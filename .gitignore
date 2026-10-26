@@ -1,0 +1,63 @@
+# ===== 운영체제 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== IDE =====
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# ===== 환경 변수 (비밀번호·API 키) =====
+.env
+.env.*
+!.env.example
+
+# ===== 로그 =====
+*.log
+logs/
+
+# ===== Node / React (frontend) =====
+node_modules/
+dist/
+coverage/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== Java / Spring Boot / Gradle (backend) =====
+.gradle/
+build/
+out/
+bin/
+*.class
+
+# ===== Python (ai, data) =====
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ===== 데이터 (원본·가공 데이터는 커밋하지 않음) =====
+data/raw/
+data/processed/
+*.parquet
+*.feather
+*.h5
+
+# ===== 모델 파일 =====
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.pkl
+*.joblib
