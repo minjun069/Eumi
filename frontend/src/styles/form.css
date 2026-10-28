@@ -1,0 +1,87 @@
+/* 입력 화면 공통: 양식 카드, 항목 줄(이름 | 입력칸), 단추 (사례자 등록·수정, 복지자원 등록·수정) */
+
+.form-card {
+  padding: 8px 24px 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 0;
+}
+
+.form-label {
+  padding-top: 10px;
+  font-family: 'Noto Sans KR:Medium', sans-serif;
+  font-size: 14px;
+}
+
+.form-control {
+  min-width: 0;
+}
+
+.form-short {
+  width: 320px;
+}
+
+.form-date {
+  width: 200px;
+}
+
+.inline-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.age-preview {
+  color: var(--link);
+  font-size: 14px;
+}
+
+.radio-group {
+  display: flex;
+  gap: 24px;
+  height: 42px;
+  align-items: center;
+}
+
+.radio-group input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--navy);
+}
+
+.region-selects {
+  display: flex;
+  gap: 8px;
+}
+
+.manager-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  padding-top: 10px;
+}
+
+.manager-option input:disabled {
+  cursor: not-allowed;
+}
+
+.form-actions {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  padding-top: 20px;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.form-buttons .btn {
+  min-width: 96px;
+}
