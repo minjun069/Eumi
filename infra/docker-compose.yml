@@ -4,6 +4,10 @@
 #   docker compose up -d      → postgres + Flyway(스키마 · 권한 적용) + mailpit
 #   docker compose down       → 끄기 (-v를 붙이면 로컬 DB를 지우고 처음부터 다시 만든다)
 # 모든 포트는 127.0.0.1에만 연다.
+#
+# 데이터 파이프라인(MinIO · Kafka · Spark)은 profile "data"에 있어 데이터 파트만 켠다. 다른 파트는 위 명령 그대로.
+#   docker compose --profile data up -d --build   → 위 3개 + minio + kafka + spark (+ 버킷 · 토픽 생성)
+#   docker compose --profile data down            → 끌 때도 profile을 붙여야 파이프라인 컨테이너까지 내려간다
 # ==========================================================================
 name: eumi-dev
 
@@ -55,5 +59,112 @@ services:
       - "127.0.0.1:8025:8025"   # 메일함 화면
       - "127.0.0.1:1025:1025"   # SMTP (Spring 메일 발송)
 
+  # ---------- 데이터 파이프라인 (profile: data) ----------
+
+  # 원본 · 생성 데이터 저장소 (S3 호환). API 9000, 콘솔 9001 (로그인: MINIO_ROOT_USER / MINIO_ROOT_PASSWORD)
+  #   MinIO가 2025년에 커뮤니티 이미지 배포를 중단해(docker.io/minio, quay.io/minio 모두 삭제됨)
+  #   Bitnami가 마지막으로 빌드한 RELEASE.2025-07-23 이미지를 쓴다. 문제가 생기면 RustFS(rustfs/rustfs)가 대안.
+  minio:
+    image: bitnamilegacy/minio:2025.7.23-debian-12-r5
+    profiles: ["data"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?infra/.env에 MINIO_ROOT_USER가 필요합니다 (.env.example 참고)}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?infra/.env에 MINIO_ROOT_PASSWORD가 필요합니다 (.env.example 참고)}
+      MINIO_DEFAULT_BUCKETS: ${MINIO_BUCKET}     # 시작할 때 버킷을 만든다 (이미 있으면 넘어감)
+    ports:
+      - "127.0.0.1:9000:9000"   # S3 API
+      - "127.0.0.1:9001:9001"   # 콘솔 (객체 탐색)
+    volumes:
+      - miniodata:/bitnami/minio/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # 메시지 큐 (KRaft 단일 노드). 호스트는 localhost:9092, 컨테이너 안에서는 kafka:19092
+  kafka:
+    image: apache/kafka:3.9.2
+    profiles: ["data"]
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"   # 토픽은 kafka-init이 만든다
+      KAFKA_LOG_RETENTION_HOURS: 168
+    ports:
+      - "127.0.0.1:9092:9092"
+    volumes:
+      - kafkadata:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:19092 --list >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 15s
+
+  # 토픽을 만들고 끝난다 (flow_hourly: 키 = grid_cd, 파티션 6)
+  kafka-init:
+    image: apache/kafka:3.9.2
+    profiles: ["data"]
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:19092 --create --if-not-exists \
+          --topic ${KAFKA_TOPIC_FLOW:-flow_hourly} --partitions 6 --replication-factor 1
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:19092 --describe --topic ${KAFKA_TOPIC_FLOW:-flow_hourly}
+
+  # Spark 3.5 (local[*]) + S3A · PostgreSQL JDBC · Kafka 커넥터 (infra/spark/Dockerfile)
+  #   잡 실행: docker compose --profile data exec spark spark-submit pipeline/<잡>.py
+  #   저장소의 data/ 폴더가 /opt/eumi/data 로 마운트된다. 실행 중인 잡의 UI는 http://localhost:4040
+  spark:
+    build: ./spark
+    image: eumi/spark:3.5.9
+    profiles: ["data"]
+    environment:
+      # S3A(hadoop-aws)가 읽는 자격 증명. 엔드포인트는 spark-defaults.conf (http://minio:9000)
+      AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      KAFKA_BOOTSTRAP: kafka:19092
+      KAFKA_TOPIC_FLOW: ${KAFKA_TOPIC_FLOW:-flow_hourly}
+      PIPELINE_DB_URL: jdbc:postgresql://postgres:5432/eumi
+      PIPELINE_DB_USER: eumi_pipeline
+      PIPELINE_DB_PASSWORD: ${EUMI_PIPELINE_PASSWORD}
+      PIPELINE_DB_DSN: postgresql://eumi_pipeline:${EUMI_PIPELINE_PASSWORD}@postgres:5432/eumi
+      TZ: Asia/Seoul
+    ports:
+      - "127.0.0.1:4040:4040"
+    volumes:
+      - ../data:/opt/eumi/data
+      - sparkcheckpoint:/opt/eumi/checkpoint
+    working_dir: /opt/eumi/data
+    command: ["sleep", "infinity"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
 volumes:
   pgdata:
+  miniodata:
+  kafkadata:
+  sparkcheckpoint:
