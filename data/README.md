@@ -23,10 +23,12 @@
 |---|---|---|---|
 | 4.3 | `pipeline/load_dim_region.py` | admdongkor geojson + `dim_grid100.csv` → `public.dim_region` (UPSERT) | 47행 (강남구 22 · 춘천시 25), adm_cd8·geom 모두 채움 |
 | 4.3 | `pipeline/load_dim_grid100.py` | `dim_grid100.csv` → `analysis.dim_grid100` (UPSERT) | 40,942행, 모든 격자의 adm_cd10이 dim_region에 있음 |
+| 4.4 | `pipeline/upload_raw.py` | `data/raw/` 전체 → MinIO `sgi/raw/` (같은 경로로 미러링, `*.md` 제외). SKT xlsx 2개는 csv로 변환(`data/processed/skt_csv/`)해 같은 폴더에 추가 | 버킷 파일 수·크기가 로컬과 같음 (42개). 값은 바꾸지 않고 중복 제거도 하지 않음(2차) |
 
 ```bash
 data/.venv/Scripts/python data/pipeline/load_dim_region.py
 data/.venv/Scripts/python data/pipeline/load_dim_grid100.py
+data/.venv/Scripts/python data/pipeline/upload_raw.py
 ```
 
 ## 저장소 규칙 (인수인계 요약)
