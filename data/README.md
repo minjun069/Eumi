@@ -12,6 +12,22 @@
 - MinIO · Kafka · Spark는 `infra/docker-compose.yml`의 profile `data`. 켜는 법과 접속 정보는 [infra/README.md](../infra/README.md).
 - 환경변수는 `infra/.env` 한 곳에서 관리한다. Spark 컨테이너에는 compose가 넣어 주고, 호스트에서 도는 스크립트는 python-dotenv로 `infra/.env`를 읽는다.
 - `pipeline/check_infra.py`: 인프라 연결 확인 (s3a 쓰기·읽기, 테이블 11개, JDBC, DML 권한, Kafka 메시지 1건 왕복).
+- 호스트 스크립트용 가상환경 (처음 한 번): `python -m venv data/.venv` 후 `data/.venv/Scripts/python -m pip install -r data/requirements.txt`
+- 원본 파일은 `data/raw/` 아래에 MinIO 레이아웃(인수인계 3장)과 같은 구조로 둔다. 커밋되지 않는다.
+
+## 적재 스크립트 (1차)
+
+순서대로 실행한다. 각 스크립트는 입력을 검사하고 적재한 뒤 행 수를 확인해 마지막 줄에 `... PASS`를 찍는다.
+
+| 단계 | 스크립트 | 입력 → 대상 | 확인 |
+|---|---|---|---|
+| 4.3 | `pipeline/load_dim_region.py` | admdongkor geojson + `dim_grid100.csv` → `public.dim_region` (UPSERT) | 47행 (강남구 22 · 춘천시 25), adm_cd8·geom 모두 채움 |
+| 4.3 | `pipeline/load_dim_grid100.py` | `dim_grid100.csv` → `analysis.dim_grid100` (UPSERT) | 40,942행, 모든 격자의 adm_cd10이 dim_region에 있음 |
+
+```bash
+data/.venv/Scripts/python data/pipeline/load_dim_region.py
+data/.venv/Scripts/python data/pipeline/load_dim_grid100.py
+```
 
 ## 저장소 규칙 (인수인계 요약)
 
@@ -28,7 +44,8 @@
 | 2026-10-30 | `dim_region.geom`은 TEXT(GeoJSON), PostGIS 없음 | DB가 `postgres:17` 이미지라 PostGIS 확장이 없다 (`SELECT PostGIS_Version()` 실패, `pg_available_extensions`에도 없음). 테이블 정의서의 GEOMETRY 표기는 TEXT로 고친다 |
 | 2026-10-30 | 등급 방향은 인수인계 기준: `bg_grade`·`bh_grade` 1~3 (3 = 위험), `risk_grade` 1~5 (5 = 최우선) | 정의서(1 = 높음)·V5 주석(1~5)·프론트 타입(1~5)이 서로 달라 데이터 파트가 확정. V5의 CHECK(1~5)는 그대로 통과한다. 백엔드·프론트에 공유 필요 |
 | 2026-10-30 | MinIO는 `bitnamilegacy/minio:2025.7.23` | MinIO 커뮤니티 이미지 배포 중단 (infra/README.md 참고) |
+| 2026-10-30 | `dim_region.geom`은 EPSG:5179 좌표의 GeoJSON MultiPolygon 문자열 (좌표 소수점 2자리) | 정의서 공통 규칙(좌표계 5179)과 인수인계 4.3을 따름. 웹 지도에서 바로 쓰려면 `load_dim_region.py --srid 4326`으로 다시 적재하면 된다 |
 
-- 원본 데이터 공유 위치: (작성)
+- 원본 데이터 공유 위치: 팀 공유 폴더에서 받아 `data/raw/`에 둔다 (MinIO 업로드는 4.4)
 - 노트북은 실행 결과(출력)를 지우고 커밋하는 것을 권장합니다. 결과에 데이터가 그대로 남을 수 있습니다.
 - 개인정보가 포함된 파일은 어떤 폴더에도 커밋하지 않습니다.
