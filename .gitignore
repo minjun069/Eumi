@@ -61,3 +61,9 @@ data/processed/
 *.onnx
 *.pkl
 *.joblib
+
+# ===== 키 · 인증서 =====
+*.pem
+*.key
+*.p12
+*.jks

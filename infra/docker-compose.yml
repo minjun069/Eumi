@@ -1,0 +1,59 @@
+# ==========================================================================
+# 로컬 개발용 Compose (infra/ 폴더에서 실행)
+#   cp .env.example .env      → 처음 한 번
+#   docker compose up -d      → postgres + Flyway(스키마 · 권한 적용) + mailpit
+#   docker compose down       → 끄기 (-v를 붙이면 로컬 DB를 지우고 처음부터 다시 만든다)
+# 모든 포트는 127.0.0.1에만 연다.
+# ==========================================================================
+name: eumi-dev
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?infra/.env가 필요합니다 (cp .env.example .env)}
+      # postgres-init/01-eumi-roles.sh가 계정을 만들 때 쓴다 (DB를 처음 만들 때 한 번만)
+      EUMI_OWNER_PASSWORD: ${EUMI_OWNER_PASSWORD}
+      EUMI_APP_PASSWORD: ${EUMI_APP_PASSWORD}
+      EUMI_PIPELINE_PASSWORD: ${EUMI_PIPELINE_PASSWORD}
+      EUMI_AI_PASSWORD: ${EUMI_AI_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+      - ../db/roles:/eumi/roles:ro
+    healthcheck:
+      # 127.0.0.1(TCP)로 확인해야 계정 만들기가 끝난 뒤에 healthy가 된다
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # db/migration(V1~V6 + afterMigrate)을 eumi_owner로 적용하고 끝난다
+  flyway:
+    image: flyway/flyway:13.11.1
+    command: migrate
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/eumi
+      FLYWAY_USER: eumi_owner
+      FLYWAY_PASSWORD: ${EUMI_OWNER_PASSWORD}
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+      # seed가 생기면: filesystem:/flyway/sql,filesystem:/flyway/seed  + 아래 volumes 줄 추가
+      FLYWAY_CONNECT_RETRIES: "10"
+    volumes:
+      - ../db/migration:/flyway/sql:ro
+      # - ../db/seed:/flyway/seed:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 회원가입 인증 메일 · 임시 비밀번호 확인용 가짜 메일 서버
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "127.0.0.1:8025:8025"   # 메일함 화면
+      - "127.0.0.1:1025:1025"   # SMTP (Spring 메일 발송)
+
+volumes:
+  pgdata:
