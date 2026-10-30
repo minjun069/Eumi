@@ -83,7 +83,8 @@
 | 프론트엔드 | React · Vite · TypeScript · Tailwind CSS | 19.3.1 · 8.3.5 · 5.9.3 · 4.3.3 (Node 24) |
 | 백엔드 | Spring Boot · Java · Gradle | 4.1.2 · 21 · 9.8.2 |
 | AI Agent 서버 | FastAPI · LangChain · LangGraph | AI 파트 초기 설정 때 확정 |
-| 데이터 분석 | Python · Spark · Kafka | 데이터 분석 파트 초기 설정 때 확정 |
+| 데이터 분석 | Python · Spark (PySpark) · Kafka | 3.12 · 3.5.9 (Java 17) · 3.9.2 (KRaft) |
+| 원본 저장소 | MinIO (S3 호환) | 2025.7.23 (`bitnamilegacy/minio`) |
 | DB | PostgreSQL · Flyway | 17 · 13.11.1 |
 | 시각화 | Tableau Public | - |
 | 로컬 메일 확인 | Mailpit | v1.27 |
