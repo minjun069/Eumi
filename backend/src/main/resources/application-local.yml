@@ -1,0 +1,8 @@
+# 로컬 개발 — docker compose up -d 로 띄운 postgres에 붙는다
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/eumi}
+    username: ${DB_USERNAME:eumi}
+    password: ${DB_PASSWORD:eumi_local}   # 로컬 compose 전용 값
+  jpa:
+    show-sql: true
