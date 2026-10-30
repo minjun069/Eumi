@@ -6,7 +6,7 @@
 # ==========================================================================
 
 # ---------- build ----------
-FROM node:22-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 
 # package-lock.json이 있어야 한다 (npm ci는 lock 파일 그대로 설치)
