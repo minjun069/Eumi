@@ -1,0 +1,10 @@
+# 호스트에서 도는 적재 · 생성 스크립트용 (data/.venv). Spark 컨테이너 안 버전과 맞춘다: pandas 2.2.3 · pyarrow 17.0.0 · psycopg 3.2.9
+# 설치: python -m venv data/.venv && data/.venv/Scripts/python -m pip install -r data/requirements.txt
+pandas==2.2.3
+pyarrow==17.0.0
+psycopg[binary]==3.2.9
+python-dotenv==1.1.1
+openpyxl==3.1.5
+pyproj>=3.7,<4
+s3fs>=2025.3
+kafka-python>=2.1,<3

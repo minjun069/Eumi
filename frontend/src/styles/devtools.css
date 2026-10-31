@@ -1,0 +1,323 @@
+/* 개발용 영역 (1440 화면 바깥 오른쪽). 서비스 화면과 구분되도록 어두운 색을 쓴다 */
+
+.dev-panel {
+  --dev-bg: #1d2330;
+  --dev-surface: #262d3c;
+  --dev-line: #343d51;
+  --dev-text: #dfe5ef;
+  --dev-muted: #96a0b3;
+  --dev-accent: #8fb4ff;
+  --dev-ok: #5fd39a;
+  --dev-fail: #ff8a8a;
+
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: var(--dev-panel-width);
+  height: 100vh;
+  min-height: 600px;
+  color: var(--dev-text);
+  background: var(--dev-bg);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dev-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--dev-line);
+}
+
+.dev-panel-head strong {
+  font-family: 'Noto Sans KR:Bold', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.dev-panel-head span {
+  color: var(--dev-muted);
+  font-size: 12px;
+}
+
+.dev-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--dev-line);
+}
+
+.dev-title {
+  margin: 0 0 8px;
+  font-family: 'Noto Sans KR:Medium', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.dev-count {
+  margin-left: 4px;
+  color: var(--dev-muted);
+}
+
+.dev-button {
+  height: 30px;
+  border: 1px solid var(--dev-line);
+  border-radius: 5px;
+  padding: 0 12px;
+  color: var(--dev-text);
+  background: var(--dev-surface);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.dev-button:hover:not(:disabled) {
+  border-color: var(--dev-accent);
+}
+
+.dev-button:disabled {
+  color: var(--dev-muted);
+  cursor: default;
+}
+
+.dev-button-wide {
+  width: 100%;
+  height: 34px;
+  font-size: 13px;
+}
+
+.dev-button[aria-current='page'] {
+  border-color: var(--dev-accent);
+  color: var(--dev-accent);
+}
+
+.dev-field {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.dev-field > span {
+  color: var(--dev-muted);
+}
+
+.dev-field select {
+  height: 30px;
+  border: 1px solid var(--dev-line);
+  border-radius: 5px;
+  padding: 0 8px;
+  color: var(--dev-text);
+  background: var(--dev-surface);
+}
+
+.dev-hint {
+  margin: 8px 0 0;
+  color: var(--dev-muted);
+  font-size: 12px;
+}
+
+.dev-hint-muted {
+  margin-top: 2px;
+  opacity: 0.75;
+}
+
+/* 예외 상황 (화면별) */
+
+.dev-scenario-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.dev-scenario-actions .dev-button {
+  width: 100%;
+}
+
+.dev-group {
+  margin-top: 8px;
+}
+
+.dev-group-title {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--dev-muted);
+  font-size: 11px;
+}
+
+.dev-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.dev-info-label {
+  flex: none;
+  min-width: 90px;
+  color: var(--dev-muted);
+  white-space: nowrap;
+}
+
+.dev-info-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dev-button-small {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+/* API 기록 */
+
+.dev-log {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.dev-log-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dev-log-head .dev-title {
+  margin: 0;
+}
+
+.dev-log-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.dev-log-list {
+  flex: 1;
+  min-height: 0;
+  margin: 0 -16px;
+  padding: 0 16px 16px;
+  overflow-y: auto;
+}
+
+.dev-empty {
+  margin: 12px 0;
+  color: var(--dev-muted);
+}
+
+.log-entry {
+  margin-top: 10px;
+  border: 1px solid var(--dev-line);
+  border-left: 3px solid var(--dev-ok);
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: var(--dev-surface);
+}
+
+.log-entry.is-fail {
+  border-left-color: var(--dev-fail);
+}
+
+.log-entry-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.log-entry-head strong {
+  flex: 1;
+  font-family: 'Noto Sans KR:Medium', sans-serif;
+  font-weight: 400;
+}
+
+.log-feature-id {
+  color: var(--dev-accent);
+  font-family: Consolas, 'Noto Sans KR:Regular', monospace;
+}
+
+.log-badge {
+  border-radius: 4px;
+  padding: 0 6px;
+  color: #10261b;
+  background: var(--dev-ok);
+  font-size: 11px;
+}
+
+.is-fail .log-badge {
+  color: #2e1010;
+  background: var(--dev-fail);
+}
+
+.log-meta {
+  display: flex;
+  gap: 10px;
+  margin-top: 2px;
+  color: var(--dev-muted);
+  font-size: 11px;
+}
+
+.log-block {
+  margin-top: 8px;
+}
+
+.log-label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--dev-muted);
+  font-size: 11px;
+}
+
+summary.log-label {
+  display: list-item;
+  cursor: pointer;
+}
+
+.log-block pre {
+  margin: 0;
+  color: #cfd7e6;
+  font-family: Consolas, 'Noto Sans KR:Regular', monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.log-server-notes {
+  margin: 0;
+  padding-left: 16px;
+  color: #f3d58a;
+  font-size: 12px;
+  list-style: disc;
+}
+
+.log-fail-reason {
+  margin: 0;
+  color: var(--dev-fail);
+}
+
+.log-note {
+  margin-top: 10px;
+  border: 1px dashed var(--dev-line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--dev-muted);
+  font-size: 12px;
+}
+
+.log-note time {
+  margin-right: 4px;
+}
+
+/* Tableau에 넘긴 값처럼 여러 줄인 메모 */
+.log-note {
+  white-space: pre-line;
+  line-height: 18px;
+}

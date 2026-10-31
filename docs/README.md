@@ -6,5 +6,6 @@
 | ERD | - | 새 기능명세 기준으로 다시 작성 예정 |
 | API 명세 | - | 예정 |
 | 저장소 초기 설정 | [gitlab-setup.md](gitlab-setup.md) | - |
+| 결정 기록: 로그인 방식 · 에이전트 흐름 전달 | [decisions/login-sse.md](decisions/login-sse.md) | 확정 (10/29 수정) |
 
 문서를 고치면 파일 이름의 날짜를 바꾸고, 이전 판은 지워 최신 판만 남깁니다. (이전 판은 Git 기록에 남습니다.)
