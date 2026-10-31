@@ -252,10 +252,10 @@ P(최대 소요시간): __h
 | 비밀값 | 보관 | 아는 사람 | 비고 |
 |---|---|---|---|
 | 로컬 DB 비밀번호 | `infra/.env.example` (커밋됨) | 팀 전체 | 공개된 값이라 로컬 DB에는 가짜 데이터만 넣습니다 |
-| 운영 DB 비밀번호 (계정 4개 + 슈퍼유저) | Jenkins credentials, 서버 설정 파일(권한 600) | 인프라 담당 | 계정마다 다른 무작위 값 (`openssl rand -hex 24`) |
-| GMS API 키 | 로컬: 각자 `ai/.env` / 운영: Jenkins credentials | AI 담당, 인프라 담당 | AI 담당이 원본 보관 |
-| 인증 코드 · 가입 토큰 해시 키 | 운영: Jenkins credentials | 인프라 담당 | 로컬은 개발용 값 |
-| 메일(SMTP) 접속 정보 | 운영: Jenkins credentials | 인프라 담당 | 로컬은 Mailpit(인증 없음) |
+| 운영 DB 비밀번호 (계정 4개 + 슈퍼유저) | 서버 설정 파일 `/srv/eumi/.env.config`(권한 600) + 인프라 담당 개인 보관 사본 | 인프라 담당 | 계정마다 다른 무작위 값 (`openssl rand -hex 24`) |
+| GMS API 키 | 로컬: 각자 `ai/.env` / 운영: 서버 설정 파일 | AI 담당, 인프라 담당 | AI 담당이 원본 보관 |
+| 인증 코드 · 가입 토큰 해시 키 | 운영: 서버 설정 파일 | 인프라 담당 | 로컬은 개발용 값 |
+| 메일(SMTP) 접속 정보 | 운영: 서버 설정 파일 | 인프라 담당 | 로컬은 Mailpit(인증 없음) |
 | GitLab 접근 토큰 (Jenkins용) | Jenkins credentials | 인프라 담당 | 인프라 담당 계정으로 발급, 만료일 기록 |
 | EC2 접속 키(pem) | 인프라 담당 PC의 저장소 밖 폴더 | 인프라 담당 | |
 | Jenkins 관리자 계정 | 인프라 담당 | 인프라 담당 | |

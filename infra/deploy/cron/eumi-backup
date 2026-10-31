@@ -1,0 +1,7 @@
+# 운영 DB 매일 백업 → 서버 /etc/cron.d/eumi-backup (root 소유, 권한 644)
+# 파일 이름에 점(.)이 있으면 cron이 읽지 않는다. 마지막 줄 뒤에 빈 줄이 있어야 한다.
+# 시간은 서버 시간대 기준 (03 문서 1번에서 Asia/Seoul로 맞춘다). 결과는 backups/backup.log.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+30 4 * * * jenkins /srv/eumi/scripts/backup.sh daily >> /srv/eumi/backups/backup.log 2>&1
