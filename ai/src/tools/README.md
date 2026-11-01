@@ -47,6 +47,26 @@ DB 연결 없이 호출할 수 있는 Python 업무 함수다. 입력은 `TypedD
 
 주요 실패 코드는 `incompatible_units`, `non_numeric_field`, `missing_value`, `zero_denominator`, `non_finite_result`, `duplicate_field`, `as_of_mismatch`, `join_key_mismatch`, `ambiguous_join`, `missing_join_key`, `invalid_cast`다. 위험지수 산출 모델이나 임의 Python·SQL 실행은 제공하지 않는다.
 
+## 시각화 렌더링
+
+`render_visualization({data, spec})`는 독립 HTML 내용을 담은 `artifact`, 적용한 `applied`, 자료 참조·출처·기준 시점·주의사항을 반환한다. artifact는 현재 `response.artifacts`의 `{type, data}` 형식에 맞으며 `data`는 `mime_type="text/html"`, `content`다. 응답 작성 노드가 공개할 산출물을 선택한다. 렌더러는 State를 갱신하거나 파일을 저장하지 않는다.
+
+| 유형 | 명세와 결과 |
+| --- | --- |
+| `table` | title, 선택 fields. 실제 값·단위·결측을 HTML 셀에 표시. 빈 자료는 빈 표와 안내 |
+| `bar/line` | title, x, y, unit. 축 이름 x_label/y_label, legend, HEX color, value_range 선택. SVG와 원본 수치 표 생성 |
+| `map` | title, region, value, unit, code_system, boundaries. legend, HEX color, value_range 선택. SVG 지역별 색상 지도와 수치 표 생성 |
+
+수치 열의 단위가 요청 단위와 같아야 한다. 차트 가로축은 중복·결측이 없는 입력 행 순서의 등간격 범주다. 선 차트는 날짜 간격 비례 축을 제공하지 않으며 해당 안내를 반환한다. 최대 200개 행을 받으며 더 큰 자료는 먼저 가공한다. 결측은 0으로 표시하지 않고 선도 연결하지 않는다. 막대 범위는 반드시 0과 모든 값을 포함하며 임의 범위에 맞춰 값을 잘라내지 않는다. 전체가 결측이거나 빈 자료면 `no_plottable_data`로 실패한다.
+
+지도 `boundaries`에는 참조·버전·기준 시점·출처, `code_system`, `crs="EPSG:4326"`, `features`를 전달한다. 각 feature는 code와 GeoJSON 형식의 Polygon/MultiPolygon geometry를 가진다. 경위도 쌍·닫힌 고리·면적을 검사한다. 데이터 지역 열의 unit은 같은 지역코드 체계명이어야 한다. 중복 코드·대응 경계 없음·다른 좌표계는 거부한다. 자료가 없는 경계는 회색으로 표시한다. 경계 기준 시점은 수치 자료와 별도로 보존한다. 중심 위도로 보정한 참고 지도이며 전문 GIS 투영·위상 검증·타일 서비스·좌표 점 지도는 제공하지 않는다.
+
+HTML/SVG는 입력 텍스트를 이스케이프하고 스크립트·외부 리소스를 넣지 않는다. 출처 주소는 텍스트로 보존한다. 파일 보관·조회 URL·프론트 삽입 방식·접근 권한은 서비스 연동에서 결정한다. 브라우저에서 `content`를 표시할 때는 서비스의 산출물 표시 정책을 적용해야 한다.
+
+주요 실패 코드는 `incompatible_units`, `invalid_range`, `ambiguous_axis`, `too_many_marks`, `region_code_mismatch`, `ambiguous_region`, `boundary_not_found`, `invalid_boundary`, `unsupported_bounds`다.
+
 ## 검증
 
 `ai/`에서 `.venv/Scripts/python -m pytest tests/tools -q`를 실행한다. 외부 자료 공급만 합성 자료로 대체하며 실제 도구 함수를 검증한다. 실제 DB·인증·서비스 API와 Agent의 도구 선택 품질은 이 검증에 포함하지 않는다.
+
+렌더러 검증은 HTML 셀·SVG 구조·실제 수치·출처·안전한 텍스트·현재 산출물 계약을 확인한다. 자동 브라우저의 로컬 파일 접근이 차단되어 실제 브라우저 화면의 시각적 검수는 수행하지 않았다.
