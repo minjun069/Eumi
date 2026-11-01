@@ -1,202 +1,174 @@
-"""One execution-wide state, including each agent call's request and history."""
+"""
+State 계약
+자료형과 초기 상태만 제공하며 실행·재개·쓰기 제어는 수행하지 않는다.
+세부사항은 docs/ieumi-agent-state.md를 따른다.
+"""
 
 from copy import deepcopy
 from typing import Annotated, Literal, NotRequired
 from uuid import uuid4
 
-from langchain_core.messages import AnyMessage, HumanMessage
+from langchain_core.messages import AnyMessage
 from langgraph.graph import MessagesState
 from pydantic import ConfigDict, Field, JsonValue, TypeAdapter, with_config
 from typing_extensions import TypedDict
 
-from src.exceptions import LimitReached
 from src.settings import Settings
 
 
+
+# Request - Constraints
 @with_config(ConfigDict(extra="forbid"))
 class Constraints(TypedDict):
     required: NotRequired[Annotated[list[str], Field(default_factory=list)]]
     preferred: NotRequired[Annotated[list[str], Field(default_factory=list)]]
     excluded: NotRequired[Annotated[list[str], Field(default_factory=list)]]
 
-
+# Request
 @with_config(ConfigDict(extra="forbid"))
 class Request(TypedDict):
     goal: Annotated[str, Field(min_length=1, pattern=r"\S")]
-    subject: NotRequired[Annotated[dict[str, JsonValue], Field(default_factory=dict)]]
     constraints: NotRequired[
         Annotated[Constraints, Field(default_factory=dict, validate_default=True)]
     ]
 
 
+
+# result - ResultItem - Action
 @with_config(ConfigDict(extra="forbid"))
-class Reference(TypedDict):
-    label: Annotated[str, Field(min_length=1)]
-    uri: Annotated[str, Field(min_length=1)]
+class Action(TypedDict):
+    name: Annotated[str, Field(min_length=1, pattern=r"\S")]
+    arguments: dict[str, JsonValue]
+
+# result - ResultItem
+@with_config(ConfigDict(extra="forbid"))
+class ResultItem(TypedDict):
+    id: Annotated[str, Field(min_length=1)]
+    node: Annotated[str, Field(min_length=1, pattern=r"\S")]
+    decision: Annotated[str, Field(min_length=1, pattern=r"\S")]
+    reason: str
+    action: Action | None
+    output: dict[str, JsonValue] | None
+    description: str
+    outcome: Literal["success", "failure"]
 
 
+
+# Response - Artifact
 @with_config(ConfigDict(extra="forbid"))
 class Artifact(TypedDict):
-    type: Literal["analysis_interpretation", "visualization"]
+    type: Annotated[str, Field(min_length=1, pattern=r"\S")]
     data: dict[str, JsonValue]
-    sources: NotRequired[Annotated[list[Reference], Field(default_factory=list)]]
-    issues: NotRequired[Annotated[list[str], Field(default_factory=list)]]
 
-
+# Response
 @with_config(ConfigDict(extra="forbid"))
-class Result(TypedDict):
-    content: Annotated[str, Field(min_length=1, pattern=r"\S")]
-    results: NotRequired[Annotated[list[Artifact], Field(default_factory=list)]]
-    references: NotRequired[Annotated[list[Reference], Field(default_factory=list)]]
-    partial: NotRequired[Annotated[bool, Field(default=False)]]
+class Response(TypedDict):
+    id: Annotated[str, Field(min_length=1)]
+    kind: Literal["progress", "intermediate", "final", "question"]
+    label: str
+    content: str
+    artifacts: list[Artifact]
 
 
+
+# Execution - Budget - Usage
 @with_config(ConfigDict(extra="forbid"))
-class Call(TypedDict):
-    agent_path: list[str]
-    parent: str | None
-    tool_call_id: str | None
-    request: Request
-    messages: list[AnyMessage]
-    results: list[Artifact]
-    candidate: Result | None
-    result: Result | None
-    error: dict[str, JsonValue] | None
-    retry_tool: bool
+class Usage(TypedDict):
+    used: int | float
+    limit: int | float
 
-
+# Execution - Budget
 @with_config(ConfigDict(extra="forbid"))
-class Initial(TypedDict):
-    request: Request
-    info: dict[str, JsonValue]
-    messages: list[AnyMessage]
-    results: list[Artifact]
-    candidate: Result | None
-    result: Result | None
+class Budget(TypedDict):
+    steps: Usage
+    tool_calls: Usage
+    agent_calls: Usage
+    retries: Usage
+    active_seconds: Usage
 
+# Execution - Error
+@with_config(ConfigDict(extra="forbid"))
+class Error(TypedDict):
+    code: str
+    cause: str
 
+# Execution
+@with_config(ConfigDict(extra="forbid"))
+class Execution(TypedDict):
+    run_id: str
+    status: Literal[
+        "queued",
+        "running",
+        "waiting_input",
+        "completed",
+        "partial",
+        "failed",
+        "cancelled",
+    ]
+    version: Annotated[str, Field(min_length=1, pattern=r"\S")]
+    budget: Budget
+    error: Error | None
+
+# State
 @with_config(ConfigDict(extra="forbid"))
 class State(MessagesState):
     request: Request
-    info: dict[str, JsonValue]
-    results: list[Artifact]
-    result: Result | None
-    calls: dict[str, Call]
-    active_call: str
-    settings: dict[str, JsonValue]
-    run_id: str
-    agent: str
-    data_versions: dict[str, str]
-    input_version: int
-    usage: dict[str, int | float]
-    initial: Initial
-    instruction_version: str
-    public_messages: list[dict[str, str]]
-    status: str
-    error: dict[str, JsonValue] | None
-    pending: dict[str, str] | None
-    cancel_requested: bool
+    # messages: 시스템 지침·실제 대화. MessagesState의 타입·병합을 상속한다.
+    results: list[ResultItem]
+    response: Response | None
+    execution: Execution
+
+
+@with_config(ConfigDict(extra="forbid"))
+class StateUpdate(TypedDict, total=False):
+    """실행 계층을 포함한 부분 갱신. 노드 쓰기 권한을 강제하는 타입은 아니다."""
+
+    request: Request
+    messages: list[AnyMessage]
+    results: list[ResultItem]
+    response: Response | None
+    execution: Execution
 
 
 request_adapter = TypeAdapter(Request)
-artifact_adapter = TypeAdapter(Artifact)
-result_adapter = TypeAdapter(Result)
+result_item_adapter = TypeAdapter(ResultItem)
+response_adapter = TypeAdapter(Response)
 state_adapter = TypeAdapter(State)
 
 
-def merge_results(*groups: list[Artifact]) -> list[Artifact]:
-    merged = []
-    for group in groups:
-        for item in group:
-            if item not in merged:
-                merged.append(deepcopy(item))
-    return merged
-
-
-def new_call(request: Request, path: list[str], parent=None, tool_call_id=None) -> Call:
-    return {
-        "agent_path": path,
-        "parent": parent,
-        "tool_call_id": tool_call_id,
-        "request": request,
-        "messages": [HumanMessage(request["goal"], id=str(uuid4()))],
-        "results": [],
-        "candidate": None,
-        "result": None,
-        "error": None,
-        "retry_tool": False,
-    }
-
-
 def create_state(
-    request,
+    request: Request,
     settings: Settings,
     *,
-    agent="test",
-    instruction_version="test",
-    info=None,
-    data_versions=None,
+    messages: list[AnyMessage],
+    version: str,
 ) -> State:
-    request = request_adapter.validate_python(request)
-    call = new_call(request, [])
-    initial = {
-        "request": request,
-        "info": info if info is not None else {},
-        "messages": call["messages"],
-        "results": [],
-        "candidate": None,
-        "result": None,
+    """호출자가 구성한 메시지와 배포 버전으로 새 실행을 초기화한다.
+
+    이벤트 실행의 시스템 지침도 호출자가 messages에 제공한다.
+    goal을 사용자 발화로 복제하지 않으며 저장된 실행 재개에는 사용하지 않는다.
+    """
+    limits = {
+        "steps": settings.max_steps,
+        "tool_calls": settings.max_tool_calls,
+        "agent_calls": settings.max_agent_calls,
+        "retries": settings.max_tool_retries,
+        "active_seconds": settings.runtime_timeout,
     }
     return state_adapter.validate_python(
         {
-            "request": request,
-            "info": initial["info"],
-            "messages": call["messages"],
+            "request": deepcopy(request),
+            "messages": deepcopy(messages),
             "results": [],
-            "result": None,
-            "calls": {"root": call},
-            "active_call": "root",
-            "settings": settings.model_dump(mode="json", exclude={"api_key"}),
-            "run_id": str(uuid4()),
-            "agent": agent,
-            "data_versions": data_versions if data_versions is not None else {},
-            "input_version": 1,
-            "usage": {
-                "steps": 0,
-                "tool_calls": 0,
-                "agent_calls": 0,
-                "retries": 0,
-                "active_seconds": 0.0,
+            "response": None,
+            "execution": {
+                "run_id": str(uuid4()),
+                "status": "queued",
+                "version": version,
+                "budget": {
+                    key: {"used": 0, "limit": limit} for key, limit in limits.items()
+                },
+                "error": None,
             },
-            "initial": deepcopy(initial),
-            "instruction_version": instruction_version,
-            "public_messages": [{"role": "user", "content": request["goal"]}],
-            "status": "queued",
-            "error": None,
-            "pending": None,
-            "cancel_requested": False,
         }
     )
-
-
-def consume(state: State, kind: str) -> None:
-    limit = "max_tool_retries" if kind == "retries" else f"max_{kind}"
-    if state["usage"][kind] >= state["settings"][limit]:
-        raise LimitReached(kind)
-    state["usage"][kind] += 1
-
-
-def current_call(state: State) -> Call:
-    return state["calls"][state["active_call"]]
-
-
-def update_call(state: State, *, messages=(), **changes) -> dict:
-    messages = [
-        m if m.id else m.model_copy(update={"id": str(uuid4())}) for m in messages
-    ]
-    call = current_call(state) | changes
-    call["messages"] = [*call["messages"], *messages]
-    return {
-        "calls": state["calls"] | {state["active_call"]: call},
-        "messages": messages,
-    }

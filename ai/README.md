@@ -1,8 +1,21 @@
 # AI Agent 공통 실행 기반
 
-LangGraph의 ReAct 실행 흐름, `ToolNode`, 체크포인트와 `interrupt`를 사용한다. 하나의 실행 전체가 하나의 `State`를 공유하며 Agent 호출은 순차적으로 처리한다. 현재 범위는 공통 실행 기반과 임시 프롬프트·도구를 이용한 로컬 모의 실행 검증이다. 업무 기준은 [현재 명세 목록](../../docs/README.md)을 따른다.
+현재 State 계약에 맞춘 공통 그래프 연결과 질문 재개를 구현했다. `src/graph.py`는 호출자가 제공한 업무 노드를 연결하고 State 갱신을 검사한다. `experiments/fixtures.py`는 임시 입력·모의 노드 출력을 제공하고, `demo.py`가 이를 실제 `src.graph.compile_graph()`에 연결해 실행한다. 실제 모델·도구·하위 Agent와 서비스 실행기는 아직 연결하지 않았다.
 
-## 실행
+## 현재 그래프 실행
+
+- `compile_graph(nodes, finish=..., analysis_event=False, checkpointer=None)`: 다섯 업무 노드와 종료 판단 함수를 받아 그래프 구성. 노드는 LangGraph `Command`로 부분 갱신과 다음 노드를 반환한다.
+- `finish(state)`: 최종 응답까지 반영한 상태에서 `status`와 `error` 반환. 공통 그래프가 `execution`에 반영한다.
+- `experiments.fixtures.initial_state()`와 `mock_nodes(scenario)`: 임시 초기 상태, 모의 노드 및 종료 판단을 제공한다. 그래프 생성·실행은 수행하지 않는다.
+- `python demo.py --suite`: 여섯 임시 시나리오를 실제 공통 그래프로 실행한다. `--analysis-event`는 작업 단계로 진입하며, `--scenario question --answer "추가 정보"`는 질문 재개를 확인한다. 질문 재개에는 체크포인터와 동일한 `configurable.thread_id`, `Command(resume="답변")`을 사용한다. `--output 경로`를 지정하면 State를 JSON 보고서로 저장한다.
+- 검증 명령: `python -m pytest tests/test_graph_contract.py tests/test_demo.py -q`. 현재 업무 노드 출력은 모의 함수가 공급하므로 검증 범위는 공통 연결·상태 처리·질문 재개와 데모 조립이다. 실제 업무 노드가 구현되면 같은 노드를 실행하고 미연결 모델·외부 도구의 입출력 경계만 대체한다. 실제 업무 판단·모델·도구, 재시도·사용량·시간 제한, 서비스 접근 권한·동시 재개는 검증 범위 밖이다.
+
+## 이전 구현 기록
+
+아래는 State 및 그래프 교체 전 구현의 실행 방법과 검증 기록이다. 현재 실행 방법은 위의 공통 그래프 데모를 따르며, 기존 서비스 실행기와 테스트는 새 계약에 맞춘 연결이 필요하다.
+
+### 이전 실행 방법
+
 
 Python 3.12 또는 3.13과 uv가 필요하다. `Eumi/ai`에서 실행한다.
 
