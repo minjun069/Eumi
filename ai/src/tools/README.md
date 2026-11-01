@@ -65,8 +65,58 @@ HTML/SVG는 입력 텍스트를 이스케이프하고 스크립트·외부 리�
 
 주요 실패 코드는 `incompatible_units`, `invalid_range`, `ambiguous_axis`, `too_many_marks`, `region_code_mismatch`, `ambiguous_region`, `boundary_not_found`, `invalid_boundary`, `unsupported_bounds`다.
 
+## 호출 인터페이스와 실행 예제
+
+`create_tools(providers)`는 LangChain `BaseTool` 목록을 반환한다. 도구 이름은 `query_data`, `process_data`, `render_visualization`이며 인자와 결과는 위 Python 함수와 같다. 공급자 목록은 생성 시 복사한다. 입력 JSON 스키마는 같은 TypeAdapter에서 생성하고 실제 함수 경계에서도 검사한다. 도구 호출 결과는 일반 결과 객체 또는 표준 ToolMessage로 전달되며 `ToolMessage.artifact`에 별도 상태를 숨기지 않는다.
+
+```python
+from src.tools.interface import create_tools
+
+# read_activity는 실제 버전·출처와 열 정의가 있는 Dataset을 반환하는 함수다.
+tools = {tool.name: tool for tool in create_tools({"activity": read_activity})}
+queried = tools["query_data"].invoke({"target": "activity", "limit": 100})
+processed = tools["process_data"].invoke(
+    {
+        "data": queried["data"],
+        "operations": [
+            {
+                "operation": "calculate",
+                "method": "percent_change",
+                "before": "before",
+                "after": "after",
+                "output": "change",
+            }
+        ],
+        "missing": "preserve",
+        "decimals": 1,
+    }
+)
+rendered = tools["render_visualization"].invoke(
+    {
+        "data": processed["data"],
+        "spec": {
+            "type": "bar",
+            "title": "변화율",
+            "x": "region",
+            "y": "change",
+            "unit": "%",
+        },
+    }
+)
+```
+
+`ainvoke`도 LangChain의 표준 비동기 인터페이스로 호출할 수 있다. 현재 공급 함수는 동기 함수이며 비동기 호출 시 라이브러리의 실행 스레드를 사용한다. 도구는 자동 재시도하지 않는다. 조회는 공급자에게 읽기 작업만 연결한다. `retry_safe` 메타데이터는 읽기·순수 계산·메모리 렌더링의 재실행 가능 여부를 나타내며 재시도 횟수·한도 판단을 대신하지 않는다.
+
+`ai/`에서 `python tool_demo.py --output outputs/tool-demo`를 실행하면 합성 자료 공급자를 실제 도구에 연결해 A/B/C의 -10%/-8%/-10% 변화율을 계산하고 `table.html`, `bar.html`, `line.html`, `map.html`, `report.json`을 생성한다. 합성 자료는 `experiments/tool_fixtures.py`, 예제 조립과 파일 저장은 `tool_demo.py`에 둔다. 도구 모듈에는 모의 응답이나 데모 분기를 넣지 않는다.
+
+공통 그래프에 실제 업무 노드·모델·도구 선택을 연결하는 작업, DB·HTTP·파일 저장 서비스 연동은 포함하지 않는다. 기존 그래프는 그대로 유지한다. 작업 선택 및 실행 노드가 호출 결과를 `results[].output`에 기록하고, 응답 작성 노드가 공개할 `artifact`를 선택하도록 연결할 수 있다.
+
 ## 검증
 
 `ai/`에서 `.venv/Scripts/python -m pytest tests/tools -q`를 실행한다. 외부 자료 공급만 합성 자료로 대체하며 실제 도구 함수를 검증한다. 실제 DB·인증·서비스 API와 Agent의 도구 선택 품질은 이 검증에 포함하지 않는다.
 
 렌더러 검증은 HTML 셀·SVG 구조·실제 수치·출처·안전한 텍스트·현재 산출물 계약을 확인한다. 자동 브라우저의 로컬 파일 접근이 차단되어 실제 브라우저 화면의 시각적 검수는 수행하지 않았다.
+
+2026-11-01 검증: 도구 테스트 73개, 기존 공통 그래프·데모 29개, 합계 **102개 통과**. 새 코드의 Ruff 검사·포맷 검사와 실제 예제 실행도 통과했다. Windows 샌드박스에서 asyncio 내부 socketpair 생성이 대기해 해당 검증은 샌드박스 밖에서 수행했다. pytest 임시 경로는 작업 폴더의 `outputs/` 아래에 지정했다.
+
+기존 전체 테스트는 제거된 `Agent`, `Info`, `result_adapter`를 참조하는 세 파일의 수집 오류가 있어 전체 통과로 보고하지 않는다. 이 문제는 도구 변경 전에도 존재했으며 기존 사용자 변경과 함께 유지했다.
