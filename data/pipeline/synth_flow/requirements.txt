@@ -1,0 +1,7 @@
+pandas>=2.0
+numpy>=1.24
+pyarrow>=14
+fsspec
+s3fs            # MinIO(s3://) 경로를 쓸 때
+openpyxl        # SKT xlsx 원본을 읽을 때
+kafka-python    # replay.py
