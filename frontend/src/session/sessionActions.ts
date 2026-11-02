@@ -1,4 +1,4 @@
-import { authApi } from "@/api/authApi"
+import { authApi, type LoginUser } from "@/api/authApi"
 import { prepareCsrf } from "@/api/csrf"
 import { errorMessage, isApiError, MESSAGES } from "@/api/errors"
 import { setAuthHandlers } from "@/api/http"
@@ -23,6 +23,14 @@ export function restoreSession(): Promise<void> {
       restoring = null
     })
   return restoring
+}
+
+/** 로그인 성공 (API-08 data.user) → 로그인 상태로 바꾼다 */
+export function completeLogin(user: LoginUser) {
+  const { memberId, name, orgName, title, jurisdictionSidoCode, jurisdictionSigunguCode, mustChangePassword } = user
+  sessionStore.signIn({ memberId, name, orgName, title, jurisdictionSidoCode, jurisdictionSigunguCode, mustChangePassword })
+  // 로그인하면 서버가 CSRF 토큰을 새로 정하므로 다시 준비한다
+  prepareCsrf(true).catch(() => {})
 }
 
 /** 로그아웃 (API-02). 서버 세션이 이미 없어도 화면은 로그아웃 상태로 바꾼다 */

@@ -51,7 +51,10 @@ export function isApiError(error: unknown): error is ApiError {
 
 /** 화면에 보여 줄 오류 문구 */
 export function errorMessage(error: unknown): string {
-  return isApiError(error) ? error.message : MESSAGES.badResponse
+  if (!isApiError(error)) return MESSAGES.badResponse
+  // 서버의 요청 제한 응답은 공통 문구라 무엇을 해야 할지 알려 주는 문구로 바꾼다
+  if (error.code === CLIENT_ERROR_CODE.rateLimited) return MESSAGES.rateLimited
+  return error.message
 }
 
 /** 필드별 오류를 { 필드: 사유 } 로 바꾼다 (폼 입력칸 아래 표시용) */

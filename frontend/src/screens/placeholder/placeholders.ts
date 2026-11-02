@@ -1,7 +1,7 @@
 import { PATHS } from "@/routes/paths"
 
 // 아직 만들지 않은 화면의 자리 표시 내용 ('준비 중').
-// 페이지를 프로토타입(태그 prototype-v2)에서 옮겨 실제 API로 연결하면 그 항목을 지운다.
+// 페이지를 프로토타입 원본(초기화 직전 develop 커밋 c96cf85의 frontend/)에서 옮겨 실제 API로 연결하면 그 항목을 지운다.
 // stage는 "○○에서 만들 화면입니다." 문장에 들어간다.
 
 export type PlaceholderSpec = {
@@ -19,7 +19,6 @@ export type PlaceholderLink = {
   to: string
 }
 
-const LOGIN = "11/2 로그인 작업"
 const RISK = "11/3~11/4 대시보드 작업"
 const CASES = "11/4~11/5 사례자 작업"
 const RESOURCES = "11/5~11/6 복지자원 작업"
@@ -27,15 +26,6 @@ const MY = "11/6 마이페이지 작업"
 const EXTRA = "11/9 이후 부가 기능 작업"
 
 export const PLACEHOLDERS = {
-  login: {
-    title: "로그인",
-    stage: LOGIN,
-    features: ["이메일·비밀번호 로그인 (API-08)", "새로고침 때 로그인 복원 (API-01)", "이메일 저장, 비밀번호 보기"],
-    links: [
-      { label: "회원가입", to: PATHS.signup },
-      { label: "비밀번호 찾기", to: PATHS.passwordFind },
-    ],
-  },
   signup: {
     title: "회원가입",
     stage: EXTRA,
