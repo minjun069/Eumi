@@ -73,8 +73,9 @@ synth/flow_hourly (Parquet) ──replay.py──▶ Kafka flow_hourly ──str
 | 스크립트 | 입력 → 대상 | 확인 |
 |---|---|---|
 | `pipeline/load_region_result.py` | `data/dong_priority_monthly.csv` → `public.region_result` (bg_score·bg_grade 1~3·bh_score·bh_grade 1~3·risk_grade 1~5) | 8~12월 235행, 월별 4·5단계 수가 패키지와 같음. 7월은 B·단계 결측이라 제외 |
-| `pipeline/load_bh_grid_anomaly.py` | `data/grid_scores_monthly.csv.gz` → `analysis.bh_grid_anomaly` | 격자 중심 좌표로 `grid_cd`를 붙인다. 패키지 격자가 SGIS 격자와 59m 어긋나 있어 DA가 원점을 맞춰 재계산한 파일이 와야 적재된다(정렬 검사 게이트) |
+| `pipeline/load_bh_grid_anomaly.py` | `data/grid_scores_monthly.csv.gz` → `analysis.bh_grid_anomaly` | 격자 중심 좌표로 `grid_cd`를 붙인다(정렬 검사 게이트). 원본 패키지 격자는 SGIS 격자와 59m 어긋나 있어, 데이터 파트가 격자 원점을 SGIS에 맞춘 재실행본(`raw/model_package_sgis/`)으로 적재했다: 27,388 격자 전부 `dim_grid100`에 1:1 매핑, 8~12월 130,177행 |
 
+- SGIS 정렬 재실행(`data/raw/model_package_sgis/`, MinIO `raw/model_package_sgis/`): 패키지 사본에 전용 venv(Python 3.12, requirements.txt 고정 버전)를 만들고 `engines/grid/config/grid_build_protocol.json`의 격자 앵커·원점을 +50m(앵커 956633.991787/1939829.147389, 원점 956600/1939800)로 바꾼 뒤 `PYTHONUTF8=1 python run_pipeline.py --stage preprocess|analyze|export`를 돌렸다. 읍면동 경로 결과는 원본과 동일(차이 1e-14). Windows에서 두 가지를 손봤다: `PYTHONUTF8=1`(read_text 기본 인코딩), `src/common.py`의 fsync 핸들을 `rb+`로. 격자 모델 안정성 상태가 춘천시는 `exploratory_sensitive`(trim 민감도)로 나왔으니 DA 확인 필요.
 - 기준값 `background_thresholds.json`·`behavior_thresholds.csv`와 모델 4개(`models/registry.json`)는 새 달 점수 산출(`src/inference.py`)에 그대로 쓴다. 패키지 의존성(scikit-learn 1.8.0 등)은 `requirements.txt` 참고.
 - 읍면동 H 지표의 1차·2차 차이 원인: 패키지는 6개월·3파일 모두에 있는 50m 위치 79,618개(코호트)만 쓰고 50m 위치를 경계 폴리곤에 점 매핑(`crosswalk.csv.gz`)해 동을 배정한다. 2차 생성기에 같은 규칙을 적용하면 일치시킬 수 있다(미결).
 
