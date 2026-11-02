@@ -44,7 +44,8 @@ data/.venv/Scripts/python data/pipeline/run_synth.py all      # anchor → gener
 ## 2차 5.2 유동 파이프라인
 
 ```
-synth/flow_hourly (Parquet) ──replay.py──▶ Kafka flow_hourly ──stream_flow_detail.py──▶ analysis.flow_detail ──batch_bh_indicators.py──▶ bh_grid_indicator · bh_region_indicator
+synth/flow_hourly (Parquet) ──replay.py──▶ Kafka flow_hourly ──stream_flow_detail.py──▶ analysis.flow_detail ──batch_bh_grid_indicators.py (M3-3)──▶ bh_grid_indicator
+                                                                                 └─batch_bh_region_indicators.py (M3-2, + bg_region_detail)──▶ bh_region_indicator
                             └──batch_flow_detail.py (Kafka 없이 과거분 적재)──▶ analysis.flow_detail
 ```
 
@@ -57,7 +58,8 @@ synth/flow_hourly (Parquet) ──replay.py──▶ Kafka flow_hourly ──str
 | `pipeline/run_synth.py replay` | Parquet 를 Kafka 에 발행 (`--days 01 02`, `--speed 10`) | `data/.venv/Scripts/python data/pipeline/run_synth.py replay --months 2025-12 --speed 10` |
 | `pipeline/send_eos.py` | 재생을 마친 뒤 마지막 하루 윈도를 닫는 종료 신호 | `data/.venv/Scripts/python data/pipeline/send_eos.py --month 2025-12` |
 | `pipeline/verify_flow_detail.py` | flow_detail 일평균 = anchor 확인 (상대오차 1e-5 + DECIMAL(16,4) 반올림 한계) | `spark-submit pipeline/verify_flow_detail.py --months 2025-07` |
-| `pipeline/batch_bh_indicators.py` | flow_detail → 행동 지표. `--dry-run` 으로 1차 값과 비교 | `python3 pipeline/batch_bh_indicators.py --months 2025-12 [--dry-run]` |
+| `pipeline/batch_bh_grid_indicators.py` | M3-3: flow_detail → `bh_grid_indicator` (지표 10개 + activity). 그 달 삭제 후 재적재 | `python3 pipeline/batch_bh_grid_indicators.py --months 2025-12 [--dry-run]` |
+| `pipeline/batch_bh_region_indicators.py` | M3-2: flow_detail(동 안 격자 합산) + bg_region_detail(주민 연령) → `bh_region_indicator` (지표 12개 + activity). 기본은 activity_daily 만 UPSERT, `--overwrite-region` 으로 H 지표까지. 산식은 `bh_indicators.py` 공통 | `python3 pipeline/batch_bh_region_indicators.py --months 2025-12 [--dry-run]` |
 
 - 적재 현황: 7~12월 flow_detail 은 batch 로 넣고 anchor 대조 통과. 스트리밍은 12월 1~2일로 검증(행·day_count 일치, 값은 메시지 반올림 오차 내).
 - 시연 준비: 12월 flow_detail 삭제(`DELETE FROM analysis.flow_detail WHERE period_start = '2025-12-01'`), 토픽 비우기(`kafka-topics.sh --delete --topic flow_hourly` 후 `docker compose --profile data up -d kafka-init`), 체크포인트 삭제(`rm -rf /opt/eumi/checkpoint/flow_detail`).
