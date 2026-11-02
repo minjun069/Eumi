@@ -1,0 +1,229 @@
+{
+  "revision": "tableau-public-20261102-v2",
+  "registered_at": "2026-11-02T12:41:52.511Z",
+  "base_url": "https://public.tableau.com/views",
+  "input_profiles": {
+    "monthly_city": {
+      "parameters": {
+        "p_city": {
+          "data_type": "string",
+          "default": "51110",
+          "allowed": [
+            "11680",
+            "51110"
+          ],
+          "labels": {
+            "11680": "서울특별시 강남구",
+            "51110": "강원특별자치도 춘천시"
+          }
+        },
+        "p_end": {
+          "data_type": "date",
+          "default": "2025-12-01",
+          "allowed": [
+            "2025-07-01",
+            "2025-08-01",
+            "2025-09-01",
+            "2025-10-01",
+            "2025-11-01",
+            "2025-12-01"
+          ]
+        },
+        "p_start": {
+          "data_type": "date",
+          "default": "2025-07-01",
+          "allowed": [
+            "2025-07-01",
+            "2025-08-01",
+            "2025-09-01",
+            "2025-10-01",
+            "2025-11-01",
+            "2025-12-01"
+          ]
+        }
+      },
+      "filters": {
+        "읍면동": {
+          "depends_on": "p_city",
+          "allowed_by": {
+            "11680": [
+              "개포1동",
+              "개포2동",
+              "개포3동",
+              "개포4동",
+              "논현1동",
+              "논현2동",
+              "대치1동",
+              "대치2동",
+              "대치4동",
+              "도곡1동",
+              "도곡2동",
+              "삼성1동",
+              "삼성2동",
+              "세곡동",
+              "수서동",
+              "신사동",
+              "압구정동",
+              "역삼1동",
+              "역삼2동",
+              "일원1동",
+              "일원본동",
+              "청담동"
+            ],
+            "51110": [
+              "강남동",
+              "교동",
+              "근화동",
+              "남면",
+              "남산면",
+              "동내면",
+              "동면",
+              "동산면",
+              "북산면",
+              "사북면",
+              "서면",
+              "석사동",
+              "소양동",
+              "신동면",
+              "신북읍",
+              "신사우동",
+              "약사명동",
+              "조운동",
+              "퇴계동",
+              "효자1동",
+              "효자2동",
+              "효자3동",
+              "후평1동",
+              "후평2동",
+              "후평3동"
+            ]
+          }
+        }
+      },
+      "date_orders": [
+        {
+          "start": "p_start",
+          "end": "p_end"
+        }
+      ]
+    }
+  },
+  "views": {
+    "Embed01RiskMap": {
+      "title": "종합 위험도 지도",
+      "purpose": "종합 위험도의 읍면동별 공간 분포 확인",
+      "limitations": [
+        "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+      ],
+      "workbook": "eumi_tableau_main_dashboard_v_master",
+      "view_name": "Embed01RiskMap",
+      "input_profile": "monthly_city",
+      "filter_targets": {
+        "읍면동": [
+          "① 지도 · 종합 위험도"
+        ]
+      },
+      "period_mode": "end_month",
+      "subset_warnings": []
+    },
+    "Embed01VulnerabilityMap": {
+      "title": "배경 취약성 지도",
+      "purpose": "배경 취약성의 읍면동별 공간 분포 확인",
+      "limitations": [
+        "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+      ],
+      "workbook": "eumi_tableau_main_dashboard_v_master",
+      "view_name": "Embed01VulnerabilityMap",
+      "input_profile": "monthly_city",
+      "filter_targets": {
+        "읍면동": [
+          "① 지도 · 배경 취약성"
+        ]
+      },
+      "period_mode": "end_month",
+      "subset_warnings": []
+    },
+    "Embed01BehaviorMap": {
+      "title": "행동 이상 지도",
+      "purpose": "행동 이상의 읍면동별 공간 분포 확인",
+      "limitations": [
+        "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+      ],
+      "workbook": "eumi_tableau_main_dashboard_v_master",
+      "view_name": "Embed01BehaviorMap",
+      "input_profile": "monthly_city",
+      "filter_targets": {
+        "읍면동": [
+          "① 지도 · 행동 이상"
+        ]
+      },
+      "period_mode": "end_month",
+      "subset_warnings": []
+    },
+    "Embed02RiskDistribution": {
+      "title": "월별 종합 위험도 단계 분포",
+      "purpose": "선택 기간의 월별 위험도 단계 구성 비교",
+      "limitations": [],
+      "workbook": "eumi_tableau_main_dashboard_v_master",
+      "view_name": "Embed02RiskDistribution",
+      "input_profile": "monthly_city",
+      "filter_targets": {
+        "읍면동": [
+          "② 월별 종합 위험도 단계 분포"
+        ]
+      },
+      "period_mode": "period",
+      "subset_warnings": [
+        "선택한 읍면동의 분포입니다. 도시 전체 분포로 해석하지 않습니다."
+      ]
+    },
+    "Embed03Vulnerability": {
+      "title": "읍면동별 배경 취약성 분포",
+      "purpose": "종료 월의 읍면동별 배경 취약성 점수·분위 비교",
+      "limitations": [
+        "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+      ],
+      "workbook": "eumi_tableau_main_dashboard_v_master",
+      "view_name": "Embed03Vulnerability",
+      "input_profile": "monthly_city",
+      "filter_targets": {
+        "읍면동": [
+          "③ 읍면동별 배경 취약성 분포"
+        ]
+      },
+      "period_mode": "end_month",
+      "subset_warnings": []
+    },
+    "Embed05BehaviorChange": {
+      "title": "읍면동별 전월 대비 행동 변화",
+      "purpose": "종료 월의 읍면동별 전월 대비 행동 점수 변화 비교",
+      "limitations": [
+        "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+      ],
+      "workbook": "eumi_tableau_main_dashboard_v_master",
+      "view_name": "Embed05BehaviorChange",
+      "input_profile": "monthly_city",
+      "filter_targets": {
+        "읍면동": [
+          "⑤ 읍면동별 전월 대비 행동 변화"
+        ]
+      },
+      "period_mode": "end_month",
+      "subset_warnings": []
+    }
+  },
+  "verification": {
+    "scope": "registration_snapshot",
+    "filter_checked_at": "2026-11-02T12:44:07.046Z",
+    "checks": [
+      "6개 뷰 로딩 및 매개변수 허용값 조회",
+      "두 도시의 지역 목록 조회",
+      "각 뷰에서 두 도시의 읍면동 필터 적용·재조회"
+    ],
+    "limitations": [
+      "모든 기간·지역 조합의 데이터 유무는 검사하지 않음",
+      "등록 확인 시각은 자료 버전·갱신 시각이 아님",
+      "게시된 워크북 변경 시 재등록 필요"
+    ]
+  }
+}

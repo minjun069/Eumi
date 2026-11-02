@@ -17,6 +17,7 @@ def test_native_tool_call_message_schemas_and_state_record(dataset):
         "query_data",
         "process_data",
         "render_visualization",
+        "validate_visualization",
     ]
     for tool in tools:
         schema = convert_to_openai_tool(tool)

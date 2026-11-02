@@ -7,6 +7,7 @@ from langchain_core.tools import BaseTool, StructuredTool
 from src.tools.process import process_adapter, process_data
 from src.tools.query import DataProvider, query_adapter, query_data
 from src.tools.render import render_adapter, render_visualization
+from src.tools.tableau import validate_visualization, visualization_adapter
 
 
 def create_tools(providers: Mapping[str, DataProvider]) -> list[BaseTool]:
@@ -25,6 +26,9 @@ def create_tools(providers: Mapping[str, DataProvider]) -> list[BaseTool]:
 
     def render(**arguments):
         return render_visualization(arguments)
+
+    def validate_tableau(**arguments):
+        return validate_visualization(arguments)
 
     return [
         StructuredTool.from_function(
@@ -55,6 +59,15 @@ def create_tools(providers: Mapping[str, DataProvider]) -> list[BaseTool]:
                 render_adapter,
                 "전달 자료와 명세로 HTML 표·SVG 막대/선 차트·경계 지도를 만든다. "
                 "산출물 내용과 적용 설정·출처·자료 버전·주의사항을 반환한다.",
+            ),
+            (
+                "validate_visualization",
+                validate_tableau,
+                visualization_adapter,
+                "선택한 Tableau 뷰의 입력 프로필에 따라 필터·매개변수·필수값과 "
+                "선언된 날짜 순서·필터 의존 조건을 검사한다. "
+                "valid=true이면 프론트용 tableau 산출물을, false이면 수정 가능한 "
+                "issues와 artifact=null을 반환한다. 외부 호출·화면 검증은 하지 않는다.",
             ),
         )
     ]
