@@ -48,11 +48,13 @@ data/.venv/Scripts/python data/pipeline/run_synth.py all      # anchor → gener
 | 스크립트 | 입력 → 대상 | 확인 |
 |---|---|---|
 | `pipeline/bg_sources.py` | 주민등록(행정동 10자리, 월) · 센서스(통계청 8자리, 연, 'X' 역산) · 공원·정류장(패키지 매핑표 `park_allocations` · `bus_stops`) · 동 면적(geojson EPSG:5179) → 동 × 월 × 항목 47개 | 모듈 |
-| `pipeline/batch_bg_region.py` | 위 원값 → `bg_region_detail`(그 달 삭제 후 적재) → 비율 6개 → `bg_region_indicator`(UPSERT) | `--dry-run`: 1차 값과 원값 13,182행·지표 282행 모두 일치(2자리 기준), 센서스 복원 38셀 = 완성본 '결측복원근거' |
+| `pipeline/batch_bg_detail.py` (M2-2) | 위 원값 → `bg_region_detail`(그 달 삭제 후 적재) | `--dry-run`: 1차 값과 원값 13,182행 일치(2자리 기준), 센서스 복원 38셀 = 완성본 '결측복원근거' |
+| `pipeline/batch_bg_indicators.py` (M3) | `bg_region_detail` → 비율 6개 → `bg_region_indicator`(UPSERT) | `--dry-run`: 지표 282행 × 6개 모두 1차와 일치 |
 | `pipeline/batch_bg_grid.py` | SGIS 100m csv 15개(`raw/sgis_grid/<연도>/`) → `bg_grid_indicator`(그 연도 삭제 후 적재, 기록 없는 격자 0) | `--dry-run`: 40,942 격자 7개 값 모두 1차와 일치 |
 
 ```bash
-docker compose --profile data exec spark python3 pipeline/batch_bg_region.py --months 2025-07 2025-08 ... [--dry-run]
+docker compose --profile data exec spark python3 pipeline/batch_bg_detail.py --months 2025-07 2025-08 ... [--dry-run]
+docker compose --profile data exec spark python3 pipeline/batch_bg_indicators.py --months 2025-07 2025-08 ... [--dry-run]
 docker compose --profile data exec spark spark-submit pipeline/batch_bg_grid.py --year 2024 [--dry-run]
 ```
 
@@ -75,6 +77,7 @@ docker compose --profile data exec spark spark-submit pipeline/batch_bg_grid.py 
 | 2026-10-30 | `dim_region.geom`은 TEXT(GeoJSON), PostGIS 없음 | DB가 `postgres:17` 이미지라 PostGIS 확장이 없다 (`SELECT PostGIS_Version()` 실패, `pg_available_extensions`에도 없음). 테이블 정의서의 GEOMETRY 표기는 TEXT로 고친다 |
 | 2026-10-30 | 등급 방향은 인수인계 기준: `bg_grade`·`bh_grade` 1~3 (3 = 위험), `risk_grade` 1~5 (5 = 최우선) | 정의서(1 = 높음)·V5 주석(1~5)·프론트 타입(1~5)이 서로 달라 데이터 파트가 확정. V5의 CHECK(1~5)는 그대로 통과한다. 백엔드·프론트에 공유 필요 |
 | 2026-10-30 | MinIO는 `bitnamilegacy/minio:2025.7.23` | MinIO 커뮤니티 이미지 배포 중단 (infra/README.md 참고) |
+| 2026-11-02 | `bg_region_detail.value`를 NUMERIC(18,6)으로 확대 (`db/migration/V20261102_01__bg_region_detail_value_scale.sql`) | DECIMAL(14,2)로는 동 면적이 1.74로 잘려 M3가 DB에서 계산한 공원 비율·정류장 밀도가 1차와 둘째 자리에서 어긋남. 확대 후 전부 일치 |
 | 2026-10-30 | `dim_region.geom`은 EPSG:5179 좌표의 GeoJSON MultiPolygon 문자열 (좌표 소수점 2자리) | 정의서 공통 규칙(좌표계 5179)과 인수인계 4.3을 따름. 웹 지도에서 바로 쓰려면 `load_dim_region.py --srid 4326`으로 다시 적재하면 된다 |
 | 2026-10-30 | 1차 지표 적재는 완성본 값을 그대로 옮기고 점수·등급(`region_result`, `bh_grid_anomaly`)은 비워 둠 | 인수인계 1차 범위. 완성본의 `vulnerability_score`·`behavior_anomaly_score`·`grade_*`는 모델 담당 결과라 넣지 않음 |
 | 2026-10-30 | `bh_region_indicator.activity_daily`는 1차에서 NULL | 완성본에 24시간 유동 합이 없음(h01 = 평균/주민 비율만 있음). 2차에서 flow_detail로 산출 |
@@ -82,7 +85,7 @@ docker compose --profile data exec spark spark-submit pipeline/batch_bg_grid.py 
 | 2026-11-02 | 가상 유동은 생성기 기본 설정(float32, 반올림 없음, 6개월 약 5.5GB)으로 생성 | 생성기 README 권장값. 월평균 상대오차 1e-7. 용량을 줄이려면 `synth_flow/config.py`의 VALUE_DECIMALS=4 (약 2.6GB, 절대오차 0.005) |
 | 2026-11-02 | 제공 생성기 `synth_flow/io_util.py`의 `list_files`를 한 줄 고침 (s3 목록에 `s3://` 접두사 복원) | 원본 코드는 로컬 경로로만 검증돼 MinIO 경로에서 validate·replay가 파일을 로컬에서 찾다 실패했음. 생성 규칙·값에는 영향 없음 (anchor·check가 제공 zip과 일치) |
 
-- 완성본 지표는 소수점 6자리인데 `bg_region_indicator`는 DECIMAL(5,2)·(7,2), `bg_region_detail.value`는 DECIMAL(14,2)라 2자리로 반올림되어 들어간다 (예: `area_km2` 1.740451 → 1.74). 2차 산출값과 비교할 때는 같은 자리수로 반올림해 비교한다. 자리수를 늘리려면 새 마이그레이션이 필요하다.
+- 완성본 지표는 소수점 6자리인데 `bg_region_indicator`는 DECIMAL(5,2)·(7,2)라 2자리로 반올림되어 들어간다. `bg_region_detail.value`는 V20261102_01 마이그레이션으로 NUMERIC(18,6)이 되어 원값(면적 1.740451 ㎢ 등)이 그대로 들어간다. 2차 산출값과 비교할 때는 지표만 2자리로 반올림해 비교한다.
 - 원본 데이터 공유 위치: 팀 공유 폴더에서 받아 `data/raw/`에 둔다 (MinIO 업로드는 4.4)
 - 노트북은 실행 결과(출력)를 지우고 커밋하는 것을 권장합니다. 결과에 데이터가 그대로 남을 수 있습니다.
 - 개인정보가 포함된 파일은 어떤 폴더에도 커밋하지 않습니다.
