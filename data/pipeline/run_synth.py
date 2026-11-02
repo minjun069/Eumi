@@ -30,4 +30,6 @@ args = sys.argv[1:]
 script = "replay.py" if args and args[0] == "replay" else "run.py"
 if script == "replay.py":
     args = args[1:]
+    if "--bootstrap" not in args and os.environ.get("KAFKA_BOOTSTRAP"):   # 호스트용 Kafka 주소는 infra/.env 의 값
+        args = ["--bootstrap", os.environ["KAFKA_BOOTSTRAP"], *args]
 sys.exit(subprocess.call([sys.executable, script, *args], cwd=HERE / "synth_flow", env=env))
