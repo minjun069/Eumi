@@ -66,6 +66,18 @@ synth/flow_hourly (Parquet) ──replay.py──▶ Kafka flow_hourly ──str
 - 격자 지표 중 전월 대비 변화율(h26·h29)은 유동이 극히 적은 격자에서 DECIMAL(10,6) 범위(|값| < 10⁴)를 넘을 수 있어 그 값은 NULL 로 둔다(월 1~85개). 전월에 없던 격자도 NULL.
 - 스트리밍은 하루 윈도가 닫힐 때(다음 날 01:00 메시지 이후) DB 에 반영되고, 재시작 시 마지막 배치가 두 번 더해질 수 있으면 그 달을 batch 로 다시 적재한다.
 
+## 모델 결과 적재 (분석 재현 패키지)
+
+모델 담당이 전달한 `dual_analysis_reproducible_20261102/`(점수·단계·모델·기준값)는 `data/raw/model_package/`에 두고 MinIO `raw/model_package/`에 올린다(1.1 GB, git 제외).
+
+| 스크립트 | 입력 → 대상 | 확인 |
+|---|---|---|
+| `pipeline/load_region_result.py` | `data/dong_priority_monthly.csv` → `public.region_result` (bg_score·bg_grade 1~3·bh_score·bh_grade 1~3·risk_grade 1~5) | 8~12월 235행, 월별 4·5단계 수가 패키지와 같음. 7월은 B·단계 결측이라 제외 |
+| `pipeline/load_bh_grid_anomaly.py` | `data/grid_scores_monthly.csv.gz` → `analysis.bh_grid_anomaly` | 격자 중심 좌표로 `grid_cd`를 붙인다. 패키지 격자가 SGIS 격자와 59m 어긋나 있어 DA가 원점을 맞춰 재계산한 파일이 와야 적재된다(정렬 검사 게이트) |
+
+- 기준값 `background_thresholds.json`·`behavior_thresholds.csv`와 모델 4개(`models/registry.json`)는 새 달 점수 산출(`src/inference.py`)에 그대로 쓴다. 패키지 의존성(scikit-learn 1.8.0 등)은 `requirements.txt` 참고.
+- 읍면동 H 지표의 1차·2차 차이 원인: 패키지는 6개월·3파일 모두에 있는 50m 위치 79,618개(코호트)만 쓰고 50m 위치를 경계 폴리곤에 점 매핑(`crosswalk.csv.gz`)해 동을 배정한다. 2차 생성기에 같은 규칙을 적용하면 일치시킬 수 있다(미결).
+
 ## 저장소 규칙 (인수인계 요약)
 
 - MinIO 버킷 `sgi`: `raw/<소스>/<기준시점>/<파일명>`, 완성본은 `raw/final_sets/`, 가상 유동은 `synth/`

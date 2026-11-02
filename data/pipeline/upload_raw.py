@@ -59,8 +59,9 @@ def main() -> int:
             plan.append((p, f"{bucket}/raw/{p.relative_to(RAW_DIR).as_posix()}"))
     if not args.no_convert:
         print("[SKT xlsx → csv]")
-        for rel, csv_name in SKT_XLSX.items():
-            csv_path = convert_skt(rel, csv_name)
+    for rel, csv_name in SKT_XLSX.items():
+        csv_path = convert_skt(rel, csv_name) if not args.no_convert else PROCESSED_DIR / csv_name
+        if csv_path.exists():   # --no-convert 라도 이미 변환해 둔 csv 는 대조 목록에 포함한다
             plan.append((csv_path, f"{bucket}/raw/{Path(rel).parent.as_posix()}/{csv_name}"))
 
     print(f"[업로드] {len(plan)}개 → s3://{bucket}/raw/")
