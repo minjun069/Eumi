@@ -3,7 +3,7 @@ import type { PlaceholderSpec } from "@/screens/placeholder/placeholders"
 import { PATHS } from "@/routes/paths"
 
 /**
- * 아직 만들지 않은 화면의 자리 표시.
+ * 아직 만들지 않은 화면의 자리 표시 ('준비 중').
  * fullFrame: 메뉴바 없이 1440×1024 전체를 쓰는 화면(회원가입, 비밀번호 찾기)
  */
 export function PlaceholderScreen({
@@ -54,7 +54,7 @@ export function PlaceholderScreen({
             ))}
           </div>
         )}
-        {fullFrame && (
+        {fullFrame && location.pathname !== PATHS.login && (
           <div className="placeholder-links">
             <Link to={PATHS.login}>← 로그인 화면으로</Link>
           </div>

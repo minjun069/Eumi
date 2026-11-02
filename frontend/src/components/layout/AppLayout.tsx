@@ -1,10 +1,9 @@
 import { Outlet } from "react-router"
-import { AgentPanel } from "@/components/agent/AgentPanel"
 import { Header } from "@/components/layout/Header"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { useSession } from "@/session/sessionStore"
 
-/** 로그인 후 화면의 공통 틀: 헤더 + 좌측 메뉴바 + 본문 + AI Agent 패널(본문 오른쪽 위를 덮음) */
+/** 로그인 후 화면의 공통 틀: 헤더 + 좌측 메뉴바 + 본문 (AI Agent 패널은 AI 패널 작업에서 붙인다) */
 export function AppLayout() {
   const session = useSession()
   if (session.status !== "authenticated") return null
@@ -17,7 +16,6 @@ export function AppLayout() {
       <main className="workspace" key={session.memberId}>
         <Outlet />
       </main>
-      <AgentPanel />
     </>
   )
 }
