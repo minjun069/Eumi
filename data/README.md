@@ -27,6 +27,7 @@
 | 4.5 | `pipeline/load_bg_region.py` | `배경데이터셋_최종.xlsm` 읍면동_월_통합표 → `analysis.bg_region_indicator`(비율 6개) + `analysis.bg_region_detail`(정의서 5.1 항목 47개) | 282행 / 13,182행. 빈 셀은 행을 넣지 않음. 임의 동·월 값이 원본과 일치 |
 | 4.5 | `pipeline/load_bh_region.py` | `행동_데이터셋_최종.xlsx` 행동_최종본 → `analysis.bh_region_indicator`(H 지표 12개) | 282행. 7월 h26·h29·h30·h31은 NULL. `activity_daily`는 완성본에 없어 NULL |
 | 4.5 | `pipeline/load_bg_grid.py` | `grid100_sgis2024_강남춘천.csv` → `analysis.bg_grid_indicator`(ref_year 2024, INT 7개) | 40,942행, 컬럼별 합계가 원본과 일치 |
+| 4.6 | `pipeline/run_synth.py` (+ 제공 생성기 `pipeline/synth_flow/`) | MinIO `raw/`의 SKT csv 3개 + `dim_grid100.csv` → `synth/anchor/`(격자별 월 기준값), `synth/flow_hourly/period=YYYY-MM/day=DD.parquet`(격자 × 시각 × 성·연령 12칸), `synth/check/`(검증) | anchor가 제공 zip과 같음, check 전 격자 통과. Kafka 발행(replay)은 2차 |
 
 ```bash
 data/.venv/Scripts/python data/pipeline/load_dim_region.py
@@ -35,7 +36,10 @@ data/.venv/Scripts/python data/pipeline/upload_raw.py
 data/.venv/Scripts/python data/pipeline/load_bg_region.py
 data/.venv/Scripts/python data/pipeline/load_bh_region.py
 data/.venv/Scripts/python data/pipeline/load_bg_grid.py
+data/.venv/Scripts/python data/pipeline/run_synth.py all      # anchor → generate → validate, 6개월
 ```
+
+`run_synth.py`는 `infra/.env`의 MinIO 접속 정보를 읽어 입력·출력 경로를 MinIO로 지정한 뒤 `synth_flow/run.py`를 그대로 실행한다. 월을 고르려면 `generate --months 2025-12`처럼 인자를 넘긴다. 생성 규칙·출력 형식·Spark 스트리밍 집계 규칙은 [pipeline/synth_flow/README.md](pipeline/synth_flow/README.md).
 
 ## 저장소 규칙 (인수인계 요약)
 
@@ -56,6 +60,8 @@ data/.venv/Scripts/python data/pipeline/load_bg_grid.py
 | 2026-10-30 | 1차 지표 적재는 완성본 값을 그대로 옮기고 점수·등급(`region_result`, `bh_grid_anomaly`)은 비워 둠 | 인수인계 1차 범위. 완성본의 `vulnerability_score`·`behavior_anomaly_score`·`grade_*`는 모델 담당 결과라 넣지 않음 |
 | 2026-10-30 | `bh_region_indicator.activity_daily`는 1차에서 NULL | 완성본에 24시간 유동 합이 없음(h01 = 평균/주민 비율만 있음). 2차에서 flow_detail로 산출 |
 | 2026-10-30 | `bg_region_detail`에 `pop_female`·`pop_M_65P`·`pop_F_65P`는 넣지 않음 | 완성본에 없음(65세+는 `pop_total_0_64`와의 차이로만 존재). 인수인계 미결 "65세+ 세부 구간"과 함께 결정 |
+| 2026-11-02 | 가상 유동은 생성기 기본 설정(float32, 반올림 없음, 6개월 약 5.5GB)으로 생성 | 생성기 README 권장값. 월평균 상대오차 1e-7. 용량을 줄이려면 `synth_flow/config.py`의 VALUE_DECIMALS=4 (약 2.6GB, 절대오차 0.005) |
+| 2026-11-02 | 제공 생성기 `synth_flow/io_util.py`의 `list_files`를 한 줄 고침 (s3 목록에 `s3://` 접두사 복원) | 원본 코드는 로컬 경로로만 검증돼 MinIO 경로에서 validate·replay가 파일을 로컬에서 찾다 실패했음. 생성 규칙·값에는 영향 없음 (anchor·check가 제공 zip과 일치) |
 
 - 완성본 지표는 소수점 6자리인데 `bg_region_indicator`는 DECIMAL(5,2)·(7,2), `bg_region_detail.value`는 DECIMAL(14,2)라 2자리로 반올림되어 들어간다 (예: `area_km2` 1.740451 → 1.74). 2차 산출값과 비교할 때는 같은 자리수로 반올림해 비교한다. 자리수를 늘리려면 새 마이그레이션이 필요하다.
 - 원본 데이터 공유 위치: 팀 공유 폴더에서 받아 `data/raw/`에 둔다 (MinIO 업로드는 4.4)

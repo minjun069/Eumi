@@ -45,7 +45,8 @@ docker compose logs flyway   # "Successfully applied 6 migrations"
 
 | 서비스 | 이미지 | 호스트에서 | 컨테이너 안에서 | 용도 |
 |---|---|---|---|---|
-| minio | `bitnamilegacy/minio` 2025.7.23 | S3 API `localhost:9000`, 콘솔 http://localhost:9001 | `http://minio:9000` | 원본(`raw/`) · 가상 유동(`synth/`) 저장소. 버킷 `sgi`는 시작할 때 자동 생성 |
+| minio | `bitnamilegacy/minio` 2025.7.23 | S3 API `localhost:9000` | `http://minio:9000` | 원본(`raw/`) · 가상 유동(`synth/`) 저장소. 버킷 `sgi`는 시작할 때 자동 생성. 이 빌드에는 내장 웹 콘솔이 없다 |
+| s3manager | `cloudlena/s3manager` v0.12.0 | http://localhost:9001 | — | MinIO 버킷을 브라우저로 보는 웹 UI (목록 · 다운로드 · 업로드). 로그인 없음, 데이터는 갖지 않음 |
 | kafka | `apache/kafka` 3.9.2 (KRaft 단일 노드) | `localhost:9092` | `kafka:19092` | 토픽 `flow_hourly` (파티션 6, 키 grid_cd). kafka-init이 만들고 끝난다 |
 | spark | `spark/Dockerfile` (apache/spark 3.5.9 + S3A · PostgreSQL JDBC · Kafka 커넥터) | 실행 중인 잡 UI http://localhost:4040 | — | 월 배치 · 스트리밍 실행 (local[*]). 저장소 `data/`가 `/opt/eumi/data`로 마운트 |
 
@@ -65,7 +66,7 @@ docker compose --profile data down            # 끌 때도 --profile data (없�
 
 | 항목 | 값 |
 |---|---|
-| MinIO | 루트 계정 `eumi_minio` / `minio_local123` (콘솔 로그인 · 스크립트 · Spark 공통), 버킷 `sgi` |
+| MinIO | 루트 계정 `eumi_minio` / `minio_local123` (스크립트 · Spark · s3manager 공통), 버킷 `sgi` |
 | Kafka | 호스트 `localhost:9092`, 컨테이너 `kafka:19092`, 토픽 `flow_hourly` |
 | PostgreSQL | `eumi_pipeline` / `pipeline_local` (위 표와 같음) |
 
