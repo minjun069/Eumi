@@ -2,7 +2,7 @@
 #   - S3A (MinIO 읽기 · 쓰기): hadoop-aws + aws-java-sdk-bundle. Spark 3.5.x에 들어 있는 Hadoop 3.3.4와 같은 버전이어야 한다
 #   - PostgreSQL JDBC
 #   - Kafka 소스 (Structured Streaming): spark-sql-kafka-0-10 + token-provider + kafka-clients + commons-pool2
-#   - Python: pandas · pyarrow · psycopg (그 달 삭제 · UPSERT 같은 SQL 실행용) · python-dotenv
+#   - Python: pandas · pyarrow · psycopg (그 달 삭제 · UPSERT 같은 SQL 실행용) · python-dotenv · shapely · pyproj (동 면적 계산)
 # 빌드: infra/ 에서 docker compose --profile data build spark
 FROM apache/spark:3.5.9-java17-python3
 
@@ -31,7 +31,9 @@ RUN pip install --no-cache-dir \
       pandas==2.2.3 \
       pyarrow==17.0.0 \
       "psycopg[binary]==3.2.9" \
-      python-dotenv==1.1.1
+      python-dotenv==1.1.1 \
+      "shapely>=2.0,<3" \
+      "pyproj>=3.6,<3.8"
 
 COPY spark-defaults.conf /opt/spark/conf/spark-defaults.conf
 
