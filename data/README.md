@@ -79,6 +79,24 @@ synth/flow_hourly (Parquet) ──replay.py──▶ Kafka flow_hourly ──str
 - 기준값 `background_thresholds.json`·`behavior_thresholds.csv`와 모델 4개(`models/registry.json`)는 새 달 점수 산출(`src/inference.py`)에 그대로 쓴다. 패키지 의존성(scikit-learn 1.8.0 등)은 `requirements.txt` 참고.
 - 읍면동 H 지표의 1차·2차 차이 원인: 패키지는 6개월·3파일 모두에 있는 50m 위치 79,618개(코호트)만 쓰고 50m 위치를 경계 폴리곤에 점 매핑(`crosswalk.csv.gz`)해 동을 배정한다. 2차 생성기에 같은 규칙을 적용하면 일치시킬 수 있다(미결).
 
+## 2차 5.3 실거래가 수집 (M1-1)
+
+국토교통부 아파트 매매 상세(`RTMSDataSvcAptTradeDev`)·전월세(`RTMSDataSvcAptRent`) API를 월 단위로 호출해 원본 XML을 MinIO에 보관하고, 단지별 좌표를 붙여 `analysis.re_apt_trade`에 적재한다. 대상은 강남구(법정동 시군구 11680)·춘천시(51110), 호출은 호스트 `data/.venv`에서 한다(월 수천 행이라 Spark 없이 pandas). 키는 `infra/.env`의 `DATA_GO_KR_SERVICE_KEY`(공공데이터포털 '일반 인증키 (Decoding)')와 `KAKAO_REST_KEY`.
+
+| 순서 | 스크립트 | 하는 일 | 확인 |
+|---|---|---|---|
+| 1 | `pipeline/collect_apt_trade.py` | 시군구 × 월 × 종류별로 페이지 끝까지 받아 응답 그대로 `raw/apt_trade/<YYYYMM>/<LAWD>_p<NN>.xml`, `raw/apt_rent/…`에 저장. `_manifest.json`에 totalCount·건수·시각. 인자 없으면 전월 한 달, 이미 받은 달은 건너뜀(`--force`) | 받은 건수 = totalCount. 2025-07~12 매매 3,343 + 전월세 16,071 = 19,414건 |
+| 2 | `pipeline/geocode_apt.py` | 원본에 나온 단지(aptSeq)마다 한 번만 Kakao 주소 검색(도로명 → 실패 시 지번)으로 WGS84 좌표를 받고, EPSG:5179로 바꿔 `dim_region.geom` 포함 판정으로 행정동을 붙여 `raw/apt_geocode/apt_geocode.csv`에 캐시. 경계 밖이면 200m 안 가장 가까운 동(`nearest`). `raw/apt_geocode/manual.csv`(apt_seq, lon, lat)로 수동 보정 | 단지 731개 전부 `ok`(경계 안). Kakao가 주는 행정동명과 729개 일치, 2개는 경계(0.9m)·대단지 출입구 차이 |
+| 3 | `pipeline/batch_re_apt_trade.py` | 원본 + 좌표 캐시 → 같은 계약월 DELETE 후 INSERT(`trade_id`는 DB 발급). 매매 해제 거래(`cdealType='O'`) 제외, 전월세는 월세 0이면 '전세'. `--dry-run` | 넣은 행 = 원본 − 해제 − 좌표없음. 6개월 19,178행(해제 236 제외, 좌표 없음 0), 재실행해도 행 수 동일 |
+
+```bash
+data/.venv/Scripts/python data/pipeline/collect_apt_trade.py --months 2025-07 2025-08 2025-09 2025-10 2025-11 2025-12
+data/.venv/Scripts/python data/pipeline/geocode_apt.py      --months 2025-07 2025-08 2025-09 2025-10 2025-11 2025-12
+data/.venv/Scripts/python data/pipeline/batch_re_apt_trade.py --months 2025-07 2025-08 2025-09 2025-10 2025-11 2025-12
+```
+
+새 달은 세 스크립트를 인자 없이 차례로 돌리면 전월 한 달이 처리된다(실거래 신고 기한이 30일이라 계약월 다음다음 달 초에 돌리는 것을 권장. 스케줄러 연결은 배포 환경에서). 공원·정류장 API 수집은 아직 없다(1차 완성본 파일로 적재).
+
 ## 저장소 규칙 (인수인계 요약)
 
 - MinIO 버킷 `sgi`: `raw/<소스>/<기준시점>/<파일명>`, 완성본은 `raw/final_sets/`, 가상 유동은 `synth/`
@@ -104,6 +122,9 @@ synth/flow_hourly (Parquet) ──replay.py──▶ Kafka flow_hourly ──str
 | 2026-11-02 | 호스트용 Kafka 주소는 `127.0.0.1:9092` | `localhost` 가 IPv6(::1)로 먼저 풀려 kafka-python 이 연결 실패 |
 | 2026-11-02 | `flow_detail` 검증 허용치에 DECIMAL(16,4) 반올림 한계(0.00005/day_count)를 더함 | 값이 작은 칸은 4자리 반올림만으로 상대오차 1e-5 를 넘음. 자릿수 변경은 DA 와 협의 |
 | 2026-11-02 | 2차 산출 `bh_region_indicator` H 지표는 1차 완성본과 평균 0.25%·최대 2%(북산면) 차이 → 완성본 값 유지, `activity_daily` 만 채움 | 월 정렬·산식은 일치. 동 배정(BLOCK_CD 접두, 경계 폴리곤, dim_grid100)·셀 포함 범위 가설로는 재현 안 됨. DA 의 완성본 산출 코드 확인 필요 |
+| 2026-11-02 | 실거래가 좌표는 Kakao 주소 검색(단지 aptSeq 당 1회), 행정동은 좌표를 `dim_region.geom`에 포함 판정 | API는 법정동·주소만 주고 좌표가 없다. 법정동 ≠ 행정동이라 좌표를 거쳐야 하며, 격자(`dim_grid100`)와 같은 경계 데이터 기준으로 동을 정한다. Kakao 행정동명과 731개 중 2개 차이는 경계 0.9m·대단지 출입구 위치 |
+| 2026-11-02 | 실거래가 수집 기간 2025-07~2025-12, 매매·전세·월세 모두. 전월세 해제 거래는 제외하지 않음 | 다른 데이터와 기간을 맞춤. 전월세 API에는 해제 항목이 없다 |
+| 2026-11-02 | 호스트용 DB 주소도 `127.0.0.1` | Kafka 와 같은 IPv6 문제로 `localhost` 접속이 2분 넘게 걸림 |
 
 - 완성본 지표는 소수점 6자리인데 `bg_region_indicator`는 DECIMAL(5,2)·(7,2), `bg_region_detail.value`는 DECIMAL(14,2)라 2자리로 반올림되어 들어간다 (예: `area_km2` 1.740451 → 1.74). 2차 산출값과 비교할 때는 같은 자리수로 반올림해 비교한다. 자리수를 늘리려면 새 마이그레이션이 필요하다.
 - 원본 데이터 공유 위치: 팀 공유 폴더에서 받아 `data/raw/`에 둔다 (MinIO 업로드는 4.4)
