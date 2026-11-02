@@ -61,7 +61,7 @@ services:
 
   # ---------- 데이터 파이프라인 (profile: data) ----------
 
-  # 원본 · 생성 데이터 저장소 (S3 호환). API 9000, 콘솔 9001 (로그인: MINIO_ROOT_USER / MINIO_ROOT_PASSWORD)
+  # 원본 · 생성 데이터 저장소 (S3 호환). API 9000. 이 빌드에는 내장 웹 콘솔이 없어 아래 s3manager(9001)로 본다
   #   MinIO가 2025년에 커뮤니티 이미지 배포를 중단해(docker.io/minio, quay.io/minio 모두 삭제됨)
   #   Bitnami가 마지막으로 빌드한 RELEASE.2025-07-23 이미지를 쓴다. 문제가 생기면 RustFS(rustfs/rustfs)가 대안.
   minio:
@@ -73,7 +73,6 @@ services:
       MINIO_DEFAULT_BUCKETS: ${MINIO_BUCKET}     # 시작할 때 버킷을 만든다 (이미 있으면 넘어감)
     ports:
       - "127.0.0.1:9000:9000"   # S3 API
-      - "127.0.0.1:9001:9001"   # 콘솔 (객체 탐색)
     volumes:
       - miniodata:/bitnami/minio/data
     healthcheck:
@@ -81,6 +80,22 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+
+  # MinIO 버킷을 브라우저로 보는 웹 UI (http://localhost:9001). 저장하는 데이터는 없다
+  s3manager:
+    image: cloudlena/s3manager:v0.12.0
+    profiles: ["data"]
+    environment:
+      ENDPOINT: minio:9000
+      ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
+      SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
+      USE_SSL: "false"
+      REGION: us-east-1
+    ports:
+      - "127.0.0.1:9001:8080"
+    depends_on:
+      minio:
+        condition: service_healthy
 
   # 메시지 큐 (KRaft 단일 노드). 호스트는 localhost:9092, 컨테이너 안에서는 kafka:19092
   kafka:
