@@ -2,8 +2,10 @@
 
 이음이 웹 화면 (React 19 · React Router 7 · TanStack Query 5 · Vite 8 · TypeScript 5.9 · Tailwind 4, Node 24).
 
-지금은 **초기 설정 단계**다. 빌드·배포 설정, 레이아웃 틀, 공통 부품, API 공통 계층만 있고, 화면은 모두 '준비 중'이다.
-업무 화면은 페이지 작업 차례마다 프로토타입(태그 `prototype-v2`의 `frontend/`)에서 옮겨 실제 API로 연결한다.
+빌드·배포 설정, 레이아웃 틀, 공통 부품, API 공통 계층 위에 페이지를 하나씩 붙이는 중이다.
+아직 붙이지 않은 화면은 '준비 중'으로 보인다 (목록은 `src/screens/placeholder/placeholders.ts`).
+업무 화면은 페이지 작업 차례마다 프로토타입 원본(초기화 직전 develop 커밋 `c96cf85`의 `frontend/`)에서 옮겨 실제 API로 연결한다.
+프로토타입 화면은 별도 링크(`eumi-prototype.vercel.app`)에서 확인하며 더 고치지 않는다.
 그래서 운영 화면에 보이는 페이지는 실제로 동작하는 페이지뿐이다.
 
 ## 실행
@@ -27,10 +29,10 @@ npm run build
 | `src/api/queryClient.ts` | TanStack Query 기본값 (4xx 재시도 안 함, 변경 요청 재시도 안 함) |
 | `src/api/schema.d.ts` | OpenAPI 2.2.0에서 자동 생성한 타입. 직접 고치지 않는다 |
 | `src/api/types.ts` | 화면에서 쓰는 응답 타입 별칭 |
-| `src/api/*Api.ts` | API 묶음 (지금은 `authApi`: 로그인 상태 조회·로그아웃) |
+| `src/api/*Api.ts` | API 묶음 (지금은 `authApi`: 로그인·로그인 상태 조회·로그아웃) |
 | `src/session/` | 로그인 상태(`sessionStore`), 복원·로그아웃·401 처리(`sessionActions`) |
 | `src/components/` | 레이아웃(헤더·메뉴), 로그인 필요 화면 보호, 확인 창·알림·빈 상태·입력 부품 |
-| `src/screens/placeholder/` | '준비 중' 화면과 화면별 예정 내용 |
+| `src/screens/` | 화면 (`auth/` 로그인), `placeholder/` '준비 중' 화면과 화면별 예정 내용 |
 | `src/routes/paths.ts` | 화면 주소 |
 
 ## 규칙
@@ -41,6 +43,7 @@ npm run build
 - 401을 받으면 로그인 화면으로, 403 `PASSWORD_CHANGE_REQUIRED`를 받으면 비밀번호 변경 화면으로 간다 (`sessionActions`).
 - 로그아웃·사용자 전환 때 Query 캐시를 비운다 (`sessionStore.signOut`).
 - 페이지를 옮길 때: 화면 컴포넌트와 그 CSS를 함께 옮기고, mock 호출을 `src/api/*Api.ts` + `useQuery`/`useMutation`으로 바꾼 뒤 `App.tsx`의 해당 줄과 `placeholders.ts` 항목을 바꾼다.
+- 화면 CSS는 `index.css`가 아니라 그 화면 파일에서 `import "@/styles/○○.css"`로 불러온다. 여러 페이지 브랜치가 같은 파일을 동시에 고쳐 충돌하지 않게 하기 위해서다.
 
 ## API 타입 다시 만들기
 

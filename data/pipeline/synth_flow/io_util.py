@@ -12,7 +12,8 @@ def write_parquet(df: pd.DataFrame, path: str):
     if not str(path).startswith("s3://"):
         fs.makedirs(parent, exist_ok=True)
     with fs.open(path, "wb") as f:
-        pq.write_table(pa.Table.from_pandas(df, preserve_index=False), f, compression="zstd")
+        # ts 를 마이크로초로 저장한다. pandas 기본(나노초)은 Spark 3.5 가 읽지 못한다 (Illegal Parquet type TIMESTAMP(NANOS))
+        pq.write_table(pa.Table.from_pandas(df, preserve_index=False), f, compression="zstd", coerce_timestamps="us", allow_truncated_timestamps=True)
 
 def read_parquet(path: str) -> pd.DataFrame:
     fs = _fs(path)
