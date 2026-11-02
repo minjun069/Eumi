@@ -5,6 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout"
 import { LeaveGuardHost } from "@/components/routing/LeaveGuardHost"
 import { RequireAuth } from "@/components/routing/RequireAuth"
 import { HOME_PATH, PATHS } from "@/routes/paths"
+import { LoginScreen } from "@/screens/auth/LoginScreen"
 import { PlaceholderScreen } from "@/screens/placeholder/PlaceholderScreen"
 import { PLACEHOLDERS } from "@/screens/placeholder/placeholders"
 import { restoreSession } from "@/session/sessionActions"
@@ -28,7 +29,7 @@ export default function App() {
         <LeaveGuardHost />
         <Routes>
           {/* 로그인하지 않아도 볼 수 있는 화면 */}
-          <Route path={PATHS.login} element={<PlaceholderScreen spec={PLACEHOLDERS.login} fullFrame />} />
+          <Route path={PATHS.login} element={<LoginScreen />} />
           <Route path={PATHS.signup} element={<PlaceholderScreen spec={PLACEHOLDERS.signup} fullFrame />} />
           <Route path={PATHS.passwordFind} element={<PlaceholderScreen spec={PLACEHOLDERS.passwordFind} fullFrame />} />
 
