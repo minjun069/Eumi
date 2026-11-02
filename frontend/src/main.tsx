@@ -1,12 +1,21 @@
+import { QueryClientProvider } from "@tanstack/react-query"
 import ReactDOM from "react-dom/client"
 import { createBrowserRouter, RouterProvider } from "react-router"
+import { queryClient } from "@/api/queryClient"
+import { registerAuthHandlers } from "@/session/sessionActions"
 import App from "./App"
 import "./index.css"
+
+// 다른 요청에서 받은 401·비밀번호 변경 필요를 로그인 상태에 반영한다
+registerAuthHandlers()
 
 // 화면 주소 연결: 저장하지 않은 내용 경고(뒤로 가기 막기, useBlocker)를 쓰려고 createBrowserRouter를 쓴다.
 // 실제 화면 주소는 App.tsx의 <Routes>에서 정한다.
 const router = createBrowserRouter([{ path: "*", element: <App /> }])
 
-// React.StrictMode는 쓰지 않는다.
-// 개발 모드의 StrictMode는 화면을 띄울 때 조회를 두 번 실행해서 API 기록이 중복으로 쌓인다.
-ReactDOM.createRoot(document.getElementById("root")!).render(<RouterProvider router={router} />)
+// React.StrictMode는 쓰지 않는다 (프로토타입에서 옮겨 오는 화면과 동작을 맞춘다).
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <QueryClientProvider client={queryClient}>
+    <RouterProvider router={router} />
+  </QueryClientProvider>,
+)

@@ -1,11 +1,10 @@
 import { NavLink, useNavigate } from "react-router"
-import { authApi } from "@/mock/api/authApi"
-import { PASSWORD_CHANGE_REQUIRED_MESSAGE } from "@/mock/api/core"
+import { MESSAGES } from "@/api/errors"
+import type { MenuProfile } from "@/api/types"
 import { PATHS } from "@/routes/paths"
-import { sessionStore } from "@/session/sessionStore"
+import { logout } from "@/session/sessionActions"
 import { leaveGuard } from "@/stores/leaveGuardStore"
 import { showToast } from "@/stores/toastStore"
-import type { MenuProfile } from "@/types/domain"
 
 const MENUS = [
   { label: "고립 위험 탐색", to: PATHS.risk },
@@ -19,11 +18,10 @@ export function Sidebar({ profile }: { profile: MenuProfile }) {
   const navigate = useNavigate()
   const locked = profile.mustChangePassword
 
-  const logout = async () => {
+  const onLogout = async () => {
     // 입력 중인 내용이 있으면 먼저 묻는다 (저장하지 않은 내용 경고)
     if (!(await leaveGuard.confirmLeave())) return
-    authApi.logout()
-    sessionStore.signOut()
+    await logout()
     navigate(PATHS.login, { replace: true })
   }
 
@@ -41,17 +39,17 @@ export function Sidebar({ profile }: { profile: MenuProfile }) {
             className={({ isActive }) => (isActive ? "selected" : undefined)}
             aria-disabled={locked || undefined}
             onClick={(event) => {
-              // 임시 비밀번호로 로그인했으면 비밀번호를 바꿀 때까지 메뉴를 막는다 (M3-A)
+              // 임시 비밀번호로 로그인했으면 비밀번호를 바꿀 때까지 메뉴를 막는다 (FR-003)
               if (!locked) return
               event.preventDefault()
-              showToast(PASSWORD_CHANGE_REQUIRED_MESSAGE, "error")
+              showToast(MESSAGES.passwordChangeRequired, "error")
             }}
           >
             {menu.label}
           </NavLink>
         ))}
       </nav>
-      <button type="button" className="logout-button" onClick={logout}>
+      <button type="button" className="logout-button" onClick={onLogout}>
         로그아웃
       </button>
     </aside>

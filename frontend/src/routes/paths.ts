@@ -1,11 +1,9 @@
-// 화면 주소. 프로토타입용 주소이며, API 경로와 같을 필요는 없다.
-// 주소는 각 페이지 단계에서 상세 계획과 함께 확정한다.
+// 화면 주소 (프로토타입과 같은 주소를 쓴다). API 경로와 같을 필요는 없다.
 
 export const PATHS = {
   login: "/login",
   signup: "/signup",
   passwordFind: "/password/find",
-  flow: "/flow",
 
   risk: "/risk",
 
@@ -36,5 +34,4 @@ export const PUBLIC_PATHS: string[] = [
   PATHS.login,
   PATHS.signup,
   PATHS.passwordFind,
-  PATHS.flow,
 ]

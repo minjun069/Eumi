@@ -1,13 +1,14 @@
-/* 전체 배치: [1440×1024 서비스 화면][개발용 영역] */
+/* 전체 배치: 1440×1024 서비스 화면을 가운데에 둔다 */
 
 .app-shell {
   display: flex;
   align-items: flex-start;
-  width: calc(var(--frame-width) + var(--dev-panel-width));
+  width: var(--frame-width);
   min-height: var(--frame-height);
+  margin: 0 auto;
 }
 
-.prototype-frame {
+.app-frame {
   position: relative;
   flex: none;
   width: var(--frame-width);
@@ -56,6 +57,11 @@
   padding: 0;
   background: transparent;
   cursor: pointer;
+}
+
+.ai-agent-toggle:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 .ai-agent-toggle img {
