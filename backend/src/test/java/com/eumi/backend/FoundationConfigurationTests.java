@@ -21,6 +21,13 @@ class FoundationConfigurationTests {
     }
 
     @Test
+    void unresolvedPlaceholderCannotBecomeAuthenticationHashKey() {
+        runner.withPropertyValues("eumi.auth.hash-key=${EUMI_AUTH_HASH_KEY}")
+                .withBean(JavaMailSender.class, JavaMailSenderImpl::new)
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
     void providedHashKeyBindsWithoutLeakingThroughToString() {
         runner.withPropertyValues("eumi.auth.hash-key=fixture-only-key")
                 .withBean(JavaMailSender.class, JavaMailSenderImpl::new)

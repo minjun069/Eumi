@@ -12,5 +12,10 @@ public class AuthHashProperties {
     private String hashKey;
 
     public String getHashKey() { return hashKey; }
-    public void setHashKey(String hashKey) { this.hashKey = hashKey; }
+    public void setHashKey(String hashKey) {
+        if (hashKey != null && hashKey.contains("${")) {
+            throw new IllegalArgumentException("Authentication hash key must resolve all placeholders.");
+        }
+        this.hashKey = hashKey;
+    }
 }
