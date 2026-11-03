@@ -163,9 +163,10 @@ function restart() {
 
 async function send(question: string): Promise<boolean> {
   const sendGeneration = generation
+  const conversationId = state.conversationId
   setState({ sending: true, notice: null })
   try {
-    const created = await agentApi.ask({ conversationId: state.conversationId, question })
+    const created = await agentApi.ask({ conversationId, question })
     if (sendGeneration !== generation) return false
     storeConversationId(created.conversationId)
     setState({ conversationId: created.conversationId, sending: false, loadedFrom: null })
@@ -189,7 +190,9 @@ async function send(question: string): Promise<boolean> {
   } catch (error) {
     if (sendGeneration !== generation) return false
     setState({ sending: false })
-    if (isApiError(error) && error.status === 404) {
+    // 이어서 질문한 대화가 없어졌을 때만 새 대화로 초기화한다.
+    // 새 대화(conversationId=null)의 404는 대화 문제가 아니라 질문 API를 쓸 수 없는 것이라 아래 일반 오류로 알린다
+    if (isApiError(error) && error.status === 404 && conversationId !== null) {
       restart()
       return false
     }

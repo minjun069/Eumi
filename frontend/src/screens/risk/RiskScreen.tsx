@@ -9,7 +9,7 @@ import type { MenuProfile } from "@/api/types"
 import { EmptyState } from "@/components/common/EmptyState"
 import { FieldError } from "@/components/common/FieldError"
 import { RiskDongScreen } from "@/screens/risk/RiskDongScreen"
-import { LoadError, Loading, MonthSelect, TableauViewPanel } from "@/screens/risk/RiskPanels"
+import { LoadError, Loading, MONTHS_UNAVAILABLE, MonthSelect, TableauViewPanel } from "@/screens/risk/RiskPanels"
 import {
   compactPeriod,
   effectivePeriod,
@@ -167,7 +167,7 @@ function RiskDistrictScreen({ query, profile }: { query: RiskQuery; profile: Men
     if (months.isPending) return <Loading />
     if (months.isError) {
       if (isApiError(months.error) && (months.error.code === "NOT_FOUND" || months.error.code === "VALIDATION_ERROR")) {
-        return <EmptyState title="선택한 시군구를 찾을 수 없습니다." description="지역을 다시 골라 적용하세요." />
+        return <EmptyState title={MONTHS_UNAVAILABLE} description="지역을 다시 골라 적용하거나 잠시 후 다시 시도해 주세요." />
       }
       return <LoadError message={errorMessage(months.error)} onRetry={() => void months.refetch()} />
     }
