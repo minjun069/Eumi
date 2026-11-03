@@ -1,6 +1,6 @@
 """1차 4.5 — 배경데이터셋_최종.xlsm 읍면동_월_통합표(282행) → analysis.bg_region_indicator(비율 6개) + analysis.bg_region_detail(원값).
 
-- 정제 없이 값을 옮긴다. 지표는 DECIMAL(5,2)·(7,2), 원값은 DECIMAL(14,2)라 그 자리수로 반올림된다.
+- 정제 없이 값을 옮긴다. 지표는 DECIMAL(5,2)·(7,2) 자리수로 반올림되고, 원값은 NUMERIC(18,6)(V20261102_01)에 그대로 들어간다.
 - bg_region_detail 에는 정의서 5.1 항목 사전에 있는 항목만 넣는다 (46개). 통합표에 없는 pop_female · pop_M_65P · pop_F_65P 는 넣지 않는다.
 - 비어 있는 셀(NaN)은 행을 넣지 않는다 (0 금지). 같은 달 · 같은 항목은 지우고 다시 넣는다.
 실행  data/.venv/Scripts/python data/pipeline/load_bg_region.py
@@ -88,7 +88,7 @@ def main() -> int:
             exp_ind = tuple(q(pick[c], 2) for c in IND_MAP)
             cur.execute("SELECT item_cd, value FROM analysis.bg_region_detail WHERE period_start = %s AND adm_cd10 = %s", (pick.period_start, pick.adm_cd))
             db_det = dict(cur.fetchall())
-            exp_det = {DETAIL_MAP[c]: q(pick[c], 2) for c in DETAIL_MAP if not pd.isna(pick[c])}
+            exp_det = {DETAIL_MAP[c]: q(pick[c], 6) for c in DETAIL_MAP if not pd.isna(pick[c])}
         conn.commit()
 
     ok &= check("bg_region_indicator 행 수", n_ind == 282, f"{n_ind}, NULL 있는 행 {n_ind_null}")

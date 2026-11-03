@@ -5,3 +5,23 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  mail:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      "[mail.smtp.auth]": ${SMTP_AUTH}
+      "[mail.smtp.starttls.enable]": ${SMTP_STARTTLS_ENABLED}
+
+server:
+  servlet:
+    session:
+      cookie:
+        secure: true
+
+eumi:
+  auth:
+    hash-key: ${EUMI_AUTH_HASH_KEY}
+  mail:
+    from: ${EUMI_MAIL_FROM}

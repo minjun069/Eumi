@@ -1,32 +1,75 @@
 package com.eumi.backend.config;
 
+import java.util.List;
+
+import com.eumi.backend.auth.session.PasswordChangeRequiredFilter;
+import com.eumi.backend.common.error.ApiErrorWriter;
+import com.eumi.backend.common.security.ApiAccessDeniedHandler;
+import com.eumi.backend.common.security.ApiAuthenticationEntryPoint;
+import jakarta.servlet.DispatcherType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.context.DelegatingSecurityContextRepository;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfAuthenticationStrategy;
 
-/**
- * 개발 초기용 임시 설정: 로그인 기능이 생기기 전까지 모든 요청을 허용한다.
- * (Spring Security를 넣으면 기본값이 "모든 요청 차단"이라, 이 설정이 없으면 팀원 API 호출이 전부 401이 된다.)
- *
- * TODO(백엔드) 쿠키 로그인 구현 시 docs/decisions/login-sse.md 기준으로 교체한다.
- *   - /health 만 permitAll, 나머지는 authenticated()
- *   - 쿠키 인증이므로 CSRF를 disable 상태로 두지 않는다 (SameSite=Lax + CSRF 토큰 검토)
- *   - CORS는 운영 도메인만 허용
- *   - 실제 개인 정보 데이터를 넣기 전에 반드시 교체한다
- */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
+    @Bean
+    CookieCsrfTokenRepository csrfTokenRepository(
+            @Value("${server.servlet.session.cookie.secure:false}") boolean secure) {
+        var repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        repository.setCookieCustomizer(cookie -> cookie.path("/").httpOnly(false).sameSite("Lax").secure(secure));
+        return repository;
+    }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityContextRepository securityContextRepository() {
+        return new DelegatingSecurityContextRepository(
+                new RequestAttributeSecurityContextRepository(), new HttpSessionSecurityContextRepository());
+    }
+
+    @Bean
+    SessionAuthenticationStrategy sessionAuthenticationStrategy(CookieCsrfTokenRepository csrfRepository) {
+        return new CompositeSessionAuthenticationStrategy(List.of(
+                new ChangeSessionIdAuthenticationStrategy(), new CsrfAuthenticationStrategy(csrfRepository)));
+    }
+
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http, CookieCsrfTokenRepository csrfRepository,
+            SecurityContextRepository contextRepository, SessionAuthenticationStrategy sessionStrategy,
+            ApiAuthenticationEntryPoint entryPoint, ApiAccessDeniedHandler deniedHandler,
+            ApiErrorWriter errorWriter) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
             .httpBasic(basic -> basic.disable())
             .formLogin(form -> form.disable())
+            .logout(logout -> logout.disable())
+            .requestCache(cache -> cache.disable())
+            .securityContext(context -> context.securityContextRepository(contextRepository).requireExplicitSave(true))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                    .sessionAuthenticationStrategy(sessionStrategy))
+            // Security 7.1의 내장 SPA 처리기가 raw 쿠키 헤더와 XOR 처리를 구분한다.
+            .csrf(csrf -> csrf.spa().csrfTokenRepository(csrfRepository))
+            .exceptionHandling(errors -> errors.authenticationEntryPoint(entryPoint).accessDeniedHandler(deniedHandler))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/health").permitAll()
-                .anyRequest().permitAll());
+                    .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                    .requestMatchers(HttpMethod.GET, "/health", "/auth/csrf", "/organizations").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/logout", "/auth/temp-password",
+                            "/signup/email-verifications", "/signup/email-verifications/verify", "/members").permitAll()
+                    .anyRequest().authenticated())
+            .addFilterAfter(new PasswordChangeRequiredFilter(errorWriter), AnonymousAuthenticationFilter.class);
         return http.build();
     }
 }

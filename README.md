@@ -164,9 +164,10 @@ DB 계정, 메일 확인, 문제 해결은 [infra/README.md](infra/README.md)를
 | 협업 규칙 (브랜치 · 커밋 · MR · 리뷰 · Jira · DB · 비밀값) | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 로컬 개발 환경 (DB · 메일) | [infra/README.md](infra/README.md) |
 | DB 스키마 · 마이그레이션 규칙 | [db/README.md](db/README.md) |
+| API 계약 (OpenAPI 2.3.0) · AI 에이전트 패널 동작 | [docs/api/openapi.json](docs/api/openapi.json), [docs/api/ai-agent-panel.md](docs/api/ai-agent-panel.md) |
 | 결정 기록: 로그인 방식 · 에이전트 흐름 전달 | [docs/decisions/login-sse.md](docs/decisions/login-sse.md) |
 | GitLab 저장소 설정 | [docs/gitlab-setup.md](docs/gitlab-setup.md) |
-| 테이블 정의서, ERD, API 명세 | [docs/](docs/README.md) (작성 예정) |
+| 문서 목록 (테이블 정의서 · ERD 위치 포함) | [docs/README.md](docs/README.md) |
 
 ## 협업 규칙
 

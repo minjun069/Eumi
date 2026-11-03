@@ -16,12 +16,13 @@ cd infra
 cp .env.example .env
 docker compose up -d
 docker compose ps -a         # postgres: healthy / flyway: Exited (0) / mailpit: running
-docker compose logs flyway   # "Successfully applied 6 migrations"
+docker compose logs flyway   # "Successfully applied …" (처음이면 V1부터 전부)
 ```
 
 - 끌 때: `docker compose down`
 - 처음부터 다시 만들기(로컬 DB 삭제): `docker compose down -v` 후 `up -d`
-- 새 마이그레이션을 받은 뒤: `docker compose up -d flyway`
+- 새 마이그레이션이나 seed(`db/seed/R__*.sql`)를 받은 뒤: `docker compose up -d flyway`
+- develop을 받은 뒤 `required variable … is missing a value`로 멈추면: `.env.example`에 새로 생긴 줄을 `.env` 끝에 추가한다. 이미 있는 줄(DB 비밀번호)은 바꾸지 않는다 (바꾸면 기존 로컬 DB 계정과 맞지 않는다)
 
 ### 파트별 접속 정보 (로컬 전용)
 
