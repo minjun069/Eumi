@@ -1,6 +1,6 @@
 import "@/styles/risk.css"
 import { useQuery } from "@tanstack/react-query"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 import { analysisApi, analysisKeys } from "@/api/analysisApi"
 import { errorMessage, isApiError } from "@/api/errors"
@@ -32,19 +32,44 @@ import type { Conditions } from "@/tableau/tableauTypes"
 /**
  * 2.1 고립 위험 탐색. 주소에 dong이 있으면 읍면동 화면(RiskDongScreen), 없으면 시군구 화면
  * - 조건은 주소에 남긴다 (R5-A, riskQuery.ts). 뒤로 가기·새로고침하면 주소에서 다시 그린다
+ * - 시군구 지도에서 읍면동으로 가면 시군구 화면을 지우지 않고 숨겨 둔다. '이전으로'에서 Tableau 4개를 다시 띄우지 않으려고.
+ *   숨긴 동안에는 떠날 때의 조건으로 멈춰 두고(읍면동 화면에서 기간을 바꿔도 뒤에서 다시 적용하지 않는다), 돌아오면 그때 맞춘다.
+ *   새로고침·주소로 바로 들어온 읍면동 화면에서는 시군구 화면을 미리 띄우지 않는다
  */
 export function RiskScreen() {
   const session = useSession()
+  const location = useLocation()
   const [params] = useSearchParams()
   const search = params.toString()
   const profile = session.status === "authenticated" ? session.profile : null
   const query = useMemo(() => (profile ? parseRiskQuery(new URLSearchParams(search), profile) : null), [search, profile])
+  // 이 화면이 떠 있는 동안 시군구 화면을 띄운 적이 있는지 (새로고침해도 navigation state는 남으므로 따로 기억한다)
+  const districtShown = useRef(false)
+  useEffect(() => {
+    if (query && !query.dongCode) districtShown.current = true
+  }, [query])
 
   if (!profile || !query) return null
-  if (query.dongCode) {
-    return <RiskDongScreen key={query.dongCode} query={{ ...query, dongCode: query.dongCode }} profile={profile} />
-  }
-  return <RiskDistrictScreen query={query} profile={profile} />
+  const leftFrom = location.state as DistrictState | null
+  const districtQuery: RiskQuery | null = !query.dongCode
+    ? query
+    : leftFrom?.fromDistrict && districtShown.current
+      ? { ...query, from: leftFrom.from, to: leftFrom.to, dongCode: null }
+      : null
+
+  // 두 화면의 자리를 고정해 두어야 시군구 화면이 숨겨졌다 돌아와도 다시 만들어지지 않는다
+  return (
+    <>
+      {districtQuery && (
+        <div className={query.dongCode ? "risk-kept" : undefined} inert={Boolean(query.dongCode)}>
+          <RiskDistrictScreen query={districtQuery} profile={profile} />
+        </div>
+      )}
+      {query.dongCode && (
+        <RiskDongScreen key={query.dongCode} query={{ ...query, dongCode: query.dongCode }} profile={profile} />
+      )}
+    </>
+  )
 }
 
 /**
