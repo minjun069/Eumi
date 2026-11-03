@@ -23,6 +23,7 @@ env = {
     "SKT_WKDY": f"s3://{bucket}/raw/skt_flow_wkdy/flow_wkdy_pop_202507_202512.csv",
     "SKT_AGE": f"s3://{bucket}/raw/skt_flow_age/flow_age_pop_202507_202512.csv",
     "GRID_FILE": f"s3://{bucket}/raw/dim_grid100.csv",
+    "COHORT_FILE": f"s3://{bucket}/raw/skt_cohort/2025-07_2025-12/skt_cohort_50m.csv",  # DA 분석과 같은 50m 셀 집합만 합산
     "SYNTH_OUT": f"s3://{bucket}/synth",
     "PYTHONUTF8": "1",
 }

@@ -39,7 +39,7 @@ data/.venv/Scripts/python data/pipeline/load_bg_grid.py
 data/.venv/Scripts/python data/pipeline/run_synth.py all      # anchor → generate → validate, 6개월
 ```
 
-`run_synth.py`는 `infra/.env`의 MinIO 접속 정보를 읽어 입력·출력 경로를 MinIO로 지정한 뒤 `synth_flow/run.py`를 그대로 실행한다. 월을 고르려면 `generate --months 2025-12`처럼 인자를 넘긴다. 생성 규칙·출력 형식·Spark 스트리밍 집계 규칙은 [pipeline/synth_flow/README.md](pipeline/synth_flow/README.md).
+`run_synth.py`는 `infra/.env`의 MinIO 접속 정보를 읽어 입력·출력 경로를 MinIO로 지정한 뒤 `synth_flow/run.py`를 그대로 실행한다. 코호트 목록(`COHORT_FILE`, MinIO `raw/skt_cohort/2025-07_2025-12/skt_cohort_50m.csv`)에 있는 50m 셀만 합산한다(2차, 결정 기록 참고). 월을 고르려면 `generate --months 2025-12`처럼 인자를 넘긴다. 생성 규칙·출력 형식·Spark 스트리밍 집계 규칙은 [pipeline/synth_flow/README.md](pipeline/synth_flow/README.md).
 
 ## 2차 5.1 배경 배치
 
@@ -65,7 +65,8 @@ docker compose --profile data exec spark spark-submit pipeline/batch_bg_grid.py 
 ## 2차 5.2 유동 파이프라인
 
 ```
-synth/flow_hourly (Parquet) ──replay.py──▶ Kafka flow_hourly ──stream_flow_detail.py──▶ analysis.flow_detail ──batch_bh_indicators.py──▶ bh_grid_indicator · bh_region_indicator
+synth/flow_hourly (Parquet) ──replay.py──▶ Kafka flow_hourly ──stream_flow_detail.py──▶ analysis.flow_detail ──batch_bh_grid_indicators.py (M3-3)──▶ bh_grid_indicator
+                                                                                 └─batch_bh_region_indicators.py (M3-2, + bg_region_detail)──▶ bh_region_indicator
                             └──batch_flow_detail.py (Kafka 없이 과거분 적재)──▶ analysis.flow_detail
 ```
 
@@ -78,7 +79,8 @@ synth/flow_hourly (Parquet) ──replay.py──▶ Kafka flow_hourly ──str
 | `pipeline/run_synth.py replay` | Parquet 를 Kafka 에 발행 (`--days 01 02`, `--speed 10`) | `data/.venv/Scripts/python data/pipeline/run_synth.py replay --months 2025-12 --speed 10` |
 | `pipeline/send_eos.py` | 재생을 마친 뒤 마지막 하루 윈도를 닫는 종료 신호 | `data/.venv/Scripts/python data/pipeline/send_eos.py --month 2025-12` |
 | `pipeline/verify_flow_detail.py` | flow_detail 일평균 = anchor 확인 (상대오차 1e-5 + DECIMAL(16,4) 반올림 한계) | `spark-submit pipeline/verify_flow_detail.py --months 2025-07` |
-| `pipeline/batch_bh_indicators.py` | flow_detail → 행동 지표. `--dry-run` 으로 1차 값과 비교 | `python3 pipeline/batch_bh_indicators.py --months 2025-12 [--dry-run]` |
+| `pipeline/batch_bh_grid_indicators.py` | M3-3: flow_detail → `bh_grid_indicator` (지표 10개 + activity). 그 달 삭제 후 재적재 | `python3 pipeline/batch_bh_grid_indicators.py --months 2025-12 [--dry-run]` |
+| `pipeline/batch_bh_region_indicators.py` | M3-2: flow_detail(동 안 격자 합산) + bg_region_detail(주민 연령) → `bh_region_indicator` (지표 12개 + activity). 12개 + activity 전부 UPSERT. 산식은 `bh_indicators.py` 공통 | `python3 pipeline/batch_bh_region_indicators.py --months 2025-12 [--dry-run]` |
 
 - 적재 현황: 7~12월 flow_detail 은 batch 로 넣고 anchor 대조 통과. 스트리밍은 12월 1~2일로 검증(행·day_count 일치, 값은 메시지 반올림 오차 내).
 - 시연 준비: 12월 flow_detail 삭제(`DELETE FROM analysis.flow_detail WHERE period_start = '2025-12-01'`), 토픽 비우기(`kafka-topics.sh --delete --topic flow_hourly` 후 `docker compose --profile data up -d kafka-init`), 체크포인트 삭제(`rm -rf /opt/eumi/checkpoint/flow_detail`).
@@ -117,6 +119,19 @@ data/.venv/Scripts/python data/pipeline/batch_re_apt_trade.py --months 2025-07 2
 ```
 
 새 달은 세 스크립트를 인자 없이 차례로 돌리면 전월 한 달이 처리된다(실거래 신고 기한이 30일이라 계약월 다음다음 달 초에 돌리는 것을 권장. 스케줄러 연결은 배포 환경에서). 공원·정류장 API 수집은 아직 없다(1차 완성본 파일로 적재).
+## 서버 DB 반영 (덤프 · 복원)
+
+서버(`k15b201.p.ssafy.io`)에는 아직 MinIO · Kafka · Spark 가 없어 파이프라인은 로컬에서 돌고, 결과 테이블만 덤프로 옮긴다. 서버 DB 에 같은 마이그레이션(최신 V 파일)이 먼저 적용되어 있어야 한다.
+
+```bash
+# 로컬: 데이터 파트 테이블만 데이터 덤프 (analysis 스키마 전체 + dim_region · region_result, 약 65 MB)
+docker compose -f infra/docker-compose.yml exec -T postgres sh -c "pg_dump -U postgres -d eumi --data-only -Fc -t 'analysis.*' -t public.dim_region -t public.region_result -f /tmp/eumi.dump"
+docker cp eumi-dev-postgres-1:/tmp/eumi.dump data/processed/dump/eumi_analysis_data_YYYYMMDD.dump
+# 서버(인프라 담당): 대상 테이블을 비운 뒤 복원
+pg_restore -U <owner> -d eumi --data-only --disable-triggers eumi_analysis_data_YYYYMMDD.dump
+```
+
+새 달 데이터는 로컬 적재 → 덤프 → 복원을 반복한다. 서버에 `data` 프로필과 스케줄러(Airflow)가 올라가면 서버에서 직접 돌리는 것으로 바꾼다.
 
 ## 저장소 규칙 (인수인계 요약)
 
@@ -143,10 +158,10 @@ data/.venv/Scripts/python data/pipeline/batch_re_apt_trade.py --months 2025-07 2
 | 2026-11-02 | 생성기 `io_util.write_parquet`가 ts 를 마이크로초로 저장하도록 수정 | pandas 기본(나노초) Parquet 를 Spark 3.5 가 읽지 못함. 6개월 재생성(값 동일) |
 | 2026-11-02 | 호스트용 Kafka 주소는 `127.0.0.1:9092` | `localhost` 가 IPv6(::1)로 먼저 풀려 kafka-python 이 연결 실패 |
 | 2026-11-02 | `flow_detail` 검증 허용치에 DECIMAL(16,4) 반올림 한계(0.00005/day_count)를 더함 | 값이 작은 칸은 4자리 반올림만으로 상대오차 1e-5 를 넘음. 자릿수 변경은 DA 와 협의 |
-| 2026-11-02 | 2차 산출 `bh_region_indicator` H 지표는 1차 완성본과 평균 0.25%·최대 2%(북산면) 차이 → 완성본 값 유지, `activity_daily` 만 채움 | 월 정렬·산식은 일치. 동 배정(BLOCK_CD 접두, 경계 폴리곤, dim_grid100)·셀 포함 범위 가설로는 재현 안 됨. DA 의 완성본 산출 코드 확인 필요 |
 | 2026-11-02 | 실거래가 좌표는 Kakao 주소 검색(단지 aptSeq 당 1회), 행정동은 좌표를 `dim_region.geom`에 포함 판정 | API는 법정동·주소만 주고 좌표가 없다. 법정동 ≠ 행정동이라 좌표를 거쳐야 하며, 격자(`dim_grid100`)와 같은 경계 데이터 기준으로 동을 정한다. Kakao 행정동명과 731개 중 2개 차이는 경계 0.9m·대단지 출입구 위치 |
 | 2026-11-02 | 실거래가 수집 기간 2025-07~2025-12, 매매·전세·월세 모두. 전월세 해제 거래는 제외하지 않음 | 다른 데이터와 기간을 맞춤. 전월세 API에는 해제 항목이 없다 |
 | 2026-11-02 | 호스트용 DB 주소도 `127.0.0.1` | Kafka 와 같은 IPv6 문제로 `localhost` 접속이 2분 넘게 걸림 |
+| 2026-11-03 | 가상 유동은 DA 분석과 같은 50m 코호트 셀(6개월·3파일 모두에 있는 79,618개, `raw/skt_cohort/`)만 합산해 생성. 행동 지표는 우리 코드 값으로 적재 | DA 격자·읍면동 모델이 이 셀 집합을 쓴다. 격자 합은 DA 격자 패널과 일치(1e-12). 읍면동은 동 배정 단위(100m 격자 vs 50m 점) 차이로 DA 값과 최대 2% 안에서 다르며, 산식·셀 집합은 같다 |
 
 - 완성본 지표는 소수점 6자리인데 `bg_region_indicator`는 DECIMAL(5,2)·(7,2)라 2자리로 반올림되어 들어간다. `bg_region_detail.value`는 V20261102_01 마이그레이션으로 NUMERIC(18,6)이 되어 원값(면적 1.740451 ㎢ 등)이 그대로 들어간다. 2차 산출값과 비교할 때는 지표만 2자리로 반올림해 비교한다.
 - 원본 데이터 공유 위치: 팀 공유 폴더에서 받아 `data/raw/`에 둔다 (MinIO 업로드는 4.4)
