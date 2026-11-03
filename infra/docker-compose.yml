@@ -34,7 +34,7 @@ services:
       timeout: 3s
       retries: 30
 
-  # db/migration(V1~V6 + afterMigrate)을 eumi_owner로 적용하고 끝난다
+  # db/migration(V 파일 + afterMigrate)과 db/seed(R__ 파일)를 eumi_owner로 적용하고 끝난다
   flyway:
     image: flyway/flyway:13.11.1
     command: migrate
@@ -42,12 +42,11 @@ services:
       FLYWAY_URL: jdbc:postgresql://postgres:5432/eumi
       FLYWAY_USER: eumi_owner
       FLYWAY_PASSWORD: ${EUMI_OWNER_PASSWORD}
-      FLYWAY_LOCATIONS: filesystem:/flyway/sql
-      # seed가 생기면: filesystem:/flyway/sql,filesystem:/flyway/seed  + 아래 volumes 줄 추가
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql,filesystem:/flyway/seed
       FLYWAY_CONNECT_RETRIES: "10"
     volumes:
       - ../db/migration:/flyway/sql:ro
-      # - ../db/seed:/flyway/seed:ro
+      - ../db/seed:/flyway/seed:ro
     depends_on:
       postgres:
         condition: service_healthy
