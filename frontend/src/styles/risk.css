@@ -68,6 +68,14 @@
   min-width: 0;
 }
 
+/* 읍면동 화면에 있는 동안 숨겨 두는 시군구 화면 (RiskScreen).
+   display:none이면 Tableau iframe 크기가 0이 되어 돌아올 때 다시 그리므로, 크기는 그대로 두고 높이 0으로 접는다 */
+.risk-kept {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
 /* 불러오기 실패: 안내 아래 다시 시도 */
 .risk-load-error {
   display: grid;
