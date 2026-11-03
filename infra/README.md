@@ -61,7 +61,7 @@ docker compose --profile data down            # 끌 때도 --profile data (없�
 ```
 
 - 데이터까지 지우고 처음부터: `docker compose --profile data down -v` (DB · MinIO · Kafka · Spark 체크포인트 볼륨 모두 삭제)
-- 연결 확인: `docker compose --profile data exec spark spark-submit pipeline/check_infra.py` → 마지막 줄 `CHECK_INFRA PASS` (s3a 쓰기 · 읽기, 테이블 11개, JDBC, DML 권한, Kafka 메시지 1건 왕복)
+- 연결 확인: `docker compose --profile data exec spark spark-submit pipeline/ops/check_infra.py` → 마지막 줄 `CHECK_INFRA PASS` (s3a 쓰기 · 읽기, 테이블 11개, JDBC, DML 권한, Kafka 메시지 1건 왕복)
 
 ### 접속 정보 (로컬 전용, `.env.example`)
 
