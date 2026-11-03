@@ -19,7 +19,6 @@ export type PlaceholderLink = {
   to: string
 }
 
-const RISK = "11/3~11/4 대시보드 작업"
 const CASES = "11/4~11/5 사례자 작업"
 const RESOURCES = "11/5~11/6 복지자원 작업"
 const MY = "11/6 마이페이지 작업"
@@ -35,16 +34,6 @@ export const PLACEHOLDERS = {
     title: "비밀번호 찾기",
     stage: EXTRA,
     features: ["임시 비밀번호 발급 (API-09)"],
-  },
-
-  risk: {
-    title: "고립 위험 탐색",
-    stage: RISK,
-    features: [
-      "시군구 지도·그래프 (Tableau)",
-      "조회 가능한 월 선택 (API-10)",
-      "읍면동 요약·인사이트 보고서 (API-11·12)",
-    ],
   },
 
   resources: {

@@ -8,6 +8,7 @@ import { HOME_PATH, PATHS } from "@/routes/paths"
 import { LoginScreen } from "@/screens/auth/LoginScreen"
 import { PlaceholderScreen } from "@/screens/placeholder/PlaceholderScreen"
 import { PLACEHOLDERS } from "@/screens/placeholder/placeholders"
+import { RiskScreen } from "@/screens/risk/RiskScreen"
 import { restoreSession } from "@/session/sessionActions"
 import { useSession } from "@/session/sessionStore"
 
@@ -41,7 +42,7 @@ export default function App() {
               </RequireAuth>
             }
           >
-            <Route path={PATHS.risk} element={<PlaceholderScreen spec={PLACEHOLDERS.risk} />} />
+            <Route path={PATHS.risk} element={<RiskScreen />} />
             <Route path={PATHS.resources} element={<PlaceholderScreen spec={PLACEHOLDERS.resources} />} />
             <Route path={PATHS.resourceNew} element={<PlaceholderScreen spec={PLACEHOLDERS.resourceNew} />} />
             <Route path="/resources/:resourceId" element={<PlaceholderScreen spec={PLACEHOLDERS.resourceDetail} />} />
