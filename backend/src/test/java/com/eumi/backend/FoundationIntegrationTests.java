@@ -6,87 +6,37 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
 import java.util.UUID;
 
 import com.eumi.backend.common.mail.MailService;
-import com.eumi.backend.support.FoundationFixture;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
 import org.springframework.test.context.ActiveProfiles;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** 실제 PostgreSQL·HTTP·Mailpit 사용. 인증 자체만 src/test fixture로 대체한다. */
+/** 실제 PostgreSQL·HTTP·Mailpit 사용. 로그인·JDBC 세션 검사는 AuthIntegrationTests로 옮겼다. */
 @Tag("local-integration")
 @ActiveProfiles("local")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(FoundationFixture.class)
 class FoundationIntegrationTests {
     @LocalServerPort int port;
-    @Autowired JdbcIndexedSessionRepository sessions;
-    @Autowired JdbcTemplate jdbc;
     @Autowired MailService mail;
     @Autowired JsonMapper mapper;
     private CookieManager cookies;
     private HttpClient client;
-    private final List<String> createdSessionIds = new ArrayList<>();
 
     @BeforeEach
     void client() {
         cookies = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         client = HttpClient.newBuilder().cookieHandler(cookies).connectTimeout(Duration.ofSeconds(5)).build();
-    }
-
-    @AfterEach
-    void cleanOnlyCreatedSessions() {
-        createdSessionIds.forEach(sessions::deleteById);
-    }
-
-    @Test
-    void jdbcSessionPersistsRestoresAndRotatesThroughRealHttp() throws Exception {
-        var login = signIn();
-        String first = sessionId();
-        createdSessionIds.add(first);
-        org.springframework.session.Session session = sessions.findById(first);
-        assertThat(session).isNotNull();
-        assertThat(session.getMaxInactiveInterval()).isEqualTo(Duration.ofHours(2));
-        assertThat(jdbc.queryForObject("SELECT principal_name FROM spring_session WHERE session_id = ?",
-                String.class, first)).isEqualTo("910000001");
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM spring_session_attributes a JOIN spring_session s "
-                + "ON s.primary_id = a.session_primary_id WHERE s.session_id = ?", Integer.class, first)).isPositive();
-
-        String attributes = login.headers().allValues("Set-Cookie").stream()
-                .filter(c -> c.startsWith("SESSION=")).findFirst().orElseThrow();
-        attributes = attributes.substring(attributes.indexOf(';') + 1);
-        assertThat(attributes).contains("Path=/api", "HttpOnly", "SameSite=Lax").doesNotContain("Domain=", "Secure");
-
-        var restored = get("/auth/me");
-        assertThat(restored.statusCode()).isEqualTo(200);
-        assertThat(mapper.readTree(restored.body()).path("data").asText()).isEqualTo("910000001");
-
-        signIn();
-        String second = sessionId();
-        createdSessionIds.add(second);
-        assertThat(second.equals(first)).isFalse();
-        assertThat(sessions.findById(first)).isNull();
-        assertThat(sessions.findById(second)).isNotNull();
-        sessions.deleteById(second);
-        assertThat(get("/auth/me").statusCode()).isEqualTo(401);
     }
 
     @Test
@@ -137,22 +87,6 @@ class FoundationIntegrationTests {
         assertThat(received.statusCode()).isEqualTo(200);
         assertThat(mapper.readTree(received.body()).path("Text").asText().strip()).isEqualTo(text);
         // 메일함에서 사람이 확인할 수 있게 이 테스트 메일은 유지한다.
-    }
-
-    private HttpResponse<String> signIn() throws Exception {
-        get("/auth/csrf");
-        String token = cookies.getCookieStore().getCookies().stream()
-                .filter(c -> c.getName().equals("XSRF-TOKEN")).findFirst().orElseThrow().getValue();
-        var response = client.send(request("/auth/login").header("X-XSRF-TOKEN", token)
-                .POST(HttpRequest.BodyPublishers.noBody()).build(), HttpResponse.BodyHandlers.ofString());
-        assertThat(response.statusCode()).isEqualTo(204);
-        return response;
-    }
-
-    private String sessionId() {
-        String value = cookies.getCookieStore().getCookies().stream()
-                .filter(c -> c.getName().equals("SESSION")).findFirst().orElseThrow().getValue();
-        return new String(Base64.getDecoder().decode(value), StandardCharsets.UTF_8);
     }
 
     private HttpResponse<String> get(String path) throws Exception {

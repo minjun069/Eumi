@@ -1,5 +1,7 @@
 # G1 B0부터 B4까지의 범위와 인계
 
+2026-11-02 갱신: `feat/be-login`(시작 HEAD 4de5c62)에서 A1·PBKDF2·시연 seed와 prod 필수 설정 검증을 추가했다. 최신 계약은 현재 저장소의 OpenAPI 2.3.0이다. 최신 결과와 다음 작업은 [A1 인계](../a1/README.md)를 먼저 읽는다. 아래의 브랜치·2.2.0·미완료 안내는 10월 31일 기록이다.
+
 기준일: 2026-10-31. 사용자 승인 후 `feat/be-common-foundation`에서 진행한다. 기준 develop은 `99e63564788f97fadc1327a4fe237ddf2e229125`이며 사용자가 직접 pull 후 Already up to date를 확인했다. 이후 원격 갱신·commit·push·merge는 Agent가 수행하지 않았다.
 
 ## 범위
