@@ -139,19 +139,18 @@ data/.venv/Scripts/python data/pipeline/batch_grid_anomaly.py  --months 2025-08 
 - 검증(2026-11-03): DA 지표 파일을 넣으면 DA 점수 · 등급 · 단계를 그대로 재현(차이 0). DB 지표(M3)로 내면 읍면동은 월 47개 중 0~4개 동의 단계가 한 칸 바뀌고(행동 지표의 동 배정 차이), 위험 4~5단계 집합은 월마다 13~15개 중 13~14개가 같다. 격자는 DA 와 점수 상관 0.9999, 상위 20% 겹침 99% 이상.
 - `bh_region_contribution` 은 비워 둔다 (IsolationForest 는 지표별 기여도를 주지 않음. 배경 점수 S 의 지표별 기여도는 `m4_models.background_score()` 가 돌려주므로 필요하면 적재 가능).
 
-## 서버 DB 반영 (덤프 · 복원)
+## 서버 DB 반영 (seed · 덤프)
 
-서버(`k15b201.p.ssafy.io`)에는 아직 MinIO · Kafka · Spark 가 없어 파이프라인은 로컬에서 돌고, 결과 테이블만 덤프로 옮긴다. 서버 DB 에 같은 마이그레이션(최신 V 파일)이 먼저 적용되어 있어야 한다.
+서버(`k15b201.p.ssafy.io`)에는 MinIO · Kafka · Spark 가 없어 파이프라인은 로컬에서 돌고, 결과 테이블은 두 길로 옮긴다.
+
+- **seed (기본)**: `data/.venv/Scripts/python data/pipeline/make_seed.py` 가 로컬 DB 의 데이터 파트 테이블 10개를 `db/seed/R__01_dim_region.sql`, `R__10_…`~`R__18_….sql` 로 내보낸다(약 41 MB). 커밋 → `develop` → `master` 배포 때 Flyway 가 V 마이그레이션 다음에 적용한다. 로컬도 `docker compose up -d flyway` 로 같은 파일을 쓴다. R 파일은 내용이 바뀌면 다시 실행되며 `ON CONFLICT DO NOTHING` 이라 있는 행은 두고 새 행만 넣는다 (값이 바뀐 행을 바꾸려면 서버에서 해당 달을 지운 뒤 재배포).
+- **덤프 (flow_detail 만)**: 760만 행 · 500 MB 라 seed 로 넣지 않는다. 서버에 필요해지면 아래처럼 한 테이블만 옮긴다.
 
 ```bash
-# 로컬: 데이터 파트 테이블만 데이터 덤프 (analysis 스키마 전체 + dim_region · region_result, 약 65 MB)
-docker compose -f infra/docker-compose.yml exec -T postgres sh -c "pg_dump -U postgres -d eumi --data-only -Fc -t 'analysis.*' -t public.dim_region -t public.region_result -f /tmp/eumi.dump"
-docker cp eumi-dev-postgres-1:/tmp/eumi.dump data/processed/dump/eumi_analysis_data_YYYYMMDD.dump
-# 서버(인프라 담당): 대상 테이블을 비운 뒤 복원
-pg_restore -U <owner> -d eumi --data-only --disable-triggers eumi_analysis_data_YYYYMMDD.dump
+docker compose -f infra/docker-compose.yml exec -T postgres sh -c "pg_dump -U postgres -d eumi --data-only -Fc -t analysis.flow_detail -f /tmp/flow.dump"
+docker cp eumi-dev-postgres-1:/tmp/flow.dump data/processed/dump/flow_detail_YYYYMMDD.dump
+# 서버(인프라 담당): pg_restore -U postgres -d eumi --data-only --disable-triggers flow_detail_YYYYMMDD.dump
 ```
-
-새 달 데이터는 로컬 적재 → 덤프 → 복원을 반복한다. 서버에 `data` 프로필과 스케줄러(Airflow)가 올라가면 서버에서 직접 돌리는 것으로 바꾼다.
 
 ## 저장소 규칙 (인수인계 요약)
 
