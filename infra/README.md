@@ -4,10 +4,10 @@
 
 | 파일 | 용도 |
 |---|---|
-| `docker-compose.yml` | PostgreSQL 17 + Flyway(스키마 · 권한 적용) + Mailpit. profile `data`: MinIO · Kafka · Spark (데이터 파트만, 아래 참고) |
+| `docker-compose.yml` | PostgreSQL 17 + Flyway(스키마 · 권한 적용) + Mailpit. profile `data`: MinIO · Kafka · pipeline(Spark + Airflow) (데이터 파트만, 아래 참고) |
 | `.env.example` | 로컬 비밀번호 목록. `.env`로 복사해서 쓴다 (`.env`는 커밋하지 않음) |
 | `postgres-init/01-eumi-roles.sh` | DB를 처음 만들 때 계정 4개와 `eumi` DB 생성 (`db/roles/eumi_db_roles.sql` 실행) |
-| `spark/` | Spark 실행 이미지 (`Dockerfile`, `spark-defaults.conf`). profile `data`에서 빌드 |
+| `pipeline/` | 데이터 파이프라인 실행 이미지 (`Dockerfile`: Python 3.12 + Spark 3.5.9 + Airflow 2.10, `spark-defaults.conf`, `requirements.txt`). profile `data`에서 빌드 |
 
 ### 처음 실행
 
@@ -40,7 +40,7 @@ docker compose logs flyway   # "Successfully applied …" (처음이면 V1부터
 - 화면: http://localhost:8025
 - SMTP(Spring 설정): `localhost:1025`, 인증 없음
 
-## 데이터 파이프라인 (MinIO · Kafka · Spark)
+## 데이터 파이프라인 (MinIO · Kafka · Spark · Airflow)
 
 데이터 파트만 쓴다. compose profile `data`에 있어 다른 파트의 `docker compose up -d`에는 영향이 없다.
 
@@ -49,19 +49,22 @@ docker compose logs flyway   # "Successfully applied …" (처음이면 V1부터
 | minio | `bitnamilegacy/minio` 2025.7.23 | S3 API `localhost:9000` | `http://minio:9000` | 원본(`raw/`) · 가상 유동(`synth/`) 저장소. 버킷 `sgi`는 시작할 때 자동 생성. 이 빌드에는 내장 웹 콘솔이 없다 |
 | s3manager | `cloudlena/s3manager` v0.12.0 | http://localhost:9001 | — | MinIO 버킷을 브라우저로 보는 웹 UI (목록 · 다운로드 · 업로드). 로그인 없음, 데이터는 갖지 않음 |
 | kafka | `apache/kafka` 3.9.2 (KRaft 단일 노드) | `localhost:9092` | `kafka:19092` | 토픽 `flow_hourly` (파티션 6, 키 grid_cd). kafka-init이 만들고 끝난다 |
-| spark | `spark/Dockerfile` (apache/spark 3.5.9 + S3A · PostgreSQL JDBC · Kafka 커넥터) | 실행 중인 잡 UI http://localhost:4040 | — | 월 배치 · 스트리밍 실행 (local[*]). 저장소 `data/`가 `/opt/eumi/data`로 마운트 |
+| pipeline | `pipeline/Dockerfile` (python 3.12 + pyspark 3.5.9 + Java 17 + S3A · PostgreSQL JDBC · Kafka 커넥터 + Airflow 2.10 + `data/requirements.txt`) | Spark 잡 UI http://localhost:4040 | — | Airflow 스케줄러. 모든 배치 · 스트리밍 스크립트가 이 안에서 돈다 (local[*]). 저장소 `data/`가 `/opt/eumi/data`로 마운트 |
+| pipeline-web | 같은 이미지 | http://localhost:8081 (계정 `.env` AIRFLOW_ADMIN_*) | — | Airflow 웹 UI (DAG 실행 · 로그) |
+| pipeline-init | 같은 이미지 | — | — | Airflow 메타 DB 마이그레이션 + 관리자 계정 (한 번 돌고 종료) |
 
 ### 켜기 · 끄기
 
 ```bash
 cd infra
-docker compose --profile data up -d --build   # 처음(또는 spark/ 변경 후)에는 --build
+docker compose --profile data up -d --build   # 처음(또는 pipeline/ 변경 후)에는 --build
 docker compose --profile data ps -a           # minio · kafka: healthy, flyway · kafka-init: Exited (0)
 docker compose --profile data down            # 끌 때도 --profile data (없으면 파이프라인 컨테이너가 남는다)
 ```
 
 - 데이터까지 지우고 처음부터: `docker compose --profile data down -v` (DB · MinIO · Kafka · Spark 체크포인트 볼륨 모두 삭제)
-- 연결 확인: `docker compose --profile data exec spark spark-submit pipeline/ops/check_infra.py` → 마지막 줄 `CHECK_INFRA PASS` (s3a 쓰기 · 읽기, 테이블 11개, JDBC, DML 권한, Kafka 메시지 1건 왕복)
+- Airflow 메타 DB: 새 볼륨이면 `postgres-init/02-airflow-db.sh`가 `airflow` 계정 · DB를 만든다. **이미 있는 로컬 DB**에는 한 번 수동으로: `docker compose exec postgres psql -U postgres -c "CREATE ROLE airflow LOGIN PASSWORD 'airflow_local'" -c "CREATE DATABASE airflow OWNER airflow"`
+- 연결 확인: `docker compose --profile data exec pipeline spark-submit pipeline/ops/check_infra.py` → 마지막 줄 `CHECK_INFRA PASS` (s3a 쓰기 · 읽기, 테이블 11개, JDBC, DML 권한, Kafka 메시지 1건 왕복)
 
 ### 접속 정보 (로컬 전용, `.env.example`)
 
@@ -74,11 +77,11 @@ docker compose --profile data down            # 끌 때도 --profile data (없�
 ### Spark 잡 실행
 
 ```bash
-docker compose --profile data exec spark spark-submit pipeline/<잡>.py
+docker compose --profile data exec pipeline spark-submit pipeline/<잡>.py
 ```
 
 - 컨테이너 안 환경변수: `MINIO_ENDPOINT` · `MINIO_BUCKET` · `AWS_ACCESS_KEY_ID` · `AWS_SECRET_ACCESS_KEY`(S3A용), `KAFKA_BOOTSTRAP` · `KAFKA_TOPIC_FLOW`, `PIPELINE_DB_URL`(JDBC) · `PIPELINE_DB_DSN`(psycopg) · `PIPELINE_DB_USER` · `PIPELINE_DB_PASSWORD`
-- S3A 엔드포인트 등 기본 설정은 `spark/spark-defaults.conf`. 드라이버 메모리 기본 4g (`--driver-memory`로 조정)
+- S3A 엔드포인트 등 기본 설정은 `pipeline/spark-defaults.conf`. 드라이버 메모리 기본 4g (`--driver-memory`로 조정)
 - 스트리밍 체크포인트 위치: `/opt/eumi/checkpoint` (볼륨)
 
 ### MinIO 이미지
@@ -92,19 +95,21 @@ MinIO가 2025년에 커뮤니티 에디션 이미지 배포를 중단해 `docker
 ```
 사용자 ─ https ─> Nginx(443) ─┬─ /api/      → backend   127.0.0.1:8080 ─> postgres (내부망, 포트 없음)
                               ├─ /jenkins/  → Jenkins   127.0.0.1:9090
+                              ├─ /airflow/  → pipeline-web(Airflow) 127.0.0.1:8081
                               └─ /          → web       127.0.0.1:3000
+pipeline(Airflow 스케줄러 + Spark) ─> minio(원본 · 가상 유동) · kafka(시연) · postgres(결과 테이블 · airflow 메타 DB)
 master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migrate(백업 → Flyway) → Deploy(헬스체크 · 실패 시 되돌림) → Cleanup
 ```
 
 | 파일 | 서버 위치 | 용도 |
 |---|---|---|
-| `deploy/docker-compose.prod.yml` | `/srv/eumi/` | 운영 서비스 (postgres · backend · web · mailpit, flyway는 실행할 때만) |
+| `deploy/docker-compose.prod.yml` | `/srv/eumi/` | 운영 서비스 (postgres · backend · web · mailpit · minio · kafka · pipeline 3종, flyway는 실행할 때만) |
 | `deploy/.env.config.example` | `/srv/eumi/.env.config` | 운영 비밀값 키 목록. 값은 서버에서 무작위로 만들고 git에 두지 않는다 |
 | `deploy/nginx/eumi.conf` | `/etc/nginx/sites-available/eumi` | HTTPS · 경로 연결. 인프라 담당이 손으로 반영 (Jenkins는 다르면 경고만) |
 | `deploy/nginx/eumi-bootstrap.conf` | (인증서 첫 발급 때만) | |
 | `deploy/jenkins/override.conf` | `/etc/systemd/system/jenkins.service.d/` | Jenkins를 127.0.0.1:9090, `/jenkins` 경로로 |
 | `deploy/cron/eumi-backup` | `/etc/cron.d/` | 매일 04:30 DB 백업 |
-| `scripts/sync.sh` | `/srv/eumi/scripts/` | 저장소 → `/srv/eumi` 복사 (비밀값 · 태그 · 백업은 건드리지 않음) |
+| `scripts/sync.sh` | `/srv/eumi/scripts/` | 저장소 → `/srv/eumi` 복사 (compose · 스크립트 · db · postgres-init · data/pipeline · data/airflow. 비밀값 · 태그 · 백업은 건드리지 않음) |
 | `scripts/migrate.sh` | 〃 | DB 기동 → 백업 → Flyway |
 | `scripts/deploy.sh` | 〃 | 서비스 하나 교체 + 헬스체크, 실패하면 이전 태그로 |
 | `scripts/backup.sh` · `restore-test.sh` | 〃 | 백업 (deploy 10개 · daily 7개 보관) · 복원 시험 (운영 DB는 건드리지 않음) |
@@ -117,3 +122,24 @@ master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migra
 - 운영 DB 비밀번호 · 키는 서버 `/srv/eumi/.env.config`(jenkins 소유, 권한 600)에만 있다. 필요하면 인프라 담당에게 요청한다.
 - 병합된 마이그레이션은 운영 DB에 그대로 적용된다. 컬럼 삭제 · 이름 변경처럼 이전 버전 코드가 깨지는 변경은 "추가 → 코드 전환 → 다음 배포에서 삭제" 두 번에 나눈다.
 - 배포 결과는 `https://k15b201.p.ssafy.io/jenkins/`의 `eumi-deploy`에서 본다 (읽기 전용 계정은 인프라 담당에게 요청. Jenkins는 서버 관리자 권한으로 동작하므로 실행 · 설정 권한은 인프라 담당만 가진다). 롤백 · 복구는 서버 접속이 필요하므로 인프라 담당이 진행한다.
+
+### 데이터 파이프라인 서버 구성 (인프라 담당 절차, 한 번)
+
+파이프라인 compose 서비스(`minio` · `kafka` · `kafka-init` · `pipeline-init` · `pipeline` · `pipeline-web`)가 처음 배포되기 **전에** 아래 1~3을 하고, 배포 **뒤에** 4~6을 한다. 명령은 모두 서버에서 실행한다.
+
+1. **비밀값**: `/srv/eumi/.env.config`에 `.env.config.example`의 "데이터 파이프라인" 절 키 7개를 추가한다. `MINIO_ROOT_PASSWORD` · `AIRFLOW_DB_PASSWORD` · `AIRFLOW_ADMIN_PASSWORD` · `AIRFLOW_SECRET_KEY`는 `openssl rand -hex 24`, `DATA_GO_KR_SERVICE_KEY` · `KAKAO_REST_KEY`는 데이터 파트(강병민)에게 Mattermost 비공개로 받는다.
+2. **Airflow 메타 DB** (postgres 볼륨이 이미 있어 init 스크립트가 돌지 않으므로 수동, `AIRFLOW_DB_PASSWORD`와 같은 값):
+   ```bash
+   sudo -u jenkins /srv/eumi/scripts/dc.sh exec postgres psql -U postgres -c "CREATE ROLE airflow LOGIN PASSWORD '<AIRFLOW_DB_PASSWORD 값>'" -c "CREATE DATABASE airflow OWNER airflow"
+   ```
+3. **MinIO 볼륨**: `docker volume create eumi-miniodata` (pgdata와 같이 external — `down -v`에도 남는다).
+4. **배포**: `develop` → `master` 병합 → Jenkins가 `eumi-pipeline` 이미지를 빌드하고(약 10분) `deploy.sh pipeline`으로 3개 서비스를 띄운다. `dc.sh ps`에서 `minio` · `kafka` · `pipeline` · `pipeline-web`이 healthy 인지 본다. 그 뒤 Nginx `/airflow/` 블록을 반영한다(`eumi.conf` 복사 → `nginx -t` → reload).
+5. **원본 업로드** (약 2 GB, 데이터 파트가 전달하는 `data/raw` 폴더를 서버 `/srv/eumi/data/raw`에 두고):
+   ```bash
+   sudo -u jenkins /srv/eumi/scripts/dc.sh exec pipeline python3 pipeline/m1_collect/upload_raw.py     # raw/ → MinIO sgi/raw (코호트 · 모델 자산 포함)
+   sudo -u jenkins /srv/eumi/scripts/dc.sh exec pipeline python3 pipeline/ops/load_dim_region.py && sudo -u jenkins /srv/eumi/scripts/dc.sh exec pipeline python3 pipeline/ops/load_dim_grid100.py
+   ```
+   결과 테이블(2025-07~12)은 이미 `db/seed`로 들어가 있으므로 과거분 배치는 돌리지 않는다. 가상 유동 Parquet은 다음 달 배치가 그 달 것만 만든다.
+6. **Airflow 확인**: `https://k15b201.p.ssafy.io/airflow/` 로그인(`AIRFLOW_ADMIN_*`) → DAG `eumi_monthly`를 unpause. unpause 직후 지난 스케줄 1건이 자동 실행되는데, 그 달 원본이 없으면 `check_inputs`가 전체를 skip 하므로 괜찮다. 첫 실제 실행은 매월 5일 03:00(전월 대상)이고, 재처리는 UI에서 `{"months": ["2025-12"]}`로 트리거한다. 문제가 생기면 UI의 태스크 로그를 데이터 파트에 전달한다.
+
+자원: `pipeline` 6 GB(Spark 드라이버 4 GB 포함) · `kafka` 1.5 GB · `minio` 1 GB · `pipeline-web` 1 GB, 디스크는 MinIO 원본 2 GB + 가상 유동 월 1 GB + Kafka 보관 7일. Kafka와 스트리밍은 시연용이라 평소 월 배치에는 쓰지 않는다.

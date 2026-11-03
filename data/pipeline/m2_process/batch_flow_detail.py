@@ -1,7 +1,7 @@
 """[M2 유동 상세 월 배치 | Spark 컨테이너] 가상 유동 Parquet(synth/flow_hourly) → analysis.flow_detail 월 배치 적재 (Kafka 를 거치지 않는 과거분 적재용).
 
 그 달 행을 지운 뒤 월 전체를 집계해 넣는다 (한 달이 통째로 들어오므로 day_count 가 정확하다).
-실행 (infra/):  docker compose --profile data exec spark spark-submit pipeline/m2_process/batch_flow_detail.py --months 2025-07 2025-08
+실행 (infra/):  docker compose --profile data exec pipeline spark-submit pipeline/m2_process/batch_flow_detail.py --months 2025-07 2025-08
 """
 import sys
 from pathlib import Path

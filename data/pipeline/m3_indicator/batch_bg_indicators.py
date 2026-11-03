@@ -3,7 +3,7 @@
 비율 (인수인계 5.1): 남성 = pop_male/pop_total, 1인가구 = hh_size_1/hh_total, 비아파트 = (house_total − house_apt)/house_total,
       65세+ = (pop_total − Σ 0~64세 구간)/pop_total, 공원 = park_area_m2/(area_km2 × 1e6), 정류장 밀도 = bus_stop_cnt/area_km2  (% 또는 개/㎢)
 분모 0 또는 항목 결측이면 NULL (0 금지). UPSERT.
-실행 (infra/):  docker compose --profile data exec spark python3 pipeline/m3_indicator/batch_bg_indicators.py --months 2025-07 ... [--dry-run]
+실행 (infra/):  docker compose --profile data exec pipeline python3 pipeline/m3_indicator/batch_bg_indicators.py --months 2025-07 ... [--dry-run]
 """
 import argparse
 import os

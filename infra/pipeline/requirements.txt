@@ -1,0 +1,15 @@
+# data/requirements.txt 사본 (이미지 빌드용). data/requirements.txt 를 바꾸면 이 파일도 같이 바꾼다
+pandas==2.2.3
+pyarrow==17.0.0
+psycopg[binary]==3.2.9
+python-dotenv==1.1.1
+openpyxl==3.1.5
+pyproj>=3.7,<4
+s3fs>=2025.3
+kafka-python>=2.1,<3
+shapely>=2,<3
+# M4 점수 산출: DA 재현 패키지(dual_analysis_reproducible_20261102)와 같은 고정 버전. 모델(.joblib)을 다른 버전으로 열면 경고·오차가 난다
+numpy==2.3.5
+scipy==1.17.0
+scikit-learn==1.8.0
+joblib==1.5.3

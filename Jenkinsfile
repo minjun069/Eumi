@@ -33,9 +33,10 @@ pipeline {
                     def sha = sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()
                     env.TAG = "master-${sha}"
 
-                    // 배포 순서: 의존받는 쪽 먼저 (ai · pipeline이 생기면 backend 앞에 추가)
-                    def order = ['backend', 'web']
-                    def dirs  = [backend: 'backend/', web: 'frontend/']
+                    // 배포 순서: 의존받는 쪽 먼저 (ai가 생기면 backend 앞에 추가)
+                    //   pipeline 이미지는 infra/pipeline/ 가 바뀔 때만 다시 빌드한다. data/ (스크립트 · DAG)는 Sync가 복사해 마운트하므로 빌드가 필요 없다
+                    def order = ['pipeline', 'backend', 'web']
+                    def dirs  = [pipeline: 'infra/pipeline/', backend: 'backend/', web: 'frontend/']
                     def services = order
                     def base = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
 
@@ -77,7 +78,7 @@ pipeline {
             when { expression { return env.SERVICES?.trim() ? true : false } }
             steps {
                 script {
-                    def ctx = [backend: 'backend', web: 'frontend']
+                    def ctx = [pipeline: 'infra/pipeline', backend: 'backend', web: 'frontend']
                     env.SERVICES.tokenize(' ').each { s ->
                         sh "docker build -t eumi-${s}:${env.TAG} ${ctx[s]}"
                     }

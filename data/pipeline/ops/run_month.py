@@ -1,6 +1,6 @@
 """[운영 · 월 배치 실행기 | 호스트] README "월 배치 순서" 13단계를 순서대로 실행한다.
 
-호스트 단계는 이 venv 로, 컨테이너 단계는 `docker compose --profile data exec spark …` 로 돌린다.
+호스트 단계는 이 venv 로, 컨테이너 단계는 `docker compose --profile data exec pipeline …` 로 돌린다.
 한 단계가 실패(종료 코드 ≠ 0)하면 거기서 멈추고 요약을 찍는다. 실행 요약은 data/processed/run_log/run_<시각>.json 에도 남긴다.
 
 실행  data/.venv/Scripts/python data/pipeline/ops/run_month.py [--months 2025-12 …]   # 없으면 전월
@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # data/pipeline (common 패키지)
 from common import REPO_ROOT, months_arg, setup
 
-COMPOSE = ["docker", "compose", "-f", str(REPO_ROOT / "infra" / "docker-compose.yml"), "--profile", "data", "exec", "-T", "spark"]
+COMPOSE = ["docker", "compose", "-f", str(REPO_ROOT / "infra" / "docker-compose.yml"), "--profile", "data", "exec", "-T", "pipeline"]
 LOG_DIR = REPO_ROOT / "data" / "processed" / "run_log"
 
 # (번호, 모듈, 설명, 실행 위치, 스크립트, 월 인자 방식)

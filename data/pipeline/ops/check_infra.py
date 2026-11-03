@@ -7,7 +7,7 @@ Spark 컨테이너 안에서 실행해 다음을 확인한다.
   4. Kafka: flow_hourly 토픽이 있고 읽을 수 있는지
 
 실행 (infra/ 폴더, data profile이 켜진 상태):
-    docker compose --profile data exec spark spark-submit pipeline/ops/check_infra.py
+    docker compose --profile data exec pipeline spark-submit pipeline/ops/check_infra.py
 마지막 줄이 "CHECK_INFRA PASS" 이면 통과.
 """
 import datetime as dt

@@ -8,7 +8,7 @@
 #   배포 기록:            /srv/eumi/deploy-history.log
 #
 # 교체하는 몇 초~1분 동안은 해당 서비스 응답이 끊길 수 있다 (무중단 배포는 쓰지 않는다).
-# ai · pipeline은 compose에 서비스를 추가할 때 아래 case에도 한 줄씩 추가한다.
+# ai는 compose에 서비스를 추가할 때 아래 case에도 한 줄 추가한다. pipeline은 init · 스케줄러 · 웹 3개를 같은 태그로 함께 교체한다.
 # ==========================================================================
 set -euo pipefail
 
@@ -16,13 +16,15 @@ APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$APP_DIR"
 COMPOSE=(docker compose -f docker-compose.prod.yml --env-file .env.config --env-file .env.tags)
 
-USAGE="사용법: deploy.sh <backend|web> <태그>"
+USAGE="사용법: deploy.sh <pipeline|backend|web> <태그>"
 SVC="${1:?$USAGE}"
 TAG="${2:?$USAGE}"
 
+UNITS="$SVC"   # up 대상 (pipeline은 3개)
 case "$SVC" in
-  backend) KEY=BACKEND_TAG ;;
-  web)     KEY=WEB_TAG ;;
+  pipeline) KEY=PIPELINE_TAG; UNITS="pipeline-init pipeline pipeline-web" ;;
+  backend)  KEY=BACKEND_TAG ;;
+  web)      KEY=WEB_TAG ;;
   *) echo "[deploy] 알 수 없는 서비스: $SVC ($USAGE)" >&2; exit 1 ;;
 esac
 
@@ -66,7 +68,7 @@ rollback() {
   "${COMPOSE[@]}" logs --tail=80 "$SVC" >&2 || true
   set_tag "${PREV:-none}"
   if [ -n "$PREV" ] && [ "$PREV" != "none" ]; then
-    if "${COMPOSE[@]}" up -d --no-deps "$SVC"; then
+    if "${COMPOSE[@]}" up -d --no-deps $UNITS; then
       log "failed (rolled back to $PREV)"
     else
       log "failed (rollback to $PREV also failed)"
@@ -83,7 +85,7 @@ echo "[deploy] $SVC: ${PREV:-없음} → $TAG"
 set_tag "$TAG"
 
 # if 조건 안에서는 set -e가 멈추지 않으므로, up 실패도 아래 rollback으로 간다
-if "${COMPOSE[@]}" up -d --no-deps "$SVC" && wait_healthy; then
+if "${COMPOSE[@]}" up -d --no-deps $UNITS && wait_healthy; then
   trap - INT TERM
   echo "[deploy] $SVC 정상 동작 ($TAG)"
   log ok
