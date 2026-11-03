@@ -65,6 +65,12 @@ export function TableauViewPanel({
   )
 }
 
+/**
+ * 적재된 월(API-10)이 404·400일 때의 제목. 없는 시군구일 수도, 분석 API를 아직 쓸 수 없는 것일 수도 있어
+ * 어느 쪽이어도 틀리지 않게 쓴다
+ */
+export const MONTHS_UNAVAILABLE = "이 지역의 분석 결과를 불러올 수 없습니다."
+
 /** 불러오지 못했을 때: 안내와 다시 시도 */
 export function LoadError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
