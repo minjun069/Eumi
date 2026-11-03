@@ -1,6 +1,6 @@
 """[M2 유동 상세 검증 | Spark 컨테이너] 검증 — flow_detail 의 일평균(flow_sum/day_count) 이 anchor(h · w×k_wkdy · a×k_age) 와 같은지 (상대오차 1e-5, 인수인계 5.2).
 
-실행 (infra/):  docker compose --profile data exec spark spark-submit pipeline/m2_process/verify_flow_detail.py --months 2025-07
+실행 (infra/):  docker compose --profile data exec pipeline spark-submit pipeline/m2_process/verify_flow_detail.py --months 2025-07
 """
 import argparse
 import os

@@ -2,7 +2,7 @@
 
 원본 읽기·센서스 비공개 셀 역산·공원/정류장 귀속·동 면적은 bg_sources.py. 지표(비율 6개)는 batch_bg_indicators.py 가 따로 만든다.
 적재: 그 달의 해당 항목 행을 지운 뒤 넣는다. 값이 없는 셀(못 푼 비공개)은 행을 넣지 않는다.
-실행 (infra/):  docker compose --profile data exec spark python3 pipeline/m2_process/batch_bg_detail.py --months 2025-07 ... [--dry-run]
+실행 (infra/):  docker compose --profile data exec pipeline python3 pipeline/m2_process/batch_bg_detail.py --months 2025-07 ... [--dry-run]
   --dry-run: 적재하지 않고 기존 값(1차 완성본)과의 차이만 출력
 """
 import sys

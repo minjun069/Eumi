@@ -11,6 +11,7 @@ M3 지표  상세 → 읍면동 · 격자 지표                     M4 분석  
 
 | 폴더 | 내용 |
 |---|---|
+| `airflow/dags/` | Airflow DAG (월 배치 스케줄) |
 | `common/` | DB · MinIO 연결, 월 인자, 실거래가 API, 배경 원본 읽기, 행동 지표 산식, 유동 집계 · 적재, 모델 자산 |
 | `m1_collect/` | 수동 업로드(`upload_raw`), 실거래가 API 수집 · 지오코딩, 가상 유동 생성 · Kafka 재생(`run_synth`, `synth_flow/`), 종료 신호 |
 | `m2_process/` | 배경 상세 · 격자 배경 · 실거래가 적재, 유동 상세 월 배치 · 스트리밍 · 검증 |
@@ -21,15 +22,19 @@ M3 지표  상세 → 읍면동 · 격자 지표                     M4 분석  
 
 ## 실행 환경
 
-| 위치 | 무엇이 도나 | 준비 |
-|---|---|---|
-| 호스트 `data/.venv` (Python 3.12) | M1, 실거래가 적재, M4, ops | `python -m venv data/.venv && data/.venv/Scripts/python -m pip install -r data/requirements.txt` |
-| Spark 컨테이너 (`infra/docker-compose.yml` `data` 프로필) | 배경 정제 · 격자 배경, 유동 상세, M3 | `cd infra && docker compose --profile data up -d` → MinIO(9000, 화면 9001) · Kafka(9092) · Spark · PostgreSQL · Flyway |
+모든 스크립트는 **pipeline 컨테이너** 안에서 돈다 (`infra/docker-compose.yml` `data` 프로필, 이미지 `infra/pipeline/Dockerfile`: Python 3.12 + Spark 3.5.9 + Airflow 2.10 + `data/requirements.txt`). 호스트 venv 는 개발 · 디버깅용이고 같은 버전이다.
 
-- 설정은 `infra/.env` (`infra/.env.example` 복사). 키: `MINIO_*`, `KAFKA_*`, `PIPELINE_DB_DSN`, `DATA_GO_KR_SERVICE_KEY`, `KAKAO_REST_KEY`, `MODEL_VERSION`(기본 v20261102).
-- 호스트 실행: `data/.venv/Scripts/python data/pipeline/<모듈>/<스크립트>.py …`. 컨테이너 실행(infra/ 에서): `docker compose --profile data exec spark python3 pipeline/<모듈>/<스크립트>.py …` (Spark 를 쓰는 유동 상세 · 격자 배경 · 검증 · 스트리밍은 `spark-submit`).
+```bash
+cd infra && docker compose --profile data up -d --build      # PostgreSQL · Flyway · MinIO(9000, 화면 9001) · Kafka(9092) · pipeline(Airflow 8081)
+docker compose --profile data exec pipeline python3 pipeline/<모듈>/<스크립트>.py …     # 일반 스크립트
+docker compose --profile data exec pipeline spark-submit pipeline/<모듈>/<스크립트>.py …  # Spark 잡 (유동 상세 · 격자 배경 · 검증 · 스트리밍)
+```
+
+- 호스트에서 돌릴 때: `python -m venv data/.venv && data/.venv/Scripts/python -m pip install -r data/requirements.txt` 후 `data/.venv/Scripts/python data/pipeline/<모듈>/<스크립트>.py …` (Spark 잡은 컨테이너에서만).
+- 설정은 `infra/.env` (`infra/.env.example` 복사). 키: `MINIO_*`, `KAFKA_*`, `PIPELINE_DB_DSN`, `DATA_GO_KR_SERVICE_KEY`, `KAKAO_REST_KEY`, `MODEL_VERSION`(기본 v20261102), `AIRFLOW_*`.
 - MinIO 버킷 `sgi`: `raw/<소스>/<기준시점>/…`(원본), `raw/skt_cohort/`(50m 코호트), `raw/model/<버전>/`(DA 모델 자산), `raw/apt_*`(실거래가 원본 · 좌표 캐시), `synth/`(가상 유동 anchor · Parquet · check).
 - DB 계정 `eumi_pipeline`: `analysis` 스키마 DML 전부, `public.dim_region` UPSERT, `public.region_result` DML. TRUNCATE · DROP · CREATE 없음 → "그 달 DELETE 후 적재" 또는 UPSERT 만.
+- Airflow 웹 http://localhost:8081 (계정 `.env` `AIRFLOW_ADMIN_*`), DAG 는 `data/airflow/dags/`.
 
 ## 초기 설정 (한 번)
 
@@ -90,7 +95,7 @@ M3 지표  상세 → 읍면동 · 격자 지표                     M4 분석  
 
 ```bash
 # infra/ 에서 스트리밍 시작 (체크포인트 · 토픽을 비운 뒤)
-docker compose --profile data exec spark spark-submit pipeline/m2_process/stream_flow_detail.py
+docker compose --profile data exec pipeline spark-submit pipeline/m2_process/stream_flow_detail.py
 # 호스트에서 12월 재생 (1시간치를 10초 간격으로) → 끝나면 종료 신호
 data/.venv/Scripts/python data/pipeline/m1_collect/run_synth.py replay --months 2025-12 --speed 10
 data/.venv/Scripts/python data/pipeline/m1_collect/send_eos.py --month 2025-12

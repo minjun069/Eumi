@@ -142,17 +142,20 @@ services:
           --topic ${KAFKA_TOPIC_FLOW:-flow_hourly} --partitions 6 --replication-factor 1
         /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:19092 --describe --topic ${KAFKA_TOPIC_FLOW:-flow_hourly}
 
-  # Spark 3.5 (local[*]) + S3A · PostgreSQL JDBC · Kafka 커넥터 (infra/spark/Dockerfile)
-  #   잡 실행: docker compose --profile data exec spark spark-submit pipeline/<잡>.py
+  # Spark 3.5 (local[*]) + S3A · PostgreSQL JDBC · Kafka 커넥터 (infra/pipeline/Dockerfile)
+  #   잡 실행: docker compose --profile data exec pipeline spark-submit pipeline/<잡>.py
   #   저장소의 data/ 폴더가 /opt/eumi/data 로 마운트된다. 실행 중인 잡의 UI는 http://localhost:4040
-  spark:
-    build: ./spark
-    image: eumi/spark:3.5.9
+  # ----- 데이터 파이프라인 실행 (Spark + Airflow, 이미지 하나). 모든 배치 · 스트리밍 스크립트는 이 컨테이너 안에서 돈다 -----
+  pipeline:
+    build: ./pipeline
+    image: eumi/pipeline:3.5.9-airflow2.10
     profiles: ["data"]
-    environment:
-      # S3A(hadoop-aws)가 읽는 자격 증명. 엔드포인트는 spark-defaults.conf (http://minio:9000)
+    environment: &pipeline-env
+      # S3A(hadoop-aws) · s3fs 가 읽는 MinIO 자격 증명. 엔드포인트는 spark-defaults.conf (http://minio:9000)
       AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
       AWS_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_ENDPOINT: http://minio:9000
       MINIO_BUCKET: ${MINIO_BUCKET}
       KAFKA_BOOTSTRAP: kafka:19092
@@ -161,20 +164,60 @@ services:
       PIPELINE_DB_USER: eumi_pipeline
       PIPELINE_DB_PASSWORD: ${EUMI_PIPELINE_PASSWORD}
       PIPELINE_DB_DSN: postgresql://eumi_pipeline:${EUMI_PIPELINE_PASSWORD}@postgres:5432/eumi
+      DATA_GO_KR_SERVICE_KEY: ${DATA_GO_KR_SERVICE_KEY:-}
+      KAKAO_REST_KEY: ${KAKAO_REST_KEY:-}
+      MODEL_VERSION: ${MODEL_VERSION:-v20261102}
       TZ: Asia/Seoul
+      # Airflow (메타 DB 는 postgres 의 airflow DB, 태스크는 이 컨테이너 안에서 LocalExecutor 로)
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD}@postgres:5432/airflow
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/eumi/data/airflow/dags
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Seoul
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "false"
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
     ports:
-      - "127.0.0.1:4040:4040"
-    volumes:
+      - "127.0.0.1:4040:4040"   # Spark UI (잡이 돌 때만)
+    volumes: &pipeline-volumes
       - ../data:/opt/eumi/data
       - sparkcheckpoint:/opt/eumi/checkpoint
+      - airflowlogs:/opt/airflow/logs
     working_dir: /opt/eumi/data
-    command: ["sleep", "infinity"]
+    command: ["airflow", "scheduler"]
     depends_on:
-      postgres:
-        condition: service_healthy
+      pipeline-init:
+        condition: service_completed_successfully
       minio:
         condition: service_healthy
       kafka:
+        condition: service_healthy
+
+  # Airflow 웹 UI http://localhost:8081 (계정은 .env 의 AIRFLOW_ADMIN_*)
+  pipeline-web:
+    image: eumi/pipeline:3.5.9-airflow2.10
+    profiles: ["data"]
+    environment: *pipeline-env
+    volumes: *pipeline-volumes
+    ports:
+      - "127.0.0.1:8081:8080"
+    command: ["airflow", "webserver"]
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+
+  # 메타 DB 마이그레이션 + 관리자 계정 (한 번 돌고 끝난다. 다시 실행해도 안전)
+  pipeline-init:
+    image: eumi/pipeline:3.5.9-airflow2.10
+    profiles: ["data"]
+    environment: *pipeline-env
+    volumes: *pipeline-volumes
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - airflow db migrate && airflow users create --username "${AIRFLOW_ADMIN_USER}" --password "${AIRFLOW_ADMIN_PASSWORD}" --firstname Eumi --lastname Admin --role Admin --email admin@eumi.local || true
+    depends_on:
+      postgres:
         condition: service_healthy
 
 volumes:
@@ -182,3 +225,4 @@ volumes:
   miniodata:
   kafkadata:
   sparkcheckpoint:
+  airflowlogs:

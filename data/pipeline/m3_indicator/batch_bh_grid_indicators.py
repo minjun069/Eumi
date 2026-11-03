@@ -2,7 +2,7 @@
 
 그 달과 전월의 격자별 일평균(시간대 24 · 요일 7 · 성연령 12)을 읽어 산식(bh_indicators.py)대로 계산하고,
 그 달 행을 지운 뒤 다시 넣는다. 전월이 없으면 변화 지표 4개(h26·h29·h30·h31)는 NULL.
-실행 (infra/):  docker compose --profile data exec spark python3 pipeline/m3_indicator/batch_bh_grid_indicators.py --months 2025-07 ... [--dry-run]
+실행 (infra/):  docker compose --profile data exec pipeline python3 pipeline/m3_indicator/batch_bh_grid_indicators.py --months 2025-07 ... [--dry-run]
   --dry-run: DB 에 쓰지 않고 격자 수와 기존 bh_grid_indicator 와의 최대 차이만 출력
 """
 import sys

@@ -2,7 +2,7 @@
 
 읍면동 값은 격자 지표의 평균이 아니라, 동 안 격자(dim_grid100.adm_cd10)의 일평균 유동을 합산한 뒤 산식(bh_indicators.py)을 다시 적용한다.
 h20·h21 의 분모(주민 60세+ · 남 50세+ 비율)는 그 달 bg_region_detail 의 주민등록 인구.
-실행 (infra/):  docker compose --profile data exec spark python3 pipeline/m3_indicator/batch_bh_region_indicators.py --months 2025-07 ... [--dry-run]
+실행 (infra/):  docker compose --profile data exec pipeline python3 pipeline/m3_indicator/batch_bh_region_indicators.py --months 2025-07 ... [--dry-run]
   --dry-run: DB 에 쓰지 않고 기존 bh_region_indicator 와의 최대 차이만 출력
   기본 동작: 지표 12개 + activity_daily 를 UPSERT 한다. 유동 상세가 DA 와 같은 50m 코호트 셀로 생성되므로(synth_flow COHORT_FILE)
   DA 읍면동 값과 셀 집합·산식이 같고, 동 배정 단위(100m 격자 vs 50m 점)만 달라 최대 2% 안에서 차이가 난다.

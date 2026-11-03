@@ -2,7 +2,7 @@
 
 항목: to_in_001 총인구 · to_in_007 남 · to_in_008 여 · to_ga_001 가구 · to_ho_001 주택 · to_fa_010 사업체 · to_em_020 종사자
 dim_grid100 에 있는 격자만 넣고, 기록 없는 격자·항목은 0 (인수인계 5.1). 그 연도를 지우고 다시 넣는다.
-실행 (infra/):  docker compose --profile data exec spark spark-submit pipeline/m2_process/batch_bg_grid.py --year 2024 [--dry-run]
+실행 (infra/):  docker compose --profile data exec pipeline spark-submit pipeline/m2_process/batch_bg_grid.py --year 2024 [--dry-run]
 """
 import argparse
 import os

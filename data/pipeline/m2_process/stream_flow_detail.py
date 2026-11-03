@@ -6,7 +6,7 @@
 주의:   하루 윈도는 다음 날 01:00 이후 메시지가 와야 닫힌다. 재생이 끝난 뒤 마지막 날을 닫으려면 send_eos.py 로 종료 신호를 보낸다
         (grid_cd '_EOS', 집계에서 제외). foreachBatch 는 DB 와 exactly-once 가 아니라서 재시작 시 마지막 배치가 두 번 더해질 수 있다
         → 그 달은 batch_flow_detail.py 로 다시 적재한다.
-실행 (infra/):  docker compose --profile data exec spark spark-submit pipeline/m2_process/stream_flow_detail.py [--starting earliest|latest] [--trigger 5]
+실행 (infra/):  docker compose --profile data exec pipeline spark-submit pipeline/m2_process/stream_flow_detail.py [--starting earliest|latest] [--trigger 5]
 """
 import sys
 from pathlib import Path
