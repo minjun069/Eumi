@@ -16,7 +16,7 @@ M3 지표  상세 → 읍면동 · 격자 지표                     M4 분석  
 | `m2_process/` | 배경 상세 · 격자 배경 · 실거래가 적재, 유동 상세 월 배치 · 스트리밍 · 검증 |
 | `m3_indicator/` | 읍면동 배경 지표, 격자 · 읍면동 행동 지표 |
 | `m4_analysis/` | 읍면동 점수 · 단계(`region_result`), 격자 이상 점수(`bh_grid_anomaly`) |
-| `ops/` | 기준 테이블 초기 적재(`load_dim_region`, `load_dim_grid100`), 서버 seed 생성(`make_seed`), 인프라 연결 확인 |
+| `ops/` | 월 배치 실행기(`run_month`), 기준 테이블 초기 적재(`load_dim_region`, `load_dim_grid100`), 서버 seed 생성(`make_seed`), 인프라 연결 확인 |
 | `legacy/` | 1차 완성본 · DA 결과 CSV 적재 스크립트. 지금은 M2~M4 가 대체하므로 참고용 (실행하면 2차 산출값을 덮어쓴다) |
 
 ## 실행 환경
@@ -61,7 +61,9 @@ M3 지표  상세 → 읍면동 · 격자 지표                     M4 분석  
 
 - 첫 달(전월 없음)은 변화 지표 4개(h26 · h29 · h30 · h31)가 NULL → 행동 점수 · 단계를 내지 않고 `region_result` 에 넣지 않는다 (DA 방침).
 - 모든 스크립트는 `--dry-run` 또는 `[OK]/[FAIL]` 검사를 찍는다. FAIL 이면 다음 단계로 가지 않는다.
-- 아직 스케줄러는 없다 (Airflow 로 자동화 예정). 실행 이력도 그때 같이 남긴다.
+- **한 번에 돌리기**: `data/.venv/Scripts/python data/pipeline/ops/run_month.py --months 2025-12` 가 13단계를 순서대로 실행한다(호스트 · 컨테이너 자동 구분). 실패하면 그 단계에서 멈추고, `--from 8` · `--only 11 12` · `--skip 3` 으로 일부만 다시 돌린다. 단계별 소요 시간 · 결과는 `data/processed/run_log/run_<시각>.json` 에 남는다.
+- 재처리 리허설(2026-11-03, 2025-12 한 달 전체 재실행): 13단계 모두 통과, 총 4분(가상 유동 생성 111초 · 유동 적재 78초가 대부분). 결과 테이블 값은 재실행 전과 동일 (`re_apt_trade` 는 DELETE 후 INSERT 라 `trade_id` 만 새로 발급). `make_seed` 는 값이 바뀐 달이 있을 때만 커밋한다 (재실행만으로는 updated_at · trade_id 가 바뀌어 diff 가 커진다).
+- 아직 스케줄러는 없다 (Airflow 로 자동화 예정, 서버에 MinIO · Spark 와 함께). Airflow DAG 는 `run_month.py` 의 STEPS 순서를 그대로 옮긴다.
 
 ## 모듈별 메모
 
