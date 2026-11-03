@@ -170,7 +170,7 @@ async function send(question: string): Promise<boolean> {
     storeConversationId(created.conversationId)
     setState({ conversationId: created.conversationId, sending: false, loadedFrom: null })
     // 질문 행은 다시 받지 않으므로(after=questionId) 입력한 문장으로 바로 붙인다.
-    // 새로고침하면(after=0) 서버가 개인정보를 가려 저장한 문장으로 보인다
+    // 새로고침하면(after=0) 서버가 저장한 문장으로 보인다 (이메일·휴대전화·이름/생년월일 필드만 가린 결과)
     merge([
       {
         messageId: created.questionId,
