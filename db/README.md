@@ -58,10 +58,11 @@ Spring Boot · FastAPI · 데이터 파이프라인이 같은 DB(`eumi`)를 쓰�
 - 위치는 `seed/`, 이름은 `R__{순번}_{설명}.sql`입니다 (예: `R__01_dim_region.sql`). R 파일은 내용이 바뀔 때마다 다시 실행되므로 `INSERT ... ON CONFLICT DO NOTHING`으로 씁니다.
 - 넣는 순서: 행정동(`dim_region`) → 기관 · 회원 → 사례자. FK 때문에 순서가 바뀌면 실패합니다.
 - **가짜 데이터만** 넣습니다. 실제 개인정보는 넣지 않습니다.
-- 첫 seed 파일이 들어오면 `infra/docker-compose.yml`에서 주석 처리된 seed 경로를 풀어야 적용됩니다 (인프라 담당).
+- seed 경로는 로컬(`infra/docker-compose.yml`)과 운영(`infra/deploy/docker-compose.prod.yml`) Flyway에 모두 켜져 있습니다. 파일을 넣으면 다음 `docker compose up -d flyway`와 배포 때 적용됩니다.
+- 운영에도 들어가므로 시연 계정의 평문 비밀번호는 넣지 않고 해시만 넣습니다.
 
 | 파일 (예정) | 내용 | 담당 |
 |---|---|---|
 | `R__01_dim_region.sql` | 강남구 · 춘천시 행정동 | 강병민 |
 | `R__02_organization.sql` | 기관 | 김민재 |
-| `R__03_demo_member.sql` | 개발 · 시연용 회원 (BCrypt 해시) | 김민재 |
+| `R__03_demo_member.sql` | 개발 · 시연용 회원 (PBKDF2 해시, OPEN-04) | 김민재 |
