@@ -14,7 +14,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/api": { target: "http://localhost:8080", changeOrigin: true },
+      // 기본은 실제 backend(8080). 가짜 API(8081)로 붙을 때만 VITE_API_TARGET을 준다 (README '실행')
+      "/api": { target: process.env.VITE_API_TARGET ?? "http://localhost:8080", changeOrigin: true },
     },
   },
 })

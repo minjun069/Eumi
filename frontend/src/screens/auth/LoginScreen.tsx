@@ -1,118 +1,75 @@
+import "@/styles/auth.css"
+import { useMutation } from "@tanstack/react-query"
 import { useState, type FormEvent } from "react"
-import { Link, Navigate, useLocation, useNavigate } from "react-router"
+import { Link, Navigate, useLocation } from "react-router"
+import { authApi } from "@/api/authApi"
+import { errorMessage, fieldErrorMap, isApiError } from "@/api/errors"
 import { FieldError } from "@/components/common/FieldError"
 import { PasswordInput } from "@/components/common/PasswordInput"
-import { expireTempPassword, isTempPasswordExpired, peekTempPassword } from "@/devtools/devMailbox"
-import { useDevScenario } from "@/devtools/devScenarioStore"
-import { authApi } from "@/mock/api/authApi"
-import { DEMO_LOGIN, LOGIN_EXAMPLES } from "@/mock/seed/members"
 import { HOME_PATH, PATHS } from "@/routes/paths"
 import { clearSavedEmail, getSavedEmail, saveEmail } from "@/session/savedEmail"
-import { profileFromLogin } from "@/session/loginProfile"
-import { sessionStore, useSession } from "@/session/sessionStore"
+import { completeLogin, restoreSession } from "@/session/sessionActions"
+import { useSession } from "@/session/sessionStore"
+import { showToast } from "@/stores/toastStore"
 import { isValidEmail } from "@/utils/validation"
 
 type FieldErrors = { email?: string; password?: string }
 
+const RESTRICTED_SESSION = "임시 비밀번호로 로그인된 상태예요. 비밀번호를 변경하거나 로그아웃한 뒤 다시 로그인하세요."
+
 /**
- * 1.2.1 로그인
- * - 이메일·비밀번호로 로그인하면 고립 위험 탐색(첫 화면)으로 이동
- * - 임시 비밀번호로 로그인하면 비밀번호 변경(5.1.3)으로 이동
- * - 빈칸·이메일 형식은 API를 부르기 전에 화면에서 먼저 확인
- * - 이메일 저장: 로그인에 성공했을 때 브라우저에 저장 (API 기록 없음)
+ * 로그인 (FR-006·007·008, API-08)
+ * - 로그인하면 고립 위험 탐색(첫 화면)으로, 임시 비밀번호로 로그인하면 비밀번호 변경으로 이동한다
+ * - 빈칸·이메일 형식은 API를 부르기 전에 화면에서 먼저 확인한다
+ * - 실패 사유(미가입·탈퇴·비밀번호 불일치·만료된 임시 비밀번호)는 서버가 같은 문구로 돌려준다
+ * - 이메일 저장: 로그인에 성공했을 때만 브라우저에 이메일을 저장한다. 비밀번호는 저장하지 않는다
  */
 export function LoginScreen() {
-  const navigate = useNavigate()
   const session = useSession()
-  // 화면을 처음 띄울 때 이미 로그인한 상태였는지 (로그인 직후의 이동과 구분하기 위해 처음 값만 기억)
-  const [openedWhileSignedIn] = useState(() => sessionStore.getState().status !== "anonymous")
 
-  // 회원가입·비밀번호 찾기에서 왔으면 입력한 이메일만 채운다.
-  // 저장된 이메일이 있으면 이메일만 채우고 비밀번호는 비운다. 둘 다 없으면 예시 계정을 채운다.
+  // 회원가입·비밀번호 찾기에서 왔으면 입력한 이메일을, 아니면 저장된 이메일을 채운다
   const location = useLocation()
   const signedUpEmail = (location.state as { email?: string } | null)?.email ?? null
-  const [savedEmail, setSavedEmail] = useState(getSavedEmail)
-  const [email, setEmail] = useState(signedUpEmail ?? savedEmail ?? DEMO_LOGIN.email)
-  const [password, setPassword] = useState(
-    signedUpEmail || savedEmail ? "" : DEMO_LOGIN.password,
-  )
+  const [savedEmail] = useState(getSavedEmail)
+  const [email, setEmail] = useState(signedUpEmail ?? savedEmail ?? "")
+  const [password, setPassword] = useState("")
   const [rememberEmail, setRememberEmail] = useState(savedEmail !== null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [loginError, setLoginError] = useState<string | null>(null)
 
-  // 개발용: 지금 입력한 이메일로 발급된 임시 비밀번호 (비밀번호 찾기 1.3.1)
-  const [tempPasswordTick, setTempPasswordTick] = useState(0)
-  const issuedTempPassword = peekTempPassword(email.trim())
-  const tempPasswordExpired = isTempPasswordExpired(email.trim())
-
-  const fillExample = (example: { email: string; password: string }) => {
-    setEmail(example.email)
-    setPassword(example.password)
-    setFieldErrors({})
-    setLoginError(null)
-  }
-
-  useDevScenario(
-    {
-      screen: "로그인 화면",
-      hint: "버튼을 누르면 입력칸이 채워집니다. '로그인'을 눌러 결과를 확인하세요.",
-      actions: LOGIN_EXAMPLES.map((example) => ({
-        label: example.label,
-        run: () => fillExample(example),
-      })),
-      groups: issuedTempPassword
-        ? [
-            {
-              title: "지금 이메일의 임시 비밀번호",
-              actions: [
-                {
-                  label: "임시 비밀번호 채우기",
-                  run: () => fillExample({ email: email.trim(), password: issuedTempPassword }),
-                },
-                {
-                  label: "임시 비밀번호 만료시키기",
-                  run: () => {
-                    expireTempPassword(email.trim())
-                    setTempPasswordTick((tick) => tick + 1)
-                  },
-                },
-              ],
-            },
-          ]
-        : undefined,
-      infos: [
-        {
-          label: "저장된 이메일",
-          value: savedEmail ?? "없음",
-          action: savedEmail
-            ? {
-                label: "지우기",
-                run: () => {
-                  clearSavedEmail()
-                  setSavedEmail(null)
-                },
-              }
-            : undefined,
-        },
-        {
-          label: "발급된 임시 비밀번호",
-          value: issuedTempPassword
-            ? `${issuedTempPassword}${tempPasswordExpired ? " (24시간 지남)" : ""}`
-            : "없음",
-        },
-      ],
+  const login = useMutation({
+    mutationFn: authApi.login,
+    onSuccess: ({ user }, request) => {
+      if (rememberEmail) saveEmail(request.email)
+      else clearSavedEmail()
+      // 로그인 상태가 되면 아래에서 첫 화면(또는 비밀번호 변경)으로 이동한다
+      completeLogin(user)
     },
-    [savedEmail, email, issuedTempPassword, tempPasswordExpired, tempPasswordTick],
-  )
+    onError: (error) => {
+      // 이 브라우저가 이미 임시 비밀번호로 로그인된 제한 세션이면 서버가 새 로그인을 거절한다 (API-08 403).
+      // 그 세션을 다시 불러오면 비밀번호 변경 화면으로 간다. 다른 계정으로는 로그아웃한 뒤 로그인한다
+      if (isApiError(error) && error.code === "PASSWORD_CHANGE_REQUIRED") {
+        setLoginError(RESTRICTED_SESSION)
+        showToast(RESTRICTED_SESSION, "error")
+        void restoreSession()
+        return
+      }
+      const fields = fieldErrorMap(error)
+      if (fields.email || fields.password) setFieldErrors({ email: fields.email, password: fields.password })
+      else setLoginError(errorMessage(error))
+    },
+  })
 
-  // 이미 로그인한 상태로 로그인 화면에 들어오면 첫 화면으로 보낸다
-  if (openedWhileSignedIn && session.status === "restoring") return null
-  if (openedWhileSignedIn && session.status === "authenticated") {
-    return <Navigate to={HOME_PATH} replace />
+  // 로그인 상태를 복원하는 중에는 아무것도 그리지 않는다
+  if (session.status === "restoring") return null
+  // 이미 로그인했거나 방금 로그인했으면 첫 화면으로. 임시 비밀번호 로그인이면 비밀번호 변경으로
+  if (session.status === "authenticated") {
+    return <Navigate to={session.profile.mustChangePassword ? PATHS.myPassword : HOME_PATH} replace />
   }
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
+    if (login.isPending) return
     const trimmedEmail = email.trim()
 
     const errors: FieldErrors = {}
@@ -123,17 +80,8 @@ export function LoginScreen() {
     setLoginError(null)
     if (errors.email || errors.password) return
 
-    const result = authApi.login({ email: trimmedEmail, password })
-    if (!result.ok) {
-      setLoginError(result.message)
-      return
-    }
-
-    if (rememberEmail) saveEmail(trimmedEmail)
-    else clearSavedEmail()
-
-    sessionStore.signIn(profileFromLogin(result.data))
-    navigate(result.data.mustChangePassword ? PATHS.myPassword : HOME_PATH, { replace: true })
+    // 비밀번호는 앞뒤 공백을 지우지 않고 그대로 보낸다
+    login.mutate({ email: trimmedEmail, password })
   }
 
   return (
@@ -192,8 +140,8 @@ export function LoginScreen() {
           </p>
         )}
 
-        <button type="submit" className="btn btn-primary btn-block btn-large">
-          로그인
+        <button type="submit" className="btn btn-primary btn-block btn-large" disabled={login.isPending}>
+          {login.isPending ? "로그인 중…" : "로그인"}
         </button>
 
         <div className="login-links">

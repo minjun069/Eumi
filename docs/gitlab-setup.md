@@ -3,7 +3,7 @@
 현재 설정 기록입니다. 
 GitLab 버전에 따라 메뉴 이름 · 위치가 조금 다를 수 있습니다.
 
-- 마지막 확인: 2026-10-30
+- 마지막 확인: 2026-11-01
 
 ## 1. 브랜치
 
@@ -49,7 +49,7 @@ GitLab 버전에 따라 메뉴 이름 · 위치가 조금 다를 수 있습니�
 
 | 대상 | 방식 | 상태 |
 |---|---|---|
-| Jenkins | 서버(EC2)에 설치된 Jenkins. GitLab 접근 토큰은 인프라 담당 계정으로 발급 | 토큰 교체 · webhook은 배포 설정 때 진행 |
+| Jenkins | 서버(EC2)의 Jenkins 잡 `eumi-deploy` (https://k15b201.p.ssafy.io/jenkins/). 저장소는 프로젝트 액세스 토큰 `eumi-jenkins-read`(Reporter, `read_repository`)로 읽음. 웹훅(Settings > Webhooks): `https://k15b201.p.ssafy.io/jenkins/project/eumi-deploy`, Push events · 브랜치 `master`, SSL 검증, Secret token(값은 Jenkins에만) | 사용 중 (2026-10-31). 토큰 만료 2026-12-02 전에 인프라 담당이 교체 |
 | Jira | 커밋 본문과 MR 설명에 이슈 키를 적음 ([CONTRIBUTING 2장](../CONTRIBUTING.md#2-커밋-메시지)) | GitLab–Jira 연동(Settings > Integrations > Jira)이 켜져 있으면 Jira 이슈에 커밋이 자동으로 연결됨. 켜져 있는지 확인 필요 |
 
 ## 5. 쓰지 않는 기능
@@ -65,3 +65,4 @@ GitLab 버전에 따라 메뉴 이름 · 위치가 조금 다를 수 있습니�
 | 2026-10-30 | backend · frontend 초기 프로젝트 병합, master의 `Jenkinsfile`을 develop에 반영, 기본 브랜치 develop, master · develop 보호 |
 | 2026-10-30 | 공통 규칙(버전, 로그인 결정 기록), 로컬 개발 DB(Flyway V1~V6, 계정 · 권한) 병합 |
 | 2026-10-30 | 개발 인원 4명 기준으로 협업 규칙 개편 (MR 리뷰, Jira, DB, 비밀값) |
+| 2026-10-31 | 운영 배포 파일(`infra/deploy` · `infra/scripts`) 병합, 이전 개인 토큰 대신 프로젝트 액세스 토큰 `eumi-jenkins-read` 발급, Jenkins 웹훅(Push events · `master`) 등록, develop → master 병합으로 자동 배포 시작 |

@@ -1,14 +1,14 @@
+import type { InsightReport } from "@/api/analysisApi"
+import type { Schemas } from "@/api/types"
 import { Emphasized } from "@/components/common/Emphasized"
-import type { InsightReportResponse } from "@/mock/api/analysisApi"
-import { splitDirection } from "@/screens/risk/emphasis"
-import { shortMonth } from "@/screens/risk/riskQuery"
-import { STAGE_COLORS, STAGE_TEXT } from "@/screens/risk/riskStyle"
-import type { ReportBlock, ReportChart } from "@/types/domain"
+import { formatDateTime, shortMonth } from "@/screens/risk/riskQuery"
+import { stageStyle } from "@/screens/risk/riskStyle"
 
-// 2.1.4 인사이트 보고서. 저장된 보고서(질문별 문장·목록·그래프 값)를 받아 화면이 그린다.
-// 그래프는 Tableau가 아니라 우리 화면이 그린다 (R2: 보고서를 만들 때 그래프 값까지 저장).
+// 2.1.4 인사이트 보고서 (API-12). 저장된 보고서(질문별 문장·목록·그래프 값)를 받아 화면이 그린다.
+// 그래프는 Tableau 뷰가 아니라 저장 JSON으로 우리 화면이 그린다 (상세 계약 대시보드 절).
 
-type Report = NonNullable<InsightReportResponse["report"]>
+type ReportBlock = Schemas["ReportBlock"]
+type ReportChart = Schemas["ReportChart"]
 type ChartOf<T extends ReportChart["type"]> = Extract<ReportChart, { type: T }>
 
 const MAIN_COLOR = "#2f6fdc"
@@ -16,7 +16,15 @@ const OTHER_COLOR = "#c9c5bb"
 const BAND_COLOR = "#ece9e1"
 const signed = (value: number, digits = 1) => `${value > 0 ? "+" : ""}${value.toFixed(digits)}`
 
-export function InsightReportView({ report }: { report: Report }) {
+/** 제목 문장에서 '상승'·'하락'을 색으로 강조하려고 나눈다 */
+function splitDirection(text: string): { text: string; direction: "up" | "down" | null }[] {
+  return text
+    .split(/(상승|하락)/)
+    .filter((part) => part !== "")
+    .map((part) => ({ text: part, direction: part === "상승" ? "up" : part === "하락" ? "down" : null }))
+}
+
+export function InsightReportView({ report }: { report: InsightReport }) {
   return (
     <article className="insight-report">
       <h3 className="report-headline">
@@ -39,7 +47,8 @@ export function InsightReportView({ report }: { report: Report }) {
         </section>
       ))}
       <p className="report-footnote">
-        월 데이터를 분석할 때 AI가 만든 보고서입니다 ({report.generatedAt}). 더 궁금한 점은 오른쪽 위 AI 패널에서 물어보세요.
+        월 데이터를 분석할 때 AI가 만든 보고서입니다 ({formatDateTime(report.generatedAt)}). 더 궁금한 점은 오른쪽 위 AI
+        패널에서 물어보세요.
       </p>
     </article>
   )
@@ -91,7 +100,10 @@ function Legend({ items }: { items: { label: string; color: string; kind?: "line
     <div className="report-legend">
       {items.map((item) => (
         <span key={item.label}>
-          <i className={`legend-${item.kind ?? "box"}`} style={{ background: item.kind === "dash" ? undefined : item.color, borderColor: item.color }} />
+          <i
+            className={`legend-${item.kind ?? "box"}`}
+            style={{ background: item.kind === "dash" ? undefined : item.color, borderColor: item.color }}
+          />
           {item.label}
         </span>
       ))}
@@ -156,28 +168,31 @@ function TrendChart({ chart }: { chart: ChartOf<"trend"> }) {
         <polygon points={band} fill={BAND_COLOR} />
         <path d={line((point) => point.median)} fill="none" stroke="#8a94a5" strokeWidth={1.2} strokeDasharray="4 3" />
         {chart.points.length > 1 && <path d={line((point) => point.score)} fill="none" stroke={MAIN_COLOR} strokeWidth={2} />}
-        {chart.points.map((point, index) => (
-          <g key={point.month}>
-            <circle cx={x(index)} cy={y(point.score)} r={4.5} fill={MAIN_COLOR} stroke="#fff" strokeWidth={2}>
-              <title>{`${shortMonth(point.month)} ${point.score}점 · ${point.stage}단계 · ${chart.total}개 동 중 ${point.rank}위 · 중앙값 ${point.median}`}</title>
-            </circle>
-            <text x={x(index)} y={y(point.score) - 9} fontSize={10.5} textAnchor="middle" fill="#243247">
-              {point.score.toFixed(1)}
-            </text>
-            {annotated.has(index) && (
-              <text x={x(index)} y={y(point.score) + 17} fontSize={10} textAnchor="middle" fill={MAIN_COLOR}>
-                {point.rank}위
+        {chart.points.map((point, index) => {
+          const stage = stageStyle(point.stage)
+          return (
+            <g key={point.month}>
+              <circle cx={x(index)} cy={y(point.score)} r={4.5} fill={MAIN_COLOR} stroke="#fff" strokeWidth={2}>
+                <title>{`${shortMonth(point.month)} ${point.score}점 · ${point.stage}단계 · ${chart.total}개 동 중 ${point.rank}위 · 중앙값 ${point.median}`}</title>
+              </circle>
+              <text x={x(index)} y={y(point.score) - 9} fontSize={10.5} textAnchor="middle" fill="#243247">
+                {point.score.toFixed(1)}
               </text>
-            )}
-            <text x={x(index)} y={plotBottom + 16} fontSize={10.5} textAnchor="middle" fill="#6b7686">
-              {shortMonth(point.month)}
-            </text>
-            <rect x={x(index) - 19} y={plotBottom + 26} width={38} height={18} rx={4} fill={STAGE_COLORS[point.stage]} />
-            <text x={x(index)} y={plotBottom + 39} fontSize={10.5} textAnchor="middle" fill={STAGE_TEXT[point.stage]}>
-              {point.stage}단계
-            </text>
-          </g>
-        ))}
+              {annotated.has(index) && (
+                <text x={x(index)} y={y(point.score) + 17} fontSize={10} textAnchor="middle" fill={MAIN_COLOR}>
+                  {point.rank}위
+                </text>
+              )}
+              <text x={x(index)} y={plotBottom + 16} fontSize={10.5} textAnchor="middle" fill="#6b7686">
+                {shortMonth(point.month)}
+              </text>
+              <rect x={x(index) - 19} y={plotBottom + 26} width={38} height={18} rx={4} fill={stage.background} />
+              <text x={x(index)} y={plotBottom + 39} fontSize={10.5} textAnchor="middle" fill={stage.color}>
+                {point.stage}단계
+              </text>
+            </g>
+          )
+        })}
       </svg>
       <figcaption className="report-caption">파란 글씨 = {chart.total}개 동 중 순위 (가장 높은 달·낮은 달·이번 달)</figcaption>
     </>
@@ -332,7 +347,7 @@ function CompareChart({ chart }: { chart: ChartOf<"compare"> }) {
           <div key={item.label} className="compare-row" title={`${item.label} ${item.value}`}>
             <span
               className="compare-bar"
-              style={{ width: `${(item.value / max) * 78}%`, background: item.highlight ? MAIN_COLOR : OTHER_COLOR }}
+              style={{ width: `${max > 0 ? (item.value / max) * 78 : 0}%`, background: item.highlight ? MAIN_COLOR : OTHER_COLOR }}
             />
             <em>{item.value}</em>
           </div>

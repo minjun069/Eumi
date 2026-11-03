@@ -1,4 +1,4 @@
-/* 2. ANALYSIS 고립 위험 탐색 */
+/* 2. ANALYSIS 고립 위험 탐색 (프로토타입 c96cf85 risk.css + feat/dashboard-PoC tableau-poc.css) */
 
 .risk-heading {
   display: flex;
@@ -39,6 +39,12 @@
 
 .risk-filter-controls .select {
   width: 150px;
+  padding-right: 8px;
+  cursor: pointer;
+}
+
+.risk-filter-controls .select:disabled {
+  cursor: not-allowed;
 }
 
 .risk-filter-controls .risk-month {
@@ -59,11 +65,32 @@
 .risk-column {
   display: grid;
   gap: 16px;
+  min-width: 0;
+}
+
+/* 읍면동 화면에 있는 동안 숨겨 두는 시군구 화면 (RiskScreen).
+   display:none이면 Tableau iframe 크기가 0이 되어 돌아올 때 다시 그리므로, 크기는 그대로 두고 높이 0으로 접는다 */
+.risk-kept {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+/* 불러오기 실패: 안내 아래 다시 시도 */
+.risk-load-error {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+.risk-load-error .empty-state {
+  justify-self: stretch;
 }
 
 /* 우리 화면의 패널(제목·버튼) */
 
 .risk-panel {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 14px 16px 16px;
@@ -112,198 +139,123 @@
   background: var(--navy);
 }
 
-/* Tableau가 그리는 영역 (예시 그림) */
+/* Tableau 대시보드 영역.
+   대시보드 크기가 고정(지도·② 640px, ③⑤ 430px)이라, 칸 폭은 그대로 두고 패널 좌우 안쪽 여백만 줄여 맞춘다
+   (오른쪽 칸은 본문 스크롤바를 빼면 438px → 테두리·여백을 빼고 430px 이상 남게) */
+
+.risk-panel.is-tableau {
+  padding-right: 3px;
+  padding-left: 3px;
+}
+
+.risk-panel.is-tableau > .risk-panel-head,
+.risk-panel.is-tableau .tableau-badge,
+.risk-panel.is-tableau .tableau-hint,
+.risk-panel.is-tableau .tableau-pending {
+  margin-right: 13px;
+  margin-left: 13px;
+}
 
 .tableau-frame {
-  position: relative;
-  border: 1px dashed #b9c3d3;
-  border-radius: 6px;
-  padding: 26px 12px 12px;
-  background: #fbfcfe;
+  min-width: 0;
 }
 
 .tableau-badge {
-  position: absolute;
-  top: 6px;
-  left: 8px;
+  display: inline-block;
+  margin-bottom: 7px;
   border-radius: 4px;
-  padding: 0 6px;
+  padding: 1px 7px;
   color: #5b6b85;
   background: #eef2f8;
   font-size: 11px;
   line-height: 18px;
 }
 
-.tableau-message {
-  margin: 24px 0;
+.tableau-embed {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  background: #fff;
+}
+
+.tableau-host {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.tableau-host tableau-viz {
+  display: block;
+  flex: none;
+}
+
+/* 확인 전·실패 때 Tableau를 덮는다 (숨기지 않고 덮어야 iframe이 느려지지 않는다) */
+.tableau-loading {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  border-radius: 6px;
+  padding: 20px;
   color: var(--text-muted);
-  font-size: 14px;
+  background: #fafbfe;
+  font-size: 13px;
+  text-align: center;
+}
+
+.tableau-loading p {
+  margin: 0;
+}
+
+.tableau-updating {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  right: 8px;
+  max-width: calc(100% - 16px);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 7px 10px;
+  color: #58688a;
+  background: #fffffff2;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.tableau-error {
+  margin: 8px 0;
+  color: var(--danger);
+  font-size: 12px;
+}
+
+/* 게시본이 아직 없는 뷰 */
+.tableau-pending {
+  display: grid;
+  place-content: center;
+  min-height: 160px;
+  margin: 0;
+  border: 1px dashed #b9c3d3;
+  border-radius: 6px;
+  padding: 20px;
+  color: var(--text-muted);
+  background: #fbfcfe;
+  font-size: 13px;
   text-align: center;
 }
 
 .tableau-hint {
-  margin: 8px 0 0;
+  margin-top: 8px;
+  margin-bottom: 0;
   color: var(--text-muted);
   font-size: 12px;
 }
 
-/* ① 시군구 지도·⑥ 격자 지도 (실제 행정동 경계) */
-
-.risk-map {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.district-map,
-.grid-map {
-  display: block;
-}
-
-.district-shape {
-  stroke: #fff;
-  stroke-width: 1.2;
-  cursor: pointer;
-}
-
-.district-shape:hover,
-.district-shape:focus-visible {
-  outline: none;
-  stroke: var(--navy);
-  stroke-width: 2.5;
-}
-
-.district-label {
-  font-family: 'Noto Sans KR:Medium', sans-serif;
-  font-size: 10.5px;
-  pointer-events: none;
-}
-
-.grid-cell {
-  stroke: rgb(255 255 255 / 70%);
-  stroke-width: 0.6;
-}
-
-.map-attribution {
-  margin: 4px 0 0;
-  color: #8a94a5;
-  font-size: 10.5px;
-}
-
-.legend-note {
-  margin: 4px 0 0;
-  color: var(--text-muted);
-  font-size: 11px;
-}
-
-.risk-legend {
-  display: grid;
-  gap: 6px;
-  min-width: 140px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 10px 12px;
-  background: #fff;
-  font-size: 12.5px;
-}
-
-.risk-legend strong {
-  font-family: 'Noto Sans KR:Medium', sans-serif;
-  font-weight: 400;
-}
-
-.risk-legend-row {
-  display: grid;
-  grid-template-columns: 12px 1fr auto;
-  align-items: center;
-  gap: 6px;
-}
-
-.risk-legend-row i,
-.stage-legend i,
-.quintile-legend i {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-}
-
-.risk-legend-row span {
-  white-space: nowrap;
-}
-
-.risk-legend-row em {
-  color: var(--text-muted);
-  font-style: normal;
-  white-space: nowrap;
-}
-
-/* ② 분포 변화 */
-
-.stage-distribution {
-  display: flex;
-  gap: 12px;
-}
-
-.stage-rows {
-  display: grid;
-  flex: 1;
-  gap: 6px;
-}
-
-.stage-row {
-  display: grid;
-  grid-template-columns: 34px 1fr;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-}
-
-.stage-month {
-  color: var(--text-muted);
-  text-align: right;
-}
-
-.stage-bar {
-  display: flex;
-  height: 22px;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.stage-bar span {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-  font-size: 11.5px;
-}
-
-.stage-legend,
-.quintile-legend {
-  display: grid;
-  align-content: start;
-  gap: 4px;
-  font-size: 11.5px;
-  color: var(--text-muted);
-}
-
-.stage-legend span,
-.quintile-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.quintile-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  margin-top: 4px;
-}
-
-/* ③~⑤ 그래프는 패널 폭에 맞춰 줄어든다 */
+/* 보고서 그래프는 패널 폭에 맞춰 줄어든다 */
 .chart-svg {
   display: block;
   width: 100%;
@@ -327,6 +279,7 @@
 .risk-dong-left {
   display: grid;
   gap: 14px;
+  min-width: 0;
 }
 
 .dong-summary {

@@ -84,7 +84,7 @@
 | 프론트엔드 | React · Vite · TypeScript · Tailwind CSS | 19.3.1 · 8.3.5 · 5.9.3 · 4.3.3 (Node 24) |
 | 백엔드 | Spring Boot · Java · Gradle | 4.1.2 · 21 · 9.8.2 |
 | AI Agent 서버 | FastAPI · LangChain · LangGraph | AI 파트 초기 설정 때 확정 |
-| 데이터 분석 | Python · Spark (PySpark) · Kafka | 3.12 · 3.5.9 (Java 17) · 3.9.2 (KRaft) |
+| 데이터 분석 | Python · Spark (PySpark) · Kafka · Airflow | 3.12 · 3.5.9 (Java 17) · 3.9.2 (KRaft) · 2.10.5 |
 | 원본 저장소 | MinIO (S3 호환) | 2025.7.23 (`bitnamilegacy/minio`) |
 | DB | PostgreSQL · Flyway | 17 · 13.11.1 |
 | 시각화 | Tableau Public | - |
@@ -164,9 +164,10 @@ DB 계정, 메일 확인, 문제 해결은 [infra/README.md](infra/README.md)를
 | 협업 규칙 (브랜치 · 커밋 · MR · 리뷰 · Jira · DB · 비밀값) | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 로컬 개발 환경 (DB · 메일) | [infra/README.md](infra/README.md) |
 | DB 스키마 · 마이그레이션 규칙 | [db/README.md](db/README.md) |
+| API 계약 (OpenAPI 2.3.0) · AI 에이전트 패널 동작 | [docs/api/openapi.json](docs/api/openapi.json), [docs/api/ai-agent-panel.md](docs/api/ai-agent-panel.md) |
 | 결정 기록: 로그인 방식 · 에이전트 흐름 전달 | [docs/decisions/login-sse.md](docs/decisions/login-sse.md) |
 | GitLab 저장소 설정 | [docs/gitlab-setup.md](docs/gitlab-setup.md) |
-| 테이블 정의서, ERD, API 명세 | [docs/](docs/README.md) (작성 예정) |
+| 문서 목록 (테이블 정의서 · ERD 위치 포함) | [docs/README.md](docs/README.md) |
 
 ## 협업 규칙
 

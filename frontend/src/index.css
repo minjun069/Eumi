@@ -1,19 +1,7 @@
 @import 'tailwindcss';
 
-/* 영역별 스타일 */
+/* 영역별 스타일. 페이지를 프로토타입에서 옮겨 올 때 그 페이지의 CSS(styles/*.css)도 함께 옮기고 여기에 추가한다 */
 @import './styles/base.css';
 @import './styles/layout.css';
 @import './styles/common.css';
 @import './styles/placeholder.css';
-@import './styles/flow.css';
-@import './styles/auth.css';
-@import './styles/signup.css';
-@import './styles/list.css';
-@import './styles/detail.css';
-@import './styles/form.css';
-@import './styles/resource.css';
-@import './styles/case.css';
-@import './styles/risk.css';
-@import './styles/my.css';
-@import './styles/agent.css';
-@import './styles/devtools.css';

@@ -60,15 +60,15 @@ services:
       FLYWAY_URL: jdbc:postgresql://postgres:5432/eumi
       FLYWAY_USER: eumi_owner
       FLYWAY_PASSWORD: ${EUMI_OWNER_PASSWORD:?.env.config에 EUMI_OWNER_PASSWORD가 필요합니다}
-      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql,filesystem:/flyway/seed
       FLYWAY_CLEAN_DISABLED: "true"              # flyway clean(전체 삭제) 명령 차단
       FLYWAY_GROUP: "true"                       # 새 파일 여러 개를 한 트랜잭션으로: 하나라도 실패하면 전부 되돌림
       FLYWAY_VALIDATE_MIGRATION_NAMING: "true"   # 이름 규칙이 틀린 파일을 조용히 건너뛰지 않고 실패시킨다
       FLYWAY_CONNECT_RETRIES: "10"
     volumes:
       - ./db/migration:/flyway/sql:ro
-      # 시연 계정 seed를 운영에 넣기로 정하면: 아래 줄을 살리고 FLYWAY_LOCATIONS에 ,filesystem:/flyway/seed 추가
-      # - ./db/seed:/flyway/seed:ro
+      # 개발·시연용 seed (db/seed/R__*.sql, ON CONFLICT DO NOTHING). 로컬과 같은 파일을 운영에도 넣는다
+      - ./db/seed:/flyway/seed:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -85,6 +85,18 @@ services:
       DB_USERNAME: eumi_app
       DB_PASSWORD: ${EUMI_APP_PASSWORD:?.env.config에 EUMI_APP_PASSWORD가 필요합니다}
       UPLOAD_DIR: /data/uploads
+      # 메일: 지금은 같은 compose의 mailpit으로 보낸다 (밖으로 나가지 않음).
+      #   실제 SMTP를 정하면 아래 4줄을 바꾸고, 계정(SMTP_USERNAME · SMTP_PASSWORD)은 .env.config로 넘긴다
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_AUTH: "false"
+      SMTP_STARTTLS_ENABLED: "false"
+      EUMI_MAIL_FROM: no-reply@k15b201.p.ssafy.io
+      # 인증 코드 · 가입 증명 해시 키 (비밀값. 서버에서 한 번 만들고 바꾸지 않는다)
+      EUMI_AUTH_HASH_KEY: ${EUMI_AUTH_HASH_KEY:?.env.config에 EUMI_AUTH_HASH_KEY가 필요합니다}
+      # AI 실행 방식: fake(가짜 AI가 진행·완료 행을 씀) / http(ai 서비스 호출). 비밀값이 아니라 여기 둔다.
+      #   application-prod.yml이 기본값 없이 읽으므로 빠지면 backend가 뜨지 않는다. ai 서비스를 추가하는 MR에서 http로 바꾼다
+      EUMI_AI_MODE: fake
       # AI_BASE_URL: http://ai:8000            (ai 서비스를 추가할 때)
       # PIPELINE_BASE_URL: http://pipeline:8100 (pipeline 서비스를 추가할 때)
     volumes:

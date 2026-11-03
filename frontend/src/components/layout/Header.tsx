@@ -2,8 +2,8 @@ import { useSession } from "@/session/sessionStore"
 import { agentStore, useAgentState } from "@/stores/agentStore"
 
 /**
- * 상단 헤더: 가운데 로고, 우측 AI Agent 아이콘 (0.2.1 누르면 AI Agent 패널을 열고 닫는다).
- * 임시 비밀번호로 로그인해 비밀번호를 바꿔야 하면 아이콘을 막는다 (M3-A)
+ * 상단 헤더: 가운데 로고, 우측 AI Agent 아이콘 (누르면 AI Agent 패널을 열고 닫는다, FR-071).
+ * 임시 비밀번호로 로그인해 비밀번호를 바꿔야 하면 아이콘을 막는다 (FR-003)
  */
 export function Header() {
   const { open } = useAgentState()

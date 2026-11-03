@@ -38,10 +38,9 @@
   --danger: #d64545;
   --danger-hover: #bb3434;
 
-  /* 1440×1024 화면 + 개발용 영역 */
+  /* 1440×1024 화면 (개발용 영역은 프로토타입에만 있다) */
   --frame-width: 1440px;
   --frame-height: 1024px;
-  --dev-panel-width: 460px;
 
   color: var(--text);
   background: #e9edf3;
@@ -53,7 +52,7 @@ html,
 body,
 #root {
   width: 100%;
-  min-width: calc(var(--frame-width) + var(--dev-panel-width));
+  min-width: var(--frame-width);
   min-height: var(--frame-height);
   margin: 0;
 }
