@@ -90,6 +90,7 @@ class AuthIntegrationTests {
         assertThat(user.path("jurisdictionSidoCode").asText()).isEqualTo("11");
         assertThat(user.path("mustChangePassword").asBoolean()).isFalse();
         assertThat(user.path("title").isNull()).isTrue();
+        assertCsrfCookieExpired(login);
         assertThat(login.headers().firstValue("Cache-Control").orElseThrow()).isEqualTo("no-store");
         assertThat(body.path("meta").path("requestId").asText())
                 .isEqualTo(login.headers().firstValue("X-Request-Id").orElseThrow());
@@ -104,6 +105,11 @@ class AuthIntegrationTests {
                 + "ON s.primary_id = a.session_primary_id WHERE s.session_id = ?", Integer.class, session)).isPositive();
         String attributes = sessionCookieAttributes(login);
         assertThat(attributes).contains("Path=/api", "HttpOnly", "SameSite=Lax").doesNotContain("Domain=", "Secure");
+
+        var initialMe = get("/auth/me");
+        assertThat(initialMe.statusCode()).isEqualTo(200);
+        assertThat(json(initialMe).path("data").has("title")).isTrue();
+        assertThat(json(initialMe).path("data").path("title").isNull()).isTrue();
 
         jdbc.update("UPDATE member SET name = '변경한 이름', title = '변경한 직함' WHERE member_id = ?", memberId);
         var me = get("/auth/me");
@@ -121,6 +127,7 @@ class AuthIntegrationTests {
         assertThat(logout.statusCode()).isEqualTo(204);
         assertThat(logout.body()).isEmpty();
         assertThat(sessionCookieAttributes(logout)).contains("Max-Age=0");
+        assertCsrfCookieExpired(logout);
         assertThat(sessions.findById(session) == null).isTrue();
         assertThat(get("/auth/me").statusCode()).isEqualTo(401);
         assertThat(post("/auth/logout", null).statusCode()).isEqualTo(204);
@@ -155,6 +162,7 @@ class AuthIntegrationTests {
             assertThat(result.statusCode()).isEqualTo(401);
             var error = json(result).path("error");
             assertThat(error.path("code").asText()).isEqualTo("INVALID_CREDENTIALS");
+            assertThat(error.path("message").asText()).isEqualTo("이메일 또는 비밀번호가 일치하지 않습니다.");
             errors.add(error.toString());
             assertThat(get("/auth/me").statusCode()).isEqualTo(401);
         }
@@ -179,6 +187,39 @@ class AuthIntegrationTests {
     }
 
     @Test
+    void restrictedSessionRequiresLogoutBeforeLoggingInAsAnotherMember() throws Exception {
+        String otherEmail = "switch-" + email;
+        String otherPassword = UUID.randomUUID().toString();
+        long otherMemberId = jdbc.queryForObject("""
+                INSERT INTO member(org_id, email_normalized, name, password_hash)
+                VALUES (?, ?, '계정 전환 검사용', ?) RETURNING member_id
+                """, Long.class, orgId, otherEmail, passwords.encode(otherPassword));
+        try {
+            jdbc.update("UPDATE member SET temp_password_expires_at = now() + interval '1 hour' WHERE member_id = ?", memberId);
+            assertThat(login(email, password).statusCode()).isEqualTo(200);
+
+            var blocked = login(otherEmail, otherPassword);
+            assertThat(blocked.statusCode()).isEqualTo(403);
+            assertThat(json(blocked).path("error").path("code").asText()).isEqualTo("PASSWORD_CHANGE_REQUIRED");
+            var me = get("/auth/me");
+            assertThat(me.statusCode()).isEqualTo(200);
+            assertThat(json(me).path("data").path("memberId").asLong()).isEqualTo(memberId);
+            assertThat(sessions.findByPrincipalName(Long.toString(otherMemberId)).isEmpty()).isTrue();
+
+            assertThat(post("/auth/logout", null).statusCode()).isEqualTo(204);
+            assertThat(login(otherEmail, otherPassword).statusCode()).isEqualTo(200);
+            me = get("/auth/me");
+            assertThat(me.statusCode()).isEqualTo(200);
+            assertThat(json(me).path("data").path("memberId").asLong()).isEqualTo(otherMemberId);
+            assertThat(json(me).path("data").path("mustChangePassword").asBoolean()).isFalse();
+            assertThat(post("/auth/logout", null).statusCode()).isEqualTo(204);
+        } finally {
+            sessions.findByPrincipalName(Long.toString(otherMemberId)).keySet().forEach(sessions::deleteById);
+            jdbc.update("DELETE FROM member WHERE member_id = ? AND email_normalized = ?", otherMemberId, otherEmail);
+        }
+    }
+
+    @Test
     void meRejectsAndInvalidatesSessionAfterMemberIsWithdrawn() throws Exception {
         assertThat(login(email, password).statusCode()).isEqualTo(200);
         String session = sessionId();
@@ -186,6 +227,25 @@ class AuthIntegrationTests {
         jdbc.update("UPDATE member SET withdrawn_at = now() WHERE member_id = ?", memberId);
         assertThat(get("/auth/me").statusCode()).isEqualTo(401);
         assertThat(sessions.findById(session) == null).isTrue();
+    }
+
+    @Test
+    void meInvalidatesRestrictedSessionWhenTemporaryPasswordExpires() throws Exception {
+        jdbc.update("UPDATE member SET temp_password_expires_at = now() + interval '1 hour' WHERE member_id = ?", memberId);
+        var login = login(email, password);
+        assertThat(login.statusCode()).isEqualTo(200);
+        assertThat(json(login).path("data").path("user").path("mustChangePassword").asBoolean()).isTrue();
+        String session = sessionId();
+        createdSessionIds.add(session);
+        jdbc.update("UPDATE member SET temp_password_expires_at = now() - interval '1 second' WHERE member_id = ?", memberId);
+
+        var me = get("/auth/me");
+        assertThat(me.statusCode()).isEqualTo(401);
+        assertThat(json(me).path("error").path("code").asText()).isEqualTo("UNAUTHENTICATED");
+        assertThat(sessions.findById(session) == null).isTrue();
+        assertThat(sessionCookieAttributes(me)).contains("Max-Age=0");
+        assertCsrfCookieExpired(me);
+        assertThat(get("/auth/me").statusCode()).isEqualTo(401);
     }
 
     @Test
@@ -233,5 +293,15 @@ class AuthIntegrationTests {
         String cookie = response.headers().allValues("Set-Cookie").stream()
                 .filter(value -> value.startsWith("SESSION=")).findFirst().orElseThrow();
         return cookie.substring(cookie.indexOf(';') + 1);
+    }
+
+    private void assertCsrfCookieExpired(HttpResponse<String> response) {
+        // GET에서 먼저 토큰이 발급된 뒤 세션 무효화로 삭제될 수도 있어 마지막 헤더를 검사한다.
+        var attributes = response.headers().allValues("Set-Cookie").stream()
+                .filter(value -> value.startsWith("XSRF-TOKEN="))
+                .map(value -> java.net.HttpCookie.parse(value).getFirst()).toList().getLast();
+        assertThat(attributes.getMaxAge()).isZero();
+        assertThat(attributes.getPath()).isEqualTo("/");
+        assertThat(attributes.getValue().isEmpty()).isTrue();
     }
 }
