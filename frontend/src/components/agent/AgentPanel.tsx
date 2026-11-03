@@ -1,47 +1,41 @@
 import "@/styles/agent.css"
 import { useEffect, useRef, useState } from "react"
-import { useLocation, useNavigate } from "react-router"
-import type { AgentBlock, RecommendationCard } from "@/api/agentApi"
-import { fallbackAgentContext } from "@/components/agent/agentFallback"
-import { exampleQuestions } from "@/components/agent/agentExamples"
+import type { AgentMessage } from "@/api/agentApi"
+import { EXAMPLE_QUESTIONS } from "@/components/agent/agentExamples"
 import { Emphasized } from "@/components/common/Emphasized"
-import { PATHS } from "@/routes/paths"
-import { useCurrentAgentContext, type AgentContext } from "@/stores/agentContextStore"
-import { agentStore, useAgentState, type AgentStep, type AssistantMessage } from "@/stores/agentStore"
+import { AGENT_MESSAGES, agentStore, isEndRow, useAgentState } from "@/stores/agentStore"
 
 /**
  * AI Agent 패널 (FR-071~079): 헤더의 AI 아이콘으로 열고, 본문 오른쪽 위를 덮는다.
- * - 지금 보는 화면을 참고해 답한다. 단계가 실시간으로 나타나고, 답이 끝나면 단계를 접는다
- * - 연결이 끊기면 같은 실행에 다시 잇는다. 실패하면 '다시 시도'로만 새 실행을 만든다
- * - 사례자 상세의 'AI 맞춤 자원 추천'은 정해진 질문으로 같은 API를 부른다 (추천 카드)
+ * - 질문 행 → 진행 행(단계 이름, 상세는 펼쳐 보기) → 끝 행(완료 답변 / 실패 + 다시 질문 / 중단)
+ * - 실행 중에는 보내기를 막고 중단 버튼을 보인다. 화면 문맥은 AI에 보내지 않는다 (ai-agent-panel.md 1장)
+ * - artifacts(표·그래프)는 형식이 정해질 때까지 그리지 않는다
  */
 export function AgentPanel() {
-  const { open, messages, busy, loadedFrom } = useAgentState()
-  const location = useLocation()
-  const registered = useCurrentAgentContext()
-  const context = registered ?? fallbackAgentContext(location.pathname)
+  const { open, messages, running, sending, cancelling, notice, loadedFrom } = useAgentState()
+  const busy = running || sending
   const [draft, setDraft] = useState("")
   const scrollRef = useRef<HTMLDivElement>(null)
+  const turns = toTurns(messages)
 
-  // 마지막 질문이 맨 위에 오도록 스크롤한다 (답이 길어도 첫 줄·첫 카드부터 읽게).
+  // 마지막 질문이 맨 위에 오도록 스크롤한다 (답이 길어도 첫 줄부터 읽게).
   // 답이 아래에 붙어 높이가 늘 때마다 다시 맞춘다
   useEffect(() => {
     const box = scrollRef.current
     if (!box) return
     // 이전 대화를 막 불러왔으면 맨 위의 안내부터 보여 준다
-    const last = messages[messages.length - 1]
-    if (loadedFrom && last?.role === "assistant" && last.status === "done") {
+    if (loadedFrom && !running) {
       box.scrollTo({ top: 0 })
       return
     }
     const question = box.querySelector<HTMLElement>(".agent-question:last-of-type")
     box.scrollTo({ top: question ? question.offsetTop - box.offsetTop - 14 : box.scrollHeight })
-  }, [messages, open, loadedFrom])
+  }, [messages, open, loadedFrom, running])
 
-  const send = (question: string) => {
+  const send = async (question: string) => {
     if (!question.trim() || busy) return
-    agentStore.ask(question, context)
-    setDraft("")
+    // 질문이 저장되지 않았으면(409·통신 오류 등) 입력한 내용을 그대로 둔다
+    if (await agentStore.ask(question)) setDraft("")
   }
 
   return (
@@ -53,7 +47,7 @@ export function AgentPanel() {
           type="button"
           className="btn btn-outline btn-small agent-new"
           disabled={busy || messages.length === 0}
-          title="완료된 대화는 저장되어 있어 마이페이지 'AI 대화 기록'에서 다시 볼 수 있습니다"
+          title="대화는 저장되어 있어 마이페이지 'AI 대화 기록'에서 다시 볼 수 있습니다"
           onClick={() => agentStore.newConversation()}
         >
           새 대화
@@ -62,9 +56,6 @@ export function AgentPanel() {
           ×
         </button>
       </header>
-      <p className="agent-context">
-        <span>지금 보는 화면</span> {context.label}
-      </p>
 
       <div className="agent-messages" ref={scrollRef}>
         {loadedFrom && (
@@ -74,30 +65,28 @@ export function AgentPanel() {
             이어서 질문하면 같은 대화에 저장돼요.
           </p>
         )}
-        {messages.length === 0 && (
+        {turns.length === 0 && (
           <div className="agent-greeting">
-            <p>무엇을 도와드릴까요? 지금 보는 화면의 내용을 참고해 답해요.</p>
+            <p>무엇을 도와드릴까요?</p>
             <p className="agent-note">
-              사례자 정보는 이름·관리번호·생년월일을 빼고 AI에 전달해요. 대화는 이름을 가려 저장하고, 마이페이지 'AI 대화
-              기록'에서 다시 볼 수 있어요.
+              질문에 들어간 개인정보는 가려서 저장하고, 대화는 마이페이지 'AI 대화 기록'에서 다시 볼 수 있어요.
             </p>
           </div>
         )}
-        {messages.map((message) =>
-          message.role === "user" ? (
-            <p key={message.id} className="agent-question">
-              {message.text}
-            </p>
-          ) : (
-            <AssistantAnswer key={message.id} message={message} />
-          ),
-        )}
+        {turns.map((turn) => (
+          <Turn key={turn.question.messageId} turn={turn} busy={busy} />
+        ))}
       </div>
 
       <footer className="agent-input">
+        {notice && (
+          <p className="agent-notice" role="status">
+            {notice}
+          </p>
+        )}
         <div className="agent-examples" aria-label="예시 질문">
-          {exampleQuestions(context.screen).map((question) => (
-            <button key={question} type="button" className="agent-chip" disabled={busy} onClick={() => send(question)}>
+          {EXAMPLE_QUESTIONS.map((question) => (
+            <button key={question} type="button" className="agent-chip" disabled={busy} onClick={() => void send(question)}>
               {question}
             </button>
           ))}
@@ -113,151 +102,111 @@ export function AgentPanel() {
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
                 event.preventDefault()
-                send(draft)
+                void send(draft)
               }
             }}
           />
-          <button type="button" className="btn btn-primary" disabled={busy || !draft.trim()} onClick={() => send(draft)}>
-            보내기
-          </button>
+          {running ? (
+            <button type="button" className="btn btn-outline" disabled={cancelling} onClick={() => void agentStore.cancel()}>
+              {cancelling ? "중단하는 중…" : "중단"}
+            </button>
+          ) : (
+            <button type="button" className="btn btn-primary" disabled={sending || !draft.trim()} onClick={() => void send(draft)}>
+              보내기
+            </button>
+          )}
         </div>
       </footer>
     </aside>
   )
 }
 
-function AssistantAnswer({ message }: { message: AssistantMessage }) {
+/** 질문 하나와 그 질문을 가리키는 AI 행들 */
+type AgentTurn = { question: AgentMessage; steps: AgentMessage[]; end: AgentMessage | null }
+
+function toTurns(messages: AgentMessage[]): AgentTurn[] {
+  const turns: AgentTurn[] = []
+  const byQuestion = new Map<number, AgentTurn>()
+  for (const message of messages) {
+    if (message.status === "질문") {
+      const turn: AgentTurn = { question: message, steps: [], end: null }
+      turns.push(turn)
+      byQuestion.set(message.messageId, turn)
+      continue
+    }
+    // 질문 행을 받지 못한 AI 행은 붙일 곳이 없어 건너뛴다
+    const turn = message.questionId === null ? undefined : byQuestion.get(message.questionId)
+    if (!turn) continue
+    if (isEndRow(message)) turn.end = message
+    else turn.steps.push(message)
+  }
+  return turns
+}
+
+function Turn({ turn, busy }: { turn: AgentTurn; busy: boolean }) {
+  const { question, steps, end } = turn
+  const status = end === null ? "running" : end.status === "완료" ? "done" : end.status === "실패" ? "failed" : "cancelled"
   return (
-    <div className={`agent-answer is-${message.status}`}>
-      {message.status === "streaming" ? (
-        <StepList steps={message.steps} />
-      ) : (
-        message.steps.length > 0 && (
-          <details className="agent-steps-done">
-            <summary>진행한 단계 {message.steps.filter((step) => step.status === "완료").length}개</summary>
-            <StepList steps={message.steps} />
-          </details>
-        )
-      )}
-      {message.status === "streaming" && message.blocks.length === 0 && <p className="agent-working">답변을 만드는 중…</p>}
-      {message.status === "streaming" && message.reconnecting && (
-        <p className="agent-reconnecting" role="status">
-          연결이 끊겨 다시 잇는 중이에요…
-        </p>
-      )}
-      {message.blocks.map((block, index) => (
-        <AnswerBlock key={index} block={block} context={message.context} />
-      ))}
-      {message.status === "failed" && (
-        <div className="agent-failed">
-          <p>{message.error}</p>
-          <button type="button" className="btn btn-outline btn-small" onClick={() => agentStore.retry(message.id)}>
-            다시 시도
-          </button>
-        </div>
-      )}
-    </div>
+    <>
+      <p className="agent-question">{question.content}</p>
+      <div className={`agent-answer is-${status}`}>
+        {end === null ? (
+          <StepList steps={steps} end={end} />
+        ) : (
+          steps.length > 0 && (
+            <details className="agent-steps-done">
+              <summary>진행한 단계 {steps.length}개</summary>
+              <StepList steps={steps} end={end} />
+            </details>
+          )
+        )}
+        {end === null && <p className="agent-working">답변을 만드는 중…</p>}
+        {/* TODO(artifacts 형식 미정, AI·FE 합의): end.artifacts는 형식이 정해지면 표·그래프로 그린다 */}
+        {end?.status === "완료" && (
+          <p className="agent-text">
+            <Emphasized text={end.content ?? ""} />
+          </p>
+        )}
+        {end?.status === "실패" && (
+          <div className="agent-failed">
+            <p>{AGENT_MESSAGES.failed}</p>
+            <button
+              type="button"
+              className="btn btn-outline btn-small"
+              disabled={busy}
+              onClick={() => agentStore.retry(question.messageId)}
+            >
+              다시 질문
+            </button>
+          </div>
+        )}
+        {end?.status === "취소" && <p className="agent-cancelled">{AGENT_MESSAGES.cancelled}</p>}
+      </div>
+    </>
   )
 }
 
-function StepList({ steps }: { steps: AgentStep[] }) {
+/** 진행 행: 단계 하나 = 행 하나. 다음 단계나 끝 행이 들어오면 앞 단계가 끝난 것이다 */
+function StepList({ steps, end }: { steps: AgentMessage[]; end: AgentMessage | null }) {
   return (
     <ol className="agent-steps">
-      {steps.map((step) => (
-        <li key={step.stepId} className={step.status === "완료" ? "is-done" : "is-running"}>
-          <i aria-hidden="true">{step.status === "완료" ? "✓" : "…"}</i>
-          <span>
-            {step.stepName}
-            {step.status === "완료" && step.detail && <em> — {step.detail}</em>}
-          </span>
-        </li>
-      ))}
-    </ol>
-  )
-}
-
-function AnswerBlock({ block, context }: { block: AgentBlock; context: AgentContext }) {
-  switch (block.kind) {
-    case "text":
-      return (
-        <p className="agent-text">
-          <Emphasized text={block.text} />
-        </p>
-      )
-    case "list":
-      return (
-        <ul className="agent-list">
-          {block.items.map((item, index) => (
-            <li key={index}>
-              <Emphasized text={item} />
-            </li>
-          ))}
-        </ul>
-      )
-    case "resourceCards":
-      return (
-        <div className="rec-cards">
-          {block.cards.map((card) => (
-            <ResourceCard key={card.resourceId} card={card} context={context} />
-          ))}
-        </div>
-      )
-    default:
-      // 아직 화면이 모르는 답변 형식(표·그래프 등 협의 중)은 건너뛴다
-      return null
-  }
-}
-
-const CHECK_ICONS = { met: "✓", unmet: "!", unknown: "?" } as const
-
-function ResourceCard({ card, context }: { card: RecommendationCard; context: AgentContext }) {
-  const navigate = useNavigate()
-  return (
-    <article className="rec-card" aria-label={`${card.rank}순위 ${card.resourceName}`}>
-      <header className="rec-head">
-        <span className="rec-rank">{card.rank}순위</span>
-        <strong>{card.resourceName}</strong>
-      </header>
-      <p className="rec-meta">
-        {card.operatingOrgName} ·{" "}
-        <span className={`status-badge ${card.status === "종료" ? "is-ended" : "is-active"}`}>{card.status}</span>
-      </p>
-      <div className="rec-tags">
-        {card.tags.map((tag) => (
-          <span key={tag}>{tag}</span>
-        ))}
-      </div>
-      <h4>추천 이유</h4>
-      <p>{card.reason}</p>
-      <h4>조건 확인</h4>
-      <ul className="rec-checks">
-        {card.checks.map((check) => (
-          <li key={check.label} className={`is-${check.state}`}>
-            <i aria-hidden="true">{CHECK_ICONS[check.state]}</i>
-            {check.label} — {check.note}
+      {steps.map((step, index) => {
+        const last = index === steps.length - 1
+        const state = !last || end?.status === "완료" ? "done" : end === null ? "running" : "stopped"
+        return (
+          <li key={step.messageId} className={`is-${state}`}>
+            <i aria-hidden="true">{state === "done" ? "✓" : state === "running" ? "…" : "–"}</i>
+            {step.details ? (
+              <details className="agent-step-details">
+                <summary>{step.content}</summary>
+                <p>{step.details}</p>
+              </details>
+            ) : (
+              <span>{step.content}</span>
+            )}
           </li>
-        ))}
-      </ul>
-      <h4>이용 전 확인</h4>
-      <ul className="rec-before">
-        {card.beforeUse.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-      <h4>근거</h4>
-      <p className="rec-evidence">{card.evidence}</p>
-      <button
-        type="button"
-        className="btn btn-primary btn-small"
-        onClick={() =>
-          // 저장된 추천은 당시 스냅샷이라 자원 상세에서 현재 상태를 다시 확인한다 (FR-079)
-          navigate(PATHS.resourceDetail(card.resourceId), {
-            state: context.caseRef ? { recommendedFor: context.caseRef } : undefined,
-          })
-        }
-      >
-        자원 상세 보기
-      </button>
-    </article>
+        )
+      })}
+    </ol>
   )
 }

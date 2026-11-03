@@ -545,7 +545,7 @@ export interface paths {
         };
         /**
          * 내 대화 목록 조회
-         * @description 본인 보관 중 대화만 조회한다. delete_scheduled_at > current_date. 마지막 답변 완료 시각 내림차순·conversation_id 동률 정렬을 적용한다.
+         * @description 본인 보관 중 대화만 조회한다(v_conversation_summary, delete_scheduled_at > current_date). 실행 종료 일시 내림차순·conversation_id 동률 정렬. 질문 수는 실패·취소된 질문도 센다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -567,7 +567,7 @@ export interface paths {
         };
         /**
          * 내 대화 내용 조회
-         * @description 본인 소유·유효 보관 기간을 확인한다. 질문·답변·진행 단계 마지막 상태·완료 일시를 복원한다. recommendation은 저장 스냅샷이며 클릭 시 자원 상세를 다시 조회한다.
+         * @description 본인 소유·유효 보관 기간을 확인한다. 대화의 모든 행(질문·진행·완료·실패·취소)을 messageId 오름차순으로 돌려준다. 행 형식은 API-03-S1과 같다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -576,7 +576,7 @@ export interface paths {
         post?: never;
         /**
          * 내 대화 한 건 삭제
-         * @description 본인 대화 한 건을 물리 삭제하면 모든 turn이 CASCADE 삭제된다. 실행 중 같은 대화를 무효화하여 늦은 AI 응답이 대화를 재생성하지 않게 한다.
+         * @description 본인 대화 한 건을 물리 삭제하면 메시지가 CASCADE로 함께 삭제된다. 실행 중이면 먼저 AI에 취소를 요청한다. 삭제 뒤 AI가 늦게 쓰는 행은 FK로 거부된다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -740,7 +740,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/agent/runs": {
+    "/agent/questions": {
         parameters: {
             query?: never;
             header?: never;
@@ -750,19 +750,19 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * AI 질문 실행 생성
-         * @description 신규 설계 계약. Spring이 UUID runId·conversationId를 발급한다. 기존 대화 소유권·화면 대상 접근 권한을 확인하고 필요한 정보만 마스킹해 FastAPI에 전달한다. 실행 상태·질문 제한은 서버 한 대의 메모리에서 관리한다. 동시 질문은 대화당 1개, 중복 제출은 409다. 신규 conversationId는 완료 커밋 전 예약값이므로 FE는 done 또는 completed 조회 후에만 다음 질문의 대화 ID로 확정한다. 첫 질문 실패·만료 후 새 실행은 conversationId=null로 요청한다.
+         * AI 질문 등록
+         * @description 질문 행을 저장하고 AI에 실행을 요청한다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 첫 질문(conversationId=null)이면 대화 UUID를 만들고 ai_conversation과 질문 행을 한 트랜잭션으로 저장한다. 이어서 질문이면 대화 행을 잠그고(FOR UPDATE) 소유자를 확인하며, 끝 행이 없는 질문이 있으면 409다. 남의 대화·보관 기간이 지난 대화는 404다. 커밋 뒤 내부 AI API(POST /internal/agent/runs {conversationId, questionId})를 부르고, AI는 접수만 바로 돌려준 뒤 ai_message에 진행·완료 행을 직접 저장한다. 호출이 바로 실패하면 BE가 실패 행을 쓴다. 화면은 202를 받으면 API-03-S1을 after=questionId로 1초마다 조회한다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
-        post: operations["agentApi_createRun"];
+        post: operations["agentApi_askQuestion"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/agent/runs/{runId}/events": {
+    "/agent/conversations/{conversationId}/messages": {
         parameters: {
             query?: never;
             header?: never;
@@ -770,12 +770,12 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * AI 실행 이벤트 스트림
-         * @description 신규 설계 계약. EventSource 쿠키 인증. 실행 소유자와 로그인 상태를 확인한다. id 단조 증가, event는 step→answer→done 또는 failed다. Last-Event-ID 이후 이벤트만 재전송한다. heartbeat 15초·실행 제한 120초·완료 보관 10분은 이번 명세 설계값이다. 재시작·실행 소실은 410. done은 완료 turn DB 커밋 뒤 전송한다.
+         * AI 대화 메시지 조회
+         * @description after보다 큰 messageId의 행을 오름차순으로 돌려준다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 실행 중에는 1초마다 마지막으로 받은 messageId로, 대화를 열거나 새로고침하면 after=0으로 부른다. 끝 행(완료·실패·취소)을 받으면 화면은 조회를 멈춘다. 소유자만 조회하며 남의 대화·보관 기간이 지난 대화는 404다. 마지막 질문에 끝 행이 없고 새 행이 정해진 시간 동안 없으면 BE가 AI 실행 상태를 확인해 같은 질문으로 한 번 다시 요청하고, 질문 시각 + AI 실행 제한 + 여유 시간이 지나면 실패 행을 쓴다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
-        get: operations["agentApi_streamRun"];
+        get: operations["agentApi_getMessages"];
         put?: never;
         post?: never;
         delete?: never;
@@ -784,22 +784,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/agent/runs/{runId}": {
+    "/agent/conversations/{conversationId}/cancel": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
+        get?: never;
+        put?: never;
         /**
-         * AI 실행 상태 조회
-         * @description 신규 설계 계약. SSE 복구·폴링용 실행 조회다. 소유자만 조회한다. completed일 때 저장된 답변과 단계 상태를 반환한다. 실행 소실은 410이며 기존 대화 ID가 있으면 대화 이력에서 복원한다.
+         * AI 실행 중단
+         * @description 사용자 중단. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 소유자를 확인하고 끝 행이 없으면 내부 AI API(POST /internal/agent/runs/{conversationId}/cancel)를 부른다. AI가 실행을 멈추고 취소 행을 저장하며, 정해진 시간 안에 취소 행이 없거나 호출이 실패하면 BE가 취소 행을 쓴다. 이미 끝났으면 아무것도 하지 않고 204다. 취소 행은 API-03-S1로 받는다. 취소와 완료가 거의 동시에 일어나면 먼저 저장된 끝 행만 남는다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
-        get: operations["agentApi_getRun"];
-        put?: never;
-        post?: never;
+        post: operations["agentApi_cancelRun"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1886,71 +1886,6 @@ export interface components {
                 newManagerMemberId: number;
             }[];
         };
-        RecommendationCheck: {
-            /** @description 확인 항목 */
-            label: string;
-            /**
-             * @description 조건 확인 결과
-             * @enum {string}
-             */
-            state: "met" | "unmet" | "unknown";
-            /** @description 설명 */
-            note: string;
-        };
-        /** @description 저장 당시의 추천 스냅샷. 현재 이용 가능 여부는 resourceId로 자원 상세를 조회해 다시 확인한다 */
-        SavedRecommendationCard: {
-            /** @description 추천 순위 */
-            rank: number;
-            /**
-             * Format: int64
-             * @description 추천 당시 자원 ID
-             */
-            resourceId: number;
-            /** @description 추천 당시 자원명 */
-            resourceName: string;
-            /** @description 추천 당시 수행 기관 */
-            operatingOrgName: string;
-            /**
-             * @description 상태. 응답에서는 운영 종료일 경과를 반영
-             * @enum {string}
-             */
-            status: "진행 중" | "종료";
-            tags: string[];
-            /** @description 추천 이유 */
-            reason: string;
-            checks: components["schemas"]["RecommendationCheck"][];
-            beforeUse: string[];
-            /** @description 추천 근거 */
-            evidence: string;
-        };
-        SavedAgentTextBlock: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            kind: "text";
-            /** @description 저장된 답변. 허용한 강조 문법만 렌더링 */
-            text: string;
-        };
-        SavedAgentListBlock: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            kind: "list";
-            items: string[];
-        };
-        SavedAgentResourceCardsBlock: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            kind: "resourceCards";
-            /** @description 초기 펼침 여부 */
-            expanded: boolean;
-            cards: components["schemas"]["SavedRecommendationCard"][];
-        };
-        SavedAgentBlock: components["schemas"]["SavedAgentTextBlock"] | components["schemas"]["SavedAgentListBlock"] | components["schemas"]["SavedAgentResourceCardsBlock"];
         ConversationListItem: {
             /**
              * Format: uuid
@@ -1960,17 +1895,17 @@ export interface components {
             conversationId: string;
             /** @description 식별정보를 가린 첫 질문. 목록 제목 */
             firstQuestion: string;
-            /** @description 완료되어 저장된 질문·답변 쌍 수 */
+            /** @description 질문 수 (실패·취소된 질문 포함) */
             questionCount: number;
             /**
              * Format: date-time
-             * @description 마지막으로 완료된 대화 시각
+             * @description 실행 종료 일시. 끝 행이 저장될 때 갱신 (끝 행 전에는 대화 생성 시각)
              * @example 2026-10-30T10:00:00+09:00
              */
             lastMessageAt: string;
             /**
              * Format: date
-             * @description 마지막 대화의 서울 날짜 + 달력 기준 3개월. 해당 월 말일로 보정
+             * @description 실행 종료일(서울) + 달력 기준 3개월. 해당 월 말일로 보정
              * @example 2026-10-30
              */
             deleteScheduledAt: string;
@@ -1987,30 +1922,6 @@ export interface components {
             /** @description 현재 페이지 목록 */
             items: components["schemas"]["ConversationListItem"][];
         };
-        SavedConversationTurn: {
-            /** @description 식별정보를 가린 저장 질문 */
-            question: string;
-            /** @description 완료된 답변 블록 */
-            blocks: components["schemas"]["SavedAgentBlock"][];
-            /**
-             * Format: date-time
-             * @description 저장된 질문 시각
-             * @example 2026-10-30T10:00:00+09:00
-             */
-            askedAt: string;
-            /**
-             * Format: int64
-             * @description 완료 turn ID
-             */
-            turnId: number;
-            /** @description V4 progress_steps의 단계별 마지막 상태 */
-            progressSteps: components["schemas"]["SavedProgressStep"][];
-            /**
-             * Format: date-time
-             * @description 답변 완료 시각
-             */
-            completedAt: string;
-        };
         ConversationDetail: {
             /**
              * Format: uuid
@@ -2022,7 +1933,7 @@ export interface components {
             firstQuestion: string;
             /**
              * Format: date-time
-             * @description 마지막으로 완료된 대화 시각
+             * @description 실행 종료 일시. 끝 행이 저장될 때 갱신
              * @example 2026-10-30T10:00:00+09:00
              */
             lastMessageAt: string;
@@ -2032,8 +1943,8 @@ export interface components {
              * @example 2026-10-30
              */
             deleteScheduledAt: string;
-            /** @description asked_at, turn_id 오름차순. 완료 답변과 저장된 단계별 마지막 상태를 복원한다. */
-            turns: components["schemas"]["SavedConversationTurn"][];
+            /** @description messageId 오름차순 전체. 질문·진행·완료·실패·취소 행을 모두 돌려준다 (API-03-S1과 같은 형식) */
+            messages: components["schemas"]["AgentMessage"][];
         };
         memberApi_getMenuProfile_Success: {
             /** @enum {boolean} */
@@ -2219,19 +2130,6 @@ export interface components {
         SessionLoginData: {
             user: components["schemas"]["LoginUser"];
         };
-        SavedProgressStep: {
-            /** @description 단계 ID */
-            stepId: string;
-            /** @description 단계명 */
-            stepName: string;
-            /**
-             * @description 단계 상태
-             * @enum {string}
-             */
-            status: "진행 중" | "완료";
-            /** @description 설명 */
-            detail: string | null;
-        };
         OngoingResourceTransferItem: {
             /**
              * Format: int64
@@ -2245,104 +2143,6 @@ export interface components {
              * @description 운영 종료일
              */
             periodEnd: string;
-        };
-        AgentScreen: {
-            /** @enum {string} */
-            screenType: "risk-district";
-            sigunguCode: string;
-            from: string;
-            to: string;
-            /** @enum {string} */
-            index: "background" | "behavior";
-        } | {
-            /** @enum {string} */
-            screenType: "risk-dong";
-            dongCode: string;
-            month: string;
-        } | {
-            /** @enum {string} */
-            screenType: "case-detail";
-            /**
-             * Format: int64
-             * @description ID
-             */
-            caseId: number;
-        } | {
-            /** @enum {string} */
-            screenType: "resource-detail";
-            /**
-             * Format: int64
-             * @description ID
-             */
-            resourceId: number;
-        } | {
-            /** @enum {string} */
-            screenType: "other";
-            path: string;
-        };
-        AgentRunRequest: {
-            /**
-             * Format: uuid
-             * @description 처음 질문이면 null
-             * @example c9814a56-22d4-45f9-a203-e8492ac44e73
-             */
-            conversationId: string | null;
-            /** @description 식별정보 마스킹 후 전달·저장. 서버 원문 로그 금지. */
-            question: string;
-            screen: components["schemas"]["AgentScreen"];
-        };
-        AgentRunCreated: {
-            /**
-             * Format: uuid
-             * @description 서버 메모리 실행 ID
-             * @example c9814a56-22d4-45f9-a203-e8492ac44e73
-             */
-            runId: string;
-            /**
-             * Format: uuid
-             * @description Spring 발급 대화 ID
-             * @example c9814a56-22d4-45f9-a203-e8492ac44e73
-             */
-            conversationId: string;
-            /** @description 동일 출처 /api/agent/runs/{runId}/events */
-            eventsUrl: string;
-            /** @description 동일 출처 /api/agent/runs/{runId} */
-            statusUrl: string;
-            /**
-             * Format: date-time
-             * @description 메모리 실행 만료 시각
-             */
-            expiresAt: string;
-        };
-        AgentRunState: {
-            /**
-             * Format: uuid
-             * @description 식별자
-             * @example c9814a56-22d4-45f9-a203-e8492ac44e73
-             */
-            runId: string;
-            /**
-             * Format: uuid
-             * @description 식별자
-             * @example c9814a56-22d4-45f9-a203-e8492ac44e73
-             */
-            conversationId: string;
-            /** @enum {string} */
-            status: "running" | "completed" | "failed";
-            progressSteps: components["schemas"]["SavedProgressStep"][];
-            blocks: components["schemas"]["SavedAgentBlock"][];
-            errorCode: string | null;
-            errorMessage: string | null;
-            /**
-             * Format: date-time
-             * @description 일시
-             */
-            askedAt: string;
-            /**
-             * Format: date-time
-             * @description 일시
-             */
-            completedAt: string | null;
         };
         /** @description 찾지 못한 필드는 null. 담당자·상태·참여자 수는 추출하지 않는다. */
         DocumentExtract: {
@@ -2401,22 +2201,86 @@ export interface components {
             /** @enum {string} */
             status: "UP";
         };
-        AgentRunCreated_Success: {
-            /** @enum {boolean} */
-            success: true;
-            data: components["schemas"]["AgentRunCreated"];
-            meta: components["schemas"]["ResponseMeta"];
-        };
-        AgentRunState_Success: {
-            /** @enum {boolean} */
-            success: true;
-            data: components["schemas"]["AgentRunState"];
-            meta: components["schemas"]["ResponseMeta"];
-        };
         DocumentExtractionResult_Success: {
             /** @enum {boolean} */
             success: true;
             data: components["schemas"]["DocumentExtractionResult"];
+            meta: components["schemas"]["ResponseMeta"];
+        };
+        /** @description 질문 등록. 첫 질문이면 conversationId는 null이고 서버가 대화를 만든다. */
+        AgentQuestionRequest: {
+            /**
+             * Format: uuid
+             * @description 이어서 질문할 대화 ID. 첫 질문이면 null
+             * @example c9814a56-22d4-45f9-a203-e8492ac44e73
+             */
+            conversationId: string | null;
+            /** @description 질문. 서버가 개인정보를 가린 값으로 저장하며 원문을 로그에 남기지 않는다 */
+            question: string;
+        };
+        /** @description 저장된 질문. 화면은 이 questionId 이후의 행을 조회한다. */
+        AgentQuestionCreated: {
+            /**
+             * Format: uuid
+             * @description 대화 ID = 실행 ID
+             * @example c9814a56-22d4-45f9-a203-e8492ac44e73
+             */
+            conversationId: string;
+            /**
+             * Format: int64
+             * @description 저장된 질문 행의 messageId
+             */
+            questionId: number;
+        };
+        /** @description ai_message 한 행. 질문 행 하나와, questionId로 그 질문을 가리키는 AI 행들(진행 … 끝 행)이 한 쌍이다. 끝 행은 완료·실패·취소 중 하나이며 질문마다 하나뿐이다. */
+        AgentMessage: {
+            /**
+             * Format: int64
+             * @description 행 식별자이자 순서. 다음 조회의 after 값
+             */
+            messageId: number;
+            /**
+             * Format: int64
+             * @description AI 행이 답하는 질문 행의 messageId. 질문 행은 null
+             */
+            questionId: number | null;
+            /**
+             * @description 작성 주체. 질문 행은 Member, 나머지는 AI
+             * @enum {string}
+             */
+            role: "Member" | "AI";
+            /**
+             * @description 질문(Member) / 진행·완료·실패·취소(AI). 완료·실패·취소가 끝 행
+             * @enum {string}
+             */
+            status: "질문" | "진행" | "완료" | "실패" | "취소";
+            /** @description 질문 행은 질문, 진행 행은 단계 이름, 완료 행은 최종 답변. 실패·취소 행은 null */
+            content: string | null;
+            /** @description 진행 행의 단계 상세 설명. 질문 행은 null */
+            details: string | null;
+            /** @description 시각화 결과(표·그래프) JSON. 있을 때만. 형식은 AI·FE가 합의한다 */
+            artifacts: unknown;
+            /**
+             * Format: date-time
+             * @description 저장 일시
+             * @example 2026-11-02T10:00:00+09:00
+             */
+            createdAt: string;
+        };
+        AgentMessageList: {
+            /** @description after보다 큰 messageId만, messageId 오름차순. 새 행이 없으면 빈 배열 */
+            messages: components["schemas"]["AgentMessage"][];
+        };
+        AgentQuestionCreated_Success: {
+            /** @enum {boolean} */
+            success: true;
+            data: components["schemas"]["AgentQuestionCreated"];
+            meta: components["schemas"]["ResponseMeta"];
+        };
+        AgentMessages_Success: {
+            /** @enum {boolean} */
+            success: true;
+            data: components["schemas"]["AgentMessageList"];
             meta: components["schemas"]["ResponseMeta"];
         };
     };
@@ -5409,26 +5273,36 @@ export interface operations {
                      *         "firstQuestion": "예시",
                      *         "lastMessageAt": "2026-10-30T10:00:00+09:00",
                      *         "deleteScheduledAt": "2027-01-30",
-                     *         "turns": [
+                     *         "messages": [
                      *           {
-                     *             "question": "현재 화면을 설명해 주세요.",
-                     *             "blocks": [
-                     *               {
-                     *                 "kind": "text",
-                     *                 "text": "예시"
-                     *               }
-                     *             ],
-                     *             "askedAt": "2026-10-30T10:00:00+09:00",
-                     *             "turnId": 1,
-                     *             "progressSteps": [
-                     *               {
-                     *                 "stepId": "예시",
-                     *                 "stepName": "예시",
-                     *                 "status": "진행 중",
-                     *                 "detail": null
-                     *               }
-                     *             ],
-                     *             "completedAt": "2026-10-30T10:00:00+09:00"
+                     *             "messageId": 101,
+                     *             "questionId": null,
+                     *             "role": "Member",
+                     *             "status": "질문",
+                     *             "content": "이 동의 위험이 왜 올랐어?",
+                     *             "details": null,
+                     *             "artifacts": null,
+                     *             "createdAt": "2026-11-02T10:00:00+09:00"
+                     *           },
+                     *           {
+                     *             "messageId": 102,
+                     *             "questionId": 101,
+                     *             "role": "AI",
+                     *             "status": "진행",
+                     *             "content": "질문 이해",
+                     *             "details": "질문에서 지역과 기간을 찾습니다",
+                     *             "artifacts": null,
+                     *             "createdAt": "2026-11-02T10:00:00+09:00"
+                     *           },
+                     *           {
+                     *             "messageId": 103,
+                     *             "questionId": 101,
+                     *             "role": "AI",
+                     *             "status": "완료",
+                     *             "content": "행동 이상 점수가 오른 이유는 …",
+                     *             "details": null,
+                     *             "artifacts": null,
+                     *             "createdAt": "2026-11-02T10:00:00+09:00"
                      *           }
                      *         ]
                      *       },
@@ -6003,7 +5877,7 @@ export interface operations {
             };
         };
     };
-    agentApi_createRun: {
+    agentApi_askQuestion: {
         parameters: {
             query?: never;
             header: {
@@ -6018,21 +5892,14 @@ export interface operations {
                 /**
                  * @example {
                  *       "conversationId": null,
-                 *       "question": "현재 화면을 설명해 주세요.",
-                 *       "screen": {
-                 *         "screenType": "risk-district",
-                 *         "sigunguCode": "11680",
-                 *         "from": "2026-08",
-                 *         "to": "2026-10",
-                 *         "index": "background"
-                 *       }
+                 *       "question": "이 동의 위험이 왜 올랐어?"
                  *     }
                  */
-                "application/json": components["schemas"]["AgentRunRequest"];
+                "application/json": components["schemas"]["AgentQuestionRequest"];
             };
         };
         responses: {
-            /** @description 성공 */
+            /** @description 질문 저장, AI 실행 요청됨 */
             202: {
                 headers: {
                     /** @example no-store */
@@ -6045,19 +5912,16 @@ export interface operations {
                      * @example {
                      *       "success": true,
                      *       "data": {
-                     *         "runId": "c9814a56-22d4-45f9-a203-e8492ac44e73",
                      *         "conversationId": "c9814a56-22d4-45f9-a203-e8492ac44e73",
-                     *         "eventsUrl": "/api/agent/runs/c9814a56-22d4-45f9-a203-e8492ac44e73/events",
-                     *         "statusUrl": "/api/agent/runs/c9814a56-22d4-45f9-a203-e8492ac44e73",
-                     *         "expiresAt": "2026-10-30T10:02:00+09:00"
+                     *         "questionId": 101
                      *       },
                      *       "meta": {
                      *         "requestId": "c9814a56-22d4-45f9-a203-e8492ac44e73",
-                     *         "timestamp": "2026-10-30T10:00:00+09:00"
+                     *         "timestamp": "2026-11-02T10:00:00+09:00"
                      *       }
                      *     }
                      */
-                    "application/json": components["schemas"]["AgentRunCreated_Success"];
+                    "application/json": components["schemas"]["AgentQuestionCreated_Success"];
                 };
             };
             /** @description VALIDATION_ERROR / INVALID_JSON */
@@ -6080,6 +5944,15 @@ export interface operations {
             };
             /** @description FORBIDDEN / PASSWORD_CHANGE_REQUIRED / CSRF_INVALID */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6118,106 +5991,16 @@ export interface operations {
             };
         };
     };
-    agentApi_streamRun: {
+    agentApi_getMessages: {
         parameters: {
-            query?: never;
-            header?: {
-                "Last-Event-ID"?: string;
+            query?: {
+                /** @description 마지막으로 받은 messageId. 처음부터 받으려면 0 */
+                after?: number;
             };
-            path: {
-                runId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description 성공 */
-            200: {
-                headers: {
-                    /** @example no-store */
-                    "Cache-Control"?: string;
-                    "X-Request-Id"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example id: 1
-                     *     event: step
-                     *     data: {"stepId":"lookup","stepName":"자료 조회","status":"완료","detail":null}
-                     *
-                     *     id: 2
-                     *     event: answer
-                     *     data: {"blocks":[{"kind":"text","text":"조회 결과입니다."}]}
-                     *
-                     *     id: 3
-                     *     event: done
-                     *     data: {"conversationId":"c9814a56-22d4-45f9-a203-e8492ac44e73","turnId":1}
-                     */
-                    "text/event-stream": string;
-                };
-            };
-            /** @description VALIDATION_ERROR */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description UNAUTHENTICATED */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description FORBIDDEN / PASSWORD_CHANGE_REQUIRED */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description NOT_FOUND */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description RUN_EXPIRED */
-            410: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description INTERNAL_SERVER_ERROR */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    agentApi_getRun: {
-        parameters: {
-            query?: never;
             header?: never;
             path: {
-                runId: string;
+                /** @description 대화 식별자. 서버가 발급한 불투명 문자열이며 FE가 형식을 해석하지 않는다 */
+                conversationId: string;
             };
             cookie?: never;
         };
@@ -6236,23 +6019,36 @@ export interface operations {
                      * @example {
                      *       "success": true,
                      *       "data": {
-                     *         "runId": "c9814a56-22d4-45f9-a203-e8492ac44e73",
-                     *         "conversationId": "c9814a56-22d4-45f9-a203-e8492ac44e73",
-                     *         "status": "running",
-                     *         "progressSteps": [],
-                     *         "blocks": [],
-                     *         "errorCode": null,
-                     *         "errorMessage": null,
-                     *         "askedAt": "2026-10-30T10:00:00+09:00",
-                     *         "completedAt": null
+                     *         "messages": [
+                     *           {
+                     *             "messageId": 102,
+                     *             "questionId": 101,
+                     *             "role": "AI",
+                     *             "status": "진행",
+                     *             "content": "질문 이해",
+                     *             "details": "질문에서 지역과 기간을 찾습니다",
+                     *             "artifacts": null,
+                     *             "createdAt": "2026-11-02T10:00:00+09:00"
+                     *           },
+                     *           {
+                     *             "messageId": 103,
+                     *             "questionId": 101,
+                     *             "role": "AI",
+                     *             "status": "완료",
+                     *             "content": "행동 이상 점수가 오른 이유는 …",
+                     *             "details": null,
+                     *             "artifacts": null,
+                     *             "createdAt": "2026-11-02T10:00:00+09:00"
+                     *           }
+                     *         ]
                      *       },
                      *       "meta": {
                      *         "requestId": "c9814a56-22d4-45f9-a203-e8492ac44e73",
-                     *         "timestamp": "2026-10-30T10:00:00+09:00"
+                     *         "timestamp": "2026-11-02T10:00:00+09:00"
                      *       }
                      *     }
                      */
-                    "application/json": components["schemas"]["AgentRunState_Success"];
+                    "application/json": components["schemas"]["AgentMessages_Success"];
                 };
             };
             /** @description VALIDATION_ERROR */
@@ -6291,8 +6087,71 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description RUN_EXPIRED */
-            410: {
+            /** @description INTERNAL_SERVER_ERROR */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    agentApi_cancelRun: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description GET /api/auth/csrf가 발급한 XSRF-TOKEN 쿠키의 원문 값. 비로그인 변경 요청도 필요. */
+                "X-XSRF-TOKEN": string;
+            };
+            path: {
+                /** @description 대화 식별자. 서버가 발급한 불투명 문자열이며 FE가 형식을 해석하지 않는다 */
+                conversationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 성공. 본문 없음 (이미 끝난 실행도 204) */
+            204: {
+                headers: {
+                    "X-Request-Id"?: string;
+                    /** @example no-store */
+                    "Cache-Control"?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description VALIDATION_ERROR / INVALID_JSON */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description UNAUTHENTICATED */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description FORBIDDEN / PASSWORD_CHANGE_REQUIRED / CSRF_INVALID */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description NOT_FOUND */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
