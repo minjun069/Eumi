@@ -1,6 +1,6 @@
 # 이음이 백엔드 실행과 공통 기반
 
-Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. G1 B0~B4 공통 기반, A1 로그인·최신 프로필·로그아웃, AI1 질문·조회·취소와 Fake AI 흐름을 구현했다. 회원가입·암호 변경·G1 지역·기관 회원 API는 후속 작업이다.
+Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. G1 B0~B4 공통 기반, A1 로그인·최신 프로필·로그아웃, AI1 질문·조회·취소와 Fake AI 흐름, G1 지역·기관 회원 조회 API-39~42를 구현했다. 회원가입·암호 변경·대시보드 등은 후속 작업이다.
 
 ## 먼저 읽을 기록
 
@@ -10,6 +10,7 @@ Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. G1 B0~B4 �
 - [G1 검증 결과와 재현 방법](docs/g1/verification.md)
 - [A1 구현·검증·MR 인계](docs/a1/README.md)
 - [11월 3일 A1 리뷰 후속 보완](docs/a1/2026-11-03_review-follow-up.md)
+- [지역·기관 회원 조회 API-39~42 구현·검증·MR 인계](docs/region/README.md)
 - [AI1 구현·설정·검증·MR 인계](docs/ai1/README.md)
 - [AI1 리뷰 후속·운영 모드 인계](docs/ai1/2026-11-03_review-follow-up.md)
 - [AI1 질문 보존·진단 재점검 후속](docs/ai1/2026-11-03_masking-follow-up.md)
@@ -34,6 +35,8 @@ BE는 eumi_app으로 접속하고 Hibernate는 validate, Session JDBC의 테이�
 - 로그인: `POST /api/auth/login` → 200 `data.user`. 이메일은 trim·소문자화하고 암호는 원문을 유지한다.
 - 프로필: `GET /api/auth/me` → 200 `data`의 메뉴 프로필, 비인증·탈퇴·만료 임시 암호 회원은 401.
 - 로그아웃: `POST /api/auth/logout` → 현재 JDBC 세션·SESSION·CSRF 쿠키 정리 후 204. 세션이 없어도 204이며 유효 CSRF는 필요하다.
+- 지역: `GET /api/regions/sidos`, `/api/regions/sidos/{sidoCode}/sigungus`, `/api/regions/sigungus/{sigunguCode}/dongs` → 로그인 후 코드·이름 배열. 형식 오류 400, 없는 상위 코드 404.
+- 기관 회원: `GET /api/organizations/me/members` → 현재 로그인 회원의 기관에 속한 미탈퇴 회원의 memberId·name·title 배열. title이 null이어도 필드를 유지한다. 지역·기관 조회 모두 임시 비밀번호 제한 세션은 403이다.
 - Mailpit: <http://localhost:8025>, SMTP localhost:1025. 로컬은 인증·STARTTLS를 사용하지 않는다.
 - Windows에서 JDK 21을 선택하고 `java -version`, `.\gradlew.bat --version`을 확인한다. 전역 Gradle 설치는 필요 없다.
 
