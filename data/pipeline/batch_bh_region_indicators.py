@@ -3,9 +3,9 @@
 읍면동 값은 격자 지표의 평균이 아니라, 동 안 격자(dim_grid100.adm_cd10)의 일평균 유동을 합산한 뒤 산식(bh_indicators.py)을 다시 적용한다.
 h20·h21 의 분모(주민 60세+ · 남 50세+ 비율)는 그 달 bg_region_detail 의 주민등록 인구.
 실행 (infra/):  docker compose --profile data exec spark python3 pipeline/batch_bh_region_indicators.py --months 2025-07 ... [--dry-run]
-  --dry-run: DB 에 쓰지 않고 기존 bh_region_indicator(1차 완성본 값)와의 최대 차이만 출력
-  기본 동작: activity_daily 만 UPSERT 한다 (H 지표 12개는 1차 완성본 값을 둔다 — 2차 산출값과 0.25%~2% 차이, DA 규칙 반영 전까지)
-  --overwrite-region: H 지표 12개까지 2차 산출값으로 덮어쓴다
+  --dry-run: DB 에 쓰지 않고 기존 bh_region_indicator 와의 최대 차이만 출력
+  기본 동작: 지표 12개 + activity_daily 를 UPSERT 한다. 유동 상세가 DA 와 같은 50m 코호트 셀로 생성되므로(synth_flow COHORT_FILE)
+  DA 읍면동 값과 셀 집합·산식이 같고, 동 배정 단위(100m 격자 vs 50m 점)만 달라 최대 2% 안에서 차이가 난다.
 """
 import argparse
 import os
@@ -54,7 +54,6 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--months", nargs="+", required=True)
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--overwrite-region", action="store_true")
     args = ap.parse_args()
     with psycopg.connect(os.environ["PIPELINE_DB_DSN"]) as conn:
         for m in args.months:
@@ -68,14 +67,14 @@ def main() -> int:
             if args.dry_run:
                 continue
             report_overflow(f"{m} 읍면동", reg)
-            wcols = REGION_COLS if args.overwrite_region else ["activity_daily"]
+            wcols = REGION_COLS
             rows = [(f"{m}-01", d, *[to_dec(v, limit_of(c)) for c, v in zip(wcols, r)]) for d, r in zip(reg.index, reg[wcols].to_numpy())]
             with conn.cursor() as c:
                 c.executemany(f"INSERT INTO analysis.bh_region_indicator (period_start, adm_cd10, {', '.join(wcols)}, updated_at) "
                               f"VALUES (%s, %s, {', '.join('%s' for _ in wcols)}, now()) "
                               f"ON CONFLICT (period_start, adm_cd10) DO UPDATE SET {', '.join(f'{x} = EXCLUDED.{x}' for x in wcols)}, updated_at = now()", rows)
             conn.commit()
-            print(f"[bh-region] {m}: bh_region_indicator {len(rows)}행 ({'전체 컬럼' if args.overwrite_region else 'activity_daily 만'}) 적재", flush=True)
+            print(f"[bh-region] {m}: bh_region_indicator {len(rows)}행 적재", flush=True)
     return 0
 
 

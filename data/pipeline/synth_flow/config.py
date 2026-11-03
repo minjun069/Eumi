@@ -15,6 +15,8 @@ SKT_FILES = {
     "age":  os.environ.get("SKT_AGE",  "raw/skt_flow_age/flow_age_pop_202507_202512.csv"),
 }
 GRID_FILE = os.environ.get("GRID_FILE", "raw/dim_grid100.csv")   # grid_cd, gx, gy, adm_cd8 (100m 격자 기준)
+# 50m 코호트 (6개월 · 3파일 모두에 있는 위치, DA 분석과 같은 셀 집합). 지정하면 이 목록에 있는 셀만 합산한다. "" 이면 필터 없음
+COHORT_FILE = os.environ.get("COHORT_FILE", "raw/skt_cohort/2025-07_2025-12/skt_cohort_50m.csv")
 
 # ---- 출력
 OUT_ROOT = os.environ.get("SYNTH_OUT", "synth")   # 예: s3://sgi/synth

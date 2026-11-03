@@ -6,9 +6,10 @@ anchor 한 행 = 격자 × 월. 컬럼:
   w_mon..w_sun (요일 일평균, 요일 파일),  a_m_10..a_f_60p (성연령 일평균, 성연령 파일),
   t_h (하루 총량 = Σh), k_wkdy, k_age (요일·성연령 총량을 t_h에 맞추는 보정계수),
   src_flag (none / wkdy_dong / wkdy_city / age_dong / age_city), n_cells_time (합산된 50m 셀 수)
+COHORT_FILE 이 있으면 그 목록(BLOCK_CD, X_COORD, Y_COORD)에 있는 50m 셀만 합산한다 (DA 분석과 같은 셀 집합).
 """
 import numpy as np, pandas as pd, fsspec
-from config import SKT_FILES, GRID_FILE, ANCHOR_DIR, AGE_COLS, storage_options
+from config import SKT_FILES, GRID_FILE, COHORT_FILE, ANCHOR_DIR, AGE_COLS, storage_options
 from calendar_util import month_days
 from io_util import write_parquet
 
@@ -32,7 +33,22 @@ def load_skt(kind: str) -> pd.DataFrame:
     df["STD_YM"] = df["STD_YM"].astype(int)
     # 완전 중복 행 제거 (12월 원본에 전체 행 중복이 있었음)
     df = df.drop_duplicates()
+    if COHORT_FILE:
+        before = len(df)
+        df["kx"], df["ky"] = df.X_COORD.round(3), df.Y_COORD.round(3)
+        df = df.merge(load_cohort(), on=["BLOCK_CD", "kx", "ky"], how="inner", validate="many_to_one").drop(columns=["kx", "ky"])
+        print(f"[anchor] {kind}: 코호트 필터 {before:,} → {len(df):,}행")
     return df
+
+_cohort = None
+def load_cohort() -> pd.DataFrame:
+    """코호트 목록 (BLOCK_CD, X_COORD, Y_COORD). 좌표는 소수 3자리로 맞춰 조인한다."""
+    global _cohort
+    if _cohort is None:
+        c = pd.read_csv(COHORT_FILE, encoding="utf-8-sig", dtype={"BLOCK_CD": str}, storage_options=storage_options(COHORT_FILE))
+        c["kx"], c["ky"] = c.X_COORD.round(3), c.Y_COORD.round(3)
+        _cohort = c[["BLOCK_CD", "kx", "ky"]].drop_duplicates()
+    return _cohort
 
 def to_grid100(df: pd.DataFrame, cols, grid: pd.DataFrame) -> pd.DataFrame:
     """50m 셀 → 100m 격자 합산. 연구지역(grid 목록) 안의 격자만 남김."""
