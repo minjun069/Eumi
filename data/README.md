@@ -119,6 +119,26 @@ data/.venv/Scripts/python data/pipeline/batch_re_apt_trade.py --months 2025-07 2
 ```
 
 새 달은 세 스크립트를 인자 없이 차례로 돌리면 전월 한 달이 처리된다(실거래 신고 기한이 30일이라 계약월 다음다음 달 초에 돌리는 것을 권장. 스케줄러 연결은 배포 환경에서). 공원·정류장 API 수집은 아직 없다(1차 완성본 파일로 적재).
+## 2차 M4 분석 (점수 · 위험단계)
+
+DA 재현 패키지의 고정 계수와 학습된 모델을 그대로 써서 M3 지표 테이블에서 점수와 단계를 낸다. 모델 학습(M4-1)은 DA 가 패키지로 비정기 실행하고, 파이프라인은 그 결과물만 쓴다.
+
+| 스크립트 | 입력 → 출력 | 방법 |
+|---|---|---|
+| `pipeline/m4_models.py` | MinIO `raw/model/<버전>/` (기본 `v20261102`) | 모델 4개(`.joblib`, sha256 검사) · 배경 PCA 계수 · 배경 고정 임계값 · 지표 순서를 읽는 공통 모듈 |
+| `pipeline/batch_region_result.py` | `bg_region_indicator`(6) + `bh_region_indicator`(12) → `public.region_result` | M4-2 배경 점수 S = 고정 PCA 산식, 도시별 고정 P20·P80 → `bg_grade` 1~3. M4-3 행동 점수 B = 도시별 IsolationForest, −score_samples×100 → `bh_score`. M4-4 그 달 도시 안 B 의 P20·P80 → `bh_grade` 1~3, `risk_grade` = 두 등급 합 − 1. UPSERT 만 |
+| `pipeline/batch_grid_anomaly.py` | `bh_grid_indicator`(10) → `analysis.bh_grid_anomaly` | 도시별 격자 IsolationForest. 그 달 삭제 후 적재 |
+
+```bash
+data/.venv/Scripts/python data/pipeline/batch_region_result.py --months 2025-08 2025-09 2025-10 2025-11 2025-12   # 인자 없으면 전월
+data/.venv/Scripts/python data/pipeline/batch_grid_anomaly.py  --months 2025-08 2025-09 2025-10 2025-11 2025-12
+```
+
+- 행동 지표가 하나라도 NULL 인 동 · 격자(첫 달은 변화 지표 4개가 NULL)는 점수를 내지 않고 행도 넣지 않는다. 그래서 7월은 `region_result` 에 없다 (DA 와 같은 방침).
+- 모델 자산은 `data/raw/model/<버전>/`(git 제외)에 두고 `upload_raw.py` 또는 직접 MinIO 에 올린다. 새 버전은 폴더를 새로 만들고 `MODEL_VERSION` 으로 고른다. 패키지 고정 버전(numpy 2.3.5 · scipy 1.17.0 · scikit-learn 1.8.0 · joblib 1.5.3)은 `requirements.txt` 에 있다.
+- 검증(2026-11-03): DA 지표 파일을 넣으면 DA 점수 · 등급 · 단계를 그대로 재현(차이 0). DB 지표(M3)로 내면 읍면동은 월 47개 중 0~4개 동의 단계가 한 칸 바뀌고(행동 지표의 동 배정 차이), 위험 4~5단계 집합은 월마다 13~15개 중 13~14개가 같다. 격자는 DA 와 점수 상관 0.9999, 상위 20% 겹침 99% 이상.
+- `bh_region_contribution` 은 비워 둔다 (IsolationForest 는 지표별 기여도를 주지 않음. 배경 점수 S 의 지표별 기여도는 `m4_models.background_score()` 가 돌려주므로 필요하면 적재 가능).
+
 ## 서버 DB 반영 (덤프 · 복원)
 
 서버(`k15b201.p.ssafy.io`)에는 아직 MinIO · Kafka · Spark 가 없어 파이프라인은 로컬에서 돌고, 결과 테이블만 덤프로 옮긴다. 서버 DB 에 같은 마이그레이션(최신 V 파일)이 먼저 적용되어 있어야 한다.
@@ -162,6 +182,8 @@ pg_restore -U <owner> -d eumi --data-only --disable-triggers eumi_analysis_data_
 | 2026-11-02 | 실거래가 수집 기간 2025-07~2025-12, 매매·전세·월세 모두. 전월세 해제 거래는 제외하지 않음 | 다른 데이터와 기간을 맞춤. 전월세 API에는 해제 항목이 없다 |
 | 2026-11-02 | 호스트용 DB 주소도 `127.0.0.1` | Kafka 와 같은 IPv6 문제로 `localhost` 접속이 2분 넘게 걸림 |
 | 2026-11-03 | 가상 유동은 DA 분석과 같은 50m 코호트 셀(6개월·3파일 모두에 있는 79,618개, `raw/skt_cohort/`)만 합산해 생성. 행동 지표는 우리 코드 값으로 적재 | DA 격자·읍면동 모델이 이 셀 집합을 쓴다. 격자 합은 DA 격자 패널과 일치(1e-12). 읍면동은 동 배정 단위(100m 격자 vs 50m 점) 차이로 DA 값과 최대 2% 안에서 다르며, 산식·셀 집합은 같다 |
+| 2026-11-03 | M4 점수 · 단계는 DA 패키지의 고정 계수 · 학습 모델(`raw/model/v20261102`)로 파이프라인이 산출. 입력은 DB 의 M3 지표 | DA 결과 CSV 적재(`load_region_result.py` 등) 대신 새 달도 같은 방법으로 낼 수 있게. 입력 지표가 DA 와 조금 달라(동 배정 단위) 단계가 한 칸 바뀌는 동이 월 0~4개 있음을 확인하고 허용 |
+| 2026-11-03 | 첫 달(7월)은 행동 점수 · 단계를 내지 않고 `region_result` 에 넣지 않음 | 전월이 없어 변화 지표 4개가 NULL. DA 와 같은 방침. `region_result` 의 bh_score · risk_grade 가 NOT NULL |
 
 - 완성본 지표는 소수점 6자리인데 `bg_region_indicator`는 DECIMAL(5,2)·(7,2)라 2자리로 반올림되어 들어간다. `bg_region_detail.value`는 V20261102_01 마이그레이션으로 NUMERIC(18,6)이 되어 원값(면적 1.740451 ㎢ 등)이 그대로 들어간다. 2차 산출값과 비교할 때는 지표만 2자리로 반올림해 비교한다.
 - 원본 데이터 공유 위치: 팀 공유 폴더에서 받아 `data/raw/`에 둔다 (MinIO 업로드는 4.4)
