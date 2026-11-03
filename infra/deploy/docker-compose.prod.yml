@@ -12,7 +12,7 @@
 #   .env.tags    서비스별 배포 태그 (deploy.sh가 갱신)
 #
 # 지키는 규칙
-#   - 인터넷에 열리는 포트는 없다. 호스트 Nginx가 받는 web · backend와 mailpit 화면만 127.0.0.1에 묶는다.
+#   - 인터넷에 열리는 포트는 없다. 호스트 Nginx가 받는 web · backend · pipeline-web(Airflow)과 mailpit 화면만 127.0.0.1에 묶는다.
 #     Docker는 UFW를 거치지 않으므로 "8080:8080"이나 "0.0.0.0:..." 형태는 절대 쓰지 않는다.
 #   - DB 데이터 볼륨(eumi-pgdata)은 external이다. "docker compose down -v"를 실행해도 지워지지 않는다.
 #   - 서비스마다 컨테이너가 쓸 메모리 상한(mem_limit)과 로그 크기 상한을 둔다.
@@ -95,7 +95,6 @@ services:
       # 인증 코드 · 가입 증명 해시 키 (비밀값. 서버에서 한 번 만들고 바꾸지 않는다)
       EUMI_AUTH_HASH_KEY: ${EUMI_AUTH_HASH_KEY:?.env.config에 EUMI_AUTH_HASH_KEY가 필요합니다}
       # AI_BASE_URL: http://ai:8000            (ai 서비스를 추가할 때)
-      # PIPELINE_BASE_URL: http://pipeline:8100 (pipeline 서비스를 추가할 때)
     volumes:
       - uploads:/data/uploads
     ports:
@@ -126,6 +125,167 @@ services:
     mem_limit: 256m
     logging: *logging
 
+  # ========== 데이터 파이프라인 (MinIO · Kafka · pipeline = Spark + Airflow) ==========
+  # 로컬 infra/docker-compose.yml 의 data 프로필과 같은 구성. 모든 배치 · 스트리밍 스크립트는 pipeline 컨테이너 안에서 돈다.
+  # 저장소 data/pipeline · data/airflow 는 sync.sh 가 /srv/eumi/data 로 복사해 마운트한다 (이미지 재빌드 없이 스크립트 · DAG 갱신).
+  # 원본 파일 · 가상 유동 · 모델 자산은 MinIO 볼륨(eumi-miniodata)에 있다. 서버 구성 절차는 infra/README.md "데이터 파이프라인 서버 구성".
+
+  # 원본 저장소 (S3 호환). 버킷 sgi. 포트를 열지 않는다 — 컨테이너 사이 주소 minio:9000 만 쓴다
+  minio:
+    image: bitnamilegacy/minio:2025.7.23-debian-12-r5
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?.env.config에 MINIO_ROOT_USER가 필요합니다}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?.env.config에 MINIO_ROOT_PASSWORD가 필요합니다}
+      MINIO_DEFAULT_BUCKETS: sgi
+    volumes:
+      - miniodata:/bitnami/minio/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+    mem_limit: 1g
+    logging: *logging
+
+  # 메시지 큐 (KRaft 단일 노드). 스트리밍 시연용. 컨테이너 사이 주소 kafka:19092, 보관 7일
+  kafka:
+    image: apache/kafka:3.9.2
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_HEAP_OPTS: "-Xmx1g -Xms512m"
+    volumes:
+      - kafkadata:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:19092 --list >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    mem_limit: 1536m
+    logging: *logging
+
+  # 토픽 flow_hourly 를 만들고 끝난다
+  kafka-init:
+    image: apache/kafka:3.9.2
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:19092 --create --if-not-exists --topic flow_hourly --partitions 6 --replication-factor 1
+    logging: *logging
+
+  # Airflow 메타 DB 마이그레이션 + 관리자 계정 (배포마다 한 번 돌고 끝난다. 다시 실행해도 안전)
+  pipeline-init:
+    image: eumi-pipeline:${PIPELINE_TAG:?.env.tags에 PIPELINE_TAG가 필요합니다}
+    environment: &pipeline-env
+      # MinIO (S3A · s3fs). 루트 계정을 그대로 접근 키로 쓴다
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: sgi
+      KAFKA_BOOTSTRAP: kafka:19092
+      KAFKA_TOPIC_FLOW: flow_hourly
+      # 결과 DB (eumi_pipeline 계정)
+      PIPELINE_DB_URL: jdbc:postgresql://postgres:5432/eumi
+      PIPELINE_DB_USER: eumi_pipeline
+      PIPELINE_DB_PASSWORD: ${EUMI_PIPELINE_PASSWORD:?.env.config에 EUMI_PIPELINE_PASSWORD가 필요합니다}
+      PIPELINE_DB_DSN: postgresql://eumi_pipeline:${EUMI_PIPELINE_PASSWORD}@postgres:5432/eumi
+      # 수집 API 키 · 모델 버전
+      DATA_GO_KR_SERVICE_KEY: ${DATA_GO_KR_SERVICE_KEY:?.env.config에 DATA_GO_KR_SERVICE_KEY가 필요합니다}
+      KAKAO_REST_KEY: ${KAKAO_REST_KEY:?.env.config에 KAKAO_REST_KEY가 필요합니다}
+      MODEL_VERSION: v20261102
+      TZ: Asia/Seoul
+      # Airflow (메타 DB 는 postgres 의 airflow DB, 태스크는 pipeline 컨테이너 안에서 LocalExecutor 로)
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD:?.env.config에 AIRFLOW_DB_PASSWORD가 필요합니다}@postgres:5432/airflow
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/eumi/data/airflow/dags
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Seoul
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY:?.env.config에 AIRFLOW_SECRET_KEY가 필요합니다}
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "false"
+      AIRFLOW__WEBSERVER__BASE_URL: https://k15b201.p.ssafy.io/airflow
+      AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX: "true"
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "60"
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+    volumes: &pipeline-volumes
+      - ./data:/opt/eumi/data
+      - sparkcheckpoint:/opt/eumi/checkpoint
+      - airflowlogs:/opt/airflow/logs
+    working_dir: /opt/eumi/data
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - airflow db migrate && airflow users create --username "${AIRFLOW_ADMIN_USER:?.env.config에 AIRFLOW_ADMIN_USER가 필요합니다}" --password "${AIRFLOW_ADMIN_PASSWORD:?.env.config에 AIRFLOW_ADMIN_PASSWORD가 필요합니다}" --firstname Eumi --lastname Admin --role Admin --email admin@eumi.local || true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+  # Airflow 스케줄러 = 월 배치 실행기. Spark 드라이버(4g) 가 이 안에서 뜬다
+  pipeline:
+    image: eumi-pipeline:${PIPELINE_TAG:?.env.tags에 PIPELINE_TAG가 필요합니다}
+    restart: unless-stopped
+    environment: *pipeline-env
+    volumes: *pipeline-volumes
+    working_dir: /opt/eumi/data
+    command: ["airflow", "scheduler"]
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --local >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+      start_period: 60s
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+      minio:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    mem_limit: 6g
+    logging: *logging
+
+  # Airflow 웹 UI → Nginx /airflow/ (로그인 필요). 127.0.0.1 에만 연다
+  pipeline-web:
+    image: eumi-pipeline:${PIPELINE_TAG:?.env.tags에 PIPELINE_TAG가 필요합니다}
+    restart: unless-stopped
+    environment: *pipeline-env
+    volumes: *pipeline-volumes
+    ports:
+      - "127.0.0.1:8081:8080"
+    command: ["airflow", "webserver"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+    mem_limit: 1g
+    logging: *logging
+
   # ---------- 준비되면 추가 (D8 · D9 결정 후) ----------
   # ai:
   #   image: eumi-ai:${AI_TAG:?.env.tags에 AI_TAG가 필요합니다}
@@ -143,3 +303,12 @@ volumes:
     name: eumi-pgdata
   uploads:
     name: eumi-uploads
+  miniodata:
+    external: true      # 원본 · 가상 유동 · 모델 자산. "docker volume create eumi-miniodata"로 직접 만든다 (down -v 에도 남게)
+    name: eumi-miniodata
+  kafkadata:
+    name: eumi-kafkadata
+  sparkcheckpoint:
+    name: eumi-sparkcheckpoint
+  airflowlogs:
+    name: eumi-airflowlogs

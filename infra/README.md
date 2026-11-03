@@ -95,19 +95,21 @@ MinIO가 2025년에 커뮤니티 에디션 이미지 배포를 중단해 `docker
 ```
 사용자 ─ https ─> Nginx(443) ─┬─ /api/      → backend   127.0.0.1:8080 ─> postgres (내부망, 포트 없음)
                               ├─ /jenkins/  → Jenkins   127.0.0.1:9090
+                              ├─ /airflow/  → pipeline-web(Airflow) 127.0.0.1:8081
                               └─ /          → web       127.0.0.1:3000
+pipeline(Airflow 스케줄러 + Spark) ─> minio(원본 · 가상 유동) · kafka(시연) · postgres(결과 테이블 · airflow 메타 DB)
 master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migrate(백업 → Flyway) → Deploy(헬스체크 · 실패 시 되돌림) → Cleanup
 ```
 
 | 파일 | 서버 위치 | 용도 |
 |---|---|---|
-| `deploy/docker-compose.prod.yml` | `/srv/eumi/` | 운영 서비스 (postgres · backend · web · mailpit, flyway는 실행할 때만) |
+| `deploy/docker-compose.prod.yml` | `/srv/eumi/` | 운영 서비스 (postgres · backend · web · mailpit · minio · kafka · pipeline 3종, flyway는 실행할 때만) |
 | `deploy/.env.config.example` | `/srv/eumi/.env.config` | 운영 비밀값 키 목록. 값은 서버에서 무작위로 만들고 git에 두지 않는다 |
 | `deploy/nginx/eumi.conf` | `/etc/nginx/sites-available/eumi` | HTTPS · 경로 연결. 인프라 담당이 손으로 반영 (Jenkins는 다르면 경고만) |
 | `deploy/nginx/eumi-bootstrap.conf` | (인증서 첫 발급 때만) | |
 | `deploy/jenkins/override.conf` | `/etc/systemd/system/jenkins.service.d/` | Jenkins를 127.0.0.1:9090, `/jenkins` 경로로 |
 | `deploy/cron/eumi-backup` | `/etc/cron.d/` | 매일 04:30 DB 백업 |
-| `scripts/sync.sh` | `/srv/eumi/scripts/` | 저장소 → `/srv/eumi` 복사 (비밀값 · 태그 · 백업은 건드리지 않음) |
+| `scripts/sync.sh` | `/srv/eumi/scripts/` | 저장소 → `/srv/eumi` 복사 (compose · 스크립트 · db · postgres-init · data/pipeline · data/airflow. 비밀값 · 태그 · 백업은 건드리지 않음) |
 | `scripts/migrate.sh` | 〃 | DB 기동 → 백업 → Flyway |
 | `scripts/deploy.sh` | 〃 | 서비스 하나 교체 + 헬스체크, 실패하면 이전 태그로 |
 | `scripts/backup.sh` · `restore-test.sh` | 〃 | 백업 (deploy 10개 · daily 7개 보관) · 복원 시험 (운영 DB는 건드리지 않음) |
@@ -120,3 +122,24 @@ master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migra
 - 운영 DB 비밀번호 · 키는 서버 `/srv/eumi/.env.config`(jenkins 소유, 권한 600)에만 있다. 필요하면 인프라 담당에게 요청한다.
 - 병합된 마이그레이션은 운영 DB에 그대로 적용된다. 컬럼 삭제 · 이름 변경처럼 이전 버전 코드가 깨지는 변경은 "추가 → 코드 전환 → 다음 배포에서 삭제" 두 번에 나눈다.
 - 배포 결과는 `https://k15b201.p.ssafy.io/jenkins/`의 `eumi-deploy`에서 본다 (읽기 전용 계정은 인프라 담당에게 요청. Jenkins는 서버 관리자 권한으로 동작하므로 실행 · 설정 권한은 인프라 담당만 가진다). 롤백 · 복구는 서버 접속이 필요하므로 인프라 담당이 진행한다.
+
+### 데이터 파이프라인 서버 구성 (인프라 담당 절차, 한 번)
+
+파이프라인 compose 서비스(`minio` · `kafka` · `kafka-init` · `pipeline-init` · `pipeline` · `pipeline-web`)가 처음 배포되기 **전에** 아래 1~3을 하고, 배포 **뒤에** 4~6을 한다. 명령은 모두 서버에서 실행한다.
+
+1. **비밀값**: `/srv/eumi/.env.config`에 `.env.config.example`의 "데이터 파이프라인" 절 키 7개를 추가한다. `MINIO_ROOT_PASSWORD` · `AIRFLOW_DB_PASSWORD` · `AIRFLOW_ADMIN_PASSWORD` · `AIRFLOW_SECRET_KEY`는 `openssl rand -hex 24`, `DATA_GO_KR_SERVICE_KEY` · `KAKAO_REST_KEY`는 데이터 파트(강병민)에게 Mattermost 비공개로 받는다.
+2. **Airflow 메타 DB** (postgres 볼륨이 이미 있어 init 스크립트가 돌지 않으므로 수동, `AIRFLOW_DB_PASSWORD`와 같은 값):
+   ```bash
+   sudo -u jenkins /srv/eumi/scripts/dc.sh exec postgres psql -U postgres -c "CREATE ROLE airflow LOGIN PASSWORD '<AIRFLOW_DB_PASSWORD 값>'" -c "CREATE DATABASE airflow OWNER airflow"
+   ```
+3. **MinIO 볼륨**: `docker volume create eumi-miniodata` (pgdata와 같이 external — `down -v`에도 남는다).
+4. **배포**: `develop` → `master` 병합 → Jenkins가 `eumi-pipeline` 이미지를 빌드하고(약 10분) `deploy.sh pipeline`으로 3개 서비스를 띄운다. `dc.sh ps`에서 `minio` · `kafka` · `pipeline` · `pipeline-web`이 healthy 인지 본다. 그 뒤 Nginx `/airflow/` 블록을 반영한다(`eumi.conf` 복사 → `nginx -t` → reload).
+5. **원본 업로드** (약 2 GB, 데이터 파트가 전달하는 `data/raw` 폴더를 서버 `/srv/eumi/data/raw`에 두고):
+   ```bash
+   sudo -u jenkins /srv/eumi/scripts/dc.sh exec pipeline python3 pipeline/m1_collect/upload_raw.py     # raw/ → MinIO sgi/raw (코호트 · 모델 자산 포함)
+   sudo -u jenkins /srv/eumi/scripts/dc.sh exec pipeline python3 pipeline/ops/load_dim_region.py && sudo -u jenkins /srv/eumi/scripts/dc.sh exec pipeline python3 pipeline/ops/load_dim_grid100.py
+   ```
+   결과 테이블(2025-07~12)은 이미 `db/seed`로 들어가 있으므로 과거분 배치는 돌리지 않는다. 가상 유동 Parquet은 다음 달 배치가 그 달 것만 만든다.
+6. **Airflow 확인**: `https://k15b201.p.ssafy.io/airflow/` 로그인(`AIRFLOW_ADMIN_*`) → DAG `eumi_monthly`를 unpause. unpause 직후 지난 스케줄 1건이 자동 실행되는데, 그 달 원본이 없으면 `check_inputs`가 전체를 skip 하므로 괜찮다. 첫 실제 실행은 매월 5일 03:00(전월 대상)이고, 재처리는 UI에서 `{"months": ["2025-12"]}`로 트리거한다. 문제가 생기면 UI의 태스크 로그를 데이터 파트에 전달한다.
+
+자원: `pipeline` 6 GB(Spark 드라이버 4 GB 포함) · `kafka` 1.5 GB · `minio` 1 GB · `pipeline-web` 1 GB, 디스크는 MinIO 원본 2 GB + 가상 유동 월 1 GB + Kafka 보관 7일. Kafka와 스트리밍은 시연용이라 평소 월 배치에는 쓰지 않는다.
