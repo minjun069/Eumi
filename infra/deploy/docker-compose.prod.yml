@@ -94,6 +94,9 @@ services:
       EUMI_MAIL_FROM: no-reply@k15b201.p.ssafy.io
       # 인증 코드 · 가입 증명 해시 키 (비밀값. 서버에서 한 번 만들고 바꾸지 않는다)
       EUMI_AUTH_HASH_KEY: ${EUMI_AUTH_HASH_KEY:?.env.config에 EUMI_AUTH_HASH_KEY가 필요합니다}
+      # AI 실행 방식: fake(가짜 AI가 진행·완료 행을 씀) / http(ai 서비스 호출). 비밀값이 아니라 여기 둔다.
+      #   application-prod.yml이 기본값 없이 읽으므로 빠지면 backend가 뜨지 않는다. ai 서비스를 추가하는 MR에서 http로 바꾼다
+      EUMI_AI_MODE: fake
       # AI_BASE_URL: http://ai:8000            (ai 서비스를 추가할 때)
       # PIPELINE_BASE_URL: http://pipeline:8100 (pipeline 서비스를 추가할 때)
     volumes:
