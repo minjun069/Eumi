@@ -40,10 +40,11 @@ $env:VITE_API_TARGET="http://localhost:8081"; npm run dev
 | `src/api/queryClient.ts` | TanStack Query 기본값 (4xx 재시도 안 함, 변경 요청 재시도 안 함) |
 | `src/api/schema.d.ts` | OpenAPI 2.3.0에서 자동 생성한 타입. 직접 고치지 않는다 |
 | `src/api/types.ts` | 화면에서 쓰는 응답 타입 별칭 |
-| `src/api/*Api.ts` | API 묶음 (지금은 `authApi`: 로그인·로그인 상태 조회·로그아웃, `agentApi`: AI 패널 질문·조회·중단) |
+| `src/api/*Api.ts` | API 묶음 (`authApi`: 로그인·로그인 상태 조회·로그아웃, `agentApi`: AI 패널 질문·조회·중단, `analysisApi`: 적재 월·읍면동 요약·보고서, `regionApi`: 시도·시군구 목록) |
 | `src/session/` | 로그인 상태(`sessionStore`), 복원·로그아웃·401 처리(`sessionActions`) |
 | `src/components/` | 레이아웃(헤더·메뉴), 로그인 필요 화면 보호, 확인 창·알림·빈 상태·입력 부품 |
-| `src/screens/` | 화면 (`auth/` 로그인), `placeholder/` '준비 중' 화면과 화면별 예정 내용 |
+| `src/screens/` | 화면 (`auth/` 로그인, `risk/` 고립 위험 탐색), `placeholder/` '준비 중' 화면과 화면별 예정 내용 |
+| `src/tableau/` | Tableau Public 대시보드 띄우기(Embedding API v3)와 게시본 설정. 워크북 하나에서 자리마다 임베드용 대시보드를 띄운다. 새 뷰가 게시되면 `tableauConfig.ts`에 대시보드·워크시트 이름과 크기를 채운다 |
 | `src/routes/paths.ts` | 화면 주소 |
 
 ## 규칙
