@@ -68,7 +68,11 @@ docker compose --profile data exec pipeline spark-submit pipeline/<모듈>/<스�
 - 모든 스크립트는 `--dry-run` 또는 `[OK]/[FAIL]` 검사를 찍는다. FAIL 이면 다음 단계로 가지 않는다.
 - **한 번에 돌리기**: `data/.venv/Scripts/python data/pipeline/ops/run_month.py --months 2025-12` 가 13단계를 순서대로 실행한다(호스트 · 컨테이너 자동 구분). 실패하면 그 단계에서 멈추고, `--from 8` · `--only 11 12` · `--skip 3` 으로 일부만 다시 돌린다. 단계별 소요 시간 · 결과는 `data/processed/run_log/run_<시각>.json` 에 남는다.
 - 재처리 리허설(2026-11-03, 2025-12 한 달 전체 재실행): 13단계 모두 통과, 총 4분(가상 유동 생성 111초 · 유동 적재 78초가 대부분). 결과 테이블 값은 재실행 전과 동일 (`re_apt_trade` 는 DELETE 후 INSERT 라 `trade_id` 만 새로 발급). `make_seed` 는 값이 바뀐 달이 있을 때만 커밋한다 (재실행만으로는 updated_at · trade_id 가 바뀌어 diff 가 커진다).
-- 아직 스케줄러는 없다 (Airflow 로 자동화 예정, 서버에 MinIO · Spark 와 함께). Airflow DAG 는 `run_month.py` 의 STEPS 순서를 그대로 옮긴다.
+- **Airflow (`airflow/dags/eumi_monthly.py`)**: 위 1~12단계가 태스크 14개(가상 유동은 anchor · generate · validate 로 나뉨)로 들어 있다. 매월 5일 03:00 에 전월을 돌리며, 수집 → 실거래가 / 가상 유동 → 유동 상세 → 행동 지표 / 배경 상세 → 배경 지표 가지가 병렬로 돌고 M4 에서 합쳐진다. seed 생성(13)은 DAG 에 넣지 않는다.
+  - 첫 태스크 `check_inputs`(`ops/check_month_inputs.py`)가 그 달의 SKT 월평균 · 주민등록 원본이 MinIO 에 있는지 보고, 없으면 그 실행 전체를 skip 한다. unpause 직후 Airflow 가 지난 스케줄 1건을 자동 실행하므로, 원본이 없는 달에 API 호출 · 적재가 일어나지 않게 하는 안전장치다.
+  - 재처리: UI 의 Trigger DAG w/ config 또는 `docker compose --profile data exec pipeline airflow dags trigger eumi_monthly --conf '{"months": ["2025-12"]}'`. 실패한 태스크는 UI 에서 Clear 하면 그 태스크부터 다시 돈다.
+  - 로그는 UI 또는 pipeline 컨테이너 `/opt/airflow/logs/dag_id=eumi_monthly/…` (볼륨 `airflowlogs`). 스크립트의 `[OK]/[FAIL]` 출력이 그대로 남아 실행 이력 역할을 한다.
+  - 확인(2026-11-03): 12월 수동 실행 14개 태스크 성공, 실행 3분 50초.
 
 ## 모듈별 메모
 
