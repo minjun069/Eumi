@@ -1,6 +1,6 @@
 # 이음이 백엔드 실행과 공통 기반
 
-Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. G1 B0~B4 공통 기반과 A1 로그인·최신 프로필·로그아웃을 구현했다. 회원가입·암호 변경·G1 지역·기관 회원 API는 후속 작업이다.
+Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. G1 B0~B4 공통 기반, A1 로그인·최신 프로필·로그아웃, AI1 질문·조회·취소와 Fake AI 흐름을 구현했다. 회원가입·암호 변경·G1 지역·기관 회원 API는 후속 작업이다.
 
 ## 먼저 읽을 기록
 
@@ -10,6 +10,11 @@ Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. G1 B0~B4 �
 - [G1 검증 결과와 재현 방법](docs/g1/verification.md)
 - [A1 구현·검증·MR 인계](docs/a1/README.md)
 - [11월 3일 A1 리뷰 후속 보완](docs/a1/2026-11-03_review-follow-up.md)
+- [AI1 구현·설정·검증·MR 인계](docs/ai1/README.md)
+- [AI1 리뷰 후속·운영 모드 인계](docs/ai1/2026-11-03_review-follow-up.md)
+- [AI1 질문 보존·진단 재점검 후속](docs/ai1/2026-11-03_masking-follow-up.md)
+- [AI1 명시 표지 개인정보 노출 회귀 수정](docs/ai1/2026-11-03_privacy-regression-follow-up.md)
+- [AI1 수집 항목 기준 마스킹 범위 축소·계약 인계](docs/ai1/2026-11-03_masking-scope.md)
 - [협업 규칙](../CONTRIBUTING.md), [인증 결정](../docs/decisions/login-sse.md), [로컬 DB·메일](../infra/README.md)
 
 최종 API 계약은 이 작업 폴더의 [docs/api/openapi.json](../docs/api/openapi.json) 2.3.0이다. AI는 [ai-agent-panel.md](../docs/api/ai-agent-panel.md)의 A 방식이 기준이다. 저장소 밖 `공통_응답_및_세션_규칙.md`와 `구현_트랜잭션_가이드.md`도 함께 읽되, 폐기된 SSE·AI 실행 계약을 적용하지 않는다. G1 문서에 남아 있는 2.2.0·과거 브랜치 안내는 당시의 기록이다.
@@ -73,6 +78,8 @@ psql -h localhost -p 5432 -U eumi_app -d eumi -W -v ON_ERROR_STOP=1 -1 -f ../db/
 
 ## 환경변수
 
+AI1은 local에서 기본 `eumi.ai.mode=fake`다. prod는 `EUMI_AI_MODE`를 반드시 명시하고 운영 Compose가 해당 변수를 전달해야 한다. 시연은 fake, 실제 AI 전환은 http를 선택한다. HTTP 모드에는 AI 실행 제한·BE 여유·무응답 판정·취소 대기를 모두 명시해야 한다. 현재 실제 AI 실행 제한은 미확정이며 Fake 기본값은 개발 검증용이다. 설정 표와 `EUMI_AI_*` 변수는 [AI1 인계](docs/ai1/README.md)를 참고한다.
+
 | 이름 | 용도 | local 기본 | prod |
 |---|---|---|---|
 | DB_URL | JDBC 주소 | localhost:5432/eumi | 필수 |
@@ -101,4 +108,4 @@ SMTP 연결·읽기·쓰기 타임아웃은 각 5000ms다. prod는 필수 값의
 - 제한 세션은 `/auth/me`, `/auth/logout`, `/members/me/password`와 Health·CSRF 준비만 통과한다. `/auth/me`는 최신 활성 회원을 재조회하며, 탈퇴·임시 암호 만료라면 현재 세션을 무효화하고 401을 반환한다.
 - 11/3 사용자 결정에 따라 제한 세션의 재로그인은 403을 유지한다. 먼저 로그아웃한 뒤 다른 계정으로 로그인한다. API-08 설명·오류 목록·403 응답과 예제에 `PASSWORD_CHANGE_REQUIRED`를 반영했다. 비밀번호 변경 후 현재 로그인을 유지하는 API-32 계약과는 별개다.
 - A2/A3는 `MailService`의 SMTP 실패를 트랜잭션에 연결한다. 현재 기반만으로 DB·메일 원자성이나 발급 롤백을 검증했다고 해석하지 않는다.
-- AI1은 사용자가 `feat/be-agent`를 준비한 뒤 시작한다. 현재 A1 보완 브랜치는 `fix/be-login-review`다.
+- AI1은 `feat/be-agent`에서 구현했다. FE는 질문 202 뒤 after=questionId로 1초마다 조회하고 완료·실패·취소에서 멈춘다. 병합 전 Claude Code 리뷰를 받는다.
