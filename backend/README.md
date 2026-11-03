@@ -9,6 +9,7 @@ Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. G1 B0~B4 �
 - [G1 구현 결정](docs/g1/decisions.md)
 - [G1 검증 결과와 재현 방법](docs/g1/verification.md)
 - [A1 구현·검증·MR 인계](docs/a1/README.md)
+- [11월 3일 A1 리뷰 후속 보완](docs/a1/2026-11-03_review-follow-up.md)
 - [협업 규칙](../CONTRIBUTING.md), [인증 결정](../docs/decisions/login-sse.md), [로컬 DB·메일](../infra/README.md)
 
 최종 API 계약은 이 작업 폴더의 [docs/api/openapi.json](../docs/api/openapi.json) 2.3.0이다. AI는 [ai-agent-panel.md](../docs/api/ai-agent-panel.md)의 A 방식이 기준이다. 저장소 밖 `공통_응답_및_세션_규칙.md`와 `구현_트랜잭션_가이드.md`도 함께 읽되, 폐기된 SSE·AI 실행 계약을 적용하지 않는다. G1 문서에 남아 있는 2.2.0·과거 브랜치 안내는 당시의 기록이다.
@@ -66,6 +67,8 @@ psql -h localhost -p 5432 -U eumi_app -d eumi -W -v ON_ERROR_STOP=1 -1 -f ../db/
 
 운영은 해당 환경의 연결 정보와 권한으로 실행한다. Flyway seed 마운트 활성화는 인프라 담당 범위다. 기관은 이름·관할 코드·공식 도메인이 같으면 다시 만들지 않고, 회원은 이메일 충돌 시 `ON CONFLICT DO NOTHING`으로 암호·프로필·탈퇴 상태를 보존한다. ID를 명시하지 않아 IDENTITY 시퀀스 수동 보정은 필요 없다. Flyway repeatable seed처럼 직렬 실행한다.
 
+기관의 예상치 않은 PK 충돌은 오류로 드러내며 회원도 이메일 중복만 건너뛴다. 운영에서 명시적 ID 적재 후 시퀀스를 보정하지 않은 문제를 seed가 조용히 숨기거나 자동 보정하지 않는다.
+
 가상 기관은 강남구 `11680`·춘천시 `51110` 관할이며 공식 도메인은 각각 `demo-gangnam.eumi.test`·`demo-chuncheon.eumi.test`다. 기관별 이메일의 로컬 부분은 `demo1`·`demo2`이다. 네 계정은 같은 시연 암호를 서로 다른 salt로 해시했다. 평문은 사용자에게만 전달한다. 기존 계정이 암호를 바꾼 경우 seed를 재실행해도 그 암호가 유지된다.
 
 ## 환경변수
@@ -93,7 +96,9 @@ SMTP 연결·읽기·쓰기 타임아웃은 각 5000ms다. prod는 필수 값의
 - 일반 JSON 성공은 `ApiResponse.of(data, request)`를 사용한다. Health와 204, SSE·파일 응답을 감싸지 않는다.
 - 업무 오류는 안정적인 코드와 필드 오류를 사용한다. 응답·로그에 암호·코드·가입 증명·SQL·예외 원문을 넣지 않는다.
 - A1은 활성 회원·암호·임시 암호 만료를 확인한 뒤 `SessionAuthenticationSupport.establish`를 호출한다. member_id 문자열 principal, 세션 ID 교체, 명시적 SecurityContext 저장과 기존 CSRF 정리를 수행한다. 회원 없음·탈퇴·암호 불일치·임시 암호 만료는 동일한 `INVALID_CREDENTIALS` 401이다.
+- 로그인 해시 비교는 트랜잭션 밖에서 실행하고 `/auth/me`의 최신 프로필 조회에만 읽기 전용 트랜잭션을 지정한다.
 - A3의 다른 세션·전체 세션 폐기와 암호 변경 트랜잭션 순서는 후속 작업이다.
 - 제한 세션은 `/auth/me`, `/auth/logout`, `/members/me/password`와 Health·CSRF 준비만 통과한다. `/auth/me`는 최신 활성 회원을 재조회하며, 탈퇴·임시 암호 만료라면 현재 세션을 무효화하고 401을 반환한다.
+- 11/3 사용자 결정에 따라 제한 세션의 재로그인은 403을 유지한다. 먼저 로그아웃한 뒤 다른 계정으로 로그인한다. API-08 오류 목록의 `PASSWORD_CHANGE_REQUIRED` 누락은 계약 담당자가 문서에 반영해야 한다. 비밀번호 변경 후 현재 로그인을 유지하는 API-32 계약과는 별개다.
 - A2/A3는 `MailService`의 SMTP 실패를 트랜잭션에 연결한다. 현재 기반만으로 DB·메일 원자성이나 발급 롤백을 검증했다고 해석하지 않는다.
 - AI1은 사용자가 `feat/be-agent`를 준비한 뒤 시작한다. 현재 `feat/be-login`에서 AI API를 구현하지 않는다.

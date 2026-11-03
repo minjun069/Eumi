@@ -52,6 +52,15 @@ class ProductionConfigurationTests {
         runner(variables).run(context -> assertThat(context).hasFailed());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"SMTP_HOST", "SMTP_PORT", "SMTP_AUTH", "SMTP_STARTTLS_ENABLED",
+            "EUMI_AUTH_HASH_KEY", "EUMI_MAIL_FROM"})
+    void eachRequiredProductionVariableMustNotBeEmpty(String variable) {
+        var variables = new HashMap<>(REQUIRED);
+        variables.put(variable, "");
+        runner(variables).run(context -> assertThat(context).hasFailed());
+    }
+
     @Test
     void completeProductionSettingsBindWithoutNetworkAccess() {
         runner(REQUIRED).run(context -> {

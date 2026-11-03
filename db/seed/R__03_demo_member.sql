@@ -1,5 +1,6 @@
 -- PBKDF2: 기본 id=pbkdf2, Spring Security v5_8 기본값. 평문은 저장하지 않는다.
 -- 탈퇴 상태·기존 암호·수정된 프로필도 ON CONFLICT DO NOTHING으로 보존한다.
+-- 이메일 중복만 건너뛴다. 시퀀스 불일치에 따른 PK 충돌은 오류로 드러낸다.
 INSERT INTO member (org_id, email_normalized, name, title, password_hash)
 SELECT organization.org_id, seed.email, seed.name, '사회복지사', seed.password_hash
 FROM (VALUES
@@ -14,4 +15,4 @@ JOIN LATERAL (
       AND jurisdiction_sigungu_code = seed.sigungu_code
     ORDER BY org_id LIMIT 1
 ) organization ON true
-ON CONFLICT DO NOTHING;
+ON CONFLICT (email_normalized) DO NOTHING;

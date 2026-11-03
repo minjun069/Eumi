@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 public class AuthService {
     private final AuthMemberRepository members;
     private final PasswordEncoder passwords;
@@ -22,6 +21,7 @@ public class AuthService {
         this.missingMemberHash = passwords.encode(UUID.randomUUID().toString());
     }
 
+    // JDBC 조회가 커넥션을 반환한 뒤 비용이 큰 PBKDF2 비교를 수행한다.
     public LoginUser authenticate(LoginRequest request) {
         var member = members.findByEmail(request.email());
         boolean matches = matches(request.password(), member.map(AuthMemberRepository.Member::passwordHash)
@@ -32,6 +32,7 @@ public class AuthService {
         return member.get().user();
     }
 
+    @Transactional(readOnly = true)
     public LoginUser currentUser(long memberId) {
         return members.findById(memberId).filter(member -> member.canAuthenticate(Instant.now()))
                 .map(AuthMemberRepository.Member::user)
