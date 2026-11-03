@@ -21,6 +21,8 @@ server:
         secure: true
 
 eumi:
+  ai:
+    mode: ${EUMI_AI_MODE}
   auth:
     hash-key: ${EUMI_AUTH_HASH_KEY}
   mail:
