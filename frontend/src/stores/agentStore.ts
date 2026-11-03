@@ -1,99 +1,65 @@
 import { useSyncExternalStore } from "react"
-import {
-  AGENT_STREAM_EVENTS,
-  agentApi,
-  type AgentBlock,
-  type AgentRunState,
-  type AgentStreamEvent,
-  type ProgressStep,
-} from "@/api/agentApi"
+import { agentApi, type AgentMessage, type ConversationDetail } from "@/api/agentApi"
 import { errorMessage, isApiError } from "@/api/errors"
 import { sessionStore } from "@/session/sessionStore"
-import type { AgentContext } from "@/stores/agentContextStore"
 
-// AI Agent 패널 상태 (FR-071~076, SSE_이벤트_계약.md)
-// - 열림, 대화(질문·답변), 답을 받는 중인지. 로그인해 있는 동안 화면을 옮겨도 유지하고,
-//   로그아웃하거나 로그인 사용자가 바뀌면 비운다.
-// - 질문: POST /agent/runs(202) → eventsUrl을 EventSource로 열어 step → answer → done(또는 failed)을 받는다.
-// - 연결이 끊기면 브라우저가 Last-Event-ID를 붙여 같은 실행에 다시 잇는다. 연결이 닫혀 버리면
-//   GET /agent/runs/{runId}로 상태를 확인해 완료·실패를 반영하거나 같은 실행에 새로 연결한다.
-//   연결이 닫히지 않은 채 멈춘 경우에 대비해, 30초 동안 이벤트가 없으면 상태를 조회해 완료·실패를 반영한다.
-//   이미 받은 이벤트 id는 무시한다. 새 질문(POST)을 자동으로 다시 보내지 않는다.
-// - 새 대화의 conversationId는 실행을 만들 때 예약값으로 받고, done을 받은 뒤에만 다음 질문에 쓴다 (FR-076).
+// AI 에이전트 패널 상태 (FR-071~076, docs/api/ai-agent-panel.md)
+// - 대화 ID와 받은 행(messageId로 중복 없이, 오름차순)을 둔다. 실행 중 = 마지막 질문 행에 끝 행(완료·실패·취소)이 없음.
+// - 질문: POST /agent/questions(202) → 질문 행을 바로 붙이고 after=questionId부터 1초마다 조회 → 끝 행을 받으면 멈춘다.
+// - 조회가 실패해도 다음 조회가 마지막 id부터 이어 받는다 (재연결 처리 없음). 401은 공통 처리(로그아웃 → 대화 비움).
+// - 새로고침: 대화 ID만 sessionStorage에 두고(토큰·회원 ID가 아님) 로그인 복원 뒤 after=0으로 다시 그린다.
+//   로그아웃·사용자 전환 때 지운다.
+// - 패널을 열 때마다 한 번 조회해, 복원에 실패했거나 멈춘 조회를 이어 받는다.
 
-/** 서버 실행 제한(120초)보다 조금 길게: 이때까지 done·failed가 없으면 상태를 한 번 확인하고 끝낸다 */
-const RUN_TIMEOUT_MS = 150_000
-/** 같은 실행에 다시 연결하는 최대 횟수 */
-const MAX_RECONNECTS = 5
-const RECONNECT_DELAY_MS = 1_000
-/** 이벤트가 이만큼 오지 않으면 연결이 멈춘 것인지 상태를 조회해 본다 (서버 heartbeat 15초는 브라우저에 보이지 않음) */
-const STALL_MS = 30_000
-const STALL_CHECK_INTERVAL_MS = 10_000
+/** 실행 중 조회 간격 (ai-agent-panel.md 1장) */
+const POLL_INTERVAL_MS = 1_000
+// TODO(시간 값 미정, BE 설정 eumi.ai.*): FE는 따로 제한 시간을 두지 않는다.
+//   끝나지 않는 실행은 BE가 '질문 시각 + AI 실행 제한 + 여유 시간' 뒤에 실패 행을 써서 끝낸다.
+
+const STORAGE_KEY = "eumi.agent.conversationId"
 
 export const AGENT_MESSAGES = {
-  failed: "답변을 만들지 못했습니다.",
-  timeout: "응답 시간이 초과되어 답변을 만들지 못했습니다.",
-  lost: "답변 연결이 끊겼습니다. 다시 시도해 주세요.",
-  expired: "실행 정보가 만료되었습니다. 다시 시도해 주세요.",
+  failed: "답변을 만들지 못했어요",
+  cancelled: "중단했어요",
+  runActive: "이전 질문의 답변이 끝난 뒤 질문할 수 있어요",
+  notFound: "이전 대화를 찾을 수 없어 새 대화로 시작해요",
 } as const
-
-export type AgentStep = ProgressStep
-
-export type AssistantMessage = {
-  id: number
-  role: "assistant"
-  status: "streaming" | "done" | "failed"
-  /** 연결이 끊겨 같은 실행에 다시 잇는 중 */
-  reconnecting: boolean
-  steps: AgentStep[]
-  blocks: AgentBlock[]
-  error: string | null
-  /** 다시 시도·추천 카드 이동에 쓰는 질문 당시의 값 */
-  question: string
-  context: AgentContext
-}
-
-export type AgentMessage = { id: number; role: "user"; text: string } | AssistantMessage
 
 type AgentState = {
   open: boolean
-  /** 다음 질문에 붙일 확정 대화 ID (done을 받은 대화만) */
+  /** 이어서 질문할 대화 ID (첫 질문 전에는 null) */
   conversationId: string | null
+  /** 받은 행, messageId 오름차순 */
   messages: AgentMessage[]
-  busy: boolean
-  /** 이전 대화를 불러왔을 때 위쪽 안내 */
+  /** 마지막 질문에 끝 행이 아직 없음: 보내기를 막고 중단 버튼을 보인다 */
+  running: boolean
+  /** 질문을 보내고 202를 기다리는 중 */
+  sending: boolean
+  /** 중단을 요청하고 끝 행을 기다리는 중 */
+  cancelling: boolean
+  /** 입력칸 위 안내 (409·404·질문 실패) */
+  notice: string | null
+  /** 마이페이지에서 이전 대화를 불러왔을 때 위쪽 안내 */
   loadedFrom: { firstQuestion: string; lastMessageAt: string } | null
 }
 
-/** 마이페이지 대화 이력에서 불러오는 저장 대화 (API-37) */
-export type LoadedConversation = {
-  conversationId: string
-  firstQuestion: string
-  lastMessageAt: string
-  turns: { question: string; blocks: AgentBlock[]; progressSteps: AgentStep[] }[]
+const EMPTY: AgentState = {
+  open: false,
+  conversationId: null,
+  messages: [],
+  running: false,
+  sending: false,
+  cancelling: false,
+  notice: null,
+  loadedFrom: null,
 }
-
-type ActiveRun = {
-  messageId: number
-  runId: string
-  eventsUrl: string
-  source: EventSource | null
-  lastEventId: number
-  reconnects: number
-  timer: number | null
-  watchdog: number | null
-  lastActivity: number
-  checking: boolean
-}
-
-const EMPTY: AgentState = { open: false, conversationId: null, messages: [], busy: false, loadedFrom: null }
-
-/** 불러온 이전 대화의 답변: 추천 카드 이동에 쓰는 사례자 정보가 없다 (이름을 저장하지 않으므로) */
-const RESTORED_CONTEXT: AgentContext = { screen: { screenType: "other", path: "" }, label: "이전 대화" }
 
 let state: AgentState = EMPTY
-let sequence = 0
-let active: ActiveRun | null = null
+let timer: number | null = null
+/** 조회 요청이 나가 있는 중 (겹쳐 보내지 않음) */
+let polling = false
+/** 400·403으로 조회를 멈춤 (403 PASSWORD_CHANGE_REQUIRED 알림이 1초마다 뜨지 않게). 패널을 다시 열면 이어 간다 */
+let paused = false
 /** reset 뒤에 늦게 도착한 응답을 버리기 위한 세대 번호 */
 let generation = 0
 let ownerMemberId: number | null = sessionStore.getMemberId()
@@ -109,280 +75,245 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener)
 }
 
-function updateAssistant(id: number, patch: (message: AssistantMessage) => Partial<AssistantMessage>) {
-  setState({
-    messages: state.messages.map((message) =>
-      message.id === id && message.role === "assistant" ? { ...message, ...patch(message) } : message,
-    ),
-  })
+/** 끝 행: 질문마다 하나뿐이다 */
+export function isEndRow(message: AgentMessage): boolean {
+  return message.status === "완료" || message.status === "실패" || message.status === "취소"
 }
 
-function upsertStep(steps: AgentStep[], step: AgentStep): AgentStep[] {
-  return steps.some((item) => item.stepId === step.stepId)
-    ? steps.map((item) => (item.stepId === step.stepId ? step : item))
-    : [...steps, step]
-}
-
-/** 실행을 끝낸다: 연결·타이머 정리 */
-function stop(run: ActiveRun) {
-  run.source?.close()
-  run.source = null
-  if (run.timer !== null) window.clearTimeout(run.timer)
-  if (run.watchdog !== null) window.clearInterval(run.watchdog)
-  run.timer = null
-  run.watchdog = null
-  if (active === run) active = null
-}
-
-function complete(run: ActiveRun, conversationId: string) {
-  stop(run)
-  updateAssistant(run.messageId, () => ({ status: "done", reconnecting: false }))
-  setState({ busy: false, conversationId })
-}
-
-function fail(run: ActiveRun | null, messageId: number, error: string) {
-  if (run) stop(run)
-  updateAssistant(messageId, () => ({ status: "failed", reconnecting: false, error }))
-  setState({ busy: false })
-}
-
-function apply(run: ActiveRun, event: AgentStreamEvent) {
-  switch (event.event) {
-    case "step":
-      updateAssistant(run.messageId, (message) => ({ steps: upsertStep(message.steps, event.data) }))
-      return
-    case "answer":
-      updateAssistant(run.messageId, () => ({ blocks: event.data.blocks ?? [] }))
-      return
-    case "done":
-      complete(run, event.data.conversationId)
-      return
-    case "failed":
-      fail(run, run.messageId, event.data.message || AGENT_MESSAGES.failed)
-      return
-  }
-}
-
-/** 상태 조회 결과(API-03-S2)를 반영한다. 끝났으면 true */
-function applyState(run: ActiveRun, result: AgentRunState): boolean {
-  updateAssistant(run.messageId, () => ({ steps: result.progressSteps, blocks: result.blocks }))
-  if (result.status === "completed") {
-    complete(run, result.conversationId)
-    return true
-  }
-  if (result.status === "failed") {
-    fail(run, run.messageId, result.errorMessage || AGENT_MESSAGES.failed)
-    return true
+/** 마지막 질문 행에 끝 행이 없으면 실행 중 */
+function isRunning(messages: AgentMessage[]): boolean {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const question = messages[index]
+    if (question.status !== "질문") continue
+    return !messages.some((message) => message.questionId === question.messageId && isEndRow(message))
   }
   return false
 }
 
-function connect(run: ActiveRun) {
-  if (active !== run) return
-  const source = new EventSource(run.eventsUrl)
-  run.source = source
+function lastMessageId(): number {
+  return state.messages.length === 0 ? 0 : state.messages[state.messages.length - 1].messageId
+}
 
-  for (const name of AGENT_STREAM_EVENTS) {
-    source.addEventListener(name, (event: MessageEvent<string>) => {
-      if (active !== run) return
-      run.lastActivity = Date.now()
-      // 이미 받은 이벤트는 무시한다 (다시 연결했을 때 서버가 처음부터 보내도 안전)
-      const id = Number(event.lastEventId)
-      if (Number.isFinite(id) && id > 0) {
-        if (id <= run.lastEventId) return
-        run.lastEventId = id
-      }
-      let data: unknown
-      try {
-        data = JSON.parse(event.data)
-      } catch {
-        return
-      }
-      apply(run, { event: name, data } as AgentStreamEvent)
-    })
-  }
+/** 받은 행을 messageId 기준으로 합친다 (같은 id면 서버 값으로 바꾼다) */
+function merge(rows: AgentMessage[]) {
+  if (rows.length === 0) return
+  const byId = new Map(state.messages.map((message) => [message.messageId, message]))
+  for (const row of rows) byId.set(row.messageId, row)
+  const messages = [...byId.values()].sort((a, b) => a.messageId - b.messageId)
+  const running = isRunning(messages)
+  setState({ messages, running, cancelling: running && state.cancelling })
+}
 
-  source.onopen = () => {
-    if (active !== run) return
-    run.lastActivity = Date.now()
-    updateAssistant(run.messageId, () => ({ reconnecting: false }))
-  }
-
-  source.onerror = () => {
-    if (active !== run) return
-    run.reconnects += 1
-    updateAssistant(run.messageId, () => ({ reconnecting: true }))
-    // 연결이 닫혔거나(서버가 401·410 등으로 거절) 너무 여러 번 끊기면 상태를 직접 확인한다.
-    // 그 밖에는 브라우저가 Last-Event-ID를 붙여 같은 실행에 다시 연결한다.
-    if (source.readyState === EventSource.CLOSED || run.reconnects > MAX_RECONNECTS) void recover(run)
+function storeConversationId(conversationId: string | null) {
+  try {
+    if (conversationId) sessionStorage.setItem(STORAGE_KEY, conversationId)
+    else sessionStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // 저장소를 못 쓰면 새로고침 때 대화를 다시 그리지 못할 뿐이다
   }
 }
 
-async function recover(run: ActiveRun) {
-  run.source?.close()
-  run.source = null
-  const messageId = run.messageId
+function storedConversationId(): string | null {
   try {
-    const result = await agentApi.getRun(run.runId)
-    if (active !== run) return
-    if (applyState(run, result)) return
-    if (run.reconnects > MAX_RECONNECTS) {
-      fail(run, messageId, AGENT_MESSAGES.lost)
+    return sessionStorage.getItem(STORAGE_KEY)
+  } catch {
+    return null
+  }
+}
+
+function schedulePoll(delay = POLL_INTERVAL_MS) {
+  if (timer !== null || polling || paused) return
+  timer = window.setTimeout(() => {
+    timer = null
+    void poll()
+  }, delay)
+}
+
+/** after=마지막 id로 한 번 조회해 붙이고, 아직 실행 중이면 1초 뒤 다시 조회한다 */
+async function poll() {
+  const conversationId = state.conversationId
+  if (!conversationId || polling) return
+  const pollGeneration = generation
+  polling = true
+  try {
+    const { messages } = await agentApi.getMessages(conversationId, lastMessageId())
+    if (pollGeneration !== generation) return
+    merge(messages)
+  } catch (error) {
+    if (pollGeneration !== generation) return
+    if (isApiError(error) && error.status === 404) {
+      restart()
       return
     }
-    // 아직 실행 중: 같은 실행에 새로 연결한다
-    window.setTimeout(() => connect(run), RECONNECT_DELAY_MS)
-  } catch (error) {
-    if (active !== run) return
-    // 401이면 공통 처리(로그인 화면으로)가 대화를 비운다
-    fail(run, messageId, isApiError(error) && error.status === 410 ? AGENT_MESSAGES.expired : errorMessage(error))
-  }
-}
-
-/** 이벤트가 한동안 없으면 상태를 조회한다: 이미 끝났으면 반영하고, 아직 실행 중이면 계속 기다린다 */
-async function checkStalled(run: ActiveRun) {
-  if (active !== run || run.checking || Date.now() - run.lastActivity < STALL_MS) return
-  run.checking = true
-  try {
-    const result = await agentApi.getRun(run.runId)
-    if (active === run && !applyState(run, result)) run.lastActivity = Date.now()
-  } catch (error) {
-    if (active === run && isApiError(error) && error.status === 410) fail(run, run.messageId, AGENT_MESSAGES.expired)
+    // 401은 공통 처리가 로그아웃시키며 대화를 비운다. 400·403은 매초 되풀이하지 않고 멈춘다.
+    // 그 밖(통신 오류·5xx·429)은 다음 조회가 마지막 id부터 이어 받는다
+    if (isApiError(error) && (error.status === 400 || error.status === 403)) paused = true
   } finally {
-    run.checking = false
+    if (pollGeneration === generation) polling = false
   }
+  if (pollGeneration === generation && state.running) schedulePoll()
 }
 
-async function timeout(run: ActiveRun) {
-  if (active !== run) return
-  run.source?.close()
-  run.source = null
-  try {
-    const result = await agentApi.getRun(run.runId)
-    if (active !== run || applyState(run, result)) return
-  } catch {
-    // 아래에서 시간 초과로 끝낸다
-  }
-  if (active === run) fail(run, run.messageId, AGENT_MESSAGES.timeout)
+/** 대화가 없어졌을 때(404): 새 대화로 초기화하고 알린다 */
+function restart() {
+  storeConversationId(null)
+  agentStore.reset({ keepOpen: true })
+  setState({ notice: AGENT_MESSAGES.notFound })
 }
 
-async function run(question: string, context: AgentContext) {
-  const messageId = ++sequence
-  const runGeneration = generation
-  setState({
-    busy: true,
-    messages: [
-      ...state.messages,
-      { id: messageId, role: "assistant", status: "streaming", reconnecting: false, steps: [], blocks: [], error: null, question, context },
-    ],
-  })
-
+async function send(question: string): Promise<boolean> {
+  const sendGeneration = generation
+  setState({ sending: true, notice: null })
   try {
-    const created = await agentApi.createRun({ conversationId: state.conversationId, question, screen: context.screen })
-    if (runGeneration !== generation) return
-    const next: ActiveRun = {
-      messageId,
-      runId: created.runId,
-      eventsUrl: created.eventsUrl,
-      source: null,
-      lastEventId: 0,
-      reconnects: 0,
-      timer: null,
-      watchdog: null,
-      lastActivity: Date.now(),
-      checking: false,
-    }
-    active = next
-    next.timer = window.setTimeout(() => void timeout(next), RUN_TIMEOUT_MS)
-    next.watchdog = window.setInterval(() => void checkStalled(next), STALL_CHECK_INTERVAL_MS)
-    connect(next)
+    const created = await agentApi.ask({ conversationId: state.conversationId, question })
+    if (sendGeneration !== generation) return false
+    storeConversationId(created.conversationId)
+    setState({ conversationId: created.conversationId, sending: false, loadedFrom: null })
+    // 질문 행은 다시 받지 않으므로(after=questionId) 입력한 문장으로 바로 붙인다.
+    // 새로고침하면(after=0) 서버가 개인정보를 가려 저장한 문장으로 보인다
+    merge([
+      {
+        messageId: created.questionId,
+        questionId: null,
+        role: "Member",
+        status: "질문",
+        content: question,
+        details: null,
+        artifacts: null,
+        createdAt: new Date().toISOString(),
+      },
+    ])
+    paused = false
+    schedulePoll()
+    return true
   } catch (error) {
-    if (runGeneration !== generation) return
-    fail(null, messageId, errorMessage(error))
+    if (sendGeneration !== generation) return false
+    setState({ sending: false })
+    if (isApiError(error) && error.status === 404) {
+      restart()
+      return false
+    }
+    if (isApiError(error) && error.code === "RUN_ALREADY_ACTIVE") {
+      // 다른 탭 등에서 보낸 질문이 아직 실행 중: 마지막 id부터 조회하면 그 질문과 답이 붙는다
+      setState({ notice: AGENT_MESSAGES.runActive })
+      paused = false
+      void poll()
+      return false
+    }
+    setState({ notice: errorMessage(error) })
+    return false
   }
 }
 
 export const agentStore = {
   open() {
     setState({ open: true })
+    if (state.conversationId) {
+      paused = false
+      void poll()
+    }
   },
   close() {
     setState({ open: false })
   },
   toggle() {
-    setState({ open: !state.open })
+    if (state.open) agentStore.close()
+    else agentStore.open()
   },
 
-  /** 질문 보내기. 답을 받는 중이면 무시한다 (입력·예시 질문도 막혀 있음, FR-073) */
-  ask(question: string, context: AgentContext) {
+  /** 질문 보내기. 실행 중·보내는 중이면 무시한다 (입력·예시 질문도 막혀 있음, FR-073). 질문이 저장되면(202) true */
+  ask(question: string): Promise<boolean> {
     const text = question.trim()
-    if (!text || state.busy) return
-    setState({ messages: [...state.messages, { id: ++sequence, role: "user", text }] })
-    void run(text, context)
+    if (!text || state.running || state.sending) return Promise.resolve(false)
+    return send(text)
   },
 
-  /** 실패한 답변을 같은 질문·화면으로 다시 받는다 (사용자가 누를 때만 새 실행을 만든다) */
-  retry(messageId: number) {
-    const failed = state.messages.find((message) => message.id === messageId)
-    if (!failed || failed.role !== "assistant" || failed.status !== "failed" || state.busy) return
-    setState({ messages: state.messages.filter((message) => message.id !== messageId) })
-    void run(failed.question, failed.context)
+  /** 실패한 질문을 같은 대화에 새 질문으로 다시 보낸다 (사용자가 누를 때만) */
+  retry(questionMessageId: number) {
+    const question = state.messages.find((message) => message.messageId === questionMessageId && message.status === "질문")
+    if (question?.content) void agentStore.ask(question.content)
   },
 
-  /** '새 대화': 지금 대화를 비운다 (완료된 대화는 이미 저장되어 있음). 답을 받는 중이면 무시 */
+  /** 중단: 취소 행은 조회로 받는다. 취소와 완료가 겹치면 먼저 저장된 끝 행만 남는다 */
+  async cancel() {
+    const conversationId = state.conversationId
+    if (!conversationId || !state.running || state.cancelling) return
+    const cancelGeneration = generation
+    setState({ cancelling: true, notice: null })
+    try {
+      await agentApi.cancel(conversationId)
+      if (cancelGeneration !== generation) return
+      paused = false
+      schedulePoll(0)
+    } catch (error) {
+      if (cancelGeneration !== generation) return
+      if (isApiError(error) && error.status === 404) {
+        restart()
+        return
+      }
+      setState({ cancelling: false, notice: errorMessage(error) })
+    }
+  },
+
+  /** '새 대화': 지금 대화를 비운다 (대화는 이미 서버에 저장되어 있음). 실행 중이면 무시 */
   newConversation() {
-    if (state.busy) return
-    setState({ conversationId: null, messages: [], loadedFrom: null })
+    if (state.running || state.sending) return
+    storeConversationId(null)
+    agentStore.reset({ keepOpen: true })
   },
 
-  /** 마이페이지에서 고른 이전 대화를 패널에 불러와 연다 (FR-069). 답을 받는 중이면 false */
-  loadConversation(conversation: LoadedConversation): boolean {
-    if (state.busy) return false
-    const messages: AgentMessage[] = conversation.turns.flatMap((turn): AgentMessage[] => [
-      { id: ++sequence, role: "user", text: turn.question },
-      {
-        id: ++sequence,
-        role: "assistant",
-        status: "done",
-        reconnecting: false,
-        steps: turn.progressSteps,
-        blocks: turn.blocks,
-        error: null,
-        question: turn.question,
-        context: RESTORED_CONTEXT,
-      },
-    ])
+  /** 마이페이지에서 고른 이전 대화(API-37)를 패널에 불러와 연다 (FR-069). 실행 중이면 false */
+  loadConversation(conversation: ConversationDetail): boolean {
+    if (state.running || state.sending) return false
+    agentStore.reset()
+    storeConversationId(conversation.conversationId)
     setState({
       open: true,
       conversationId: conversation.conversationId,
-      messages,
       loadedFrom: { firstQuestion: conversation.firstQuestion, lastMessageAt: conversation.lastMessageAt },
     })
+    merge(conversation.messages)
+    if (state.running) schedulePoll()
     return true
   },
 
   /** 대화 기록을 지웠을 때: 패널에 열려 있던 대화면 비운다 (FR-070) */
   forget(conversationId: string) {
     if (state.conversationId !== conversationId) return
+    storeConversationId(null)
     agentStore.reset({ keepOpen: true })
   },
 
-  /** 대화를 비운다. 받는 중인 실행의 연결도 닫는다 (서버 실행 취소는 하지 않음) */
+  /** 대화를 비우고 조회를 멈춘다 (서버 실행 취소는 하지 않음). 저장한 대화 ID는 부른 쪽이 정리한다 */
   reset({ keepOpen = false }: { keepOpen?: boolean } = {}) {
     generation += 1
-    if (active) stop(active)
+    if (timer !== null) window.clearTimeout(timer)
+    timer = null
+    polling = false
+    paused = false
     state = { ...EMPTY, open: keepOpen && state.open }
     listeners.forEach((listener) => listener())
   },
 }
 
-// 로그아웃하거나 로그인 사용자가 바뀌면 대화를 비우고 패널을 닫는다 (FR-071)
+// 로그아웃하거나 로그인 사용자가 바뀌면 대화를 비우고 저장한 대화 ID도 지운다 (FR-071).
+// 로그인하지 않은 상태에서 회원이 정해질 때(새로고침 뒤 복원)만 저장한 대화를 after=0으로 다시 그린다
 sessionStore.subscribe(() => {
+  if (sessionStore.getState().status === "anonymous") storeConversationId(null)
   const memberId = sessionStore.getMemberId()
-  if (memberId !== ownerMemberId) {
-    ownerMemberId = memberId
-    agentStore.reset()
+  if (memberId === ownerMemberId) return
+  const switched = ownerMemberId !== null
+  ownerMemberId = memberId
+  agentStore.reset()
+  if (memberId === null) return
+  if (switched) {
+    storeConversationId(null)
+    return
   }
+  const conversationId = storedConversationId()
+  if (!conversationId) return
+  setState({ conversationId })
+  void poll()
 })
 
 export function useAgentState(): AgentState {

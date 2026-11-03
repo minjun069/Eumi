@@ -6,7 +6,7 @@ import type { FieldError } from "@/api/types"
 // - 같은 출처 /api 아래 상대 경로로 부른다. 로그인은 SESSION 쿠키(HttpOnly)로만 유지하고 토큰을 저장하지 않는다.
 // - 성공 { success:true, data, meta } → data만 돌려준다. 204는 본문을 읽지 않는다.
 // - 실패는 ApiError로 던진다. 401은 로그인 만료, 403 PASSWORD_CHANGE_REQUIRED는 비밀번호 변경 화면으로 보낸다.
-// - /health와 SSE(EventSource)는 공통 응답 모양이 아니라서 이 클라이언트를 쓰지 않는다.
+// - /health는 공통 응답 모양이 아니라서 이 클라이언트를 쓰지 않는다.
 
 const BASE_PATH = "/api"
 

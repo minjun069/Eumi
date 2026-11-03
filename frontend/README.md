@@ -17,7 +17,18 @@ npm run typecheck
 npm run build
 ```
 
-로그인 상태 복원(`GET /api/auth/me`)이 backend를 부르므로, 화면을 확인하려면 backend와 `infra/` 로컬 DB를 함께 띄운다.
+로그인 상태 복원(`GET /api/auth/me`)이 backend를 부르므로, 화면을 확인하려면 API 서버가 하나 떠 있어야 한다.
+
+- **실제 API**: backend(8080)와 `infra/` 로컬 DB를 띄운 뒤 `npm run dev`.
+- **가짜 API**: 저장소 밖 `mock-api.mjs`를 8081에 띄우고(`node mock-api.mjs`), `/api` 프록시 대상을 `VITE_API_TARGET`으로 바꾼다. 로그인은 `http://localhost:5173/api/__dev-login`.
+
+```bash
+VITE_API_TARGET=http://localhost:8081 npm run dev
+```
+
+```powershell
+$env:VITE_API_TARGET="http://localhost:8081"; npm run dev
+```
 
 ## 구조
 
@@ -27,9 +38,9 @@ npm run build
 | `src/api/csrf.ts` | `GET /api/auth/csrf`로 `XSRF-TOKEN` 쿠키 준비, 변경 요청에 `X-XSRF-TOKEN` 헤더 |
 | `src/api/errors.ts` | `ApiError`, 통신 오류·프록시 HTML·429·413 처리 문구 |
 | `src/api/queryClient.ts` | TanStack Query 기본값 (4xx 재시도 안 함, 변경 요청 재시도 안 함) |
-| `src/api/schema.d.ts` | OpenAPI 2.2.0에서 자동 생성한 타입. 직접 고치지 않는다 |
+| `src/api/schema.d.ts` | OpenAPI 2.3.0에서 자동 생성한 타입. 직접 고치지 않는다 |
 | `src/api/types.ts` | 화면에서 쓰는 응답 타입 별칭 |
-| `src/api/*Api.ts` | API 묶음 (지금은 `authApi`: 로그인·로그인 상태 조회·로그아웃) |
+| `src/api/*Api.ts` | API 묶음 (지금은 `authApi`: 로그인·로그인 상태 조회·로그아웃, `agentApi`: AI 패널 질문·조회·중단) |
 | `src/session/` | 로그인 상태(`sessionStore`), 복원·로그아웃·401 처리(`sessionActions`) |
 | `src/components/` | 레이아웃(헤더·메뉴), 로그인 필요 화면 보호, 확인 창·알림·빈 상태·입력 부품 |
 | `src/screens/` | 화면 (`auth/` 로그인), `placeholder/` '준비 중' 화면과 화면별 예정 내용 |
@@ -38,7 +49,7 @@ npm run build
 ## 규칙
 
 - 로그인은 서버 세션(`SESSION` 쿠키, HttpOnly)으로만 유지한다. 회원 ID·토큰을 브라우저 저장소에 넣지 않는다.
-- API는 `api.get/post/put/patch/delete`로만 부른다. 화면에서 `fetch`를 직접 쓰지 않는다 (예외: SSE는 `EventSource`).
+- API는 `api.get/post/put/patch/delete`로만 부른다. 화면에서 `fetch`를 직접 쓰지 않는다.
 - 응답 타입은 `src/api/types.ts`에서 `Schemas`·`SuccessData`로 꺼내 쓴다.
 - 401을 받으면 로그인 화면으로, 403 `PASSWORD_CHANGE_REQUIRED`를 받으면 비밀번호 변경 화면으로 간다 (`sessionActions`).
 - 로그아웃·사용자 전환 때 Query 캐시를 비운다 (`sessionStore.signOut`).

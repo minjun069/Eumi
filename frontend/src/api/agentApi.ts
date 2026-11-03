@@ -1,31 +1,27 @@
 import { api } from "@/api/http"
 import type { Schemas, SuccessData } from "@/api/types"
 
-// AI Agent 실행 API (API-03·03-S1·03-S2, SSE_이벤트_계약.md)
-// 1) POST /agent/runs 로 실행을 만들고(202) → 2) eventsUrl을 EventSource로 연다 → 3) 끊기면 GET /agent/runs/{runId}로 상태 확인.
-// 이벤트 스트림(EventSource)은 공통 응답 모양이 아니라서 api 클라이언트를 쓰지 않는다 (stores/agentStore.ts).
+// AI 에이전트 패널 API (API-03·03-S1·03-S2, docs/api/ai-agent-panel.md)
+// 질문을 보내면(202) 1초마다 마지막으로 받은 행 이후를 조회해 붙이고, 끝 행(완료·실패·취소)을 받으면 멈춘다 (stores/agentStore.ts).
 
-export type AgentScreen = Schemas["AgentScreen"]
-export type AgentRunRequest = Schemas["AgentRunRequest"]
-export type AgentRunCreated = SuccessData<"AgentRunCreated_Success">
-export type AgentRunState = SuccessData<"AgentRunState_Success">
-export type AgentBlock = Schemas["SavedAgentBlock"]
-export type RecommendationCard = Schemas["SavedRecommendationCard"]
-export type ProgressStep = Schemas["SavedProgressStep"]
+export type AgentQuestionRequest = Schemas["AgentQuestionRequest"]
+export type AgentQuestionCreated = SuccessData<"AgentQuestionCreated_Success">
+export type AgentMessageList = SuccessData<"AgentMessages_Success">
+/** ai_message 한 행 (질문·진행·완료·실패·취소) */
+export type AgentMessage = Schemas["AgentMessage"]
+/** 마이페이지에서 고른 대화 전체 (API-37) */
+export type ConversationDetail = SuccessData<"agentApi_getConversation_Success">
 
-/** SSE 이벤트의 data (SSE_이벤트_계약.md). id는 run 안에서 1씩 늘어나는 정수 */
-export type AgentStreamEvent =
-  | { event: "step"; data: ProgressStep }
-  | { event: "answer"; data: { blocks: AgentBlock[] } }
-  | { event: "done"; data: { conversationId: string; turnId: number } }
-  | { event: "failed"; data: { code: string; message: string } }
-
-export const AGENT_STREAM_EVENTS = ["step", "answer", "done", "failed"] as const
+const conversationPath = (conversationId: string) => `/agent/conversations/${encodeURIComponent(conversationId)}`
 
 export const agentApi = {
-  /** API-03 POST /agent/runs — 202. 대화당 실행은 하나(409 RUN_ALREADY_ACTIVE) */
-  createRun: (request: AgentRunRequest) => api.post<AgentRunCreated>("/agent/runs", request),
+  /** API-03 POST /agent/questions — 202. 끝 행 없는 질문이 있으면 409 RUN_ALREADY_ACTIVE, 남의·만료 대화 404 */
+  ask: (request: AgentQuestionRequest) => api.post<AgentQuestionCreated>("/agent/questions", request),
 
-  /** API-03-S2 GET /agent/runs/{runId} — 같은 실행의 상태 (연결이 끊겼을 때 복구용). 실행이 사라졌으면 410 */
-  getRun: (runId: string) => api.get<AgentRunState>(`/agent/runs/${encodeURIComponent(runId)}`),
+  /** API-03-S1 GET /agent/conversations/{id}/messages — after보다 큰 행을 오름차순으로. 처음부터는 after=0 */
+  getMessages: (conversationId: string, after: number) =>
+    api.get<AgentMessageList>(`${conversationPath(conversationId)}/messages`, { query: { after } }),
+
+  /** API-03-S2 POST /agent/conversations/{id}/cancel — 204, 이미 끝났어도 204. 취소 행은 조회로 받는다 */
+  cancel: (conversationId: string) => api.post<void>(`${conversationPath(conversationId)}/cancel`),
 }

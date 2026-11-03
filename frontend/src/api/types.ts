@@ -1,6 +1,6 @@
 import type { components } from "@/api/schema"
 
-// API 요청·응답 타입은 OpenAPI 2.2.0(src/api/schema.d.ts, 자동 생성)에서 꺼내 쓴다.
+// API 요청·응답 타입은 OpenAPI 2.3.0(src/api/schema.d.ts, 자동 생성)에서 꺼내 쓴다.
 // 화면 코드에서 응답 모양을 직접 다시 정의하지 않는다.
 
 export type Schemas = components["schemas"]
