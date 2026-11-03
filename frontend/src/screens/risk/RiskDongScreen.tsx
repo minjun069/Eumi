@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/common/EmptyState"
 import { FieldError } from "@/components/common/FieldError"
 import { PATHS } from "@/routes/paths"
 import { InsightReportView } from "@/screens/risk/InsightReportView"
-import { LoadError, Loading, MonthSelect, TableauViewPanel } from "@/screens/risk/RiskPanels"
+import { LoadError, Loading, MONTHS_UNAVAILABLE, MonthSelect, TableauViewPanel } from "@/screens/risk/RiskPanels"
 import {
   compactPeriod,
   DONG_PATTERN,
@@ -109,7 +109,14 @@ export function RiskDongScreen({ query, profile }: { query: RiskQuery & { dongCo
     if (!validDong) return <EmptyState {...NOT_FOUND_DONG} />
     if (months.isPending) return <Loading />
     if (months.isError) {
-      if (isNotFound(months.error)) return <EmptyState {...NOT_FOUND_DONG} />
+      if (isNotFound(months.error)) {
+        return (
+          <EmptyState
+            title={MONTHS_UNAVAILABLE}
+            description="'이전으로'를 눌러 시군구 화면에서 다시 확인하거나 잠시 후 다시 시도해 주세요."
+          />
+        )
+      }
       return <LoadError message={errorMessage(months.error)} onRetry={() => void months.refetch()} />
     }
     if (loaded.length === 0) return <EmptyState title="적재된 분석 데이터가 없습니다." />

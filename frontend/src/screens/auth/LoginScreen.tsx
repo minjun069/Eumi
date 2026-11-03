@@ -3,16 +3,19 @@ import { useMutation } from "@tanstack/react-query"
 import { useState, type FormEvent } from "react"
 import { Link, Navigate, useLocation } from "react-router"
 import { authApi } from "@/api/authApi"
-import { errorMessage, fieldErrorMap } from "@/api/errors"
+import { errorMessage, fieldErrorMap, isApiError } from "@/api/errors"
 import { FieldError } from "@/components/common/FieldError"
 import { PasswordInput } from "@/components/common/PasswordInput"
 import { HOME_PATH, PATHS } from "@/routes/paths"
 import { clearSavedEmail, getSavedEmail, saveEmail } from "@/session/savedEmail"
-import { completeLogin } from "@/session/sessionActions"
+import { completeLogin, restoreSession } from "@/session/sessionActions"
 import { useSession } from "@/session/sessionStore"
+import { showToast } from "@/stores/toastStore"
 import { isValidEmail } from "@/utils/validation"
 
 type FieldErrors = { email?: string; password?: string }
+
+const RESTRICTED_SESSION = "임시 비밀번호로 로그인된 상태예요. 비밀번호를 변경하거나 로그아웃한 뒤 다시 로그인하세요."
 
 /**
  * 로그인 (FR-006·007·008, API-08)
@@ -43,6 +46,14 @@ export function LoginScreen() {
       completeLogin(user)
     },
     onError: (error) => {
+      // 이 브라우저가 이미 임시 비밀번호로 로그인된 제한 세션이면 서버가 새 로그인을 거절한다 (API-08 403).
+      // 그 세션을 다시 불러오면 비밀번호 변경 화면으로 간다. 다른 계정으로는 로그아웃한 뒤 로그인한다
+      if (isApiError(error) && error.code === "PASSWORD_CHANGE_REQUIRED") {
+        setLoginError(RESTRICTED_SESSION)
+        showToast(RESTRICTED_SESSION, "error")
+        void restoreSession()
+        return
+      }
       const fields = fieldErrorMap(error)
       if (fields.email || fields.password) setFieldErrors({ email: fields.email, password: fields.password })
       else setLoginError(errorMessage(error))
