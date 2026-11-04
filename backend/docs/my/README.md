@@ -1,11 +1,11 @@
 # 마이페이지 내 정보·담당 자원 구현·검증·MR 인계
 
-2026-11-04. 사용자 계획의 [1](11/5 예정)을 `feat/be-my`에서 선행 구현했다. 시작 커밋은 `caea75e`(복지자원 develop 병합)이며 브랜치는 사용자가 생성·이동했다. 구현·검사를 완료했고 commit·push·MR·병합은 사용자가 진행한다. 아래 결과는 이 작업 폴더의 코드 기준 실행 기록이다.
+2026-11-04 갱신. 사용자 계획의 [1](11/5 예정)을 `feat/be-my`에서 선행 구현했다. 시작 커밋은 `caea75e`(복지자원 develop 병합), 구현 커밋은 `2fbcae4417d340e611df83a2f59cfef76c4570b1`이다. 사용자가 브랜치 생성·이동과 구현 commit·push를 완료했고, 문서 갱신 시작 시 HEAD와 `origin/feat/be-my`가 일치했다. Claude Code 리뷰 결과 병합을 막는 결함은 없었다. 아래 검사 결과는 해당 구현을 대상으로 하며 문서 보완의 commit·push와 MR·병합은 사용자가 진행한다.
 
 ## 1. 작업 ID·API ID
 
 - 마이페이지 M1·M2: API-30 `GET /api/members/me`, API-31 `PATCH /api/members/me`, API-35 `GET /api/members/me/resources`.
-- 관련 Jira: S15P31B201-177 `[BE] 내 정보 조회·수정 구현`. API-35 전용 Jira 키는 별도로 지정받지 않았다. Jira 제목·상태를 읽기만 했으며 변경하지 않았다.
+- Jira: S15P31B201-177 `[BE] 내 정보 조회·수정 구현`(API-30·31), S15P31B201-228 `[BE] 내 담당 복지자원 확인`(API-35). 228은 사용자가 추가했으며 구현 커밋 본문에도 두 키가 들어 있다. 에이전트는 Jira를 조회만 했으며 등록·수정·상태 변경을 하지 않았다.
 - 기준 계약: 이 폴더의 `docs/api/openapi.json` 2.3.0, 공통 응답·세션 규칙, 트랜잭션 가이드, V1 회원·기관과 V2 지역 뷰, V3 복지자원 뷰.
 - 새 코드: `mypage/MyController`, `MyService`, `MyRepository`, `MyDtos`. 기존 `ResourceRepository`에는 본인 담당 자원 조회 메서드만 추가했다.
 
@@ -36,7 +36,7 @@
 
 ## 4. 실행한 검사와 결과
 
-JDK 21.0.11, Git Bash, 실제 공용 PostgreSQL localhost:5432(eumi_app, Asia/Seoul)과 기존 Mailpit을 사용했다. Docker Compose·Flyway·Git 쓰기 명령은 실행하지 않았다.
+Codex는 JDK 21.0.11, Git Bash, 실제 공용 PostgreSQL localhost:5432(eumi_app, Asia/Seoul)과 기존 Mailpit으로 아래 전체 검사를 실행했다. 에이전트는 Docker Compose·Flyway·Git 쓰기 명령을 실행하지 않았다. 이번 문서 보완에서는 코드를 변경하거나 검사를 재실행하지 않았다.
 
 ```bash
 cd /c/Users/SSAFY/Desktop/PJT3/S15P31B201/backend
@@ -48,10 +48,12 @@ export JAVA_HOME='C:/Program Files/Eclipse Adoptium/jdk-21.0.11.10-hotspot'
 
 | 구분 | 결과 | 범위 |
 |---|---|---|
-| DB 없는 단위/fixture 전체 | 124개 통과 | 기존 110 + MyPatchTests 14. 실패·오류·생략 0 |
-| 실제 DB·HTTP 통합 전체 | 163개 통과 | 기존 151 + MyIntegrationTests 12. 실패·오류·생략 0 |
-| bootJar | 통과 | 이번 main 코드가 포함된 실행 jar |
-| 실제 8080 jar HTTP | 통과 | 실제 A1 로그인, API-30 200·6개 필드·관할 전체 이름, API-31 200·생략 유지·null 비움·빈 phone 400, 최신 /auth/me·SESSION 유지, API-35 200·본인 미삭제 자원만 반환 |
+| Codex: DB 없는 단위/fixture 전체 | 124개 통과 | 기존 110 + MyPatchTests 14. 실패·오류·생략 0 |
+| Codex: 실제 DB·HTTP 통합 전체 | 163개 통과 | 기존 151 + MyIntegrationTests 12. 실패·오류·생략 0 |
+| Codex: bootJar | 통과 | 구현 커밋 2fbcae4의 main 코드가 포함된 실행 jar |
+| Codex: 실제 8080 jar HTTP | 통과 | 실제 A1 로그인, API-30 200·6개 필드·관할 전체 이름, API-31 200·생략 유지·null 비움·빈 phone 400, 최신 /auth/me·SESSION 유지, API-35 200·본인 미삭제 자원만 반환 |
+| Claude Code: 단위 선별 재실행 | 14개 통과 | MyPatchTests, 11/4 15:40 KST 보고. 실패·오류·생략 0 |
+| Claude Code: 실제 DB 통합 선별 재실행 | 12개 통과 | MyIntegrationTests, 같은 시점 보고. 실패·오류·생략 0 |
 | git diff --check | 통과 | 문서 포함 변경 공백 검사 |
 | FE 브라우저·운영 배포·Nginx·HTTPS | 미실행 | 후속 연동에서 확인 |
 
@@ -61,18 +63,31 @@ export JAVA_HOME='C:/Program Files/Eclipse Adoptium/jdk-21.0.11.10-hotspot'
 
 모든 데이터는 테스트에서 생성한 합성 기관·회원·자원이다. 세션은 해당 회원 principal로만 찾아 지우며 자원·회원·기관도 자체 소유 ID·marker로 정리한다. 공용 데이터·시퀀스 초기화나 되돌림은 없다. 실제 8080 검증 역시 메모리에서 합성 암호를 생성하고 자체 데이터·세션만 정리했다. 비밀번호·쿠키·세션 값·실제 개인정보를 파일·로그·보고에 남기지 않았다.
 
+Claude Code의 독립 리뷰·재실행 결과는 사용자가 전달한 보고를 기록했다. 대상 SHA는 위 구현 커밋이며 `caea75e..2fbcae4`의 9개 파일(+459/−1)이 예상 범위와 일치했다. 내 정보 조회·PATCH 검증·잠금·세션 유지·담당 자원 조회에 확인된 결함이나 선택적 코드 개선 사항은 없다는 판정이다. 검토 시 `origin/develop`은 `c451cfa`로 나아갔지만 해당 구간은 FE 변경뿐이며 backend·db·docs/api 변경은 없었다.
+
+Claude Code는 아래 두 검사만 독립 재실행했고 전체 검사·기존 ResourceIntegrationTests·bootJar·8080·FE 브라우저·운영 환경은 다시 검사하지 않았다. jar와 8080도 변경하지 않았다.
+
+```bash
+./gradlew.bat test --rerun --tests '*MyPatchTests' --console=plain
+./gradlew.bat integrationTest --rerun --tests '*MyIntegrationTests' --console=plain
+```
+
+선별 실행 전 Claude Code가 확인한 전체 XML은 11/4 15:17:13~15:18:20 KST의 124/163개 통과 결과였으며, 소스·class·커밋 시점을 대조해 구현 커밋의 코드에 해당함을 확인했다. 선별 실행 후 XML은 두 클래스 결과로 교체됐으므로 현재 XML을 전체 실행 결과로 취급하지 않는다. 실제 8080 흐름은 Codex 기록이며 Claude Code가 독립 검증한 결과는 아니다.
+
 검사 XML: `build/test-results/test/`, `build/test-results/integrationTest/`. HTML: `build/reports/tests/`. 실제 HTTP 보조 도구와 런타임 로그는 무시되는 build 아래에만 있다.
 
 ## 5. 남은 것·FE 인계
 
-- 새 jar를 local/Fake 모드로 8080에 실행해 두었다. 문서 작성 당시 PID 13768이며 이후 사용 시 포트·프로세스를 다시 확인한다.
+- Codex 검사 종료 당시 새 jar를 local/Fake 모드로 8080에 실행해 두었고 PID는 13768이었다. Claude Code는 이 서버를 변경하지 않았으며 이번 문서 보완에서도 기동 상태를 다시 확인하지 않았다. 이후 사용 시 실제 포트·프로세스를 다시 확인한다.
 - FE 확인: 로그인 → 내 정보 조회 → title만 수정하고 phone 유지 확인 → phone을 null로 비움 → 메뉴 프로필 재조회 → 담당 자원 탭에서 본인 담당만 표시되는지 확인. 빈 전화 입력은 FE가 null로 보내고 변경하지 않은 필드는 생략한다.
 - 담당 자원 응답은 페이지 객체가 아닌 totalCount·items다. 진행 중 우선이며 전체 목록을 반환한다. 공통 자원 목록의 ResourceListItem 타입을 그대로 사용한다.
+- 변경한 값이 없으면 FE는 PATCH를 보내지 않는다. 빈 객체는 VALIDATION_ERROR이며 fieldErrors는 빈 배열이다. 값 오류는 title·phone 필드 오류로 표시하고, PATCH 응답으로 내 정보와 메뉴 직함 캐시를 갱신하거나 `/auth/me`를 다시 조회한다.
+- 기관 데이터를 확대하거나 회원가입(API-04)을 열기 전, 기관의 관할 코드가 적재된 지역과 시도 이름 매핑에 존재하는지 인프라·데이터 담당이 확인한다. 매핑 누락·중복은 해당 기관 회원의 API-30 조회와 API-31 응답 재조회에서 500을 일으킬 수 있다. 이는 현재 시연 기관(11680·51110)에서 발견된 결함이 아닌 조건부 운영 주의 사항이다. 계약의 필수 jurisdictionName을 임의 값으로 대체하지 않는다.
 - FE 브라우저 연동과 운영 배포는 아직 확인하지 않았다. Jira 완료·MR 생성·병합은 사용자가 진행한다.
 - [2] API-36~38은 feat/be-conversations, [3] API-32는 feat/be-password에서 각각 별도 MR로 진행한다. 현재 브랜치에서 다음 단계 구현을 섞지 않는다. [3]은 Claude Code 리뷰 후 병합한다.
 
 제안 커밋 제목: `feat: [BE] 내 정보 조회·수정과 담당 자원 조회 구현`
 
-커밋 본문 마지막 줄: `Jira: S15P31B201-177`
+제안 커밋 본문 마지막 줄: `Jira: S15P31B201-177, S15P31B201-228`
 
 MR 대상: develop. 위 1~5절을 인계와 MR 설명으로 사용한다.
