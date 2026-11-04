@@ -1,10 +1,11 @@
+import "@/styles/list.css"
 import "@/styles/detail.css"
 import "@/styles/my.css"
 import { NavLink } from "react-router"
 import { PATHS } from "@/routes/paths"
+import { MyConversationsTab } from "@/screens/my/MyConversationsTab"
 import { MyInfoTab } from "@/screens/my/MyInfoTab"
 import { MyResourcesTab } from "@/screens/my/MyResourcesTab"
-import { PLACEHOLDERS } from "@/screens/placeholder/placeholders"
 
 const TABS = [
   { key: "info", label: "내 정보", to: PATHS.my },
@@ -41,22 +42,7 @@ export function MyPageScreen({ tab }: { tab: MyTab }) {
       </nav>
       {tab === "info" && <MyInfoTab />}
       {tab === "resources" && <MyResourcesTab />}
-      {tab === "conversations" && <PendingTab />}
+      {tab === "conversations" && <MyConversationsTab />}
     </section>
-  )
-}
-
-/** 아직 붙이지 않은 탭 (AI 대화 기록): '준비 중' 안내 */
-function PendingTab() {
-  const spec = PLACEHOLDERS.myConversations
-  return (
-    <div className="placeholder-card">
-      <p className="placeholder-stage">{spec.stage}에서 만들 탭입니다.</p>
-      <ul className="my-pending-list">
-        {spec.features.map((feature) => (
-          <li key={feature}>{feature}</li>
-        ))}
-      </ul>
-    </div>
   )
 }

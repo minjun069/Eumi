@@ -4,6 +4,7 @@ import type { AgentMessage } from "@/api/agentApi"
 import { EXAMPLE_QUESTIONS } from "@/components/agent/agentExamples"
 import { Emphasized } from "@/components/common/Emphasized"
 import { AGENT_MESSAGES, agentStore, isEndRow, useAgentState } from "@/stores/agentStore"
+import { formatDateTime } from "@/utils/datetime"
 
 /**
  * AI Agent 패널 (FR-071~079): 헤더의 AI 아이콘으로 열고, 본문 오른쪽 위를 덮는다.
@@ -60,7 +61,7 @@ export function AgentPanel() {
       <div className="agent-messages" ref={scrollRef}>
         {loadedFrom && (
           <p className="agent-loaded">
-            이전 대화를 불러왔어요 · 마지막 대화 {loadedFrom.lastMessageAt.slice(0, 16).replace("T", " ")}
+            이전 대화를 불러왔어요 · 마지막 대화 {formatDateTime(loadedFrom.lastMessageAt)}
             <br />
             이어서 질문하면 같은 대화에 저장돼요.
           </p>
