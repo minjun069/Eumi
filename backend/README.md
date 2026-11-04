@@ -1,6 +1,6 @@
 # 이음이 백엔드 실행과 공통 기반
 
-Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. G1 B0~B4 공통 기반, A1 로그인·최신 프로필·로그아웃, AI1 질문·조회·취소와 Fake AI 흐름, G1 지역·기관 회원 조회 API-39~42를 구현했다. 회원가입·암호 변경·대시보드 등은 후속 작업이다.
+Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. 공통 기반, A1 로그인·최신 프로필·로그아웃, AI1 Fake AI 패널, 지역·기관 회원 조회 API-39~42, 대시보드 API-10~12, 사례자·상담 API-19~29, 복지자원 API-13~17을 구현했다. 회원가입·암호 변경·내 담당 자원(API-35)은 후속 작업이다.
 
 ## 먼저 읽을 기록
 
@@ -11,6 +11,7 @@ Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. G1 B0~B4 �
 - [A1 구현·검증·MR 인계](docs/a1/README.md)
 - [11월 3일 A1 리뷰 후속 보완](docs/a1/2026-11-03_review-follow-up.md)
 - [지역·기관 회원 조회 API-39~42 구현·검증·MR 인계](docs/region/README.md)
+- [복지자원 API-13~17 구현·검증·MR 인계](docs/resources/README.md)
 - [AI1 구현·설정·검증·MR 인계](docs/ai1/README.md)
 - [AI1 리뷰 후속·운영 모드 인계](docs/ai1/2026-11-03_review-follow-up.md)
 - [AI1 질문 보존·진단 재점검 후속](docs/ai1/2026-11-03_masking-follow-up.md)
