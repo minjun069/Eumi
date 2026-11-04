@@ -1,4 +1,4 @@
-"""[운영 · 월 배치 실행기 | 호스트] README "월 배치 순서" 13단계를 순서대로 실행한다.
+"""[운영 · 월 배치 실행기 | 호스트] README "월 배치 순서" 14단계를 순서대로 실행한다.
 
 호스트 단계는 이 venv 로, 컨테이너 단계는 `docker compose --profile data exec pipeline …` 로 돌린다.
 한 단계가 실패(종료 코드 ≠ 0)하면 거기서 멈추고 요약을 찍는다. 실행 요약은 data/processed/run_log/run_<시각>.json 에도 남긴다.
@@ -36,7 +36,8 @@ STEPS = [
     (10, "M3-2", "flow_detail + bg_region_detail → bh_region_indicator", "spark-python", "m3_indicator/batch_bh_region_indicators.py", "months"),
     (11, "M4", "배경 · 행동 지표 → region_result (점수 · 등급 · 위험단계)", "host", "m4_analysis/batch_region_result.py", "months"),
     (12, "M4-3", "bh_grid_indicator → bh_grid_anomaly", "host", "m4_analysis/batch_grid_anomaly.py", "months"),
-    (13, "운영", "결과 테이블 → db/seed/R__*.sql", "host", "ops/make_seed.py", "none"),
+    (13, "검증", "결과 테이블 계약 검사 (행 수 · 범위 · 재계산 일치)", "host", "ops/verify_outputs.py", "months"),
+    (14, "운영", "결과 테이블 → db/seed/R__*.sql", "host", "ops/make_seed.py", "none"),
 ]
 
 

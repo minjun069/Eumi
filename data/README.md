@@ -17,7 +17,7 @@ M3 지표  상세 → 읍면동 · 격자 지표                     M4 분석  
 | `m2_process/` | 배경 상세 · 격자 배경 · 실거래가 적재, 유동 상세 월 배치 · 스트리밍 · 검증 |
 | `m3_indicator/` | 읍면동 배경 지표, 격자 · 읍면동 행동 지표 |
 | `m4_analysis/` | 읍면동 점수 · 단계(`region_result`), 격자 이상 점수(`bh_grid_anomaly`) |
-| `ops/` | 월 배치 실행기(`run_month`), 기준 테이블 초기 적재(`load_dim_region`, `load_dim_grid100`), 서버 seed 생성(`make_seed`), 인프라 연결 확인 |
+| `ops/` | 월 배치 실행기(`run_month`), 원본 확인(`check_month_inputs`), 결과 검증(`verify_outputs`), 기준 테이블 초기 적재(`load_dim_region`, `load_dim_grid100`), 서버 seed 생성(`make_seed`), 인프라 연결 확인 |
 | `legacy/` | 1차 완성본 · DA 결과 CSV 적재 스크립트. 지금은 M2~M4 가 대체하므로 참고용 (실행하면 2차 산출값을 덮어쓴다) |
 
 ## 실행 환경
@@ -62,16 +62,18 @@ docker compose --profile data exec pipeline spark-submit pipeline/<모듈>/<스�
 | 10 | M3-2 | `m3_indicator/batch_bh_region_indicators.py` | 컨테이너 | `flow_detail` + `bg_region_detail` → `bh_region_indicator` (12개) |
 | 11 | M4 | `m4_analysis/batch_region_result.py` | 호스트 | 배경 6 + 행동 12 → `region_result` (점수 · 등급 · 위험단계) |
 | 12 | M4-3 | `m4_analysis/batch_grid_anomaly.py` | 호스트 | `bh_grid_indicator` → `bh_grid_anomaly` |
-| 13 | 운영 | `ops/make_seed.py` | 호스트 | 결과 테이블 → `db/seed/R__*.sql` (서버 반영, 아래) |
+| 13 | 검증 | `ops/verify_outputs.py` | 호스트 | 결과 테이블 계약 검사: 행 수 · 범위 · 등급 규칙 · 지표로 재계산한 점수와 일치. 실패하면 멈춤 |
+| 14 | 운영 | `ops/make_seed.py` | 호스트 | 결과 테이블 → `db/seed/R__*.sql` (서버 반영, 아래. 값이 바뀐 달이 있을 때만) |
 
 - 첫 달(전월 없음)은 변화 지표 4개(h26 · h29 · h30 · h31)가 NULL → 행동 점수 · 단계를 내지 않고 `region_result` 에 넣지 않는다 (DA 방침).
 - 모든 스크립트는 `--dry-run` 또는 `[OK]/[FAIL]` 검사를 찍는다. FAIL 이면 다음 단계로 가지 않는다.
-- **한 번에 돌리기**: `data/.venv/Scripts/python data/pipeline/ops/run_month.py --months 2025-12` 가 13단계를 순서대로 실행한다(호스트 · 컨테이너 자동 구분). 실패하면 그 단계에서 멈추고, `--from 8` · `--only 11 12` · `--skip 3` 으로 일부만 다시 돌린다. 단계별 소요 시간 · 결과는 `data/processed/run_log/run_<시각>.json` 에 남는다.
+- **한 번에 돌리기**: `data/.venv/Scripts/python data/pipeline/ops/run_month.py --months 2025-12` 가 14단계를 순서대로 실행한다(호스트 · 컨테이너 자동 구분). 실패하면 그 단계에서 멈추고, `--from 8` · `--only 11 12` · `--skip 3` 으로 일부만 다시 돌린다. 단계별 소요 시간 · 결과는 `data/processed/run_log/run_<시각>.json` 에 남는다.
 - 재처리 리허설(2026-11-03, 2025-12 한 달 전체 재실행): 13단계 모두 통과, 총 4분(가상 유동 생성 111초 · 유동 적재 78초가 대부분). 결과 테이블 값은 재실행 전과 동일 (`re_apt_trade` 는 DELETE 후 INSERT 라 `trade_id` 만 새로 발급). `make_seed` 는 값이 바뀐 달이 있을 때만 커밋한다 (재실행만으로는 updated_at · trade_id 가 바뀌어 diff 가 커진다).
-- **Airflow (`airflow/dags/eumi_monthly.py`)**: 위 1~12단계가 태스크 14개(가상 유동은 anchor · generate · validate 로 나뉨)로 들어 있다. 매월 5일 03:00 에 전월을 돌리며, 수집 → 실거래가 / 가상 유동 → 유동 상세 → 행동 지표 / 배경 상세 → 배경 지표 가지가 병렬로 돌고 M4 에서 합쳐진다. seed 생성(13)은 DAG 에 넣지 않는다.
+- **Airflow (`airflow/dags/eumi_monthly.py`)**: 위 1~12단계가 태스크 14개(가상 유동은 anchor · generate · validate 로 나뉨)로 들어 있고, 앞뒤에 원본 확인(`check_inputs`)과 결과 검증(`verify_outputs`)이 붙어 모두 16개다. 매월 5일 03:00 에 전월을 돌리며, 수집 → 실거래가 / 가상 유동 → 유동 상세 → 행동 지표 / 배경 상세 → 배경 지표 가지가 병렬로 돌고 M4 에서 합쳐진다. seed 생성(13)은 DAG 에 넣지 않는다.
   - 첫 태스크 `check_inputs`(`ops/check_month_inputs.py`)가 그 달의 SKT 월평균 · 주민등록 원본이 MinIO 에 있는지 보고, 없으면 그 실행 전체를 skip 한다. unpause 직후 Airflow 가 지난 스케줄 1건을 자동 실행하므로, 원본이 없는 달에 API 호출 · 적재가 일어나지 않게 하는 안전장치다.
   - 재처리: UI 의 Trigger DAG w/ config 또는 `docker compose --profile data exec pipeline airflow dags trigger eumi_monthly --conf '{"months": ["2025-12"]}'`. 실패한 태스크는 UI 에서 Clear 하면 그 태스크부터 다시 돈다.
-  - 로그는 UI 또는 pipeline 컨테이너 `/opt/airflow/logs/dag_id=eumi_monthly/…` (볼륨 `airflowlogs`). 스크립트의 `[OK]/[FAIL]` 출력이 그대로 남아 실행 이력 역할을 한다.
+  - **실행 이력**: 별도 테이블 없이 Airflow 기록을 쓴다. UI 의 Grid 화면에서 실행(dag run)별 기준월 · 태스크별 성공/실패 · 소요 시간을 보고, 태스크를 누르면 로그(스크립트의 `[OK]/[FAIL]` 출력, 적재 행 수)가 나온다. CLI 는 `airflow dags list-runs -d eumi_monthly`, `airflow tasks states-for-dag-run eumi_monthly <run_id>`. 로그 파일은 pipeline 컨테이너 `/opt/airflow/logs/dag_id=eumi_monthly/…`(볼륨 `airflowlogs`), 메타 정보는 postgres 의 `airflow` DB 에 남는다.
+  - **결과 검증** `ops/verify_outputs.py`: 달마다 배경 · 유동 · 행동 지표 · 결과 · 격자 점수 · 실거래가를 검사하고, 결과 점수가 지금 지표로 다시 계산한 값과 같은지(0.005 이내)까지 본다. 하나라도 틀리면 태스크가 실패한다. 단독 실행은 `python3 pipeline/ops/verify_outputs.py --all`.
   - 확인(2026-11-03): 12월 수동 실행 14개 태스크 성공, 실행 3분 50초.
 
 ## 모듈별 메모
@@ -97,14 +99,43 @@ docker compose --profile data exec pipeline spark-submit pipeline/<모듈>/<스�
 
 ## 스트리밍 시연
 
+모두 pipeline 컨테이너 안에서 한다 (`infra/` 에서). 스트리밍은 `flow_detail` 에 값을 **더하므로** 재생할 달을 먼저 비운다.
+
 ```bash
-# infra/ 에서 스트리밍 시작 (체크포인트 · 토픽을 비운 뒤)
-docker compose --profile data exec pipeline spark-submit pipeline/m2_process/stream_flow_detail.py
-# 호스트에서 12월 재생 (1시간치를 10초 간격으로) → 끝나면 종료 신호
-data/.venv/Scripts/python data/pipeline/m1_collect/run_synth.py replay --months 2025-12 --speed 10
-data/.venv/Scripts/python data/pipeline/m1_collect/send_eos.py --month 2025-12
+# 1) 준비: 재생할 달 비우기, 체크포인트 지우기 (같은 달을 두 번 재생하면 값이 두 배가 된다)
+docker compose exec postgres psql -U postgres -d eumi -c "DELETE FROM analysis.flow_detail WHERE period_start = '2025-12-01'"
+docker compose --profile data exec pipeline rm -rf /opt/eumi/checkpoint/flow_detail
+# 2) 스트리밍 시작 (터미널 하나를 차지한다. 새 메시지만 읽도록 latest)
+docker compose --profile data exec pipeline spark-submit pipeline/m2_process/stream_flow_detail.py --starting latest
+# 3) 다른 터미널에서 재생: 1시간치를 10초 간격으로 (--speed 0 이면 쉬지 않고, --days 01 02 로 날짜 제한)
+docker compose --profile data exec pipeline python3 pipeline/m1_collect/run_synth.py replay --months 2025-12 --speed 10
+docker compose --profile data exec pipeline python3 pipeline/m1_collect/send_eos.py --month 2025-12     # 마지막 날 윈도 닫기
+# 4) 끝내기: Java 프로세스까지 멈춰야 한다 (터미널 Ctrl+C 만으로는 컨테이너 안 잡이 남을 수 있다)
+docker compose --profile data exec pipeline pkill -f "SparkSubmit.*stream_flow_detail"
+# 5) 원래 값으로 되돌리기: Airflow 에서 그 달을 수동 실행 (유동 상세 · 지표 · 결과 재적재 + 검증)
+docker compose --profile data exec pipeline airflow dags trigger eumi_monthly --conf '{"months": ["2025-12"]}'
 ```
-`flow_detail` 이 쌓이는 것을 보고 M3-3 · M3-2 · M4 를 돌리면 지표 · 단계가 갱신된다. Kafka 는 월 배치 운영에는 필요 없다.
+
+- 하루 윈도는 다음 날 01:00 이후 메시지가 와야 닫힌다. 날짜마다 `[stream] batch N: 닫힌 날짜 [...] → flow_detail …행 누적` 이 찍히면, 그 시점에 M3 · M4 를 돌려 지표 · 단계가 갱신되는 것을 보여 줄 수 있다.
+- 확인(2026-11-04): 12월 1~2일 재생 1,421,424건 → 2분 50초, 날짜당 1,095,681행 적재, 적재 합계 = 재생 원본 합계(상대오차 1.2e-8), 요일 MON · TUE 각 1일. 이어서 DAG 로 12월을 되돌린 값이 리허설 전과 같았다(행 수 · 합계 4자리까지).
+- 예전 Spark 이미지로 만든 체크포인트는 소유자가 달라 지워지지 않는다. 한 번만 `docker compose --profile data exec -u root pipeline sh -c "rm -rf /opt/eumi/checkpoint/flow_detail && chown -R pipeline:pipeline /opt/eumi/checkpoint"`.
+
+## 통합 테스트
+
+배포 전에 로컬에서 세 겹으로 확인한다. 서버에서는 배포 뒤 같은 명령으로 한 번씩 돌린다.
+
+| 범위 | 방법 | 결과 (2026-11-04) |
+|---|---|---|
+| 파이프라인 끝까지 | Airflow 에서 `{"months": ["2025-12"]}` 수동 실행 → 마지막 `verify_outputs` | 16개 태스크 성공, 약 5분, 검증 PASS |
+| 결과 테이블 계약 | `python3 pipeline/ops/verify_outputs.py --all` | 2025-07~12 전부 PASS |
+| 스트리밍 | 위 "스트리밍 시연" 절차로 12월 1~2일 재생 | 적재 합계 = 재생 원본 합계 (상대오차 1.2e-8) |
+| 백엔드 연결 | 백엔드 분석 API 통합 테스트(`AnalysisIntegrationTests`, API-10 · 11 · 12)를 파이프라인이 적재한 DB 에 붙여 실행 | 18개 통과, 실패 0 |
+
+백엔드 테스트는 호스트에 JDK 가 없어도 JDK 컨테이너로 돌린다 (저장소 루트에서, 처음엔 Gradle 내려받기로 약 4분):
+
+```bash
+docker run --rm --network eumi-dev_default -v "$PWD/backend:/work" -v eumi-gradle-cache:/root/.gradle -w /work   -e DB_URL=jdbc:postgresql://postgres:5432/eumi -e SMTP_HOST=mailpit eclipse-temurin:21-jdk   java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain integrationTest --tests "*AnalysisIntegrationTests"
+```
 
 ## 서버 DB 반영 (seed · 덤프)
 

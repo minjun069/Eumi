@@ -22,7 +22,7 @@ ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1 PIP_NO_CACHE_DIR=1 
     TZ=Asia/Seoul
 
 RUN set -eux; apt-get update; \
-    apt-get install -y --no-install-recommends openjdk-17-jre-headless curl tini; \
+    apt-get install -y --no-install-recommends openjdk-17-jre-headless curl tini procps; \
     rm -rf /var/lib/apt/lists/*
 
 # Airflow 는 공식 constraints 로 먼저 깔고, 파이프라인 의존성은 data/requirements.txt 의 고정 버전으로 덮어쓴다
