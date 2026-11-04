@@ -45,6 +45,13 @@ public class ResourceRepository {
     }
     public record LockedResource(long managerId,boolean deleted) { }
 
+    public List<ResourceDtos.ListItem> managedBy(long member) {
+        return jdbc.query("""
+                SELECT * FROM public.v_resource_summary WHERE manager_member_id=?
+                ORDER BY status_order ASC,period_end ASC,resource_id ASC
+                """,this::listItem,member);
+    }
+
     public ResourceDtos.Page search(ResourceDtos.Search s) {
         var p=new MapSqlParameterSource(); var where=new StringBuilder(" FROM public.v_resource_summary WHERE true");
         add(where,p,"sido","sido_code",s.sidoCode(),"=");
