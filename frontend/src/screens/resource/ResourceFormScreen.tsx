@@ -177,14 +177,13 @@ export function ResourceFormScreen({ mode }: { mode: "new" | "edit" }) {
     }
     if (isApiError(error) && error.code === "VALIDATION_ERROR") {
       const fields = fieldErrorsOf(error, RESOURCE_FORM_FIELDS)
-      setServerErrors(fields)
-      if (Object.keys(fields).length > 0) {
-        setSubmitError(RESOURCE_MESSAGES.validation)
-        return
+      // 담당자 오류: 고른 사람이 그사이 퇴사·기관 이동해 같은 기관 활성 회원이 아니다. 후보를 다시 받는다
+      if (fields.manager) {
+        fields.manager = RESOURCE_MESSAGES.managerInactive
+        void membersQuery.refetch()
       }
-      // 화면 검사를 통과했는데 칸 표시 없이 거절되면 대개 담당자가 더 이상 같은 기관 활성 회원이 아닌 경우다
-      setSubmitError(RESOURCE_MESSAGES.validationWithoutField)
-      void membersQuery.refetch()
+      setServerErrors(fields)
+      setSubmitError(Object.keys(fields).length > 0 ? RESOURCE_MESSAGES.validation : RESOURCE_MESSAGES.validationWithoutField)
       return
     }
     setSubmitError(errorMessage(error))

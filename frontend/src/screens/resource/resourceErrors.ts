@@ -21,9 +21,10 @@ export const RESOURCE_ACCESS_TEXT: Record<ResourceAccessError, { title: string; 
 
 export const RESOURCE_MESSAGES = {
   validation: "입력값을 확인해 주세요.",
-  // 서비스가 검사하는 조건(같은 기관 활성 담당자·지역)은 fieldErrors 없이 400으로 올 수 있다
-  validationWithoutField:
-    "입력값을 확인해 주세요. 담당자 목록을 새로 불러왔으니 퇴사·기관 이동한 담당자가 아닌지도 확인해 주세요.",
+  // 서버는 서비스 검사(지역 존재·시군구와 동 일치·기간·같은 기관 활성 담당자)도 fieldErrors에 칸 이름을 담아 보낸다.
+  // 칸 이름 없이 오는 400은 화면이 알 수 없는 형식 오류뿐이다
+  validationWithoutField: "입력값을 처리하지 못했습니다. 화면을 새로 고친 뒤 다시 시도해 주세요.",
+  managerInactive: "같은 기관의 활성 회원이 아닙니다. 담당자 목록을 새로 불러왔으니 다시 고르세요.",
   deleteForbidden: "담당자만 삭제할 수 있습니다. 최신 정보를 다시 불러왔습니다.",
   listValidation: "검색 조건이 올바르지 않습니다. 조건을 다시 골라 검색해 주세요.",
 } as const
