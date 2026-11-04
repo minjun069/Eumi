@@ -7,6 +7,7 @@
               bh_region_indicator 47행 · 전월이 있으면 12개 전부, 없으면 변화 지표 4개는 NULL
   - 결과: region_result 는 전월이 있으면 47행 · 없으면 0행, 등급 1~3 · 위험단계 = 두 등급 합 − 1,
           도시마다 행동 등급 3 비율 10~30%, 점수가 지금 지표로 다시 계산한 값과 같음(0.005 이내, 오래된 결과 탐지)
+  - 기여도: bh_region_contribution 은 결과가 있는 동 × 지표 12개 · 다시 계산한 값과 같음
   - 격자 점수: bh_grid_anomaly 는 지표 10개가 모두 있는 격자만 · 다시 계산한 값과 같음
   - 실거래가: re_apt_trade 그 달 계약 행 > 0 · 거래 유형 · 금액(매매 · 전세 > 0, 월세는 월세 > 0 · 보증금 0 허용) · 좌표 범위 · 강남구/춘천시 동
 하나라도 실패하면 종료 코드 1 (Airflow 태스크 실패).
@@ -116,6 +117,21 @@ def check_result(cur, conn, assets, m, has_prev):
     return ok
 
 
+def check_contribution(conn, assets, m, has_prev):
+    from m4_analysis.batch_bh_contribution import contributions  # 같은 정의로 다시 계산해 저장값과 대조
+    p = f"{m}-01"
+    db = pd.read_sql("SELECT adm_cd10, indicator_cd, contribution FROM analysis.bh_region_contribution WHERE period_start = %s",
+                     conn, params=(p,))
+    if not has_prev:
+        return check(f"{m} 지표별 기여도", len(db) == 0, f"결과 없음 → 행 0 이어야 함 (실제 {len(db)})")
+    n_feat = len(assets.dong_features)
+    info, re = contributions(conn, assets, m)
+    both = db.merge(re, on=["adm_cd10", "indicator_cd"], how="outer", suffixes=("", "_re"))
+    diff = float(np.nanmax(np.abs(both.contribution.astype(float) - both.contribution_re))) if len(both) else float("nan")
+    ok = (len(db) == len(info) * n_feat and db.indicator_cd.nunique() == n_feat and both.isna().sum().sum() == 0 and diff <= 1e-5)
+    return check(f"{m} 지표별 기여도", ok, f"행 {len(db)} (동 {len(info)} × 지표 {n_feat}) · 재계산 최대차 {diff:.1e}")
+
+
 def check_grid_anomaly(conn, assets, m, has_prev):
     p = f"{m}-01"
     feats = assets.grid_features
@@ -179,6 +195,7 @@ def main() -> int:
             ok &= flow_ok
             ok &= check_behavior(cur, m, grids, has_prev)
             ok &= check_result(cur, conn, assets, m, has_prev)
+            ok &= check_contribution(conn, assets, m, has_prev)
             ok &= check_grid_anomaly(conn, assets, m, has_prev)
             ok &= check_apt(cur, m)
     print(f"VERIFY {'PASS' if ok else 'FAIL'} ({', '.join(months)})", flush=True)
