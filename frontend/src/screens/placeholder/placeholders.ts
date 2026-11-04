@@ -17,7 +17,7 @@ export type PlaceholderLink = {
   to: string
 }
 
-const MY_HISTORY = "11/6 AI 대화 기록·비밀번호 변경 작업"
+const MY_HISTORY = "11/6 비밀번호 변경 작업"
 const EXTRA = "11/9 이후 부가 기능 작업"
 
 export const PLACEHOLDERS = {
@@ -32,12 +32,6 @@ export const PLACEHOLDERS = {
     features: ["임시 비밀번호 발급 (API-09)"],
   },
 
-  // 마이페이지 'AI 대화 기록' 탭 안에 보이는 안내 (MyPageScreen)
-  myConversations: {
-    title: "마이페이지 · AI 대화 기록",
-    stage: MY_HISTORY,
-    features: ["대화 목록·조회·삭제 (API-36~38)", "이어서 질문 (AI 패널에서 같은 대화로)"],
-  },
   myPassword: {
     title: "비밀번호 변경",
     stage: MY_HISTORY,
