@@ -125,7 +125,7 @@ export interface paths {
         put?: never;
         /**
          * 로그인
-         * @description password_hash와 비교한다. temp_password_expires_at이 있으면 유효할 때만 제한 세션을 발급한다. 로그인 성공 시 세션 ID 교체·SecurityContext 저장·CSRF 재발급을 수행한다. 정상·임시 모두 data.user만 반환한다.
+         * @description password_hash와 비교한다. temp_password_expires_at이 있으면 유효할 때만 제한 세션을 발급한다. 로그인 성공 시 세션 ID 교체·SecurityContext 저장·CSRF 재발급을 수행한다. 정상·임시 모두 data.user만 반환한다. 이미 임시 비밀번호 제한 세션인 상태에서 로그인하면 403 PASSWORD_CHANGE_REQUIRED를 반환한다. 다른 계정으로 로그인하려면 먼저 로그아웃해야 한다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -751,7 +751,7 @@ export interface paths {
         put?: never;
         /**
          * AI 질문 등록
-         * @description 질문 행을 저장하고 AI에 실행을 요청한다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 첫 질문(conversationId=null)이면 대화 UUID를 만들고 ai_conversation과 질문 행을 한 트랜잭션으로 저장한다. 이어서 질문이면 대화 행을 잠그고(FOR UPDATE) 소유자를 확인하며, 끝 행이 없는 질문이 있으면 409다. 남의 대화·보관 기간이 지난 대화는 404다. 커밋 뒤 내부 AI API(POST /internal/agent/runs {conversationId, questionId})를 부르고, AI는 접수만 바로 돌려준 뒤 ai_message에 진행·완료 행을 직접 저장한다. 호출이 바로 실패하면 BE가 실패 행을 쓴다. 화면은 202를 받으면 API-03-S1을 after=questionId로 1초마다 조회한다.
+         * @description 질문 행을 저장하고 AI에 실행을 요청한다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 첫 질문(conversationId=null)이면 대화 UUID를 만들고 ai_conversation과 질문 행을 한 트랜잭션으로 저장한다. 이어서 질문이면 대화 행을 잠그고(FOR UPDATE) 소유자를 확인하며, 끝 행이 없는 질문이 있으면 409다. 남의 대화·보관 기간이 지난 대화는 404다. 커밋 뒤 내부 AI API(POST /internal/agent/runs {conversationId, questionId})를 부르고, AI는 접수만 바로 돌려준 뒤 ai_message에 진행·완료 행을 직접 저장한다. 호출이 바로 실패하면 BE가 실패 행을 쓴다. 화면은 202를 받으면 API-03-S1을 after=questionId로 1초마다 조회한다. 저장 전 마스킹의 지원 표지·형식·값 경계·제외 범위는 ai-agent-panel.md의 질문 마스킹 범위를 따른다. 마스킹 형식이 아닌 질문을 거절하는 별도 검증 오류는 추가하지 않는다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -1893,7 +1893,7 @@ export interface components {
              * @example c9814a56-22d4-45f9-a203-e8492ac44e73
              */
             conversationId: string;
-            /** @description 식별정보를 가린 첫 질문. 목록 제목 */
+            /** @description 목록 제목으로 쓰는 첫 저장 질문. 등록 당시의 마스킹 처리 결과를 반환하며 모든 식별정보의 제거를 보장하지 않는다. */
             firstQuestion: string;
             /** @description 질문 수 (실패·취소된 질문 포함) */
             questionCount: number;
@@ -1929,7 +1929,7 @@ export interface components {
              * @example c9814a56-22d4-45f9-a203-e8492ac44e73
              */
             conversationId: string;
-            /** @description 식별정보를 가린 첫 질문 */
+            /** @description 첫 저장 질문. 등록 당시의 마스킹 처리 결과를 반환하며 모든 식별정보의 제거를 보장하지 않는다. */
             firstQuestion: string;
             /**
              * Format: date-time
@@ -2215,7 +2215,7 @@ export interface components {
              * @example c9814a56-22d4-45f9-a203-e8492ac44e73
              */
             conversationId: string | null;
-            /** @description 질문. 서버가 개인정보를 가린 값으로 저장하며 원문을 로그에 남기지 않는다 */
+            /** @description 질문. 서버는 AI 패널 계약의 질문 마스킹 범위에 따라 이름·생년월일 명시 필드와 ASCII 이메일·표준 하이픈형 휴대전화만 치환한 뒤 저장한다. 이름 표지는 이름·성명·성함·사례자명·회원명이며 생년월일 표지는 생년월일이다. 값은 세미콜론(;)·줄바꿈·입력 끝까지 가리고 구분자 밖의 질문은 보존한다. 지원 범위 밖의 식별정보는 남을 수 있으며 완전한 비식별화를 보장하지 않는다. 질문 본문은 로그에 남기지 않는다. 정확한 형식과 제외 범위는 ai-agent-panel.md의 질문 마스킹 범위를 따른다. */
             question: string;
         };
         /** @description 저장된 질문. 화면은 이 questionId 이후의 행을 조회한다. */
@@ -2254,7 +2254,7 @@ export interface components {
              * @enum {string}
              */
             status: "질문" | "진행" | "완료" | "실패" | "취소";
-            /** @description 질문 행은 질문, 진행 행은 단계 이름, 완료 행은 최종 답변. 실패·취소 행은 null */
+            /** @description 질문 행은 질문 등록 당시의 마스킹 처리 결과, 진행 행은 단계 이름, 완료 행은 최종 답변. 실패·취소 행은 null. 질문의 지원 범위 밖 식별정보가 모두 제거됨을 보장하지 않는다. */
             content: string | null;
             /** @description 진행 행의 단계 상세 설명. 질문 행은 null */
             details: string | null;
@@ -2734,7 +2734,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description CSRF_INVALID */
+            /** @description CSRF_INVALID, PASSWORD_CHANGE_REQUIRED */
             403: {
                 headers: {
                     [name: string]: unknown;
