@@ -17,7 +17,6 @@ export type PlaceholderLink = {
   to: string
 }
 
-const MY_HISTORY = "11/6 비밀번호 변경 작업"
 const EXTRA = "11/9 이후 부가 기능 작업"
 
 export const PLACEHOLDERS = {
@@ -32,12 +31,6 @@ export const PLACEHOLDERS = {
     features: ["임시 비밀번호 발급 (API-09)"],
   },
 
-  myPassword: {
-    title: "비밀번호 변경",
-    stage: MY_HISTORY,
-    features: ["비밀번호 변경 (API-32)"],
-    note: "임시 비밀번호로 로그인하면 비밀번호를 바꿀 때까지 이 화면만 쓸 수 있습니다.",
-  },
   myWithdraw: {
     title: "회원 탈퇴",
     stage: EXTRA,

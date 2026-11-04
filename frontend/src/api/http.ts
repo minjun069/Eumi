@@ -6,6 +6,7 @@ import type { FieldError } from "@/api/types"
 // - 같은 출처 /api 아래 상대 경로로 부른다. 로그인은 SESSION 쿠키(HttpOnly)로만 유지하고 토큰을 저장하지 않는다.
 // - 성공 { success:true, data, meta } → data만 돌려준다. 204는 본문을 읽지 않는다.
 // - 실패는 ApiError로 던진다. 401은 로그인 만료, 403 PASSWORD_CHANGE_REQUIRED는 비밀번호 변경 화면으로 보낸다.
+// - 세션이 바뀌는 요청은 runExclusive로 보내 그동안 다른 요청을 멈춘다 (비밀번호 변경).
 // - /health는 공통 응답 모양이 아니라서 이 클라이언트를 쓰지 않는다.
 
 const BASE_PATH = "/api"
@@ -23,6 +24,8 @@ export type RequestOptions = {
   signal?: AbortSignal
   /** 401·403 PASSWORD_CHANGE_REQUIRED를 화면 이동으로 처리하지 않고 호출한 쪽에 맡긴다 (로그인 복원 등) */
   skipAuthHandling?: boolean
+  /** runExclusive 안에서 보내는 요청 (다른 요청을 멈춘 동안에도 보낸다) */
+  exclusive?: boolean
 }
 
 type AuthHandlers = {
@@ -37,7 +40,60 @@ export function setAuthHandlers(handlers: AuthHandlers) {
   authHandlers = handlers
 }
 
+// 세션이 바뀌는 요청(비밀번호 변경: 세션 ID 교체·CSRF 토큰 삭제)을 보내는 동안 다른 요청을 멈춘다.
+// 바뀌는 순간 이전 세션으로 처리된 요청은 401이 되어 로그아웃되므로, 이미 나간 요청이 끝나길 기다렸다가
+// 혼자 보내고, 끝난 뒤(새 CSRF 토큰 준비까지) 멈춘 요청을 이어서 보낸다.
+/** 이미 나간 요청을 기다리는 최대 시간 (응답이 오지 않는 요청 때문에 계속 막히지 않게) */
+const IDLE_WAIT_MS = 5_000
+let exclusiveGate: Promise<void> | null = null
+let inFlight = 0
+const idleWaiters = new Set<() => void>()
+
+function waitIdle(): Promise<void> {
+  if (inFlight === 0) return Promise.resolve()
+  return new Promise((resolve) => {
+    const done = () => {
+      idleWaiters.delete(done)
+      window.clearTimeout(timer)
+      resolve()
+    }
+    const timer = window.setTimeout(done, IDLE_WAIT_MS)
+    idleWaiters.add(done)
+  })
+}
+
+/** task 안의 요청은 options.exclusive: true로 보낸다. 그동안 다른 요청은 보내지 않고 기다린다 */
+export async function runExclusive<T>(task: () => Promise<T>): Promise<T> {
+  while (exclusiveGate) await exclusiveGate
+  let release = () => {}
+  exclusiveGate = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  try {
+    await waitIdle()
+    return await task()
+  } finally {
+    exclusiveGate = null
+    release()
+  }
+}
+
 export async function apiRequest<T>(method: Method, path: string, options: RequestOptions = {}): Promise<T> {
+  if (!options.exclusive) {
+    while (exclusiveGate) await exclusiveGate
+    inFlight += 1
+  }
+  try {
+    return await request<T>(method, path, options)
+  } finally {
+    if (!options.exclusive) {
+      inFlight -= 1
+      if (inFlight === 0) idleWaiters.forEach((done) => done())
+    }
+  }
+}
+
+async function request<T>(method: Method, path: string, options: RequestOptions): Promise<T> {
   const unsafe = method !== "GET"
   let response = await send(method, path, options)
 
