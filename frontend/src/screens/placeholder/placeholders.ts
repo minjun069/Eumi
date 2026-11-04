@@ -19,9 +19,8 @@ export type PlaceholderLink = {
   to: string
 }
 
-const CASES = "11/4~11/5 사례자 작업"
-const RESOURCES = "11/5~11/6 복지자원 작업"
-const MY = "11/6 마이페이지 작업"
+const RESOURCES = "11/5 복지자원 작업"
+const MY = "11/5~11/6 마이페이지 작업"
 const EXTRA = "11/9 이후 부가 기능 작업"
 
 export const PLACEHOLDERS = {
@@ -56,28 +55,6 @@ export const PLACEHOLDERS = {
     title: "복지자원 수정",
     stage: RESOURCES,
     features: ["등록·수정 공유 입력 폼 (API-15)"],
-  },
-
-  cases: {
-    title: "사례자 관리",
-    stage: CASES,
-    features: ["본인 담당 사례자 검색·정렬·페이지 (API-19)"],
-    links: [{ label: "사례자 등록", to: PATHS.caseNew }],
-  },
-  caseNew: {
-    title: "사례자 등록",
-    stage: CASES,
-    features: ["중복 확인 (API-21)", "등록·관리번호 발급 (API-22)"],
-  },
-  caseDetail: {
-    title: "사례자 상세",
-    stage: CASES,
-    features: ["상세 조회·삭제 (API-20·24)", "상담 기록 조회·등록·수정·삭제 (API-25~29)"],
-  },
-  caseEdit: {
-    title: "사례자 수정",
-    stage: CASES,
-    features: ["정보 수정 (API-23)"],
   },
 
   my: {

@@ -6,6 +6,9 @@ import { LeaveGuardHost } from "@/components/routing/LeaveGuardHost"
 import { RequireAuth } from "@/components/routing/RequireAuth"
 import { HOME_PATH, PATHS } from "@/routes/paths"
 import { LoginScreen } from "@/screens/auth/LoginScreen"
+import { CaseDetailScreen } from "@/screens/case/CaseDetailScreen"
+import { CaseFormScreen } from "@/screens/case/CaseFormScreen"
+import { CaseListScreen } from "@/screens/case/CaseListScreen"
 import { PlaceholderScreen } from "@/screens/placeholder/PlaceholderScreen"
 import { PLACEHOLDERS } from "@/screens/placeholder/placeholders"
 import { RiskScreen } from "@/screens/risk/RiskScreen"
@@ -47,10 +50,10 @@ export default function App() {
             <Route path={PATHS.resourceNew} element={<PlaceholderScreen spec={PLACEHOLDERS.resourceNew} />} />
             <Route path="/resources/:resourceId" element={<PlaceholderScreen spec={PLACEHOLDERS.resourceDetail} />} />
             <Route path="/resources/:resourceId/edit" element={<PlaceholderScreen spec={PLACEHOLDERS.resourceEdit} />} />
-            <Route path={PATHS.cases} element={<PlaceholderScreen spec={PLACEHOLDERS.cases} />} />
-            <Route path={PATHS.caseNew} element={<PlaceholderScreen spec={PLACEHOLDERS.caseNew} />} />
-            <Route path="/cases/:caseId" element={<PlaceholderScreen spec={PLACEHOLDERS.caseDetail} />} />
-            <Route path="/cases/:caseId/edit" element={<PlaceholderScreen spec={PLACEHOLDERS.caseEdit} />} />
+            <Route path={PATHS.cases} element={<CaseListScreen />} />
+            <Route path={PATHS.caseNew} element={<CaseFormScreen key="new" mode="new" />} />
+            <Route path="/cases/:caseId" element={<CaseDetailScreen />} />
+            <Route path="/cases/:caseId/edit" element={<CaseFormScreen key="edit" mode="edit" />} />
             <Route path={PATHS.my} element={<PlaceholderScreen spec={PLACEHOLDERS.my} />} />
             <Route path={PATHS.myResources} element={<PlaceholderScreen spec={PLACEHOLDERS.myResources} />} />
             <Route path={PATHS.myConversations} element={<PlaceholderScreen spec={PLACEHOLDERS.myConversations} />} />
