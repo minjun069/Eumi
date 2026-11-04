@@ -11,6 +11,9 @@ import { CaseFormScreen } from "@/screens/case/CaseFormScreen"
 import { CaseListScreen } from "@/screens/case/CaseListScreen"
 import { PlaceholderScreen } from "@/screens/placeholder/PlaceholderScreen"
 import { PLACEHOLDERS } from "@/screens/placeholder/placeholders"
+import { ResourceDetailScreen } from "@/screens/resource/ResourceDetailScreen"
+import { ResourceFormScreen } from "@/screens/resource/ResourceFormScreen"
+import { ResourceListScreen } from "@/screens/resource/ResourceListScreen"
 import { RiskScreen } from "@/screens/risk/RiskScreen"
 import { restoreSession } from "@/session/sessionActions"
 import { useSession } from "@/session/sessionStore"
@@ -46,10 +49,10 @@ export default function App() {
             }
           >
             <Route path={PATHS.risk} element={<RiskScreen />} />
-            <Route path={PATHS.resources} element={<PlaceholderScreen spec={PLACEHOLDERS.resources} />} />
-            <Route path={PATHS.resourceNew} element={<PlaceholderScreen spec={PLACEHOLDERS.resourceNew} />} />
-            <Route path="/resources/:resourceId" element={<PlaceholderScreen spec={PLACEHOLDERS.resourceDetail} />} />
-            <Route path="/resources/:resourceId/edit" element={<PlaceholderScreen spec={PLACEHOLDERS.resourceEdit} />} />
+            <Route path={PATHS.resources} element={<ResourceListScreen />} />
+            <Route path={PATHS.resourceNew} element={<ResourceFormScreen key="new" mode="new" />} />
+            <Route path="/resources/:resourceId" element={<ResourceDetailScreen />} />
+            <Route path="/resources/:resourceId/edit" element={<ResourceFormScreen key="edit" mode="edit" />} />
             <Route path={PATHS.cases} element={<CaseListScreen />} />
             <Route path={PATHS.caseNew} element={<CaseFormScreen key="new" mode="new" />} />
             <Route path="/cases/:caseId" element={<CaseDetailScreen />} />

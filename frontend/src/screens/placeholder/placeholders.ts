@@ -19,7 +19,6 @@ export type PlaceholderLink = {
   to: string
 }
 
-const RESOURCES = "11/5 복지자원 작업"
 const MY = "11/5~11/6 마이페이지 작업"
 const EXTRA = "11/9 이후 부가 기능 작업"
 
@@ -33,28 +32,6 @@ export const PLACEHOLDERS = {
     title: "비밀번호 찾기",
     stage: EXTRA,
     features: ["임시 비밀번호 발급 (API-09)"],
-  },
-
-  resources: {
-    title: "복지자원 관리",
-    stage: RESOURCES,
-    features: ["지역·대상·정원·담당자 조건 검색, 정렬, 페이지 (API-13)"],
-    links: [{ label: "복지자원 등록", to: PATHS.resourceNew }],
-  },
-  resourceNew: {
-    title: "복지자원 등록",
-    stage: RESOURCES,
-    features: ["등록·수정 공유 입력 폼 (API-17)", "같은 기관 담당자 선택 (API-42)"],
-  },
-  resourceDetail: {
-    title: "복지자원 상세",
-    stage: RESOURCES,
-    features: ["상세 조회 (API-14)", "담당자 수정·삭제 (API-15·16)"],
-  },
-  resourceEdit: {
-    title: "복지자원 수정",
-    stage: RESOURCES,
-    features: ["등록·수정 공유 입력 폼 (API-15)"],
   },
 
   my: {
