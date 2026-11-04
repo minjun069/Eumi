@@ -1,6 +1,6 @@
 # 이음이 백엔드 실행과 공통 기반
 
-Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. G1 B0~B4 공통 기반, A1 로그인·최신 프로필·로그아웃, AI1 질문·조회·취소와 Fake AI 흐름, G1 지역·기관 회원 조회 API-39~42를 구현했다. 회원가입·암호 변경·대시보드 등은 후속 작업이다.
+Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. 공통 기반, A1 로그인·최신 프로필·로그아웃, AI1 Fake AI 패널, 지역·기관 회원 조회 API-39~42, 대시보드 API-10~12, 사례자·상담 API-19~29, 복지자원 API-13~17, 마이페이지 API-30·31·35, AI 대화 기록 API-36~38, 비밀번호 변경 API-32를 구현했다. 회원가입·임시 비밀번호 발급·탈퇴는 후속 작업이다.
 
 ## 먼저 읽을 기록
 
@@ -11,6 +11,10 @@ Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. G1 B0~B4 �
 - [A1 구현·검증·MR 인계](docs/a1/README.md)
 - [11월 3일 A1 리뷰 후속 보완](docs/a1/2026-11-03_review-follow-up.md)
 - [지역·기관 회원 조회 API-39~42 구현·검증·MR 인계](docs/region/README.md)
+- [복지자원 API-13~17 구현·검증·MR 인계](docs/resources/README.md)
+- [내 정보·담당 자원 API-30·31·35 구현·검증·MR 인계](docs/my/README.md)
+- [AI 대화 기록 API-36~38 구현·검증·MR 인계](docs/my-history/README.md)
+- [비밀번호 변경 API-32 구현·검증·A3 리뷰 인계](docs/password/README.md)
 - [AI1 구현·설정·검증·MR 인계](docs/ai1/README.md)
 - [AI1 리뷰 후속·운영 모드 인계](docs/ai1/2026-11-03_review-follow-up.md)
 - [AI1 질문 보존·진단 재점검 후속](docs/ai1/2026-11-03_masking-follow-up.md)
@@ -99,7 +103,7 @@ AI1은 local에서 기본 `eumi.ai.mode=fake`다. prod는 `EUMI_AI_MODE`를 반�
 
 SMTP 연결·읽기·쓰기 타임아웃은 각 5000ms다. prod는 필수 값의 기본값을 제공하지 않는다. SMTP_HOST·PORT·AUTH·STARTTLS_ENABLED·EUMI_MAIL_FROM·EUMI_AUTH_HASH_KEY의 누락·빈값·미해석 placeholder는 기동 실패로 처리한다. `${EUMI_AUTH_HASH_KEY}` 글자가 해시 키로 저장될 수 없도록 바인딩에서도 거절한다. SMTP_AUTH=true인데 계정 또는 암호가 비어 있어도 기동에 실패한다. 실제 비밀값은 문서·로그·Git에 복사하지 않는다.
 
-운영 Compose·Jenkins의 변수 주입은 별도 인프라 작업이다. backend에서 요구하는 새 변수를 운영에 주입하기 전에는 prod 기동이 실패할 수 있다.
+운영 환경변수는 서버 `/srv/eumi/.env.config`에 보관하고 운영 Compose의 backend `environment`로 컨테이너에 전달한다. 11/3 배포부터 `EUMI_AI_MODE=fake`도 전달한다. Jenkins는 배포를 실행하며, 서버 파일에 값을 추가할 때는 Compose의 전달 항목도 함께 맞춘다.
 
 ## 기능별 연결 경계
 
@@ -113,3 +117,4 @@ SMTP 연결·읽기·쓰기 타임아웃은 각 5000ms다. prod는 필수 값의
 - A2/A3는 `MailService`의 SMTP 실패를 트랜잭션에 연결한다. 현재 기반만으로 DB·메일 원자성이나 발급 롤백을 검증했다고 해석하지 않는다.
 - AI1은 `feat/be-agent`에서 구현했다. FE는 질문 202 뒤 after=questionId로 1초마다 조회하고 완료·실패·취소에서 멈춘다. 병합 전 Claude Code 리뷰를 받는다.
 - D1·D2 분석 조회(API-10·11·12)는 `feat/be-analysis`에서 구현했다. 로그인 회원에게 전체 지역의 적재 월·읍면동 인사이트·저장 보고서를 제공하고, 조회가 AI 생성을 실행하지 않는다. 404 기준·DB 상태·검사 결과·FE 확인 순서는 [분석 API 인계](docs/analysis/README.md)를 참고한다.
+- C1~C4 사례자·상담(API-19~29)은 본인 담당·같은 기관 권한을 적용한다. 관리번호는 기관 행 잠금·9999 검사·함수 호출·INSERT를 같은 트랜잭션으로 처리한다. [사례자 인계](docs/cases/README.md)의 검사 결과와 관리번호 리뷰 항목을 확인한다.

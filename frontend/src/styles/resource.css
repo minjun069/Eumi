@@ -1,0 +1,180 @@
+/* 3. RESOURCE 복지자원 관리 (공통 목록 스타일은 list.css, 상세는 detail.css, 입력은 form.css) */
+
+/* 3.1 복지자원 조회 */
+
+.capacity-range {
+  display: grid;
+  gap: 2px;
+}
+
+.capacity-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.capacity-inputs .input {
+  width: 96px;
+}
+
+.capacity-unit {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.capacity-range + .search-label {
+  margin-left: 14px;
+}
+
+.search-manager {
+  width: 200px;
+}
+
+.resource-results {
+  margin-top: 18px;
+}
+
+.resource-results.is-refreshing {
+  opacity: 0.6;
+}
+
+.resource-results .empty-state {
+  margin-top: 12px;
+}
+
+/* 결과가 없어도 열 너비가 바뀌지 않게 고정, 긴 글은 말줄임(마우스를 올리면 전체) */
+.resource-table {
+  table-layout: fixed;
+}
+
+.resource-table th:nth-child(1) { width: 190px; }
+.resource-table th:nth-child(2) { width: 150px; }
+.resource-table th:nth-child(4) { width: 76px; }
+.resource-table th:nth-child(5) { width: 130px; }
+.resource-table th:nth-child(6) { width: 198px; }
+.resource-table th:nth-child(7) { width: 140px; }
+.resource-table th:nth-child(8) { width: 82px; }
+
+.resource-table th {
+  white-space: nowrap;
+}
+
+.resource-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resource-table .col-name {
+  font-family: 'Noto Sans KR:Medium', sans-serif;
+}
+
+.resource-table .col-number,
+.resource-table .col-period {
+  font-variant-numeric: tabular-nums;
+}
+
+.resource-table tr.is-ended td {
+  color: #8a94a5;
+}
+
+.status-badge {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 1px 8px;
+  font-size: 12.5px;
+  line-height: 20px;
+}
+
+.status-badge.is-active {
+  color: #1f6f43;
+  background: #e3f5ea;
+}
+
+.status-badge.is-ended {
+  color: #6b7280;
+  background: #eef0f3;
+}
+
+.resource-loading {
+  margin: 40px 0;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* 3.2 복지자원 상세 */
+
+.resource-detail .back-link,
+.resource-form .back-link {
+  margin-bottom: 10px;
+}
+
+.title-status {
+  margin-left: 6px;
+  font-family: 'Noto Sans KR:Medium', sans-serif;
+  font-size: 14px;
+  line-height: 24px;
+  vertical-align: middle;
+}
+
+.notice-bar {
+  margin: 0;
+  border: 1px solid #f3d9a4;
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: #7a5a12;
+  background: #fff8e8;
+  font-size: 14px;
+}
+
+.info-grid-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.info-multiline {
+  white-space: pre-wrap;
+}
+
+.info-note {
+  margin-left: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.resource-not-found {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.resource-not-found .empty-state {
+  width: 100%;
+}
+
+/* 3.3 복지자원 등록·수정 */
+
+.form-wide {
+  width: 560px;
+}
+
+.number-input .input {
+  width: 140px;
+}
+
+.resource-textarea {
+  height: 150px;
+  padding: 10px 12px;
+  line-height: 23px;
+  resize: vertical;
+}
+
+.char-count {
+  margin: 4px 0 0;
+  color: #8a94a5;
+  font-size: 12px;
+}
+
+.inline-controls .char-count {
+  margin: 0;
+}

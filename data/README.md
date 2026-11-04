@@ -17,7 +17,7 @@ M3 지표  상세 → 읍면동 · 격자 지표                     M4 분석  
 | `m2_process/` | 배경 상세 · 격자 배경 · 실거래가 적재, 유동 상세 월 배치 · 스트리밍 · 검증 |
 | `m3_indicator/` | 읍면동 배경 지표, 격자 · 읍면동 행동 지표 |
 | `m4_analysis/` | 읍면동 점수 · 단계(`region_result`), 격자 이상 점수(`bh_grid_anomaly`) |
-| `ops/` | 월 배치 실행기(`run_month`), 기준 테이블 초기 적재(`load_dim_region`, `load_dim_grid100`), 서버 seed 생성(`make_seed`), 인프라 연결 확인 |
+| `ops/` | 월 배치 실행기(`run_month`), 원본 확인(`check_month_inputs`), 결과 검증(`verify_outputs`), 기준 테이블 초기 적재(`load_dim_region`, `load_dim_grid100`), 서버 seed 생성(`make_seed`), 인프라 연결 확인 |
 | `legacy/` | 1차 완성본 · DA 결과 CSV 적재 스크립트. 지금은 M2~M4 가 대체하므로 참고용 (실행하면 2차 산출값을 덮어쓴다) |
 
 ## 실행 환경
@@ -61,17 +61,20 @@ docker compose --profile data exec pipeline spark-submit pipeline/<모듈>/<스�
 | 9 | M3-3 | `m3_indicator/batch_bh_grid_indicators.py` | 컨테이너 | `flow_detail` → `bh_grid_indicator` (10개) |
 | 10 | M3-2 | `m3_indicator/batch_bh_region_indicators.py` | 컨테이너 | `flow_detail` + `bg_region_detail` → `bh_region_indicator` (12개) |
 | 11 | M4 | `m4_analysis/batch_region_result.py` | 호스트 | 배경 6 + 행동 12 → `region_result` (점수 · 등급 · 위험단계) |
-| 12 | M4-3 | `m4_analysis/batch_grid_anomaly.py` | 호스트 | `bh_grid_indicator` → `bh_grid_anomaly` |
-| 13 | 운영 | `ops/make_seed.py` | 호스트 | 결과 테이블 → `db/seed/R__*.sql` (서버 반영, 아래) |
+| 12 | M4-3 | `m4_analysis/batch_bh_contribution.py` | 호스트 | `region_result` + `bh_region_indicator` → `bh_region_contribution` (지표별 기여도) |
+| 13 | M4-3 | `m4_analysis/batch_grid_anomaly.py` | 호스트 | `bh_grid_indicator` → `bh_grid_anomaly` |
+| 14 | 검증 | `ops/verify_outputs.py` | 호스트 | 결과 테이블 계약 검사: 행 수 · 범위 · 등급 규칙 · 지표로 재계산한 점수와 일치. 실패하면 멈춤 |
+| 15 | 운영 | `ops/make_seed.py` | 호스트 | 결과 테이블 → `db/seed/R__*.sql` (서버 반영, 아래. 값이 바뀐 달이 있을 때만) |
 
 - 첫 달(전월 없음)은 변화 지표 4개(h26 · h29 · h30 · h31)가 NULL → 행동 점수 · 단계를 내지 않고 `region_result` 에 넣지 않는다 (DA 방침).
 - 모든 스크립트는 `--dry-run` 또는 `[OK]/[FAIL]` 검사를 찍는다. FAIL 이면 다음 단계로 가지 않는다.
-- **한 번에 돌리기**: `data/.venv/Scripts/python data/pipeline/ops/run_month.py --months 2025-12` 가 13단계를 순서대로 실행한다(호스트 · 컨테이너 자동 구분). 실패하면 그 단계에서 멈추고, `--from 8` · `--only 11 12` · `--skip 3` 으로 일부만 다시 돌린다. 단계별 소요 시간 · 결과는 `data/processed/run_log/run_<시각>.json` 에 남는다.
+- **한 번에 돌리기**: `data/.venv/Scripts/python data/pipeline/ops/run_month.py --months 2025-12` 가 15단계를 순서대로 실행한다(호스트 · 컨테이너 자동 구분). 실패하면 그 단계에서 멈추고, `--from 8` · `--only 11 12` · `--skip 3` 으로 일부만 다시 돌린다. 단계별 소요 시간 · 결과는 `data/processed/run_log/run_<시각>.json` 에 남는다.
 - 재처리 리허설(2026-11-03, 2025-12 한 달 전체 재실행): 13단계 모두 통과, 총 4분(가상 유동 생성 111초 · 유동 적재 78초가 대부분). 결과 테이블 값은 재실행 전과 동일 (`re_apt_trade` 는 DELETE 후 INSERT 라 `trade_id` 만 새로 발급). `make_seed` 는 값이 바뀐 달이 있을 때만 커밋한다 (재실행만으로는 updated_at · trade_id 가 바뀌어 diff 가 커진다).
-- **Airflow (`airflow/dags/eumi_monthly.py`)**: 위 1~12단계가 태스크 14개(가상 유동은 anchor · generate · validate 로 나뉨)로 들어 있다. 매월 5일 03:00 에 전월을 돌리며, 수집 → 실거래가 / 가상 유동 → 유동 상세 → 행동 지표 / 배경 상세 → 배경 지표 가지가 병렬로 돌고 M4 에서 합쳐진다. seed 생성(13)은 DAG 에 넣지 않는다.
+- **Airflow (`airflow/dags/eumi_monthly.py`)**: 위 1~13단계가 태스크 15개(가상 유동은 anchor · generate · validate 로 나뉨)로 들어 있고, 앞뒤에 원본 확인(`check_inputs`)과 결과 검증(`verify_outputs`)이 붙어 모두 17개다. 매월 5일 03:00 에 전월을 돌리며, 수집 → 실거래가 / 가상 유동 → 유동 상세 → 행동 지표 / 배경 상세 → 배경 지표 가지가 병렬로 돌고 M4 에서 합쳐진다. seed 생성(13)은 DAG 에 넣지 않는다.
   - 첫 태스크 `check_inputs`(`ops/check_month_inputs.py`)가 그 달의 SKT 월평균 · 주민등록 원본이 MinIO 에 있는지 보고, 없으면 그 실행 전체를 skip 한다. unpause 직후 Airflow 가 지난 스케줄 1건을 자동 실행하므로, 원본이 없는 달에 API 호출 · 적재가 일어나지 않게 하는 안전장치다.
   - 재처리: UI 의 Trigger DAG w/ config 또는 `docker compose --profile data exec pipeline airflow dags trigger eumi_monthly --conf '{"months": ["2025-12"]}'`. 실패한 태스크는 UI 에서 Clear 하면 그 태스크부터 다시 돈다.
-  - 로그는 UI 또는 pipeline 컨테이너 `/opt/airflow/logs/dag_id=eumi_monthly/…` (볼륨 `airflowlogs`). 스크립트의 `[OK]/[FAIL]` 출력이 그대로 남아 실행 이력 역할을 한다.
+  - **실행 이력**: 별도 테이블 없이 Airflow 기록을 쓴다. UI 의 Grid 화면에서 실행(dag run)별 기준월 · 태스크별 성공/실패 · 소요 시간을 보고, 태스크를 누르면 로그(스크립트의 `[OK]/[FAIL]` 출력, 적재 행 수)가 나온다. CLI 는 `airflow dags list-runs -d eumi_monthly`, `airflow tasks states-for-dag-run eumi_monthly <run_id>`. 로그 파일은 pipeline 컨테이너 `/opt/airflow/logs/dag_id=eumi_monthly/…`(볼륨 `airflowlogs`), 메타 정보는 postgres 의 `airflow` DB 에 남는다.
+  - **결과 검증** `ops/verify_outputs.py`: 달마다 배경 · 유동 · 행동 지표 · 결과 · 격자 점수 · 실거래가를 검사하고, 결과 점수가 지금 지표로 다시 계산한 값과 같은지(0.005 이내)까지 본다. 하나라도 틀리면 태스크가 실패한다. 단독 실행은 `python3 pipeline/ops/verify_outputs.py --all`.
   - 확인(2026-11-03): 12월 수동 실행 14개 태스크 성공, 실행 3분 50초.
 
 ## 모듈별 메모
@@ -93,18 +96,64 @@ docker compose --profile data exec pipeline spark-submit pipeline/<모듈>/<스�
 ### M4 분석
 - DA 재현 패키지의 고정 계수 · 학습 모델(`raw/model/<버전>/`)을 `common/m4_models.py` 가 읽는다 (sha256 검사, 패키지 고정 버전 numpy 2.3.5 · scipy 1.17.0 · scikit-learn 1.8.0 · joblib 1.5.3).
 - 배경 점수 S = 고정 PCA 산식 → 도시별 고정 P20 · P80 으로 `bg_grade` 1~3. 행동 점수 B = 도시별 IsolationForest(−score_samples × 100) → 그 달 도시 안 P20 · P80 으로 `bh_grade` 1~3. `risk_grade` = 두 등급 합 − 1 (1~5, 5 = 최우선).
-- DA 지표를 넣으면 DA 결과를 그대로 재현(차이 0). DB 지표로 내면 월 47개 동 중 0~4개의 단계가 한 칸 바뀌고, 격자는 상관 0.9999 · 상위 20% 겹침 99% 이상. 모델 학습(M4-1)은 DA 가 패키지로 비정기 실행. `bh_region_contribution` 은 비워 둔다(IsolationForest 는 기여도가 없음).
+- DA 지표를 넣으면 DA 결과를 그대로 재현(차이 0). DB 지표로 내면 월 47개 동 중 0~4개의 단계가 한 칸 바뀌고, 격자는 상관 0.9999 · 상위 20% 겹침 99% 이상. 모델 학습(M4-1)은 DA 가 패키지로 비정기 실행.
+- **지표별 기여도** (`bh_region_contribution`, `m4_analysis/batch_bh_contribution.py`): IsolationForest 는 지표별 기여도를 주지 않아 **지표 치환**으로 계산한다. 지표 j 의 기여도 = 행동 점수 − (지표 j 만 같은 도시 · 같은 달 동들의 중앙값으로 바꿔 다시 낸 행동 점수). 단위는 점수이고, + 면 그 지표가 보통 동보다 튀어서 점수를 올렸다는 뜻, − 면 낮췄다는 뜻이다. 결과가 있는 동 · 달마다 지표 12개 행(한 달 564행). 지표 간 상호작용은 반영하지 않아 12개 합이 점수 차와 정확히 같지는 않으므로, 큰 순서로 상위 요인을 고르는 용도로 쓴다. 행동 등급 1 인 동은 모든 기여도가 0 이하일 수 있다(모든 지표가 보통 이하).
+- 지표 한글 이름 (`common/bh_indicators.LABELS`, DA 사전 기준). `indicator_cd` 는 왼쪽 컬럼명이다.
+
+  | indicator_cd | 이름 | 단위 |
+  |---|---|---|
+  | h12_evening_day_ratio | 저녁·낮 활동비 | 배율 |
+  | h13_commute_ratio | 출퇴근 집중비 | 배율 |
+  | h14_hour_entropy | 시간대 엔트로피 | nat |
+  | h15_weekday_entropy | 요일 엔트로피 | nat |
+  | h18_senior_male_share | 고령층 남성 비중 | 비율 |
+  | h19_age_entropy | 연령 엔트로피 | nat |
+  | h20_senior_representation | 고령층 활동 대표성 | 배율 |
+  | h21_male50plus_representation | 중고령 남성 활동 대표성 | 배율 |
+  | h26_weekend_weekday_change_gap | 주말·주중 변화율 격차 | %p |
+  | h29_senior_gender_change_gap | 고령층 성별 변화율 격차 | %p |
+  | h30_hour_profile_distance | 시간대 구성 변화 거리 | 거리 |
+  | h31_weekday_profile_distance | 요일 구성 변화 거리 | 거리 |
 
 ## 스트리밍 시연
 
+모두 pipeline 컨테이너 안에서 한다 (`infra/` 에서). 스트리밍은 `flow_detail` 에 값을 **더하므로** 재생할 달을 먼저 비운다.
+
 ```bash
-# infra/ 에서 스트리밍 시작 (체크포인트 · 토픽을 비운 뒤)
-docker compose --profile data exec pipeline spark-submit pipeline/m2_process/stream_flow_detail.py
-# 호스트에서 12월 재생 (1시간치를 10초 간격으로) → 끝나면 종료 신호
-data/.venv/Scripts/python data/pipeline/m1_collect/run_synth.py replay --months 2025-12 --speed 10
-data/.venv/Scripts/python data/pipeline/m1_collect/send_eos.py --month 2025-12
+# 1) 준비: 재생할 달 비우기, 체크포인트 지우기 (같은 달을 두 번 재생하면 값이 두 배가 된다)
+docker compose exec postgres psql -U postgres -d eumi -c "DELETE FROM analysis.flow_detail WHERE period_start = '2025-12-01'"
+docker compose --profile data exec pipeline rm -rf /opt/eumi/checkpoint/flow_detail
+# 2) 스트리밍 시작 (터미널 하나를 차지한다. 새 메시지만 읽도록 latest)
+docker compose --profile data exec pipeline spark-submit pipeline/m2_process/stream_flow_detail.py --starting latest
+# 3) 다른 터미널에서 재생: 1시간치를 10초 간격으로 (--speed 0 이면 쉬지 않고, --days 01 02 로 날짜 제한)
+docker compose --profile data exec pipeline python3 pipeline/m1_collect/run_synth.py replay --months 2025-12 --speed 10
+docker compose --profile data exec pipeline python3 pipeline/m1_collect/send_eos.py --month 2025-12     # 마지막 날 윈도 닫기
+# 4) 끝내기: Java 프로세스까지 멈춰야 한다 (터미널 Ctrl+C 만으로는 컨테이너 안 잡이 남을 수 있다)
+docker compose --profile data exec pipeline pkill -f "SparkSubmit.*stream_flow_detail"
+# 5) 원래 값으로 되돌리기: Airflow 에서 그 달을 수동 실행 (유동 상세 · 지표 · 결과 재적재 + 검증)
+docker compose --profile data exec pipeline airflow dags trigger eumi_monthly --conf '{"months": ["2025-12"]}'
 ```
-`flow_detail` 이 쌓이는 것을 보고 M3-3 · M3-2 · M4 를 돌리면 지표 · 단계가 갱신된다. Kafka 는 월 배치 운영에는 필요 없다.
+
+- 하루 윈도는 다음 날 01:00 이후 메시지가 와야 닫힌다. 날짜마다 `[stream] batch N: 닫힌 날짜 [...] → flow_detail …행 누적` 이 찍히면, 그 시점에 M3 · M4 를 돌려 지표 · 단계가 갱신되는 것을 보여 줄 수 있다.
+- 확인(2026-11-04): 12월 1~2일 재생 1,421,424건 → 2분 50초, 날짜당 1,095,681행 적재, 적재 합계 = 재생 원본 합계(상대오차 1.2e-8), 요일 MON · TUE 각 1일. 이어서 DAG 로 12월을 되돌린 값이 리허설 전과 같았다(행 수 · 합계 4자리까지).
+- 예전 Spark 이미지로 만든 체크포인트는 소유자가 달라 지워지지 않는다. 한 번만 `docker compose --profile data exec -u root pipeline sh -c "rm -rf /opt/eumi/checkpoint/flow_detail && chown -R pipeline:pipeline /opt/eumi/checkpoint"`.
+
+## 통합 테스트
+
+배포 전에 로컬에서 세 겹으로 확인한다. 서버에서는 배포 뒤 같은 명령으로 한 번씩 돌린다.
+
+| 범위 | 방법 | 결과 (2026-11-04) |
+|---|---|---|
+| 파이프라인 끝까지 | Airflow 에서 `{"months": ["2025-12"]}` 수동 실행 → 마지막 `verify_outputs` | 16개 태스크 성공, 약 5분, 검증 PASS |
+| 결과 테이블 계약 | `python3 pipeline/ops/verify_outputs.py --all` | 2025-07~12 전부 PASS |
+| 스트리밍 | 위 "스트리밍 시연" 절차로 12월 1~2일 재생 | 적재 합계 = 재생 원본 합계 (상대오차 1.2e-8) |
+| 백엔드 연결 | 백엔드 분석 API 통합 테스트(`AnalysisIntegrationTests`, API-10 · 11 · 12)를 파이프라인이 적재한 DB 에 붙여 실행 | 18개 통과, 실패 0 |
+
+백엔드 테스트는 호스트에 JDK 가 없어도 JDK 컨테이너로 돌린다 (저장소 루트에서, 처음엔 Gradle 내려받기로 약 4분):
+
+```bash
+docker run --rm --network eumi-dev_default -v "$PWD/backend:/work" -v eumi-gradle-cache:/root/.gradle -w /work   -e DB_URL=jdbc:postgresql://postgres:5432/eumi -e SMTP_HOST=mailpit eclipse-temurin:21-jdk   java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain integrationTest --tests "*AnalysisIntegrationTests"
+```
 
 ## 서버 DB 반영 (seed · 덤프)
 
@@ -143,5 +192,6 @@ docker cp eumi-dev-postgres-1:/tmp/flow.dump data/processed/dump/flow_detail_YYY
 | 2026-11-02 | 실거래가: 2025-07~12, 매매 · 전세 · 월세 모두. 좌표는 Kakao 주소 검색(단지당 1회), 행정동은 경계 포함 판정. 전월세 해제 거래는 제외 못 함 | API 가 좌표를 주지 않고 법정동 ≠ 행정동. 전월세 API 에 해제 항목이 없다 |
 | 2026-11-03 | 가상 유동은 DA 분석과 같은 50m 코호트 셀만 합산해 생성. 행동 지표는 우리 코드 값으로 적재 | DA 격자 · 읍면동 모델이 이 셀 집합을 쓴다. 격자 합은 DA 와 일치, 읍면동은 동 배정 단위 차이로 최대 2% |
 | 2026-11-03 | M4 점수 · 단계는 DA 패키지의 고정 계수 · 학습 모델(`raw/model/v20261102`)로 파이프라인이 산출. 첫 달(7월)은 `region_result` 에 넣지 않음 | DA 결과 CSV 적재 대신 새 달도 같은 방법으로. 단계가 한 칸 바뀌는 동이 월 0~4개 있음을 확인하고 허용. 7월은 변화 지표 NULL (DA 방침) |
+| 2026-11-04 | 지표별 기여도는 지표 치환(같은 도시 · 같은 달 중앙값으로 바꿨을 때의 행동 점수 차)으로 계산해 `bh_region_contribution` 에 적재 | IsolationForest 는 기여도가 없다. 새 의존성 없이 지금 모델로 계산되고, 단위가 점수라 보고서 문장으로 바로 쓸 수 있으며, 등급과 같은 비교 기준(도시 · 달)이다. SHAP 은 패키지 추가와 점수 단위 변환 문제로 쓰지 않음. 전월 대비 변화는 `region_result` 점수 차로 본다 |
 | 2026-11-03 | 서버 반영은 Flyway seed(`db/seed/R__*`), `flow_detail` 만 덤프 | 서버에 파이프라인 런타임이 없다. 760만 행은 git · Flyway 로 무리 |
 | 2026-11-03 | `pipeline/` 를 모듈 폴더(common · m1_collect · m2_process · m3_indicator · m4_analysis · ops · legacy)로 정리 | 월 배치 순서 · 실행 위치를 폴더와 docstring 태그로 드러내 Airflow DAG 와 맞춤 |
