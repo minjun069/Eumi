@@ -84,7 +84,7 @@ Claude Code는 아래 두 검사만 독립 재실행했고 전체 검사·기존
 - 변경한 값이 없으면 FE는 PATCH를 보내지 않는다. 빈 객체는 VALIDATION_ERROR이며 fieldErrors는 빈 배열이다. 값 오류는 title·phone 필드 오류로 표시하고, PATCH 응답으로 내 정보와 메뉴 직함 캐시를 갱신하거나 `/auth/me`를 다시 조회한다.
 - 기관 데이터를 확대하거나 회원가입(API-04)을 열기 전, 기관의 관할 코드가 적재된 지역과 시도 이름 매핑에 존재하는지 인프라·데이터 담당이 확인한다. 매핑 누락·중복은 해당 기관 회원의 API-30 조회와 API-31 응답 재조회에서 500을 일으킬 수 있다. 이는 현재 시연 기관(11680·51110)에서 발견된 결함이 아닌 조건부 운영 주의 사항이다. 계약의 필수 jurisdictionName을 임의 값으로 대체하지 않는다.
 - FE 브라우저 연동과 운영 배포는 아직 확인하지 않았다. Jira 완료·MR 생성·병합은 사용자가 진행한다.
-- [2] API-36~38은 feat/be-conversations, [3] API-32는 feat/be-password에서 각각 별도 MR로 진행한다. 현재 브랜치에서 다음 단계 구현을 섞지 않는다. [3]은 Claude Code 리뷰 후 병합한다.
+- [2] API-36~38은 사용자가 정한 feat/be-my-history(기존 계획명 feat/be-conversations), [3] API-32는 feat/be-password에서 각각 별도 MR로 진행한다. 현재 브랜치에서 다음 단계 구현을 섞지 않는다. [3]은 Claude Code 리뷰 후 병합한다.
 
 제안 커밋 제목: `feat: [BE] 내 정보 조회·수정과 담당 자원 조회 구현`
 
