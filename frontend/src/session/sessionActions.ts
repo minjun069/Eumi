@@ -25,6 +25,15 @@ export function restoreSession(): Promise<void> {
   return restoring
 }
 
+/** 메뉴 프로필을 다시 받는다 (API-01). 내 정보 수정 뒤 머리글·메뉴의 직함을 서버 값으로 맞춘다 */
+export async function refreshProfile(): Promise<void> {
+  try {
+    sessionStore.updateProfile(await authApi.getMe())
+  } catch {
+    // 실패하면 다음 새로고침 때 복원된다. 로그인 만료는 다른 요청의 401 처리가 맡는다
+  }
+}
+
 /** 로그인 성공 (API-08 data.user) → 로그인 상태로 바꾼다 */
 export function completeLogin(user: LoginUser) {
   const { memberId, name, orgName, title, jurisdictionSidoCode, jurisdictionSigunguCode, mustChangePassword } = user
