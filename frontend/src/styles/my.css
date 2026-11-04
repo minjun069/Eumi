@@ -118,6 +118,11 @@
   max-width: 380px;
 }
 
+.password-uncertain p {
+  margin: 0 0 16px;
+  line-height: 24px;
+}
+
 .password-change .notice-bar {
   margin: 0 0 16px;
   border: 1px solid #f0c2c2;

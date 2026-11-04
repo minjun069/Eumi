@@ -27,8 +27,10 @@ export const myApi = {
   getMyResources: () => api.get<MyResources>("/members/me/resources"),
 
   /**
-   * API-32 PUT /members/me/password — 성공하면 data.user. 서버는 다른 세션을 모두 끝내고 현재 세션 ID를 바꾼다.
-   * 현재 비밀번호 불일치(임시 비밀번호 만료 포함) 400 CURRENT_PASSWORD_MISMATCH, 같은 비밀번호 400 NEW_PASSWORD_EQUALS_CURRENT
+   * API-32 PUT /members/me/password — 성공하면 data.user. 서버는 다른 세션을 모두 끝내고 현재 세션 ID를 바꾸며 CSRF 토큰을 지운다.
+   * 현재 비밀번호 불일치(임시 비밀번호 만료 포함) 400 CURRENT_PASSWORD_MISMATCH, 같은 비밀번호 400 NEW_PASSWORD_EQUALS_CURRENT.
+   * 세션이 바뀌므로 runExclusive 안에서 부른다 (그동안 다른 요청을 멈춘다)
    */
-  changePassword: (request: PasswordChangeRequest) => api.put<PasswordChanged>("/members/me/password", request),
+  changePassword: (request: PasswordChangeRequest) =>
+    api.put<PasswordChanged>("/members/me/password", request, { exclusive: true }),
 }
