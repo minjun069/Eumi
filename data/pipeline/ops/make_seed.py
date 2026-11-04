@@ -4,11 +4,13 @@
 - flow_detail(760만 행, 500 MB)은 git · Flyway 로 옮기기엔 커서 제외한다. 필요하면 덤프로 따로 옮긴다 (data/README.md 서버 반영 절).
 - FK 순서: dim_region(R__01) → dim_grid100(R__10) → 나머지. R__02 · 03 은 인프라 담당의 기관 · 회원 seed.
 실행  data/.venv/Scripts/python data/pipeline/ops/make_seed.py            (로컬 Docker postgres 컨테이너에서 pg_dump)
+      … make_seed.py --tables bh_region_contribution region_result      값이 바뀐 테이블만 다시 만든다 (다른 파일은 그대로)
 """
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # data/pipeline (common 패키지)
+import argparse
 import datetime as dt
 import subprocess
 from pathlib import Path
@@ -28,6 +30,7 @@ TABLES = [  # (파일 순번, 스키마.테이블)
     ("16", "public.region_result"),
     ("17", "analysis.bh_grid_anomaly"),
     ("18", "analysis.re_apt_trade"),
+    ("19", "analysis.bh_region_contribution"),   # region_result(R__16) 를 참조하므로 그 뒤
 ]
 IDENTITY = {"analysis.re_apt_trade": "trade_id"}  # 시퀀스를 seed 최대값 뒤로 맞춰야 하는 테이블
 COPY_END = chr(92) + "."  # COPY 블록 끝 표시 (백슬래시 + 점)
@@ -45,8 +48,16 @@ def dump_copy_block(table: str) -> tuple[str, list[str]]:
 
 def main() -> int:
     setup()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tables", nargs="*", help="테이블 이름(스키마 없이)만 골라 내보낸다. 없으면 전부")
+    args = ap.parse_args()
+    names = {t.split('.')[1] for _, t in TABLES}
+    if args.tables and not set(args.tables) <= names:
+        raise SystemExit(f"모르는 테이블: {sorted(set(args.tables) - names)} (가능: {sorted(names)})")
     today = dt.date.today().isoformat()
     for num, table in TABLES:
+        if args.tables and table.split('.')[1] not in args.tables:
+            continue
         schema, name = table.split(".")
         cols, rows = dump_copy_block(table)
         path = SEED_DIR / f"R__{num}_{name}.sql"

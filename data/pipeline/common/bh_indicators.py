@@ -22,6 +22,22 @@ GRID_COLS = ["activity_daily", "h12_evening_day_ratio", "h13_commute_ratio", "h1
              "h30_hour_profile_distance", "h31_weekday_profile_distance"]
 REGION_COLS = GRID_COLS[:7] + ["h20_senior_representation", "h21_male50plus_representation"] + GRID_COLS[7:]
 
+# 읍면동 행동 지표 12개의 한글 이름 · 단위 (DA 사전 final_dictionary.json 기준). 보고서 · 기여도 설명에 쓴다
+LABELS = {
+    "h12_evening_day_ratio": ("저녁·낮 활동비", "배율"),
+    "h13_commute_ratio": ("출퇴근 집중비", "배율"),
+    "h14_hour_entropy": ("시간대 엔트로피", "nat"),
+    "h15_weekday_entropy": ("요일 엔트로피", "nat"),
+    "h18_senior_male_share": ("고령층 남성 비중", "비율"),
+    "h19_age_entropy": ("연령 엔트로피", "nat"),
+    "h20_senior_representation": ("고령층 활동 대표성", "배율"),
+    "h21_male50plus_representation": ("중고령 남성 활동 대표성", "배율"),
+    "h26_weekend_weekday_change_gap": ("주말·주중 변화율 격차", "%p"),
+    "h29_senior_gender_change_gap": ("고령층 성별 변화율 격차", "%p"),
+    "h30_hour_profile_distance": ("시간대 구성 변화 거리", "거리"),
+    "h31_weekday_profile_distance": ("요일 구성 변화 거리", "거리"),
+}
+
 
 def prev_month(m: str) -> str:
     y, mm = (int(x) for x in m.split("-"))

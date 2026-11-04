@@ -67,4 +67,4 @@ Spring Boot · FastAPI · 데이터 파이프라인이 같은 DB(`eumi`)를 쓰�
 | `R__01_dim_region.sql` | 강남구 · 춘천시 행정동 | 강병민 |
 | `R__02_organization.sql` | 기관 | 김민재 |
 | `R__03_demo_member.sql` | 개발 · 시연용 회원 (PBKDF2 해시, OPEN-04) | 김민재 |
-| `R__10_dim_grid100.sql` ~ `R__18_re_apt_trade.sql` | 데이터 파이프라인 결과 10개 테이블(격자 기준, 배경 상세 · 지표, 행동 지표, 읍면동 월별 결과, 격자 이상 점수, 실거래가). 2025-07~12, 약 41 MB. `flow_detail`(760만 행)은 제외 | 강병민 |
+| `R__10_dim_grid100.sql` ~ `R__19_bh_region_contribution.sql` | 데이터 파이프라인 결과 11개 테이블(격자 기준, 배경 상세 · 지표, 행동 지표, 읍면동 월별 결과, 격자 이상 점수, 실거래가, 지표별 기여도). 2025-07~12, 약 41 MB. `flow_detail`(760만 행)은 제외 | 강병민 |

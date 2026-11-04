@@ -49,6 +49,7 @@ STEPS = {
     "bh_grid_indicators":  ("python3",      "m3_indicator/batch_bh_grid_indicators.py"),
     "bh_region_indicators": ("python3",     "m3_indicator/batch_bh_region_indicators.py"),
     "region_result":       ("python3",      "m4_analysis/batch_region_result.py"),
+    "bh_contribution":     ("python3",      "m4_analysis/batch_bh_contribution.py"),
     "grid_anomaly":        ("python3",      "m4_analysis/batch_grid_anomaly.py"),
 }
 
@@ -90,6 +91,7 @@ with DAG(
     t["bg_detail"] >> [t["bg_indicators"], t["bh_region_indicators"]]
     # M4
     [t["bg_indicators"], t["bh_region_indicators"]] >> t["region_result"]
+    t["region_result"] >> t["bh_contribution"]
     t["bh_grid_indicators"] >> t["grid_anomaly"]
 
     # 결과 검증: 모든 가지가 끝난 뒤 결과 테이블을 계약대로 검사한다 (실패하면 이 실행이 실패로 남는다)
@@ -100,4 +102,4 @@ with DAG(
         append_env=True,
         retries=0,
     )
-    [t["region_result"], t["grid_anomaly"], t["re_apt_trade"]] >> verify_outputs
+    [t["bh_contribution"], t["grid_anomaly"], t["re_apt_trade"]] >> verify_outputs
