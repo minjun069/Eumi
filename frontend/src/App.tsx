@@ -9,6 +9,7 @@ import { LoginScreen } from "@/screens/auth/LoginScreen"
 import { CaseDetailScreen } from "@/screens/case/CaseDetailScreen"
 import { CaseFormScreen } from "@/screens/case/CaseFormScreen"
 import { CaseListScreen } from "@/screens/case/CaseListScreen"
+import { MyPageScreen } from "@/screens/my/MyPageScreen"
 import { PlaceholderScreen } from "@/screens/placeholder/PlaceholderScreen"
 import { PLACEHOLDERS } from "@/screens/placeholder/placeholders"
 import { ResourceDetailScreen } from "@/screens/resource/ResourceDetailScreen"
@@ -57,9 +58,9 @@ export default function App() {
             <Route path={PATHS.caseNew} element={<CaseFormScreen key="new" mode="new" />} />
             <Route path="/cases/:caseId" element={<CaseDetailScreen />} />
             <Route path="/cases/:caseId/edit" element={<CaseFormScreen key="edit" mode="edit" />} />
-            <Route path={PATHS.my} element={<PlaceholderScreen spec={PLACEHOLDERS.my} />} />
-            <Route path={PATHS.myResources} element={<PlaceholderScreen spec={PLACEHOLDERS.myResources} />} />
-            <Route path={PATHS.myConversations} element={<PlaceholderScreen spec={PLACEHOLDERS.myConversations} />} />
+            <Route path={PATHS.my} element={<MyPageScreen tab="info" />} />
+            <Route path={PATHS.myResources} element={<MyPageScreen tab="resources" />} />
+            <Route path={PATHS.myConversations} element={<MyPageScreen tab="conversations" />} />
             <Route path={PATHS.myPassword} element={<PlaceholderScreen spec={PLACEHOLDERS.myPassword} />} />
             <Route path={PATHS.myWithdraw} element={<PlaceholderScreen spec={PLACEHOLDERS.myWithdraw} />} />
           </Route>

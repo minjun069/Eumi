@@ -1,5 +1,3 @@
-import { PATHS } from "@/routes/paths"
-
 // 아직 만들지 않은 화면의 자리 표시 내용 ('준비 중').
 // 페이지를 프로토타입 원본(초기화 직전 develop 커밋 c96cf85의 frontend/)에서 옮겨 실제 API로 연결하면 그 항목을 지운다.
 // stage는 "○○에서 만들 화면입니다." 문장에 들어간다.
@@ -19,7 +17,7 @@ export type PlaceholderLink = {
   to: string
 }
 
-const MY = "11/5~11/6 마이페이지 작업"
+const MY_HISTORY = "11/6 AI 대화 기록·비밀번호 변경 작업"
 const EXTRA = "11/9 이후 부가 기능 작업"
 
 export const PLACEHOLDERS = {
@@ -34,29 +32,15 @@ export const PLACEHOLDERS = {
     features: ["임시 비밀번호 발급 (API-09)"],
   },
 
-  my: {
-    title: "마이페이지 · 내 정보",
-    stage: MY,
-    features: ["내 정보 조회, 직함·전화 수정 (API-30·31)"],
-    links: [
-      { label: "내 담당 복지자원", to: PATHS.myResources },
-      { label: "대화 이력", to: PATHS.myConversations },
-      { label: "비밀번호 변경", to: PATHS.myPassword },
-    ],
-  },
-  myResources: {
-    title: "마이페이지 · 내 담당 복지자원",
-    stage: MY,
-    features: ["담당 복지자원 목록 (API-35)"],
-  },
+  // 마이페이지 'AI 대화 기록' 탭 안에 보이는 안내 (MyPageScreen)
   myConversations: {
-    title: "마이페이지 · 대화 이력",
-    stage: MY,
-    features: ["대화 목록·조회·삭제 (API-36~38)"],
+    title: "마이페이지 · AI 대화 기록",
+    stage: MY_HISTORY,
+    features: ["대화 목록·조회·삭제 (API-36~38)", "이어서 질문 (AI 패널에서 같은 대화로)"],
   },
   myPassword: {
     title: "비밀번호 변경",
-    stage: MY,
+    stage: MY_HISTORY,
     features: ["비밀번호 변경 (API-32)"],
     note: "임시 비밀번호로 로그인하면 비밀번호를 바꿀 때까지 이 화면만 쓸 수 있습니다.",
   },
