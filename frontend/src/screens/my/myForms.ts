@@ -1,5 +1,5 @@
 import type { MyInfo, MyInfoPatch } from "@/api/myApi"
-import { isValidPhone } from "@/utils/validation"
+import { isValidPassword, isValidPhone, PASSWORD_RULE_TEXT } from "@/utils/validation"
 
 // 마이페이지 입력 확인 (화면에서 API를 부르기 전에 확인한다. 서버도 같은 조건을 다시 검사한다)
 
@@ -31,4 +31,34 @@ export function toMyInfoPatch(form: MyInfoForm, info: MyInfo): MyInfoPatch | nul
   if (title !== info.title) patch.title = title
   if (phone !== info.phone) patch.phone = phone
   return Object.keys(patch).length > 0 ? patch : null
+}
+
+// ── 5.1.3 비밀번호 변경 ──
+
+/** PasswordChangeRequest maxLength */
+export const PASSWORD_MAX = 128
+
+export type PasswordForm = { currentPassword: string; newPassword: string; confirmPassword: string }
+export type PasswordField = keyof PasswordForm
+export type PasswordErrors = Partial<Record<PasswordField, string>>
+
+export const EMPTY_PASSWORD_FORM: PasswordForm = { currentPassword: "", newPassword: "", confirmPassword: "" }
+
+export const PASSWORD_MESSAGES = {
+  currentMismatch: "현재 비밀번호가 맞지 않습니다.",
+  sameAsCurrent: "현재 비밀번호와 다른 비밀번호를 입력하세요.",
+} as const
+
+/** 비밀번호는 앞뒤 공백도 그대로 쓴다 (trim하지 않는다) */
+export function validatePasswordForm(form: PasswordForm): PasswordErrors {
+  const errors: PasswordErrors = {}
+  if (!form.currentPassword) errors.currentPassword = "현재 비밀번호를 입력하세요."
+  else if (form.currentPassword.length > PASSWORD_MAX) errors.currentPassword = `${PASSWORD_MAX}자 이내로 입력하세요.`
+  if (!form.newPassword) errors.newPassword = "새 비밀번호를 입력하세요."
+  else if (!isValidPassword(form.newPassword) || form.newPassword.length > PASSWORD_MAX)
+    errors.newPassword = `비밀번호는 ${PASSWORD_RULE_TEXT}해야 합니다. (${PASSWORD_MAX}자까지)`
+  else if (form.newPassword === form.currentPassword) errors.newPassword = PASSWORD_MESSAGES.sameAsCurrent
+  if (!form.confirmPassword) errors.confirmPassword = "새 비밀번호를 한 번 더 입력하세요."
+  else if (form.newPassword !== form.confirmPassword) errors.confirmPassword = "새 비밀번호가 일치하지 않습니다."
+  return errors
 }
