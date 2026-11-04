@@ -27,7 +27,7 @@ public class CaseService {
     }
 
     public void requireAccess(LoginUser user, long caseId, boolean lock) {
-        var access = repository.access(caseId, user.memberId(), lock).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+        var access = repository.access(caseId, user.orgId(), user.memberId(), lock).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         if (access.orgId() != user.orgId()) throw new ApiException(ErrorCode.NOT_FOUND);
         if (!access.assigned()) throw new ApiException(ErrorCode.FORBIDDEN);
     }

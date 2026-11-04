@@ -135,6 +135,35 @@ class CaseIntegrationTests {
     }
 
     @Test
+    void foreignCaseRowLockDoesNotBlockUnauthorizedWrites() throws Exception {
+        var otherBrowser=login(foreign);
+        long id=create(otherBrowser,"Synthetic foreign locked",List.of(foreign));
+        long note=data(otherBrowser.send("POST",consultations(id),consultation("2020-01-02")),201)
+                .path("consultationId").asLong();
+        try(var connection=jdbc.getDataSource().getConnection(); var executor=Executors.newSingleThreadExecutor()) {
+            connection.setAutoCommit(false);
+            try {
+                try(var statement=connection.prepareStatement("SELECT case_id FROM public.case_record WHERE case_id=? AND org_id=? FOR UPDATE")) {
+                    statement.setLong(1,id);statement.setLong(2,otherOrg);
+                    try(var rows=statement.executeQuery()){assertThat(rows.next()).isTrue();}
+                }
+                // 이 독립 연결의 행 잠금을 유지한 채 타 기관 쓰기 네 경로가 모두 404로 끝나야 한다.
+                var rejected=executor.submit(()->{
+                    error(browser.send("DELETE",path(id),null),404,"NOT_FOUND");
+                    error(browser.send("POST",consultations(id),consultation("2020-01-02")),404,"NOT_FOUND");
+                    error(browser.send("PUT",consultations(id)+"/"+note,consultation("2020-01-02")),404,"NOT_FOUND");
+                    error(browser.send("DELETE",consultations(id)+"/"+note,null),404,"NOT_FOUND");
+                    return null;
+                });
+                rejected.get(5,TimeUnit.SECONDS);
+            } finally {
+                // 수정 전 코드가 잠금 대기해 실패해도 반드시 풀어 서버 요청과 자체 fixture를 정리한다.
+                connection.rollback();
+            }
+        }
+    }
+
+    @Test
     void duplicateCheckOnlyRevealsOwnedAssignedCasesAndDoesNotBlockCreation() throws Exception {
         long own=create(browser,"Synthetic duplicate",List.of(caller));
         create(login(unassigned),"Synthetic duplicate",List.of(unassigned));

@@ -21,12 +21,12 @@ public class CaseRepository {
 
     public CaseRepository(JdbcTemplate jdbc) { this.jdbc = jdbc; this.named = new NamedParameterJdbcTemplate(jdbc); }
 
-    public Optional<Access> access(long caseId, long memberId, boolean lock) {
+    public Optional<Access> access(long caseId, long orgId, long memberId, boolean lock) {
         return jdbc.query("""
                 SELECT c.org_id, EXISTS(SELECT 1 FROM public.case_manager m WHERE m.case_id=c.case_id AND m.member_id=?) AS assigned
-                FROM public.case_record c WHERE c.case_id=?
+                FROM public.case_record c WHERE c.case_id=? AND c.org_id=?
                 """ + (lock ? " FOR UPDATE OF c" : ""),
-                (rs, row) -> new Access(rs.getLong("org_id"), rs.getBoolean("assigned")), memberId, caseId).stream().findFirst();
+                (rs, row) -> new Access(rs.getLong("org_id"), rs.getBoolean("assigned")), memberId, caseId, orgId).stream().findFirst();
     }
     public record Access(long orgId, boolean assigned) { }
 
