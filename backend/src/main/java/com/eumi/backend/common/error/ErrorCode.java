@@ -7,6 +7,8 @@ public enum ErrorCode {
     INVALID_JSON(HttpStatus.BAD_REQUEST, "요청을 처리하지 못했습니다."),
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다."),
+    CURRENT_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다."),
+    NEW_PASSWORD_EQUALS_CURRENT(HttpStatus.BAD_REQUEST, "새 비밀번호는 현재 비밀번호와 달라야 합니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "요청을 처리하지 못했습니다."),
     PASSWORD_CHANGE_REQUIRED(HttpStatus.FORBIDDEN, "비밀번호를 먼저 변경해야 합니다."),
     CSRF_INVALID(HttpStatus.FORBIDDEN, "요청 인증 정보를 새로 준비해 주세요."),
