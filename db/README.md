@@ -67,6 +67,6 @@ Spring Boot · FastAPI · 데이터 파이프라인이 같은 DB(`eumi`)를 쓰�
 | `R__01_dim_region.sql` | 강남구 · 춘천시 행정동 | 강병민 |
 | `R__02_organization.sql` | 기관 | 김민재 |
 | `R__03_demo_member.sql` | 개발 · 시연용 회원 (PBKDF2 해시, OPEN-04) | 김민재 |
-| `R__04_welfare_resource.sql` | 시연용 복지자원 58건 (강남 실제 복지서비스 26 + 춘천 전역 가상 19 + 동 단위 가상 13). `data/demo_seed/make_demo_seed.py` 로 생성 | 강병민 |
+| `R__04_welfare_resource.sql` | 시연용 복지자원 72건 (강남 실제 복지서비스 26 + 춘천 실제 통합돌봄 14 + 춘천 전역 가상 19 + 동 단위 가상 13). `data/demo_seed/make_demo_seed.py` 로 생성 | 강병민 |
 | `R__05_demo_case.sql` | 시연용 사례자 52명 · 담당자 · 상담 기록 186건 (가상 인물). 같은 스크립트로 생성 | 강병민 |
 | `R__10_dim_grid100.sql` ~ `R__19_bh_region_contribution.sql` | 데이터 파이프라인 결과 11개 테이블(격자 기준, 배경 상세 · 지표, 행동 지표, 읍면동 월별 결과, 격자 이상 점수, 실거래가, 지표별 기여도). 2025-07~12, 약 41 MB. `flow_detail`(760만 행)은 제외 | 강병민 |

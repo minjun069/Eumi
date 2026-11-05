@@ -26,7 +26,11 @@ import scenario_cases as sc  # noqa: E402
 from resources_city import CITY_RESOURCES  # noqa: E402
 from resources_local import CHUNCHEON_ORG, GANGNAM_ORG, LOCAL_RESOURCES  # noqa: E402
 from scenario_hero import HERO_CASES  # noqa: E402
+from welfare_chuncheon import CHUNCHEON_REAL  # noqa: E402
+from welfare_chuncheon import YEAR as CHUNCHEON_YEAR  # noqa: E402
 from welfare_picks import PICKS, SIGUNGU_BY_SIDO  # noqa: E402
+
+BROCHURE = "춘천시 통합돌봄 안내"
 
 ORGS = {
     "gangnam": dict(domain="demo-gangnam.eumi.test", name=GANGNAM_ORG, sigungu="11680"),
@@ -119,6 +123,22 @@ def local_resources(rng: random.Random) -> list[dict]:
     return rows
 
 
+def chuncheon_real_resources() -> list[dict]:
+    """춘천시 통합돌봄 안내 자료의 실제 서비스 (welfare_chuncheon.py). 난수는 따로 쓴다."""
+    rng = random.Random(sc.SEED + 2)
+    start, end = (dt.date.fromisoformat(d) for d in CHUNCHEON_YEAR)
+    rows = []
+    for x in CHUNCHEON_REAL:
+        created = dt.date(2026, 1, 2) + dt.timedelta(days=rng.randint(0, 20))
+        rows.append(dict(
+            name=x["name"], org_name=x["org_name"], target=x["target"], ages=x["ages"], gender="무관",
+            sigungu=ORGS["chuncheon"]["sigungu"], dong=None, start=start, end=end, fee=x["fee"], status="진행 중",
+            manager=email("chuncheon", x["manager"]), capacity=x["capacity"], participants=x["participants"],
+            content=x["content"], apply=x["apply"], created=at(created, rng.randint(9, 17), rng.randint(0, 59)), source=BROCHURE,
+        ))
+    return rows
+
+
 def city_resources() -> list[dict]:
     """춘천시 전역 가상 서비스 (resources_city.py). 사례자 생성 난수가 바뀌지 않도록 난수를 따로 쓴다."""
     rng = random.Random(sc.SEED + 1)
@@ -147,12 +167,17 @@ def validate_resource(r: dict) -> None:
     assert r["dong"] is None or r["dong"][:5] == r["sigungu"], r["name"]
 
 
+def count_sources(rows: list[dict]) -> dict[str, int]:
+    return dict(csv=sum(r["source"].startswith("WLF") for r in rows),
+                brochure=sum(r["source"] == BROCHURE for r in rows),
+                dong=sum(r["source"] == "가상" and r["dong"] is not None for r in rows),
+                city=sum(r["source"] == "가상" and r["dong"] is None for r in rows))
+
+
 def resource_sql(rows: list[dict]) -> str:
     for r in rows:
         validate_resource(r)
-    n_real = sum(r["source"] != "가상" for r in rows)
-    n_city = sum(r["source"] == "가상" and r["dong"] is None for r in rows)
-    n_dong = len(rows) - n_real - n_city
+    n = count_sources(rows)
     values = ",\n".join(
         "    (" + ", ".join([q(r["name"]), q(r["org_name"]), q(r["target"]), q(r["ages"]), q(r["gender"]), q(r["sigungu"]),
                              q(r["dong"]), q(r["start"].isoformat()), q(r["end"].isoformat()), q(r["fee"]), q(r["status"]),
@@ -160,10 +185,12 @@ def resource_sql(rows: list[dict]) -> str:
                              q(r["created"])]) + ")"
         for r in rows)
     return f"""-- 시연용 복지자원 {len(rows)}건. data/demo_seed/make_demo_seed.py 로 생성 (직접 고치지 말 것)
---   실제 복지서비스 {n_real}건: 한국사회보장정보원 복지서비스 상세 정보(공공데이터). 서비스명 · 담당 부서 · 지원 내용 · 신청 방법은 원본,
+--   강남 실제 복지서비스 {n['csv']}건: 한국사회보장정보원 복지서비스 상세 정보(공공데이터). 서비스명 · 담당 부서 · 지원 내용 · 신청 방법은 원본,
 --     지원 대상 요약 · 연령 · 운영 기간(올해) · 정원 · 참여자 수 · 담당자는 시연용 가정값 (data/demo_seed/welfare_picks.py)
---   동 단위 가상 자원 {n_dong}건: 시연 기관이 고위험 동에서 운영한다고 가정한 프로그램 (실제 사업 아님)
---   춘천시 전역 가상 서비스 {n_city}건: 실제 원본을 구하지 못해 지어낸 시군구 단위 자원 (운영 기관은 시연 기관의 가상 팀)
+--   춘천 실제 복지서비스 {n['brochure']}건: 춘천시 통합돌봄 안내 자료. 서비스명 · 대상 · 내용 · 본인부담금 · 제공기관은 원본,
+--     운영 기간 · 정원 · 참여자 수 · 담당자 · (적혀 있지 않은) 신청 방법은 시연용 가정값 (data/demo_seed/welfare_chuncheon.py)
+--   동 단위 가상 자원 {n['dong']}건: 시연 기관이 고위험 동에서 운영한다고 가정한 프로그램 (실제 사업 아님)
+--   춘천시 전역 가상 서비스 {n['city']}건: 시군구 단위로 지어낸 자원 (운영 기관은 시연 기관의 가상 팀, 실제 사업 아님)
 -- 담당자는 R__03 시연 회원 이메일로 찾는다. 같은 (자원명, 운영 기관, 시군구, 행정동) 행이 있으면(삭제된 행 포함) 넣지 않는다.
 INSERT INTO welfare_resource (
     resource_name, operating_org_name, target, support_age_groups, support_gender, sigungu_code, dong_code,
@@ -397,16 +424,16 @@ WHERE NOT EXISTS (
 
 def main() -> None:
     rng = random.Random(sc.SEED)
-    resources = real_resources(rng) + local_resources(rng) + city_resources()
+    resources = real_resources(rng) + local_resources(rng) + city_resources() + chuncheon_real_resources()
     cases = all_cases(rng)
     out4 = ROOT / "db" / "seed" / "R__04_welfare_resource.sql"
     out5 = ROOT / "db" / "seed" / "R__05_demo_case.sql"
     out4.write_text(resource_sql(resources), encoding="utf-8", newline="\n")
     out5.write_text(case_sql(cases, rng), encoding="utf-8", newline="\n")
     by_org = {k: [c for c in cases if c["org"] == k] for k in ORGS}
-    print(f"[OK] {out4.relative_to(ROOT)}: 복지자원 {len(resources)}건 "
-          f"(실제 {sum(r['source'] != '가상' for r in resources)}, 동 단위 가상 {sum(r['source'] == '가상' and r['dong'] is not None for r in resources)}, "
-          f"춘천 전역 가상 {sum(r['source'] == '가상' and r['dong'] is None for r in resources)})")
+    n = count_sources(resources)
+    print(f"[OK] {out4.relative_to(ROOT)}: 복지자원 {len(resources)}건 (강남 실제 {n['csv']}, 춘천 실제 {n['brochure']}, "
+          f"동 단위 가상 {n['dong']}, 춘천 전역 가상 {n['city']})")
     for k, cs in by_org.items():
         n = sum(len(c["consultations"]) for c in cs)
         print(f"[OK] {out5.relative_to(ROOT)}: {k} 사례자 {len(cs)}명 · 상담 {n}건")
