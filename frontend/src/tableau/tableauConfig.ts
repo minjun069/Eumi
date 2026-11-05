@@ -1,8 +1,8 @@
 // Tableau Public 게시본 설정. 워크북 하나(eumi_tableau_main_dashboard_v_master)에 화면 자리마다 임베드용 대시보드가 있다.
 // 지도·그래프는 서비스 API가 아니라 Tableau Embedding API v3로 띄우고, 자리마다 그 대시보드를 하나씩 띄운다.
 // 게시본이 없는 자리는 '준비 중'으로 두고 다른 뷰를 대신 넣지 않는다.
-// 기준 문서: fe-ref의 대시보드_구현_확정안.md(11/3 개정), tableau_views.json 3.0.0 — 이 파일과 같은 값이다.
-// ④·⑥은 게시 전이라 크기는 '준비 중' 자리 표시용이며, 게시되면 대시보드·워크시트 이름과 실제 크기로 바꾼다
+// 기준 문서: fe-ref의 대시보드_구현_확정안.md(11/3 개정), tableau_views.json 3.0.0. 11/5 결정으로 메인 화면은 ①②③⑤만 띄운다.
+// ⑥은 게시 전이라 크기는 '준비 중' 자리 표시용이며, 게시되면 대시보드·워크시트 이름과 실제 크기로 바꾼다
 
 import type { RiskIndex } from "@/screens/risk/riskQuery"
 
@@ -56,7 +56,6 @@ export const TABLEAU_VIEWS = {
     width: 430,
     height: 200,
   },
-  monthly: { number: "④", dashboard: null, worksheet: null, width: 430, height: 200 },
   dongChange: {
     number: "⑤",
     dashboard: "Embed05BehaviorChange",

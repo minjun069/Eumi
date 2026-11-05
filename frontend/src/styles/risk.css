@@ -55,17 +55,23 @@
   min-width: 72px;
 }
 
+/* 왼쪽 열 ① 지도·②, 오른쪽 열 ③·⑤. 두 열의 아래 끝을 맞추려고 짧은 열의 마지막 패널이 남는 높이를 채운다
+   (11/5 기준 왼쪽이 35px 더 길다: 지도의 지표 버튼·안내 줄) */
 .risk-dashboard {
   display: grid;
   grid-template-columns: 664px minmax(0, 1fr);
   gap: 18px;
-  align-items: start;
 }
 
 .risk-column {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
   min-width: 0;
+}
+
+.risk-column > :last-child {
+  flex: 1;
 }
 
 /* 읍면동 화면에 있는 동안 숨겨 두는 시군구 화면 (RiskScreen).
@@ -179,11 +185,14 @@
   background: #fff;
 }
 
+/* 도구 모음을 숨기면 Tableau는 도구 모음 높이만큼 더 크게 띄우고 여기서 잘라 보인다 (TableauWorksheet).
+   hidden은 스크롤할 수 있는 상자라 지표 전환 때 Tableau가 포커스를 옮기면 27px 내려가 도구 모음이 드러난다. clip은 스크롤되지 않는다 */
 .tableau-host {
   display: flex;
   justify-content: center;
   width: 100%;
   min-width: 0;
+  overflow: clip;
 }
 
 .tableau-host tableau-viz {

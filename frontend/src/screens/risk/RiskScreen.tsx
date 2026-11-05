@@ -75,7 +75,7 @@ export function RiskScreen() {
 /**
  * 시군구 화면 (2.1.1 ~ 2.1.2)
  * - 지역(시도→시군구)·기간(시작 월~종료 월) 입력은 '적용'을 눌러야 반영된다. 월 목록은 API-10
- * - 지도·그래프 5개는 같은 Tableau 워크북의 임베드용 대시보드를 패널마다 하나씩 띄운다. 게시본이 없는 뷰는 '준비 중'
+ * - 지도·그래프 4개는 같은 Tableau 워크북의 임베드용 대시보드를 패널마다 하나씩 띄운다. 게시본이 없는 뷰는 '준비 중'
  * - 지표 전환(종합 위험·배경 취약성·행동 이상)은 우리 화면의 버튼으로 ① 지도의 대시보드를 바꾼다
  * - 지도에서 행정동 하나를 고르면 읍면동 화면으로 (주소에 dong)
  */
@@ -283,7 +283,7 @@ function RiskDistrictScreen({ query, profile }: { query: RiskQuery; profile: Men
   )
 }
 
-/** Tableau 패널 5개 */
+/** Tableau 패널 4개. 왼쪽 열 ① 지도·②, 오른쪽 열 ③·⑤ */
 function RiskDashboard({
   query,
   sigunguName,
@@ -344,13 +344,6 @@ function RiskDashboard({
           view={TABLEAU_VIEWS.background}
           title={`${sigunguName} 행정동별 배경 취약성 분포 · ${baseMonth}`}
           label="행정동별 배경 취약성 분포"
-          conditions={conditions}
-          refreshKey={refreshKey}
-        />
-        <TableauViewPanel
-          view={TABLEAU_VIEWS.monthly}
-          title={`${sigunguName} 월별 행동 이상 지수 변화 · ${periodText}`}
-          label="월별 행동 이상 지수 변화"
           conditions={conditions}
           refreshKey={refreshKey}
         />

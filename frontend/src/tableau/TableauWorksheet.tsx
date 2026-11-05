@@ -49,7 +49,10 @@ export function TableauWorksheet({
   const [hasRendered, setHasRendered] = useState(false)
   const [retry, setRetry] = useState(0)
   const [selectionError, setSelectionError] = useState("")
-  const frameHeight = height + (toolbar === "hidden" ? 0 : TABLEAU_TOOLBAR_HEIGHT)
+  // Tableau Public은 toolbar=hidden을 넘겨도 도구 모음을 그린다 (11/5 확인: 대시보드 높이로 띄우면 아래가 잘린다).
+  // 그래서 늘 도구 모음까지 포함한 높이로 띄우고, 숨길 때는 아래 도구 모음 높이만큼 잘라 보인다
+  const vizHeight = height + TABLEAU_TOOLBAR_HEIGHT
+  const frameHeight = toolbar === "hidden" ? height : vizHeight
 
   useEffect(() => {
     let disposed = false
@@ -261,8 +264,8 @@ export function TableauWorksheet({
         replace = FilterUpdateType.Replace
         // 대시보드 크기가 고정이라 같은 크기로 띄운다 (더 크면 빈 칸, 작으면 스크롤이 생긴다)
         viz.width = `${width}px`
-        viz.height = `${frameHeight}px`
-        viz.toolbar = toolbar
+        viz.height = `${vizHeight}px`
+        viz.toolbar = "bottom"
         viz.hideTabs = true
         viz.setAttribute("aria-label", labelRef.current)
         firstEvent = TableauEventType.FirstInteractive
@@ -296,7 +299,7 @@ export function TableauWorksheet({
       viz?.removeEventListener("vizloaderror", onLoadError)
       viz?.remove()
     }
-  }, [width, frameHeight, toolbar, retry])
+  }, [width, vizHeight, retry])
 
   useEffect(() => {
     syncRef.current?.()

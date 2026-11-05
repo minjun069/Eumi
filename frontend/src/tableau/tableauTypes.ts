@@ -64,6 +64,7 @@ export type TableauWorksheetProps = {
   height: number
   filters?: Conditions["filters"]
   parameters?: Conditions["parameters"]
+  /** hidden이면 Tableau가 그린 도구 모음을 아래에서 잘라 숨긴다 (Tableau Public은 숨김 설정을 받지 않는다) */
   toolbar?: "hidden" | "bottom"
   /** 마크에서 행정동 하나를 골랐을 때 (빈 선택은 알리지 않는다) */
   onSelectDong?: (dongCode: string) => void

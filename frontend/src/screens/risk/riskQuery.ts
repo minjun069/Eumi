@@ -4,7 +4,7 @@ import { PATHS } from "@/routes/paths"
 // 고립 위험 탐색의 조회 조건 ↔ 화면 주소(?…) 변환 (R5-A)
 // - sigungu: 시군구 코드 (없으면 소속 기관의 관할 시군구)
 // - from, to: 시작 월·종료 월 YYYY-MM (없으면 그 시군구에 적재된 전체 기간)
-// - index: risk면 종합 위험, behavior면 행동 이상 (없으면 배경 취약성 = 게시본의 기본 지도)
+// - index: background면 배경 취약성, behavior면 행동 이상 (없으면 종합 위험 = 처음 보이는 지도)
 // - dong: 지도에서 고른 행정동 10자리 (있으면 읍면동 화면)
 
 /** ① 지도의 지표. 지표마다 Tableau 지도 대시보드가 따로 있다 (tableauConfig.TABLEAU_MAP_VIEWS) */
@@ -40,6 +40,9 @@ export const INDEX_LABELS: Record<RiskIndex, string> = {
 
 const INDEXES = Object.keys(INDEX_LABELS) as RiskIndex[]
 
+/** 처음 들어오거나 지표를 고르지 않았을 때의 지도. 배경 취약성·행동 이상은 사용자가 버튼으로 고른다 (11/5 결정) */
+const DEFAULT_INDEX: RiskIndex = "risk"
+
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
 const SIGUNGU_PATTERN = /^\d{5}$/
 /** 행정동 코드 10자리 (통계청 adm_cd8과 섞지 않는다) */
@@ -54,7 +57,7 @@ export function parseRiskQuery(params: URLSearchParams, profile: MenuProfile): R
     sigunguCode: sigungu && SIGUNGU_PATTERN.test(sigungu) ? sigungu : profile.jurisdictionSigunguCode,
     from: from && MONTH_PATTERN.test(from) ? from : null,
     to: to && MONTH_PATTERN.test(to) ? to : null,
-    index: index ?? "background",
+    index: index ?? DEFAULT_INDEX,
     dongCode: params.get("dong") || null,
   }
 }
@@ -65,7 +68,7 @@ export function buildRiskSearch(query: RiskQuery, profile: MenuProfile): string 
   if (query.sigunguCode !== profile.jurisdictionSigunguCode) params.set("sigungu", query.sigunguCode)
   if (query.from) params.set("from", query.from)
   if (query.to) params.set("to", query.to)
-  if (query.index !== "background") params.set("index", query.index)
+  if (query.index !== DEFAULT_INDEX) params.set("index", query.index)
   if (query.dongCode) params.set("dong", query.dongCode)
   const search = params.toString()
   return search ? `?${search}` : ""
