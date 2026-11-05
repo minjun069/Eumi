@@ -61,7 +61,7 @@ def main(paths: list[str]) -> None:
         raise SystemExit(f"[FAIL] 원본에서 못 찾은 서비스: {lost}")
     OUT.parent.mkdir(exist_ok=True)
     with OUT.open("w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=COLUMNS)
+        w = csv.DictWriter(f, fieldnames=COLUMNS, lineterminator="\n")
         w.writeheader()
         for sid in sorted(rows):
             w.writerow(rows[sid])

@@ -18,6 +18,7 @@ M3 지표  상세 → 읍면동 · 격자 지표                     M4 분석  
 | `m3_indicator/` | 읍면동 배경 지표, 격자 · 읍면동 행동 지표 |
 | `m4_analysis/` | 읍면동 점수 · 단계(`region_result`), 격자 이상 점수(`bh_grid_anomaly`) |
 | `ops/` | 월 배치 실행기(`run_month`), 원본 확인(`check_month_inputs`), 결과 검증(`verify_outputs`), 기준 테이블 초기 적재(`load_dim_region`, `load_dim_grid100`), 서버 seed 생성(`make_seed`), 인프라 연결 확인 |
+| `demo_seed/` | 시연용 복지자원 · 사례자 seed 생성 (파이프라인과 별개, `demo_seed/README.md`) |
 | `legacy/` | 1차 완성본 · DA 결과 CSV 적재 스크립트. 지금은 M2~M4 가 대체하므로 참고용 (실행하면 2차 산출값을 덮어쓴다) |
 
 ## 실행 환경
