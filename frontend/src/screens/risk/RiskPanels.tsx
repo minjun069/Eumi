@@ -11,6 +11,7 @@ import { TableauWorksheet } from "@/tableau/TableauWorksheet"
  * 우리 화면의 패널(제목·버튼) + 안쪽 Tableau 대시보드.
  * 게시본(tableauConfig)이 없는 뷰는 다른 뷰를 대신 넣지 않고 '준비 중'을 보인다
  * - Tableau 도구 모음은 모든 패널에서 숨긴다 (틀 높이 = 대시보드 높이). 출처는 번호 없이 작은 'Tableau Public' 표시로 남긴다
+ * - 대시보드 일부만 띄우는 뷰(crop)는 잘라 낸 범례를 legend로 받아 그 위에 그린다
  */
 export function TableauViewPanel({
   view,
@@ -18,6 +19,7 @@ export function TableauViewPanel({
   label,
   conditions,
   actions,
+  legend,
   hint,
   refreshKey,
   onSelectDong,
@@ -28,11 +30,13 @@ export function TableauViewPanel({
   label: string
   conditions: Conditions
   actions?: ReactNode
+  /** 대시보드 위에 그릴 범례 */
+  legend?: ReactNode
   hint?: string
   refreshKey: number
   onSelectDong?: (dongCode: string) => void
 }) {
-  const { dashboard, worksheet, width, height } = view
+  const { workbook, dashboard, worksheet, width, height, crop } = view
   return (
     <section className="risk-panel is-tableau">
       <header className="risk-panel-head">
@@ -43,7 +47,9 @@ export function TableauViewPanel({
         {dashboard && worksheet ? (
           <>
             <span className="tableau-badge">Tableau Public</span>
+            {legend}
             <TableauWorksheet
+              workbook={workbook}
               dashboard={dashboard}
               worksheet={worksheet}
               label={label}
@@ -52,6 +58,7 @@ export function TableauViewPanel({
               filters={conditions.filters}
               parameters={conditions.parameters}
               toolbar="hidden"
+              crop={crop}
               refreshKey={refreshKey}
               onSelectDong={onSelectDong}
             />

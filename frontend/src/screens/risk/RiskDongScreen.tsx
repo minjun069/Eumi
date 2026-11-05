@@ -22,7 +22,7 @@ import {
   type RiskQuery,
 } from "@/screens/risk/riskQuery"
 import { stageStyle } from "@/screens/risk/riskStyle"
-import { isPublished, TABLEAU_VIEWS, tableauParameters } from "@/tableau/tableauConfig"
+import { isPublished, TABLEAU_GRID_LEGEND, TABLEAU_VIEWS, tableauDetailParameters } from "@/tableau/tableauConfig"
 
 const NOT_FOUND_DONG = {
   title: "행정동을 찾을 수 없습니다.",
@@ -228,12 +228,13 @@ function DongBody({
         </div>
 
         {published ? (
-          // TODO(데이터 담당): ⑥ 격자 대시보드가 게시되면 행정동을 어떻게 넘길지(매개변수·필터) 정해 conditions에 넣는다
+          // 행정동·기준 월은 매개변수로 처음부터 넘기고 FirstInteractive 뒤에 다시 읽어 확인한다 (TableauWorksheet)
           <TableauViewPanel
             view={TABLEAU_VIEWS.grid}
             title={`${dong.dongName} 격자별 행동 이상 위험도 · ${month}`}
             label="격자별 행동 이상 위험도"
-            conditions={{ filters: {}, parameters: tableauParameters(dong.sigunguCode, period) }}
+            conditions={{ filters: {}, parameters: tableauDetailParameters(dong.dongCode, dong.sigunguCode, period) }}
+            legend={<GridLegend />}
             refreshKey={refreshKey}
           />
         ) : (
@@ -307,6 +308,29 @@ function DongBody({
           <p className="risk-empty-text">이 달의 인사이트 보고서를 준비 중입니다.</p>
         )}
       </aside>
+    </div>
+  )
+}
+
+/**
+ * ⑥ 격자 지도의 색 범례. Tableau에서는 지도 그림만 잘라 띄우고, 범례와 지도 제목의 안내(100m 격자·회색 미산출)는 여기서 그린다
+ */
+function GridLegend() {
+  const { title, min, max, colors } = TABLEAU_GRID_LEGEND
+  return (
+    <div className="grid-legend">
+      <span className="grid-legend-title">{title}</span>
+      <span
+        className="grid-legend-bar"
+        style={{ background: `linear-gradient(90deg, ${colors.join(", ")})` }}
+        role="img"
+        aria-label={`${min.toFixed(2)}점 연한 파랑부터 ${max.toFixed(2)}점 진한 남색까지`}
+      />
+      <span className="grid-legend-scale" aria-hidden="true">
+        <span>{min.toFixed(2)}</span>
+        <span>{max.toFixed(2)}</span>
+      </span>
+      <span className="grid-legend-note">100m 격자 · 회색 칸은 점수 미산출</span>
     </div>
   )
 }
