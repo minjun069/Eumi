@@ -10,6 +10,7 @@ import { TableauWorksheet } from "@/tableau/TableauWorksheet"
 /**
  * 우리 화면의 패널(제목·버튼) + 안쪽 Tableau 대시보드.
  * 게시본(tableauConfig)이 없는 뷰는 다른 뷰를 대신 넣지 않고 '준비 중'을 보인다
+ * - Tableau 도구 모음은 모든 패널에서 숨긴다 (틀 높이 = 대시보드 높이). 출처는 번호 없이 작은 'Tableau Public' 표시로 남긴다
  */
 export function TableauViewPanel({
   view,
@@ -31,7 +32,7 @@ export function TableauViewPanel({
   refreshKey: number
   onSelectDong?: (dongCode: string) => void
 }) {
-  const { number, dashboard, worksheet, width, height } = view
+  const { dashboard, worksheet, width, height } = view
   return (
     <section className="risk-panel is-tableau">
       <header className="risk-panel-head">
@@ -39,9 +40,9 @@ export function TableauViewPanel({
         {actions}
       </header>
       <div className="tableau-frame">
-        <span className="tableau-badge">{dashboard ? `Tableau Public ${number}` : `Tableau ${number} · 준비 중`}</span>
         {dashboard && worksheet ? (
           <>
+            <span className="tableau-badge">Tableau Public</span>
             <TableauWorksheet
               dashboard={dashboard}
               worksheet={worksheet}
@@ -50,6 +51,7 @@ export function TableauViewPanel({
               height={height}
               filters={conditions.filters}
               parameters={conditions.parameters}
+              toolbar="hidden"
               refreshKey={refreshKey}
               onSelectDong={onSelectDong}
             />

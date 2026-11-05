@@ -46,6 +46,10 @@
   background: #e9edf3;
   font-family: 'Noto Sans KR:Regular', 'Noto Sans KR', sans-serif;
   font-synthesis: none;
+
+  /* 한글은 낱말 중간에서 끊지 않는다. 띄어쓰기 없는 긴 영문·이메일은 칸을 넘지 않게 아무 데서나 끊는다 */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 html,
