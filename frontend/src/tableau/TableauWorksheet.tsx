@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { type CSSProperties, useEffect, useRef, useState } from "react"
 import { TABLEAU_DONG_FIELD, TABLEAU_MODULE_URL, TABLEAU_TOOLBAR_HEIGHT, tableauViewUrl } from "@/tableau/tableauConfig"
 import type { ChartState, MarksTable, Parameter, TableauWorksheetProps, Viz, Worksheet } from "@/tableau/tableauTypes"
 
@@ -9,6 +9,9 @@ import type { ChartState, MarksTable, Parameter, TableauWorksheetProps, Viz, Wor
  * - 조건 적용은 한 번에 하나씩 하고, 적용하는 사이 조건이 바뀌면 최신 조건으로 다시 적용한다 (오래된 결과가 덮지 않게)
  * - 갱신 중에는 이전 결과를 보이며 안내하고 클릭을 막는다. 실패하면 안내와 '다시 시도'
  * - 마크 선택(MarkSelectionChanged → getMarksAsync)에서 행정동 코드를 하나 받았을 때만 알린다
+ * - 대시보드 안의 매개변수 선택 칸(⑥의 읍면동·기준월)은 그 자리만 잘라 숨긴다. 조건은 우리 화면에서만 바꾼다
+ *   (숨긴 칸도 키보드로는 바꿀 수 있어, 우리 조건과 다른 값이 들어오면 되돌린다)
+ * - crop이 있으면 대시보드에서 그 부분만 보인다 (⑥: 지도 그림만)
  */
 
 /** 게시본 설정이 잘못돼 다시 게시해야 하는 오류 (안내 문구를 그대로 보인다) */
@@ -20,7 +23,28 @@ const SELECTION_ERROR = `선택한 행정동을 읽지 못했습니다. Tableau 
 
 const sorted = (values: string[]) => JSON.stringify([...values].sort())
 
+/**
+ * changeParameterValueAsync에 넣을 값. 목록 매개변수의 값에 별칭이 있으면 별칭으로만 받는다
+ * (11/5 확인: ⑥ p_detail_adm에 코드 '1168051000'을 넣으면 bad value, 별칭 '강남구 신사동'은 받는다)
+ */
+function parameterInput(parameter: Parameter, value: string) {
+  const option = parameter.allowableValues?.allowableValues?.find((item) => String(item.value) === value)
+  return option?.hasAlias && option.aliasValue ? option.aliasValue : value
+}
+
+/**
+ * 지금 대시보드의 매개변수 선택 칸 자리를 뺀 잘라내기 (선택 칸이 없으면 풀어 둔다).
+ * 잘라낸 자리는 보이지도 눌리지도 않는다. Tableau 임베드 API로는 칸 하나만 숨길 수 없어(11/5 확인) 화면에서 자른다
+ */
+function hideParameterControls(viz: Viz, width: number, height: number) {
+  const sheet = viz.workbook.activeSheet
+  const controls = sheet.sheetType === "dashboard" ? sheet.objects.filter((item) => item.type === "parameter-control") : []
+  const holes = controls.map(({ position, size }) => `M${position.x} ${position.y}h${size.width}v${size.height}h${-size.width}Z`)
+  viz.style.clipPath = holes.length ? `path(evenodd, "M0 0H${width}V${height}H0Z${holes.join("")}")` : ""
+}
+
 export function TableauWorksheet({
+  workbook,
   dashboard,
   worksheet,
   label,
@@ -29,6 +53,7 @@ export function TableauWorksheet({
   filters = {},
   parameters = {},
   toolbar = "bottom",
+  crop,
   onSelectDong,
   onStateChange,
   refreshKey = 0,
@@ -52,7 +77,11 @@ export function TableauWorksheet({
   // Tableau Public은 toolbar=hidden을 넘겨도 도구 모음을 그린다 (11/5 확인: 대시보드 높이로 띄우면 아래가 잘린다).
   // 그래서 늘 도구 모음까지 포함한 높이로 띄우고, 숨길 때는 아래 도구 모음 높이만큼 잘라 보인다
   const vizHeight = height + TABLEAU_TOOLBAR_HEIGHT
-  const frameHeight = toolbar === "hidden" ? height : vizHeight
+  const frameHeight = crop ? crop.height : toolbar === "hidden" ? height : vizHeight
+  // 일부만 보일 때는 틀을 그 크기로 만들고 Tableau를 위·왼쪽으로 밀어 넣는다 (잘린 부분은 보이지도 눌리지도 않는다)
+  const cropStyle = crop
+    ? ({ width: crop.width, "--crop-x": `${-crop.x}px`, "--crop-y": `${-crop.y}px` } as CSSProperties)
+    : undefined
 
   useEffect(() => {
     let disposed = false
@@ -133,7 +162,7 @@ export function TableauWorksheet({
                 )
               }
               if (String(actual.currentValue.value) !== value) {
-                await viz.workbook.changeParameterValueAsync(name, value)
+                await viz.workbook.changeParameterValueAsync(name, parameterInput(actual, value))
                 parametersChanged = true
                 if (disposed) return
               }
@@ -188,6 +217,7 @@ export function TableauWorksheet({
               pending = true
               continue
             }
+            hideParameterControls(viz, width, vizHeight)
             notify({ phase: "ready" })
           } catch (error) {
             if (disposed) return
@@ -221,10 +251,24 @@ export function TableauWorksheet({
       console.error("[TableauWorksheet] Load error", (event as CustomEvent).detail)
       notify({ phase: "error", message: LOAD_ERROR })
     }
-    const onParameterChanged = () => {
+    const onParameterChanged = async (event: Event) => {
       // Tableau 화면 안의 조작·도구 모음이 React 밖에서 값을 바꿀 수 있다
       parameterVersion += 1
       parameterCache = null
+      // 숨긴 선택 칸도 키보드(Tab → Enter)로는 열려 값이 바뀐다 (11/5 확인: ⑥ 읍면동을 바꾸면 화면과 다른 동이 그려졌다).
+      // 우리 조건과 다른 값이면 우리 조건으로 되돌린다. 우리가 넣은 값은 조건과 같아서 다시 적용하지 않는다
+      if (!interactive) return
+      try {
+        const detail = (event as CustomEvent<{ getParameterAsync: () => Promise<Parameter> }>).detail
+        const parameter = await detail.getParameterAsync()
+        if (disposed) return
+        const wanted = conditionsRef.current.values.parameters[parameter.name]
+        if (wanted !== undefined && String(parameter.currentValue.value) !== wanted) requestSync()
+      } catch (error) {
+        if (disposed) return
+        console.error("[TableauWorksheet] Parameter change error", error)
+        requestSync()
+      }
     }
     const onMarkSelection = async (event: Event) => {
       if (!selectionCallbackRef.current || !interactive || syncing) return
@@ -282,7 +326,7 @@ export function TableauWorksheet({
           parameter.setAttribute("value", value)
           viz.appendChild(parameter)
         }
-        viz.src = tableauViewUrl(conditionsRef.current.values.dashboard)
+        viz.src = tableauViewUrl(conditionsRef.current.values.dashboard, workbook)
         hostRef.current?.appendChild(viz)
       } catch (error) {
         console.error("[TableauWorksheet]", error)
@@ -299,7 +343,7 @@ export function TableauWorksheet({
       viz?.removeEventListener("vizloaderror", onLoadError)
       viz?.remove()
     }
-  }, [width, vizHeight, retry])
+  }, [workbook, width, vizHeight, retry])
 
   useEffect(() => {
     syncRef.current?.()
@@ -319,8 +363,8 @@ export function TableauWorksheet({
           (11/3 측정: 화면 진입부터 4개 확인까지 4.6~7.3초 → 덮기만 하면 1.7~3.6초) 숨기지 않는다 */}
       <div
         ref={hostRef}
-        className="tableau-host"
-        style={{ height: frameHeight, pointerEvents: ready ? undefined : "none" }}
+        className={crop ? "tableau-host is-cropped" : "tableau-host"}
+        style={{ ...cropStyle, height: frameHeight, pointerEvents: ready ? undefined : "none" }}
       />
       {updating && (
         <div className="tableau-updating" role="status">
