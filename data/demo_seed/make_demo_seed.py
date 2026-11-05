@@ -23,6 +23,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 import scenario_cases as sc  # noqa: E402
+from resources_city import CITY_RESOURCES  # noqa: E402
 from resources_local import CHUNCHEON_ORG, GANGNAM_ORG, LOCAL_RESOURCES  # noqa: E402
 from scenario_hero import HERO_CASES  # noqa: E402
 from welfare_picks import PICKS, SIGUNGU_BY_SIDO  # noqa: E402
@@ -118,6 +119,23 @@ def local_resources(rng: random.Random) -> list[dict]:
     return rows
 
 
+def city_resources() -> list[dict]:
+    """춘천시 전역 가상 서비스 (resources_city.py). 사례자 생성 난수가 바뀌지 않도록 난수를 따로 쓴다."""
+    rng = random.Random(sc.SEED + 1)
+    rows = []
+    for x in CITY_RESOURCES:
+        org = ORGS[x["org"]]
+        start, end = (dt.date.fromisoformat(d) for d in x["period"])
+        created = min(start - dt.timedelta(days=rng.randint(7, 20)), TODAY)
+        rows.append(dict(
+            name=x["name"], org_name=x["org_name"], target=x["target"], ages=x["ages"], gender=x["gender"],
+            sigungu=org["sigungu"], dong=None, start=start, end=end, fee=x["fee"], status=x["status"],
+            manager=email(x["org"], x["manager"]), capacity=x["capacity"], participants=x["participants"],
+            content=x["content"], apply=x["apply"], created=at(created, rng.randint(9, 17), rng.randint(0, 59)), source="가상",
+        ))
+    return rows
+
+
 def validate_resource(r: dict) -> None:
     for f, v in (("resource_name", r["name"]), ("operating_org_name", r["org_name"]), ("target", r["target"]),
                  ("support_content", r["content"]), ("apply_method", r["apply"])):
@@ -133,6 +151,8 @@ def resource_sql(rows: list[dict]) -> str:
     for r in rows:
         validate_resource(r)
     n_real = sum(r["source"] != "가상" for r in rows)
+    n_city = sum(r["source"] == "가상" and r["dong"] is None for r in rows)
+    n_dong = len(rows) - n_real - n_city
     values = ",\n".join(
         "    (" + ", ".join([q(r["name"]), q(r["org_name"]), q(r["target"]), q(r["ages"]), q(r["gender"]), q(r["sigungu"]),
                              q(r["dong"]), q(r["start"].isoformat()), q(r["end"].isoformat()), q(r["fee"]), q(r["status"]),
@@ -142,7 +162,8 @@ def resource_sql(rows: list[dict]) -> str:
     return f"""-- 시연용 복지자원 {len(rows)}건. data/demo_seed/make_demo_seed.py 로 생성 (직접 고치지 말 것)
 --   실제 복지서비스 {n_real}건: 한국사회보장정보원 복지서비스 상세 정보(공공데이터). 서비스명 · 담당 부서 · 지원 내용 · 신청 방법은 원본,
 --     지원 대상 요약 · 연령 · 운영 기간(올해) · 정원 · 참여자 수 · 담당자는 시연용 가정값 (data/demo_seed/welfare_picks.py)
---   동 단위 가상 자원 {len(rows) - n_real}건: 시연 기관이 고위험 동에서 운영한다고 가정한 프로그램 (실제 사업 아님)
+--   동 단위 가상 자원 {n_dong}건: 시연 기관이 고위험 동에서 운영한다고 가정한 프로그램 (실제 사업 아님)
+--   춘천시 전역 가상 서비스 {n_city}건: 실제 원본을 구하지 못해 지어낸 시군구 단위 자원 (운영 기관은 시연 기관의 가상 팀)
 -- 담당자는 R__03 시연 회원 이메일로 찾는다. 같은 (자원명, 운영 기관, 시군구, 행정동) 행이 있으면(삭제된 행 포함) 넣지 않는다.
 INSERT INTO welfare_resource (
     resource_name, operating_org_name, target, support_age_groups, support_gender, sigungu_code, dong_code,
@@ -376,7 +397,7 @@ WHERE NOT EXISTS (
 
 def main() -> None:
     rng = random.Random(sc.SEED)
-    resources = real_resources(rng) + local_resources(rng)
+    resources = real_resources(rng) + local_resources(rng) + city_resources()
     cases = all_cases(rng)
     out4 = ROOT / "db" / "seed" / "R__04_welfare_resource.sql"
     out5 = ROOT / "db" / "seed" / "R__05_demo_case.sql"
@@ -384,7 +405,8 @@ def main() -> None:
     out5.write_text(case_sql(cases, rng), encoding="utf-8", newline="\n")
     by_org = {k: [c for c in cases if c["org"] == k] for k in ORGS}
     print(f"[OK] {out4.relative_to(ROOT)}: 복지자원 {len(resources)}건 "
-          f"(실제 {sum(r['source'] != '가상' for r in resources)}, 가상 {sum(r['source'] == '가상' for r in resources)})")
+          f"(실제 {sum(r['source'] != '가상' for r in resources)}, 동 단위 가상 {sum(r['source'] == '가상' and r['dong'] is not None for r in resources)}, "
+          f"춘천 전역 가상 {sum(r['source'] == '가상' and r['dong'] is None for r in resources)})")
     for k, cs in by_org.items():
         n = sum(len(c["consultations"]) for c in cs)
         print(f"[OK] {out5.relative_to(ROOT)}: {k} 사례자 {len(cs)}명 · 상담 {n}건")
