@@ -2,19 +2,30 @@
 
 from functools import partial
 
+import pytest
+
+from src.settings import Settings
+from src.state import create_state
 from src.tools.tableau import validate_visualization
-from src.tools.tableau_catalog import visualization_catalog
 from src.visualization_instructions import visualization_context
 
-ALL_VIEWS = tuple(visualization_catalog()["views"])
-validate_visualization = partial(validate_visualization, allowed_view_keys=ALL_VIEWS)
-visualization_context = partial(visualization_context, allowed_view_keys=ALL_VIEWS)
+TOOL_STATE = create_state(
+    {"goal": "Tableau 조건 검증"},
+    Settings(_env_file=None),
+    messages=[],
+    version="test",
+    event="user_request",
+)
+validate_visualization = partial(validate_visualization, state=TOOL_STATE)
 
 
-def test_interpretation_receives_only_selection_descriptions():
-    context = visualization_context({}, include_inputs=False)
+pytestmark = pytest.mark.usefixtures("all_tableau_views")
+
+
+def test_interpretation_receives_only_selection_descriptions(all_tableau_views):
+    context = visualization_context(TOOL_STATE, include_inputs=False)
     assert set(context) == {"views"}
-    assert len(context["views"]) == 6
+    assert set(context["views"]) == set(all_tableau_views["views"])
     assert all(
         set(view) == {"title", "purpose", "limitations", "input_profile"}
         for view in context["views"].values()
@@ -22,8 +33,8 @@ def test_interpretation_receives_only_selection_descriptions():
 
 
 def test_selection_shares_profiles_and_omits_unselected_domains():
-    context = visualization_context({}, include_inputs=True)
-    assert list(context["input_profiles"]) == ["monthly_city"]
+    context = visualization_context(TOOL_STATE, include_inputs=True)
+    assert set(context["input_profiles"]) == {"monthly_city", "monthly_detail"}
     assert context["input_profiles"]["monthly_city"]["filters"]["읍면동"] == {
         "depends_on": "p_city"
     }
@@ -35,6 +46,7 @@ def test_followup_receives_selected_city_only_and_is_isolated():
         {"view_key": "Embed01RiskMap", "parameters": {"p_city": "11680"}}
     )["artifact"]
     state = {"response": {"artifacts": [artifact]}}
+    state["execution"] = TOOL_STATE["execution"]
     context = visualization_context(state, include_inputs=True)
     selected = context["selected"]["Embed01RiskMap"]["filters"]["읍면동"]["allowed"]
     assert "역삼1동" in selected and "후평3동" not in selected
@@ -58,6 +70,7 @@ def test_invalid_dependency_does_not_expose_default_domain_as_selected():
             }
         ]
     }
+    state["execution"] = TOOL_STATE["execution"]
     context = visualization_context(state, include_inputs=True)
     assert "allowed" not in context["selected"]["Embed01RiskMap"]["filters"]["읍면동"]
 
@@ -80,6 +93,7 @@ def test_latest_attempt_supersedes_previous_view_conditions():
             }
         ],
     }
+    state["execution"] = TOOL_STATE["execution"]
     context = visualization_context(state, include_inputs=True)
     selected = context["selected"]["Embed01RiskMap"]["filters"]["읍면동"]["allowed"]
     assert "후평3동" in selected and "역삼1동" not in selected

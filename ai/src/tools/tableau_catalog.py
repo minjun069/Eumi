@@ -1,14 +1,15 @@
-"""Tableau 등록 명세와 등록 시 일관성 검사. 모델 입력과 검증의 공통 원본."""
+"""Tableau 시각화의 등록 정보와 허용 조건을 관리한다."""
 
-from collections.abc import Collection
 from copy import deepcopy
 from datetime import date
 from functools import cache
 from pathlib import Path
-from typing import Annotated, Literal, NotRequired
+from typing import Annotated, Literal, NotRequired, get_args
 
 from pydantic import ConfigDict, Field, TypeAdapter, with_config
 from typing_extensions import TypedDict
+
+from src.state import ExecutionEvent, State, event_adapter
 
 Text = Annotated[str, Field(min_length=1, pattern=r"\S")]
 Values = Annotated[list[Text], Field(min_length=1)]
@@ -76,6 +77,7 @@ class TableauCatalog(TypedDict):
     base_url: Literal["https://public.tableau.com/views"]
     input_profiles: dict[Text, InputProfile]
     views: dict[Text, ViewDefinition]
+    event_views: dict[ExecutionEvent, list[Text] | Literal["all"]]
     verification: RegistrationVerification
 
 
@@ -91,6 +93,20 @@ def validate_catalog(value: object) -> TableauCatalog:
         require(len(set(values)) == len(values), path, "중복 허용값")
 
     require(bool(catalog["views"]), "views", "등록 뷰가 필요합니다")
+    require(
+        set(catalog["event_views"]) == set(get_args(ExecutionEvent)),
+        "event_views",
+        "모든 이벤트의 허용 뷰 목록이 필요합니다",
+    )
+    for event, keys in catalog["event_views"].items():
+        if keys == "all":
+            continue
+        unique(keys, f"event_views.{event}")
+        require(
+            set(keys) <= catalog["views"].keys(),
+            f"event_views.{event}",
+            "미등록 뷰가 있습니다",
+        )
     for name, profile in catalog["input_profiles"].items():
         path = f"input_profiles.{name}"
         params = profile["parameters"]
@@ -179,14 +195,9 @@ def visualization_catalog() -> TableauCatalog:
     return deepcopy(registered_catalog())
 
 
-def resolve_allowed_views(allowed_view_keys: Collection[str] = ()) -> frozenset[str]:
-    """호출 측의 실행 범위를 고정한다. 생략은 전체 허용으로 해석하지 않는다."""
-    if not isinstance(allowed_view_keys, (list, tuple, set, frozenset)) or any(
-        not isinstance(key, str) or not key.strip() for key in allowed_view_keys
-    ):
-        raise ValueError("allowed_view_keys는 뷰 ID 목록이어야 합니다")
-    keys = frozenset(allowed_view_keys)
-    unknown = keys - registered_catalog()["views"].keys()
-    if unknown:
-        raise ValueError(f"allowed_view_keys의 미등록 뷰: {sorted(unknown)}")
-    return keys
+def allowed_views(state: State) -> frozenset[str]:
+    """실행별 허용 범위는 State의 시작 이벤트와 배포 명세에서 조회한다."""
+    event = event_adapter.validate_python(state["execution"]["event"])
+    catalog = registered_catalog()
+    keys = catalog["event_views"][event]
+    return frozenset(catalog["views"] if keys == "all" else keys)

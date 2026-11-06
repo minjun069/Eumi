@@ -7,16 +7,25 @@ from functools import partial
 import pytest
 from pydantic import TypeAdapter
 
-from src.state import Artifact
+from src.settings import Settings
+from src.state import Artifact, create_state
 from src.tools.tableau import (
     VisualizationResult,
     validate_visualization,
 )
 from src.tools.tableau_catalog import visualization_catalog
 
-validate_visualization = partial(
-    validate_visualization, allowed_view_keys=tuple(visualization_catalog()["views"])
+TOOL_STATE = create_state(
+    {"goal": "Tableau 조건 검증"},
+    Settings(_env_file=None),
+    messages=[],
+    version="test",
+    event="user_request",
 )
+validate_visualization = partial(validate_visualization, state=TOOL_STATE)
+
+
+pytestmark = pytest.mark.usefixtures("all_tableau_views")
 
 
 def request(**overrides):
@@ -41,7 +50,8 @@ def test_valid_artifact_preserves_conditions_and_public_contract():
     assert result["valid"] and not result["issues"]
     data = result["artifact"]["data"]
     assert data["src"] == (
-        "https://public.tableau.com/views/eumi_tableau_main_dashboard_v_master/"
+        "https://public.tableau.com/views/"
+        "eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/"
         "Embed01VulnerabilityMap"
     )
     assert {p["name"]: p["value"] for p in data["parameters"]} == original["parameters"]
@@ -58,7 +68,17 @@ def test_valid_artifact_preserves_conditions_and_public_contract():
     json.dumps(result, allow_nan=False)
 
 
-@pytest.mark.parametrize("view_key", list(visualization_catalog()["views"]))
+@pytest.mark.parametrize(
+    "view_key",
+    [
+        "Embed01RiskMap",
+        "Embed01VulnerabilityMap",
+        "Embed01BehaviorMap",
+        "Embed02RiskDistribution",
+        "Embed03Vulnerability",
+        "Embed05BehaviorChange",
+    ],
+)
 def test_all_registered_views_and_defaults(view_key):
     result = validate_visualization({"view_key": view_key})
     assert result["valid"]

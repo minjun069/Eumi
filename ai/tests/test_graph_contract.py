@@ -15,25 +15,24 @@ from src.settings import Settings
 from src.state import create_state, state_adapter
 
 
-def initial(goal="test"):
+def initial(goal="test", event="user_request"):
     return create_state(
         {"goal": goal},
         Settings(_env_file=None),
         messages=[SystemMessage("Test instruction", id="system")],
         version="test",
+        event=event,
     )
 
 
 @pytest.mark.parametrize("scenario", get_args(Scenario))
 @pytest.mark.parametrize("event", (False, True))
 def test_scenarios_preserve_state_and_resume(scenario, event):
-    state = initial()
+    state = initial(event="analysis_pipeline" if event else "user_request")
     original = deepcopy(state)
     saver = InMemorySaver()
     callbacks, completion = mock_nodes(scenario)
-    graph = compile_graph(
-        callbacks, finish=completion, analysis_event=event, checkpointer=saver
-    )
+    graph = compile_graph(callbacks, finish=completion, checkpointer=saver)
     config = {"configurable": {"thread_id": state["execution"]["run_id"]}}
     snapshots = list(graph.stream(state, config, stream_mode="values"))
     if scenario == "question":
@@ -46,9 +45,7 @@ def test_scenarios_preserve_state_and_resume(scenario, event):
             assert paused["execution"]["status"] == "waiting_input"
             assert paused["response"] == question
             assert paused["results"] == records
-        graph = compile_graph(
-            callbacks, finish=completion, analysis_event=event, checkpointer=saver
-        )
+        graph = compile_graph(callbacks, finish=completion, checkpointer=saver)
         snapshots.extend(
             graph.stream(Command(resume="answer"), config, stream_mode="values")
         )
@@ -84,6 +81,20 @@ def response(kind="final", artifacts=None):
         "content": "result",
         "artifacts": artifacts or [],
     }
+
+
+def test_one_graph_uses_each_states_event_for_entry():
+    callbacks, completion = mock_nodes("complete")
+    graph = compile_graph(callbacks, finish=completion)
+    for event, first_node in (
+        ("analysis_pipeline", "act"),
+        ("user_request", "interpret"),
+        ("analysis_pipeline", "act"),
+    ):
+        state = initial(event=event)
+        result = graph.invoke(state)
+        assert result["results"][0]["node"] == first_node
+        assert result["execution"]["event"] == event
 
 
 def nodes():

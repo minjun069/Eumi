@@ -1,4 +1,4 @@
-"""자료와 표시 명세로 외부 의존성이 없는 HTML/SVG 산출물을 만든다."""
+"""자료와 표현 명세를 시각화 산출물로 변환한다."""
 
 from html import escape
 from math import cos, isfinite, radians
@@ -77,6 +77,7 @@ class ChartSpec(TypedDict):
     legend: NotRequired[Text]
     color: NotRequired[Color]
     value_range: NotRequired[ValueRange]
+    orientation: NotRequired[Literal["vertical", "horizontal"]]
 
 
 @with_config(ConfigDict(extra="forbid", strict=True, allow_inf_nan=False))
@@ -200,6 +201,10 @@ def _chart(data: Dataset, spec: ChartSpec) -> tuple[str, ChartSpec, list[str]]:
         "value_range": {"minimum": low, "maximum": high},
     }
     color = applied["color"]
+    if spec.get("orientation") == "horizontal":
+        if spec["type"] != "bar":
+            raise ToolFailure("invalid_input")
+        return _horizontal_bar(data, applied, low, high)
     step = 760 / len(labels)
 
     def y(value):
@@ -271,6 +276,50 @@ def _chart(data: Dataset, spec: ChartSpec) -> tuple[str, ChartSpec, list[str]]:
     if spec["type"] == "line":
         warnings.append("가로축은 입력 행 순서의 등간격 범주입니다.")
     return _svg(spec["title"], "".join(body)), applied, warnings
+
+
+def _horizontal_bar(data, spec, low, high):
+    def x(value):
+        return 120 + (value - low) / (high - low) * 650
+
+    body = [f'<text x="70" y="30" font-size="20">{_text(spec["title"])}</text>']
+    for tick in range(5):
+        value = low + (high - low) * tick / 4
+        position = x(value)
+        body.append(f'<path d="M{position} 75V445" stroke="#e2e8f0"/>')
+        body.append(
+            f'<text x="{position}" y="470" text-anchor="middle">{value:.5g}</text>'
+        )
+    step = 350 / len(data["rows"])
+    for index, row in enumerate(data["rows"]):
+        y = 90 + step * (index + 0.5)
+        body.append(
+            f'<text x="110" y="{y + 5}" text-anchor="end">'
+            f"{_text(row[spec['x']])}</text>"
+        )
+        value = row[spec["y"]]
+        if value is None:
+            continue
+        position, zero = x(value), x(0)
+        body.append(
+            f'<rect x="{min(position, zero)}" y="{y - step * 0.3}" '
+            f'width="{abs(position - zero)}" height="{step * 0.6}" '
+            f'fill="{spec["color"]}"/>'
+        )
+        body.append(
+            f'<text x="{position + 7}" y="{y + 5}">'
+            f"{value:.1f}{_text(spec['unit'])}</text>"
+        )
+    body.append(
+        f'<text x="450" y="520" text-anchor="middle">'
+        f"{_text(spec['y_label'])} ({_text(spec['unit'])})</text>"
+    )
+    warnings = (
+        ["결측값은 표시하지 않습니다."]
+        if any(r[spec["y"]] is None for r in data["rows"])
+        else []
+    )
+    return _svg(spec["title"], "".join(body)), spec, warnings
 
 
 def _polygons(feature: BoundaryFeature):

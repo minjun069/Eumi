@@ -1,8 +1,4 @@
-"""
-State 계약
-자료형과 초기 상태만 제공하며 실행·재개·쓰기 제어는 수행하지 않는다.
-세부사항은 docs/ieumi-agent-state.md를 따른다.
-"""
+"""Agent 실행에 사용하는 상태의 구조와 초기화 규칙을 정의한다."""
 
 from copy import deepcopy
 from typing import Annotated, Literal, NotRequired
@@ -15,6 +11,8 @@ from typing_extensions import TypedDict
 
 from src.settings import Settings
 
+ExecutionEvent = Literal["analysis_pipeline", "user_request"]
+event_adapter = TypeAdapter(ExecutionEvent)
 
 
 # Request - Constraints
@@ -74,17 +72,25 @@ class Response(TypedDict):
 # Execution - Budget - Usage
 @with_config(ConfigDict(extra="forbid"))
 class Usage(TypedDict):
-    used: int | float
-    limit: int | float
+    used: Annotated[int | float, Field(ge=0, allow_inf_nan=False)]
+    limit: Annotated[int | float, Field(ge=0, allow_inf_nan=False)]
+
+@with_config(ConfigDict(extra="forbid"))
+class CountUsage(TypedDict):
+    used: Annotated[int, Field(ge=0, strict=True)]
+    limit: Annotated[int, Field(ge=0, strict=True)]
+
 
 # Execution - Budget
 @with_config(ConfigDict(extra="forbid"))
 class Budget(TypedDict):
-    steps: Usage
-    tool_calls: Usage
-    agent_calls: Usage
-    retries: Usage
+    steps: CountUsage
+    tool_calls: CountUsage
+    agent_calls: CountUsage
+    retries: CountUsage
     active_seconds: Usage
+    final_model_calls: CountUsage
+    final_active_seconds: Usage
 
 # Execution - Error
 @with_config(ConfigDict(extra="forbid"))
@@ -96,6 +102,7 @@ class Error(TypedDict):
 @with_config(ConfigDict(extra="forbid"))
 class Execution(TypedDict):
     run_id: str
+    event: ExecutionEvent
     status: Literal[
         "queued",
         "running",
@@ -142,6 +149,7 @@ def create_state(
     *,
     messages: list[AnyMessage],
     version: str,
+    event: ExecutionEvent,
 ) -> State:
     """호출자가 구성한 메시지와 배포 버전으로 새 실행을 초기화한다.
 
@@ -154,6 +162,8 @@ def create_state(
         "agent_calls": settings.max_agent_calls,
         "retries": settings.max_tool_retries,
         "active_seconds": settings.runtime_timeout,
+        "final_model_calls": 1,
+        "final_active_seconds": 30,
     }
     return state_adapter.validate_python(
         {
@@ -163,12 +173,30 @@ def create_state(
             "response": None,
             "execution": {
                 "run_id": str(uuid4()),
+                "event": event,
                 "status": "queued",
                 "version": version,
                 "budget": {
                     key: {"used": 0, "limit": limit} for key, limit in limits.items()
                 },
                 "error": None,
+            },
+        }
+    )
+
+
+def create_child_state(request: Request, parent: State) -> State:
+    """하위 호출은 상위의 이벤트·누적 예산을 이어받는다. Settings를 다시 읽지 않는다."""
+    return state_adapter.validate_python(
+        {
+            "request": deepcopy(request),
+            "messages": deepcopy(parent["messages"]),
+            "results": [],
+            "response": None,
+            "execution": {
+                **deepcopy(parent["execution"]),
+                "run_id": str(uuid4()),
+                "status": "queued",
             },
         }
     )

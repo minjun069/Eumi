@@ -1,4 +1,4 @@
-"""등록된 공급 함수에서 자료를 읽어 조건·정렬·필드·페이지를 적용한다."""
+"""등록된 자료원에서 요청 조건에 맞는 자료를 조회한다."""
 
 from collections.abc import Callable, Mapping
 from typing import Annotated, Literal, NotRequired
@@ -7,6 +7,7 @@ from pydantic import ConfigDict, Field, TypeAdapter, with_config
 from typing_extensions import TypedDict
 
 from src.exceptions import ToolFailure
+from src.execution_trace import trace_span
 from src.tools.data import (
     Dataset,
     Scalar,
@@ -115,7 +116,11 @@ def query_data(
     if request.get("offset", 0) and "version" not in request:
         raise ToolFailure("version_required")
     try:
-        data = read_dataset(providers[target]())
+        with trace_span("provider", target, {"query": request}) as span:
+            raw = providers[target]()
+            if span:
+                span.update(output=raw)
+            data = read_dataset(raw)
     except PermissionError as exc:
         raise ToolFailure("permission_denied") from exc
     except (TimeoutError, ConnectionError) as exc:

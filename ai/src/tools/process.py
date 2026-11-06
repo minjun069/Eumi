@@ -1,4 +1,4 @@
-"""전달받은 자료에 명시한 순서대로 연산을 적용한다."""
+"""요청한 연산에 따라 자료를 가공하고 결과를 구성한다."""
 
 from copy import deepcopy
 from decimal import Decimal, InvalidOperation
@@ -9,6 +9,7 @@ from pydantic import ConfigDict, Field, TypeAdapter, with_config
 from typing_extensions import TypedDict
 
 from src.exceptions import ToolFailure
+from src.execution_trace import trace_span
 from src.tools.data import (
     Column,
     Dataset,
@@ -19,13 +20,13 @@ from src.tools.data import (
     require_columns,
     validate,
 )
-from src.tools.query import Filter, matching_rows
+from src.tools.query import Filter, Sort, matching_rows
 
 
 @with_config(ConfigDict(extra="forbid", strict=True))
 class Calculate(TypedDict):
     operation: Literal["calculate"]
-    method: Literal["difference", "ratio", "percent_change"]
+    method: Literal["difference", "ratio", "percentage", "percent_change"]
     before: Text
     after: Text
     output: Text
@@ -63,8 +64,15 @@ class Cast(TypedDict):
     kind: Literal["string", "integer", "number"]
 
 
+@with_config(ConfigDict(extra="forbid", strict=True))
+class SortRows(TypedDict):
+    operation: Literal["sort"]
+    by: Annotated[list[Sort], Field(min_length=1)]
+
+
 Operation = Annotated[
-    Calculate | Aggregate | Join | FilterRows | Cast, Field(discriminator="operation")
+    Calculate | Aggregate | Join | FilterRows | Cast | SortRows,
+    Field(discriminator="operation"),
 ]
 
 
@@ -145,6 +153,8 @@ def _calculate(data: Dataset, op: Calculate, missing: str) -> int:
             value = right - left
             if op["method"] == "ratio":
                 value = right / left
+            elif op["method"] == "percentage":
+                value = right / left * 100
             elif op["method"] == "percent_change":
                 value = (right - left) / left * 100
             row[output] = _finite(value)
@@ -152,7 +162,7 @@ def _calculate(data: Dataset, op: Calculate, missing: str) -> int:
             raise ToolFailure("non_finite_result") from exc
     column = columns[before] | {"name": output, "kind": "number"}
     if op["method"] != "difference":
-        column["unit"] = "%" if op["method"] == "percent_change" else "ratio"
+        column["unit"] = "ratio" if op["method"] == "ratio" else "%"
     data["columns"].append(column)
     return excluded
 
@@ -271,27 +281,51 @@ def process_data(request: ProcessRequest) -> ProcessResult:
     missing = request.get("missing", "error")
     counts: list[OperationCount] = []
     for op in request["operations"]:
-        before = len(data["rows"])
-        match op["operation"]:
-            case "calculate":
-                excluded = _calculate(data, op, missing)
-            case "aggregate":
-                excluded = _aggregate(data, op, missing)
-            case "join":
-                excluded = _join(data, op, inputs)
-            case "cast":
-                excluded = _cast(data, op, missing)
-            case "filter":
-                data["rows"] = matching_rows(data, op["conditions"])
-                excluded = before - len(data["rows"])
-        counts.append(
-            {
-                "operation": op["operation"],
-                "input_rows": before,
-                "output_rows": len(data["rows"]),
-                "excluded_rows": excluded,
-            }
-        )
+        with trace_span(
+            "operation",
+            op["operation"],
+            {"operation": op, "data": data, "missing": missing},
+        ) as span:
+            before = len(data["rows"])
+            match op["operation"]:
+                case "calculate":
+                    excluded = _calculate(data, op, missing)
+                case "aggregate":
+                    excluded = _aggregate(data, op, missing)
+                case "join":
+                    excluded = _join(data, op, inputs)
+                case "cast":
+                    excluded = _cast(data, op, missing)
+                case "filter":
+                    data["rows"] = matching_rows(data, op["conditions"])
+                    excluded = before - len(data["rows"])
+                case "sort":
+                    require_columns(
+                        data, list(dict.fromkeys(s["field"] for s in op["by"]))
+                    )
+                    for order in reversed(op["by"]):
+                        field = order["field"]
+                        present = [r for r in data["rows"] if r[field] is not None]
+                        absent = [r for r in data["rows"] if r[field] is None]
+                        data["rows"] = (
+                            sorted(
+                                present,
+                                key=lambda r: r[field],
+                                reverse=order["descending"],
+                            )
+                            + absent
+                        )
+                    excluded = 0
+            counts.append(
+                {
+                    "operation": op["operation"],
+                    "input_rows": before,
+                    "output_rows": len(data["rows"]),
+                    "excluded_rows": excluded,
+                }
+            )
+            if span:
+                span.update(output={"data": data, "counts": counts[-1]})
     if "fields" in request:
         columns = require_columns(data, request["fields"])
         data["columns"] = [columns[name] for name in request["fields"]]

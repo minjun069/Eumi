@@ -18,7 +18,17 @@ def test_defaults_are_preserved_without_sharing_mutable_values():
     result = result_adapter.validate_python(
         {
             "content": "Done",
-            "results": [{"type": "visualization", "data": {"rows": [[1]]}}],
+            "results": [
+                {
+                    "type": "visualization",
+                    "data": {
+                        "format": "html",
+                        "html": "<table></table>",
+                        "columns": ["value"],
+                        "rows": [[1]],
+                    },
+                }
+            ],
         }
     )
     assert result["results"][0]["sources"] == []
@@ -32,17 +42,19 @@ def test_defaults_are_preserved_without_sharing_mutable_values():
 
 def test_state_validates_nested_data_and_preserves_message_objects():
     state = create_state(
-        {"goal": "Explain", "subject": {"years": [2025, 2026]}},
+        {"goal": "Explain", "subject": {"region": "A"}},
         Settings(_env_file=None),
-        info={"values": [1, 2]},
+        info={"analysis": {"change": -10}},
     )
-    state["messages"] = [HumanMessage("Explain", id="user-1")]
+    state["execution"]["model_messages"] = [HumanMessage("Explain", id="user-1")]
     checked = state_adapter.validate_python(state)
-    assert isinstance(checked["messages"][0], HumanMessage)
-    assert checked["messages"][0].id == "user-1"
-    state["request"]["subject"]["years"].append(2027)
-    assert checked["request"]["subject"]["years"] == [2025, 2026]
+    assert isinstance(checked["execution"]["model_messages"][0], HumanMessage)
+    assert checked["execution"]["model_messages"][0].id == "user-1"
+    state["request"]["subject"]["region"] = "B"
+    assert checked["request"]["subject"]["region"] == "A"
     with pytest.raises(ValidationError):
-        state_adapter.validate_python(state | {"info": {"value": object()}})
+        state_adapter.validate_python(
+            state | {"info": {"analysis": {"change": object()}}}
+        )
     with pytest.raises(ValidationError):
         state_adapter.validate_python(state | {"request": {"goal": " "}})

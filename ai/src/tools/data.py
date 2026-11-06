@@ -1,4 +1,4 @@
-"""도구 사이에 전달하는 자료 스냅샷과 경계 검증."""
+"""도구 간에 공유하는 자료의 구조와 검증 규칙을 정의한다."""
 
 import json
 from copy import deepcopy

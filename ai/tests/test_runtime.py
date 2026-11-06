@@ -30,9 +30,9 @@ def answer(state, content="A"):
     return {
         "run_id": execution["run_id"],
         "pending_id": execution["pending"]["id"],
-        "expected_input_version": execution["input_version"],
+        "expected_input_version": execution["versions"]["input"],
         "content": content,
-        "data_versions": execution["data_versions"],
+        "data_versions": execution["versions"]["data"],
     }
 
 
@@ -74,20 +74,20 @@ async def test_question_versions_and_late_answer(monkeypatch):
     ):
         with pytest.raises(ValueError):
             await app.resume(**(old | change))
-    assert app.get(old["run_id"])["execution"]["attempts"]["steps"] == 1
+    assert app.get(old["run_id"])["execution"]["budget"]["steps"]["used"] == 1
     # Move wall time forward by a day: waiting has no expiry or active-time cost.
     from src import runtime as module
 
     now = module.monotonic
     monkeypatch.setattr(module, "monotonic", lambda: now() + 86400)
     second = await app.resume(**old)
-    assert second["execution"]["input_version"] == 2
+    assert second["execution"]["versions"]["input"] == 2
     assert second["execution"]["pending"]["id"] != old["pending_id"]
     with pytest.raises(ValueError):
         await app.resume(**old)
     done = await app.resume(**answer(second, "2026-09"))
     assert done["execution"]["status"] == "completed"
-    assert done["execution"]["attempts"]["active_seconds"] < 10
+    assert done["execution"]["budget"]["active_seconds"]["used"] < 10
     with pytest.raises(ValueError):
         await app.resume(**answer(second))
 
@@ -95,7 +95,7 @@ async def test_question_versions_and_late_answer(monkeypatch):
 @pytest.mark.asyncio
 async def test_isolated_requests_results_and_validator_inputs():
     async def validate(state, result):
-        state["info"]["nested"].append(9)
+        state["info"]["visualization"]["table"]["rows"].append([9])
         state["request"]["goal"] = "changed"
         return []
 
@@ -103,15 +103,24 @@ async def test_isolated_requests_results_and_validator_inputs():
     app = AgentRuntime(
         {"test": graph(model, validate=validate)}, Settings(_env_file=None)
     )
-    info = {"nested": [1]}
+    info = {
+        "visualization": {
+            "table": {
+                "format": "html",
+                "html": "<table></table>",
+                "columns": ["value"],
+                "rows": [[1]],
+            }
+        }
+    }
     first = await start(app, info=info)
     saved = deepcopy(first)
-    second = await start(app, info={"nested": [2]})
-    info["nested"].append(3)
-    first["info"]["nested"].append(4)
-    first["execution"]["attempts"]["steps"] = 100
+    second = await start(app, info={"analysis": {"change": 2}})
+    info["visualization"]["table"]["rows"].append([3])
+    first["info"]["visualization"]["table"]["rows"].append([4])
+    first["execution"]["budget"]["steps"]["used"] = 100
     done = await app.resume(**answer(saved))
-    assert done["info"] == {"nested": [1]}
+    assert done["info"]["visualization"]["table"]["rows"] == [[1]]
     assert done["request"]["goal"] == "Synthetic experiment"
     assert (
         app.get(second["execution"]["run_id"])["execution"]["status"] == "waiting_input"
@@ -120,7 +129,10 @@ async def test_isolated_requests_results_and_validator_inputs():
 
 @pytest.mark.asyncio
 async def test_child_budget_preserves_completed_results():
-    artifact = {"type": "analysis_interpretation", "data": {"value": 12}}
+    artifact = {
+        "type": "analysis_interpretation",
+        "data": {"region": "A", "before": 100, "after": 112, "change": 12},
+    }
     child = graph(ScriptedModel(finish(results=[artifact])))
     parent = graph(
         ScriptedModel(("child", {"goal": "Read"}), finish()), children={"child": child}
@@ -128,8 +140,8 @@ async def test_child_budget_preserves_completed_results():
     app = AgentRuntime({"test": parent}, Settings(max_steps=2, _env_file=None))
     result = await start(app)
     assert result["execution"]["status"] == "partial"
-    assert result["execution"]["attempts"]["steps"] == 2
-    assert result["results"][0]["data"]["value"] == 12
+    assert result["execution"]["budget"]["steps"]["used"] == 2
+    assert result["results"][0]["data"]["change"] == 12
 
 
 @pytest.mark.asyncio

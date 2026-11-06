@@ -15,7 +15,7 @@ from langgraph.types import Command
 
 from src.graph import Completion, Nodes
 from src.settings import Settings
-from src.state import ResultItem, State, create_state
+from src.state import ExecutionEvent, ResultItem, State, create_state
 
 Scenario = Literal[
     "complete", "continue", "intermediate", "question", "partial", "failure"
@@ -30,12 +30,13 @@ CASES = {
 }
 
 
-def initial_state() -> State:
+def initial_state(event: ExecutionEvent = "user_request") -> State:
     return create_state(
         {"goal": "공통 그래프 연결·상태 처리·질문 재개 확인"},
         Settings(_env_file=None),
         messages=[],
         version="graph-fixture",
+        event=event,
     )
 
 

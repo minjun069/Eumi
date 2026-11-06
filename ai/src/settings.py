@@ -1,12 +1,15 @@
-"""Model credentials are external; local experiment limits are explicit settings."""
+"""Agent 실행에 필요한 환경 설정을 불러오고 검증한다."""
 
-from pydantic import Field, SecretStr
+from pydantic import Field, HttpUrl, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_prefix="SETTINGS_", env_file=".env", extra="ignore"
+        env_prefix="SETTINGS_",
+        env_file=".env",
+        extra="ignore",
+        hide_input_in_errors=True,
     )
 
     model: str = "gpt-6-sol"
@@ -18,20 +21,29 @@ class Settings(BaseSettings):
     runtime_timeout: float = Field(default=60, gt=0)
     llm_timeout: float = Field(default=30, gt=0)
 
-    @classmethod
-    def settings_customise_sources(
-        cls,
-        settings_cls,
-        init_settings,
-        env_settings,
-        dotenv_settings,
-        file_secret_settings,
-    ):
-        def credentials(source):
-            return {k: v for k, v in source().items() if k in {"model", "api_key"}}
+    langfuse_enabled: bool = Field(default=False, validation_alias="LANGFUSE_ENABLED")
+    langfuse_public_key: str = Field(default="", validation_alias="LANGFUSE_PUBLIC_KEY")
+    langfuse_secret_key: SecretStr = Field(
+        default=SecretStr(""), validation_alias="LANGFUSE_SECRET_KEY"
+    )
+    langfuse_base_url: HttpUrl = Field(
+        default=HttpUrl("https://cloud.langfuse.com"),
+        validation_alias="LANGFUSE_BASE_URL",
+    )
+    langfuse_environment: str = Field(
+        default="development",
+        pattern=r"^[a-z0-9][a-z0-9_-]*$",
+        validation_alias="LANGFUSE_TRACING_ENVIRONMENT",
+    )
+    langfuse_sample_rate: float = Field(
+        default=1.0, ge=0, le=1, validation_alias="LANGFUSE_SAMPLE_RATE"
+    )
 
-        return (
-            init_settings,
-            lambda: credentials(env_settings),
-            lambda: credentials(dotenv_settings),
-        )
+    @model_validator(mode="after")
+    def require_langfuse_credentials(self):
+        if self.langfuse_enabled and not (
+            self.langfuse_public_key.strip()
+            and self.langfuse_secret_key.get_secret_value().strip()
+        ):
+            raise ValueError("LANGFUSE_ENABLED requires public and secret keys")
+        return self

@@ -1,7 +1,6 @@
-"""등록된 Tableau 표시 조건을 결정론적으로 검사한다. 외부 요청은 수행하지 않는다."""
+"""Tableau 시각화 요청을 검증하고 화면 연동용 산출물을 구성한다."""
 
 import json
-from collections.abc import Collection
 from datetime import date
 from hashlib import sha256
 from typing import Annotated, Literal, NotRequired
@@ -17,7 +16,8 @@ from pydantic import (
 )
 from typing_extensions import TypedDict
 
-from src.tools.tableau_catalog import Text, registered_catalog, resolve_allowed_views
+from src.state import State
+from src.tools.tableau_catalog import Text, allowed_views, registered_catalog
 
 
 @with_config(ConfigDict(extra="forbid", strict=True))
@@ -102,11 +102,11 @@ def _issue(code, path, message, requested, allowed=()) -> ValidationIssue:
 
 
 def validate_visualization(
-    request: VisualizationRequest, *, allowed_view_keys: Collection[str] = ()
+    request: VisualizationRequest, *, state: State
 ) -> VisualizationResult:
     """부적합도 검사 결과로 반환한다. 허용값 자동 보정·부분 적용은 하지 않는다."""
     catalog = registered_catalog()
-    allowed = resolve_allowed_views(allowed_view_keys)
+    allowed = allowed_views(state)
     result: VisualizationResult = {
         "valid": False,
         "validation_scope": "registered_configuration",
@@ -135,7 +135,7 @@ def validate_visualization(
             _issue(
                 "view_not_allowed",
                 "view_key",
-                "이번 실행에서 허용된 뷰를 선택하세요.",
+                "이 실행 이벤트에 허용된 뷰를 선택하세요.",
                 key,
                 sorted(allowed),
             )

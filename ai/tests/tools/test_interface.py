@@ -1,15 +1,28 @@
 import json
 from copy import deepcopy
+from functools import partial
 
 import pytest
 from langchain_core.messages import ToolMessage
 from langchain_core.utils.function_calling import convert_to_openai_tool
 
 from src.exceptions import ToolFailure
-from src.state import result_item_adapter
+from src.settings import Settings
+from src.state import create_state, result_item_adapter
 from src.tools.interface import create_tools
 from tool_demo import run_demo
 
+TOOL_STATE = create_state(
+    {"goal": "Tableau 조건 검증"},
+    Settings(_env_file=None),
+    messages=[],
+    version="test",
+    event="user_request",
+)
+create_tools = partial(create_tools, state=TOOL_STATE)
+
+
+pytestmark = pytest.mark.usefixtures("all_tableau_views")
 
 def test_native_tool_call_message_schemas_and_state_record(dataset):
     tools = create_tools({"activity": lambda: dataset})

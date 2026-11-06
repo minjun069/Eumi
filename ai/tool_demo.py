@@ -5,11 +5,23 @@ import json
 from pathlib import Path
 
 from experiments.tool_fixtures import activity, boundaries
+from src.settings import Settings
+from src.state import create_state
 from src.tools.interface import create_tools
 
 
 def run_demo(output: Path) -> dict:
-    tools = {tool.name: tool for tool in create_tools({"synthetic_activity": activity})}
+    state = create_state(
+        {"goal": "합성 자료의 조회·가공·렌더링 검증"},
+        Settings(_env_file=None),
+        messages=[],
+        version="tool-demo",
+        event="user_request",
+    )
+    tools = {
+        tool.name: tool
+        for tool in create_tools({"synthetic_activity": activity}, state=state)
+    }
     queried = tools["query_data"].invoke({"target": "synthetic_activity"})
     processed = tools["process_data"].invoke(
         {

@@ -5,9 +5,12 @@ from copy import deepcopy
 import pytest
 from pydantic import ValidationError
 
+from src.settings import Settings
+from src.state import create_state
 from src.tools import tableau, tableau_catalog
 from src.tools.tableau_catalog import validate_catalog, visualization_catalog
 
+pytestmark = pytest.mark.usefixtures("all_tableau_views")
 
 @pytest.fixture
 def catalog():
@@ -30,6 +33,7 @@ def catalog():
         "period_mode": "independent",
         "subset_warnings": [],
     }
+    value["event_views"]["user_request"].append("AgeGroups")
     return value
 
 
@@ -40,9 +44,14 @@ def install(monkeypatch, catalog):
 
 
 def validate_visualization(request):
-    return tableau.validate_visualization(
-        request, allowed_view_keys=tuple(tableau.registered_catalog()["views"])
+    state = create_state(
+        {"goal": "등록 명세 검증"},
+        Settings(_env_file=None),
+        messages=[],
+        version="test",
+        event="user_request",
     )
+    return tableau.validate_visualization(request, state=state)
 
 
 def test_different_workbook_and_filter_types_share_one_validator(monkeypatch, catalog):

@@ -1,7 +1,7 @@
 import json
 
 import pytest
-from langchain_core.messages import ToolMessage
+from langchain_core.messages import HumanMessage, ToolMessage
 from langchain_core.tools import tool
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langgraph.checkpoint.memory import InMemorySaver
@@ -10,7 +10,7 @@ from langgraph.types import Command
 from src.exceptions import ToolFailure
 from src.graph import Agent, compile_graph
 from src.settings import Settings
-from src.state import create_state, current_call
+from src.state import create_state
 from tests.helpers import ScriptedModel, accept, finish
 
 
@@ -41,7 +41,8 @@ async def test_native_tool_validation_and_result_verification():
 
     async def validate(state, result):
         assert any(
-            isinstance(m, ToolMessage) and "12" in m.content for m in state["messages"]
+            isinstance(m, ToolMessage) and "12" in m.content
+            for m in state["execution"]["model_messages"]
         )
         return [] if result["content"] == "12" else ["Use observed value 12"]
 
@@ -52,7 +53,7 @@ async def test_native_tool_validation_and_result_verification():
         graph(model, tools=[lookup], validate=validate)
     ).ainvoke(initial())
     assert calls == ["A"]
-    assert result["result"]["content"] == "12"
+    assert result["response"]["content"] == "12"
     assert model.invocations == 4
 
 
@@ -62,7 +63,8 @@ async def test_disallowed_tool_is_not_executed():
         graph(ScriptedModel(("unknown", {}), finish()))
     ).ainvoke(initial())
     assert any(
-        isinstance(m, ToolMessage) and m.status == "error" for m in result["messages"]
+        isinstance(m, ToolMessage) and m.status == "error"
+        for m in result["execution"]["model_messages"]
     )
 
 
@@ -74,7 +76,7 @@ async def test_verification_failure_is_bounded():
     result = await compile_graph(
         graph(ScriptedModel(finish()), validate=reject)
     ).ainvoke(initial(max_steps=2))
-    assert result["error"]["code"] == "steps_limit"
+    assert result["execution"]["error"]["code"] == "steps_limit"
 
 
 @pytest.mark.asyncio
@@ -96,25 +98,37 @@ async def test_child_interrupt_resumes_without_repeating_lookup_or_parent_model(
         graph(parent_model, children={"analysis": child}), checkpointer=InMemorySaver()
     )
     state = initial()
-    config = {"configurable": {"thread_id": state["run_id"]}}
+    config = {"configurable": {"thread_id": state["execution"]["run_id"]}}
     paused = await parent.ainvoke(state, config)
     assert paused["__interrupt__"][0].value["question"] == "Which region?"
     saved = parent.get_state(config, subgraphs=True)
-    assert len(saved.values["calls"]) == 2
-    assert current_call(saved.values)["agent_path"] == ["analysis"]
-    assert current_call(saved.values)["messages"]
+    assert (
+        sum(
+            isinstance(m, HumanMessage)
+            for m in saved.values["execution"]["model_messages"]
+        )
+        == 2
+    )
+    history = saved.values["execution"]["model_messages"]
+    scope = history[-1].additional_kwargs["scope"]
+    messages = [m for m in history if m.additional_kwargs["scope"] == scope]
+    assert messages
+    assert messages[0].additional_kwargs["agent_path"] == ["analysis"]
     result = await parent.ainvoke(Command(resume="A"), config)
-    assert result["result"]["content"] == "Done"
+    assert result["response"]["content"] == "Done"
     assert calls == [1]
     assert child_model.invocations == 3
     assert parent_model.invocations == 2
-    assert result["usage"]["agent_calls"] == 1
-    assert result["usage"]["tool_calls"] == 1
+    assert result["execution"]["budget"]["agent_calls"]["used"] == 1
+    assert result["execution"]["budget"]["tool_calls"]["used"] == 1
 
 
 @pytest.mark.asyncio
 async def test_child_failure_keeps_verified_grandchild_output():
-    artifact = {"type": "analysis_interpretation", "data": {"value": 12}}
+    artifact = {
+        "type": "analysis_interpretation",
+        "data": {"region": "A", "before": 100, "after": 112, "change": 12},
+    }
     leaf = graph(ScriptedModel(finish(results=[artifact])), name="leaf")
 
     async def fail(state, result):
@@ -130,9 +144,11 @@ async def test_child_failure_keeps_verified_grandchild_output():
         children={"middle": middle},
     )
     result = await compile_graph(parent).ainvoke(initial())
-    assert result["result"]["partial"] is True
-    assert result["results"][0]["data"] == {"value": 12}
-    assert "private error" not in json.dumps([str(m) for m in result["messages"]])
+    assert result["execution"]["status"] == "partial"
+    assert result["results"][0]["data"] == artifact["data"]
+    assert "private error" not in json.dumps(
+        [str(m) for m in result["execution"]["model_messages"]]
+    )
 
 
 @pytest.mark.asyncio
@@ -153,7 +169,7 @@ async def test_retry_requires_safe_read_and_retryable_error(safe, expected):
         graph(ScriptedModel(("lookup", {}), finish()), tools=[lookup])
     ).ainvoke(initial())
     assert len(calls) == expected
-    assert result["usage"]["retries"] == expected - 1
+    assert result["execution"]["budget"]["retries"]["used"] == expected - 1
 
 
 @pytest.mark.asyncio
@@ -175,10 +191,11 @@ async def test_invalid_submissions_are_rejected_before_business_validation(bad):
     name, args = finish()
     model = ScriptedModel((name, args | bad), finish("Corrected"))
     output = await compile_graph(graph(model, validate=validate)).ainvoke(initial())
-    assert output["result"]["content"] == "Corrected"
+    assert output["response"]["content"] == "Corrected"
     assert len(seen) == 1
     assert any(
-        isinstance(m, ToolMessage) and m.status == "error" for m in output["messages"]
+        isinstance(m, ToolMessage) and m.status == "error"
+        for m in output["execution"]["model_messages"]
     )
 
 
@@ -202,6 +219,6 @@ async def test_child_schema_and_validation_share_the_typed_request():
         ]
     )
     output = await parent.ainvoke(initial())
-    assert output["result"]["content"] == "Done"
-    assert output["usage"]["agent_calls"] == 1
+    assert output["response"]["content"] == "Done"
+    assert output["execution"]["budget"]["agent_calls"]["used"] == 1
     assert child_model.invocations == 1

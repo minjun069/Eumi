@@ -1,1 +1,1 @@
-"""LangGraph-based execution for the Eumi agents."""
+"""Agent 실행 기능을 구성하는 패키지다."""

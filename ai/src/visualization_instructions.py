@@ -1,6 +1,5 @@
-"""검토한 시각화 지침을 파일에서 읽는다. 유사도 검색 없이 항상 같은 원문을 제공한다."""
+"""Agent의 시각화 판단에 필요한 지침과 참조 정보를 제공한다."""
 
-from collections.abc import Collection
 from copy import deepcopy
 from pathlib import Path
 from typing import NotRequired
@@ -10,8 +9,8 @@ from typing_extensions import TypedDict
 from src.tools.tableau_catalog import (
     DateOrder,
     ParameterDefinition,
+    allowed_views,
     registered_catalog,
-    resolve_allowed_views,
 )
 
 
@@ -59,12 +58,10 @@ def load_visualization_instructions() -> Guides:
     }
 
 
-def visualization_context(
-    state, *, include_inputs: bool, allowed_view_keys: Collection[str] = ()
-) -> VisualizationContext:
+def visualization_context(state, *, include_inputs: bool) -> VisualizationContext:
     """선택 목록과 입력 프로필을 공유하고 확인된 매개변수의 필터 값만 상세 제공한다."""
     catalog = registered_catalog()
-    allowed = resolve_allowed_views(allowed_view_keys)
+    allowed = allowed_views(state)
     context: VisualizationContext = {
         "views": {
             key: {

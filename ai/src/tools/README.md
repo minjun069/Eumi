@@ -1,5 +1,9 @@
 # 자료 도구
 
+## Tableau 시각화 검증
+
+`validate_visualization(request, state=state)`는 선택한 뷰의 입력 프로필에 따라 매개변수·필터·필수값·날짜 순서·필터 의존 조건을 검사하고 `valid`, `issues`, `artifact`를 반환한다. 외부 호출은 없으며 부적합한 입력은 산출물 없이 구체적인 수정 정보를 반환한다. 입력·반환 계약과 실제 Agent 연결은 [Tableau 시각화 실행](../../TABLEAU.md)을 따른다. 아래 HTML 렌더러는 직접 사용 예제와 비교 근거표 생성용으로 유지하며 Agent가 선택하는 시각화는 Tableau 검증 도구다.
+
 DB 연결 없이 호출할 수 있는 Python 업무 함수다. 입력은 `TypedDict`, 경계 검증은 Pydantic `TypeAdapter`를 사용한다. State와 그래프 단계는 변경하지 않는다. 호출·검증 이력 기록과 재시도 판단은 작업 선택 및 실행 노드가 담당한다.
 
 ## 자료와 오류
@@ -33,7 +37,8 @@ DB 연결 없이 호출할 수 있는 Python 업무 함수다. 입력은 `TypedD
 
 | 연산 | 입력·처리 |
 | --- | --- |
-| `calculate` | `before/after/output`, `difference`는 after−before, `ratio`는 after/before, `percent_change`는 (after−before)/before×100 |
+| `calculate` | `before/after/output`, `difference`는 after−before, `ratio`는 after/before, `percentage`는 after/before×100, `percent_change`는 (after−before)/before×100 |
+| `sort` | `by: [{field, descending}]` 순서로 정렬. null은 항상 마지막, 동률은 이전 순서 유지 |
 | `aggregate` | `field/group_by/output`, `sum/mean/min/max/count`. count는 해당 필드의 행 수이며 결측 정책 적용 |
 | `join` | 오른쪽 `right` 자료, 같은 이름의 `keys`, `inner/left`, 원본→출력 열 이름인 `fields`. 오른쪽 키 중복·null, 왼쪽 null 키, 열 덮어쓰기 거부 |
 | `filter` | 조회와 같은 `conditions`를 순서 중간에 적용 |
@@ -54,7 +59,7 @@ DB 연결 없이 호출할 수 있는 Python 업무 함수다. 입력은 `TypedD
 | 유형 | 명세와 결과 |
 | --- | --- |
 | `table` | title, 선택 fields. 실제 값·단위·결측을 HTML 셀에 표시. 빈 자료는 빈 표와 안내 |
-| `bar/line` | title, x, y, unit. 축 이름 x_label/y_label, legend, HEX color, value_range 선택. SVG와 원본 수치 표 생성 |
+| `bar/line` | title, x, y, unit. 축 이름 x_label/y_label, legend, HEX color, value_range 선택. SVG와 원본 수치 표 생성. bar는 orientation=horizontal로 가로 막대·소수점 첫째 자리 수치 표시 가능 |
 | `map` | title, region, value, unit, code_system, boundaries. legend, HEX color, value_range 선택. SVG 지역별 색상 지도와 수치 표 생성 |
 
 수치 열의 단위가 요청 단위와 같아야 한다. 차트 가로축은 중복·결측이 없는 입력 행 순서의 등간격 범주다. 선 차트는 날짜 간격 비례 축을 제공하지 않으며 해당 안내를 반환한다. 최대 200개 행을 받으며 더 큰 자료는 먼저 가공한다. 결측은 0으로 표시하지 않고 선도 연결하지 않는다. 막대 범위는 반드시 0과 모든 값을 포함하며 임의 범위에 맞춰 값을 잘라내지 않는다. 전체가 결측이거나 빈 자료면 `no_plottable_data`로 실패한다.
@@ -67,13 +72,13 @@ HTML/SVG는 입력 텍스트를 이스케이프하고 스크립트·외부 리�
 
 ## 호출 인터페이스와 실행 예제
 
-`create_tools(providers)`는 LangChain `BaseTool` 목록을 반환한다. 도구 이름은 `query_data`, `process_data`, `render_visualization`이며 인자와 결과는 위 Python 함수와 같다. 공급자 목록은 생성 시 복사한다. 입력 JSON 스키마는 같은 TypeAdapter에서 생성하고 실제 함수 경계에서도 검사한다. 도구 호출 결과는 일반 결과 객체 또는 표준 ToolMessage로 전달되며 `ToolMessage.artifact`에 별도 상태를 숨기지 않는다.
+`create_tools(providers, state=state)`는 LangChain `BaseTool` 목록을 반환한다. 도구 이름은 `query_data`, `process_data`, `render_visualization`, `validate_visualization`이며 인자와 결과는 위 Python 함수와 같다. 공급자 목록은 생성 시 복사한다. 현재 실행의 State를 전달하며 시각화 명세·검증은 execution.event에 배정된 뷰만 허용한다. 입력 JSON 스키마는 같은 TypeAdapter에서 생성하고 실제 함수 경계에서도 검사한다. 도구 호출 결과는 일반 결과 객체 또는 표준 ToolMessage로 전달되며 `ToolMessage.artifact`에 별도 상태를 숨기지 않는다.
 
 ```python
 from src.tools.interface import create_tools
 
 # read_activity는 실제 버전·출처와 열 정의가 있는 Dataset을 반환하는 함수다.
-tools = {tool.name: tool for tool in create_tools({"activity": read_activity})}
+tools = {tool.name: tool for tool in create_tools({"activity": read_activity}, state=state)}
 queried = tools["query_data"].invoke({"target": "activity", "limit": 100})
 processed = tools["process_data"].invoke(
     {
@@ -109,7 +114,7 @@ rendered = tools["render_visualization"].invoke(
 
 `ai/`에서 `python tool_demo.py --output outputs/tool-demo`를 실행하면 합성 자료 공급자를 실제 도구에 연결해 A/B/C의 -10%/-8%/-10% 변화율을 계산하고 `table.html`, `bar.html`, `line.html`, `map.html`, `report.json`을 생성한다. 합성 자료는 `experiments/tool_fixtures.py`, 예제 조립과 파일 저장은 `tool_demo.py`에 둔다. 도구 모듈에는 모의 응답이나 데모 분기를 넣지 않는다.
 
-공통 그래프에 실제 업무 노드·모델·도구 선택을 연결하는 작업, DB·HTTP·파일 저장 서비스 연동은 포함하지 않는다. 기존 그래프는 그대로 유지한다. 작업 선택 및 실행 노드가 호출 결과를 `results[].output`에 기록하고, 응답 작성 노드가 공개할 `artifact`를 선택하도록 연결할 수 있다.
+`src/agent_nodes.py`는 공통 그래프에 실제 업무 노드·모델·도구 선택을 연결한다. 작업 선택 및 실행 노드가 호출 결과를 `results[].output`에 기록하고 응답 작성 노드가 검증된 `artifact`를 선택한다. DB·HTTP·프론트 채팅 서비스 연동은 별도 구현 대상이다.
 
 ## 검증
 

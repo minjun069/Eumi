@@ -1,18 +1,19 @@
-"""Python 도구를 LangChain의 표준 호출·모델 스키마에 연결한다."""
+"""자료 처리·시각화 기능을 Agent가 호출할 수 있는 도구로 구성한다."""
 
-from collections.abc import Collection, Mapping
+from collections.abc import Mapping
 
 from langchain_core.tools import BaseTool, StructuredTool
 
+from src.state import State
 from src.tools.process import process_adapter, process_data
 from src.tools.query import DataProvider, query_adapter, query_data
 from src.tools.render import render_adapter, render_visualization
 from src.tools.tableau import validate_visualization, visualization_adapter
-from src.tools.tableau_catalog import resolve_allowed_views
+from src.tools.tableau_catalog import allowed_views
 
 
 def create_tools(
-    providers: Mapping[str, DataProvider], *, allowed_view_keys: Collection[str] = ()
+    providers: Mapping[str, DataProvider], *, state: State
 ) -> list[BaseTool]:
     """호출별 권한 검사가 가능한 자료 공급자를 연결한 독립 도구 목록을 만든다.
 
@@ -20,7 +21,6 @@ def create_tools(
     자동 재시도, 작업 이력, 공개 산출물 등록은 이 인터페이스의 책임이 아니다.
     """
     registered = dict(providers)
-    allowed_views = resolve_allowed_views(allowed_view_keys)
 
     def query(**arguments):
         return query_data(arguments, registered)
@@ -32,19 +32,18 @@ def create_tools(
         return render_visualization(arguments)
 
     def validate_tableau(**arguments):
-        return validate_visualization(arguments, allowed_view_keys=allowed_views)
+        return validate_visualization(arguments, state=state)
 
     def input_schema(name, adapter):
         schema = adapter.json_schema()
         if name == "validate_visualization":
             view = schema["properties"]["view_key"]
-            view["description"] = "이번 실행에서 호출 측이 허용한 뷰 ID"
-            if allowed_views:
-                view["enum"] = sorted(allowed_views)
+            permitted = sorted(allowed_views(state))
+            view["description"] = "현재 실행 이벤트에 허용된 Tableau 뷰 ID"
+            if permitted:
+                view["enum"] = permitted
             else:
-                view["description"] = (
-                    "이번 실행에는 허용된 뷰가 없어 모든 호출이 거부됩니다."
-                )
+                view["description"] += "; 허용된 뷰가 없어 모든 호출을 거부함"
         return schema
 
     return [

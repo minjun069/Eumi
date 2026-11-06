@@ -22,10 +22,10 @@ async def test_experiment_scenarios(scenario, expected, tmp_path):
         assert table["data"]["rows"] == [["A", 120, 108, -10]]
         assert "고립 위험" in state["response"]["content"]
     if scenario == "rework":
-        assert state["execution"]["attempts"]["steps"] == 11
+        assert state["execution"]["budget"]["steps"]["used"] == 11
     if scenario == "failure":
         assert state["execution"]["error"]["code"] == "retries_limit"
-        assert state["execution"]["attempts"]["tool_calls"] == 3
+        assert state["execution"]["budget"]["tool_calls"]["used"] == 3
     if scenario == "empty":
         assert state["execution"]["error"] is None
         assert state["results"] == []
