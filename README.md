@@ -4,6 +4,7 @@
 
 - **개발 기간**: 2026.10.26 ~ 2026.11.08
 - **SSAFY 15기 자율 프로젝트**
+- **구현 범위**: ERD(테이블 24개)와 프로토타입 화면 기준 6개 영역 — 로그인 · 회원가입 · 비밀번호 찾기, 위험 탐지 대시보드, 사례자 관리, 복지자원 관리, 마이페이지, AI Agent 패널
 
 ## 목차
 
@@ -51,9 +52,9 @@
 | 구성 요소 | 기술 | 역할 |
 |---|---|---|
 | 웹 클라이언트 | React | 서비스 화면, Tableau 대시보드 임베딩, AI Agent 패널 |
-| API 서버 | Spring Boot | 인증·접근 검사, 분석 결과 조회, AI 요청 중계·결과 저장 |
-| AI Agent 서버 | FastAPI | 분석 결과 해석, 데이터 시각화, 사용자 요청 처리 |
-| 데이터 파이프라인 | Python | 월 단위 데이터 적재와 고립 위험 분석 |
+| API 서버 | Spring Boot | 회원, 복지자원, 사례자, 상담 등 서비스 API |
+| AI Agent 서버 | FastAPI | 화면 기반 질의응답, 복지자원 추천, 인사이트 보고서 생성, 문서 기반 자동 입력 |
+| 데이터 파이프라인 | Python · Spark · Kafka | 배경 데이터 월별 배치, 유동인구 데이터 시간별 처리, 고립 위험 분석 결과 적재 |
 | 데이터베이스 | PostgreSQL | API 서버·AI Agent 서버·데이터 파이프라인이 함께 사용 (스키마는 `db/`에서 관리) |
 | 시각화 | Tableau | 위험도 지도 등 대시보드 시각화 |
 
@@ -63,106 +64,101 @@
 
 | 구분 | 기술 | 버전 |
 |---|---|---|
-| 프론트엔드 | React | 미정 |
-| 백엔드 | Spring Boot | 미정 |
-| AI Agent 서버 | FastAPI | 미정 |
-| 데이터 분석 | Python | 미정 |
-| DB | PostgreSQL | 미정 |
-| 시각화 | Tableau | - |
+| 프론트엔드 | React · Vite · TypeScript · Tailwind CSS | 19.3.1 · 8.3.5 · 5.9.3 · 4.3.3 (Node 24) |
+| 백엔드 | Spring Boot · Java · Gradle | 4.1.2 · 21 · 9.8.2 |
+| AI Agent 서버 | FastAPI · LangChain · LangGraph | AI 파트 초기 설정 때 확정 |
+| 데이터 분석 | Python · Spark (PySpark) · Kafka · Airflow | 3.12 · 3.5.9 (Java 17) · 3.9.2 (KRaft) · 2.10.5 |
+| 원본 저장소 | MinIO (S3 호환) | 2025.7.23 (`bitnamilegacy/minio`) |
+| DB | PostgreSQL · Flyway | 17 · 13.11.1 |
+| 시각화 | Tableau Public | - |
+| 로컬 메일 확인 | Mailpit | v1.27 |
 | 협업 | GitLab, Jira, Figma | - |
 
 ## 디렉터리 구조
 
 ```
 .
-├── frontend/          # React 프론트엔드
+├── frontend/          # React 웹 (Vite)
 ├── backend/           # Spring Boot API 서버
 ├── ai/                # FastAPI AI Agent 서버
-├── data/              # 데이터 분석·적재 파이프라인
-│   ├── notebooks/     #   탐색·분석 노트북
-│   └── pipeline/      #   월 데이터 적재·분석 스크립트
+├── data/              # 데이터 수집 · 적재 · 분석
+│   ├── notebooks/     #   탐색 · 분석 노트북
+│   └── pipeline/      #   적재 · 분석 파이프라인
 ├── db/                # PostgreSQL 스키마 (여러 서버가 같은 DB를 쓰므로 한 곳에서 관리)
-│   ├── migration/     #   스키마 변경 SQL (번호 순서대로 적용)
-│   └── seed/          #   지역·기관·테스트 데이터
-├── infra/             # docker-compose, 환경 변수 예시
-├── docs/              # 테이블 정의서, ERD, API 명세
-├── .gitlab/           # 이슈·MR 템플릿
-├── CONTRIBUTING.md    # 협업 규칙 (브랜치, 커밋, MR, Jira)
+│   ├── migration/     #   Flyway 마이그레이션 + 계정별 권한(afterMigrate.sql)
+│   ├── roles/         #   DB 계정 생성 SQL
+│   └── seed/          #   개발 · 시연용 초기 데이터
+├── infra/             # 로컬 개발 DB(docker-compose), 배포 설정
+├── docs/              # 결정 기록, 저장소 설정, 명세 문서
+├── .gitlab/           # MR 템플릿
+├── Jenkinsfile        # CI/CD
+├── CONTRIBUTING.md    # 협업 규칙 (브랜치 · 커밋 · MR · 리뷰 · Jira · DB · 비밀값)
 └── README.md
 ```
 
 ## 시작하기
 
+### 준비물
+
+| 파트 | 필요한 것 |
+|---|---|
+| 공통 | Git, Docker Desktop (설치 + 실행) |
+| BE | JDK 21 |
+| FE | Node 24 |
+| AI · 데이터 | 각 파트가 정한 Python 환경 |
+
+### 받기와 로컬 DB
+
 ```bash
 git clone https://lab.ssafy.com/s15-final/S15P31B201.git
-cd S15P31B201
-git switch develop
+cd S15P31B201                    # 기본 브랜치 develop
+
+cd infra
+cp .env.example .env
+docker compose up -d             # PostgreSQL 17 + 스키마 · 계정 · 권한 + 메일 확인용 Mailpit
 ```
 
-실행 방법은 각 폴더의 README를 참고하세요.
+DB 계정, 메일 확인, 문제 해결은 [infra/README.md](infra/README.md)를 봅니다.
 
-| 구분 | 위치 |
-|---|---|
-| 프론트엔드 | [frontend/](frontend/) |
-| 백엔드 | [backend/](backend/) |
-| AI Agent 서버 | [ai/](ai/) |
-| 데이터 파이프라인 | [data/](data/README.md) |
-| DB 스키마 | [db/](db/README.md) |
-| 로컬 실행 환경 (docker-compose, `.env.example`) | [infra/](infra/README.md) |
+### 파트별 실행
+
+| 구분 | 실행 | 확인 |
+|---|---|---|
+| 백엔드 | `cd backend` → `./gradlew bootRun` (또는 IntelliJ) | http://localhost:8080/api/health |
+| 프론트엔드 | `cd frontend` → `nvm use 24` → `npm ci` → `npm run dev` | http://localhost:5173 |
+| AI Agent 서버 | [ai/](ai/) | 포트 8000, `GET /health` |
+| 데이터 파이프라인 | [data/](data/README.md) | |
 
 ## 팀 소개
 
-| 이름 | 파트 | 담당 |
+| 이름 | 역할 | 담당 |
 |---|---|---|
-| 배유진 | 프론트엔드 | 서비스 화면 구현 |
-| 김민재 | 백엔드 | API 서버, DB |
-| 이지원 | 백엔드 | API 서버, DB |
-| 김민준 | AI | AI Agent 서버 |
-| 강병민 | 데이터 분석 | 데이터 분석·적재 파이프라인 |
-| 이지석 | 데이터 분석 | 데이터 분석·적재 파이프라인 |
+| 김민준 | PM · AI | 일정 · Jira 관리, AI Agent 서버 |
+| 김민재 | BE · FE · Infra | API 서버, 서비스 화면, DB, 배포 환경 |
+| 강병민 | 데이터 엔지니어링(DE) | 데이터 수집 · 적재 파이프라인 (Spark · Kafka) |
+| 이지석 | 데이터 분석(DA) | 지표 설계 · 분석 |
+| 배유진 | - | - |
+| 이지원 | - | - |
 
 ## 문서
 
 | 문서 | 위치 |
 |---|---|
-| 테이블 정의서, ERD, API 명세 | [docs/](docs/README.md) (작성 예정) |
-| 협업 규칙 | [CONTRIBUTING.md](CONTRIBUTING.md) |
-| 저장소 초기 설정 | [docs/gitlab-setup.md](docs/gitlab-setup.md) |
+| 협업 규칙 (브랜치 · 커밋 · MR · 리뷰 · Jira · DB · 비밀값) | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| 로컬 개발 환경 (DB · 메일) | [infra/README.md](infra/README.md) |
+| DB 스키마 · 마이그레이션 규칙 | [db/README.md](db/README.md) |
+| API 계약 (OpenAPI 2.3.0) · AI 에이전트 패널 동작 | [docs/api/openapi.json](docs/api/openapi.json), [docs/api/ai-agent-panel.md](docs/api/ai-agent-panel.md) |
+| 결정 기록: 로그인 방식 · 에이전트 흐름 전달 | [docs/decisions/login-sse.md](docs/decisions/login-sse.md) |
+| GitLab 저장소 설정 | [docs/gitlab-setup.md](docs/gitlab-setup.md) |
+| 문서 목록 (테이블 정의서 · ERD 위치 포함) | [docs/README.md](docs/README.md) |
 
 ## 협업 규칙
 
-Git 규칙은 아래와 같습니다. Jira 운영 규칙을 포함한 전체 내용은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고하세요.
+요약입니다. 전체 내용은 [CONTRIBUTING.md](CONTRIBUTING.md)를 봅니다.
 
-### 브랜치 전략
-
-Feature Branch 전략을 사용합니다.
-
-| 브랜치 | 용도 |
-|---|---|
-| `master` | 배포. 직접 push 금지 |
-| `develop` | 개발 통합 (기본 브랜치) |
-| `태그/기능명` | 기능 개발·버그 수정. `develop`에서 만들어 `develop`으로 병합 (예: `feat/dashboard-map`, `fix/jwt-auth`) |
-
-### 커밋 메시지
-
-```
-{태그}: [{기능명}] 커밋 메시지
-```
-
-예시: `feat: [dashboard-map] 시군구 위험도 지도 구현`
-
-| 태그 | 사용할 때 |
-|---|---|
-| `feat` | 새로운 기능 추가 |
-| `fix` | 버그 수정 |
-| `refactor` | 코드 리팩토링 |
-| `comment` | 주석 추가 또는 오타 수정 |
-| `docs` | README 등 문서 수정 |
-| `merge` | 브랜치 병합 |
-| `rename` | 파일·폴더명 수정 및 이동 |
-| `chore` | 패키지 매니저, 환경 설정 등 기타 변경 |
-
-### 이슈·PR
-
-- **이슈** (1차 MVP 생략): 작업 시작 전에 이슈를 먼저 만들고, 제목은 `[{태그}] 작업할 내용 요약`으로 씁니다.
-- **PR(Merge Request)**: 1차 MVP에도 MR로 `develop`에 병합합니다. 제목 형식(`merge: [{날짜}] {이름} {한 일} {종료 여부}`)과 최소 1명 Approve 후 병합은 1차 MVP에서 생략합니다.
+- **브랜치**: `master`(배포) · `develop`(기본, 개발 통합)은 직접 push가 막혀 있습니다. `develop`에서 `태그/기능명` 브랜치를 만들어 `develop` 대상 MR로 병합합니다.
+- **커밋**: 제목 `{태그}: [{기능명}] 한 일`, 한 줄 띄우고 `Jira: 이슈 키`
+- **MR 리뷰**: DB 마이그레이션, 파트 간 API · 이벤트 형식, `infra/`는 리뷰어 승인 후 병합합니다. 그 밖에는 리뷰어만 지정하고 병합할 수 있습니다.
+- **Jira**: 작업 전에 Task를 만들고, 키를 커밋 본문과 MR 설명에 적습니다.
+- **DB**: 병합된 마이그레이션 파일은 고치지 않고 새 파일로 추가합니다. 테이블 변경은 'Eumi ERD 변경 기록'에 먼저 적습니다.
+- **비밀값**: `.env` · 키 파일은 커밋하지 않고, 전달은 Mattermost 비공개 채널에서만 합니다. 로컬 DB에는 가짜 데이터만 넣습니다.

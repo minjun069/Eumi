@@ -14,6 +14,7 @@ desktop.ini
 .env
 .env.*
 !.env.example
+!.env.*.example
 
 # ===== 로그 =====
 *.log
@@ -61,3 +62,9 @@ data/processed/
 *.onnx
 *.pkl
 *.joblib
+
+# ===== 키 · 인증서 =====
+*.pem
+*.key
+*.p12
+*.jks

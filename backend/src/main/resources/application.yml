@@ -1,0 +1,62 @@
+# 공통 설정 — 프로필별 값은 application-local.yml / application-prod.yml
+# (Initializr가 만든 application.properties는 지우고 이 파일을 쓴다)
+server:
+  port: 8080
+  servlet:
+    context-path: /api                  # Nginx가 /api/ 를 그대로 넘기므로 모든 API는 /api 아래
+    session:
+      timeout: 2h
+      cookie:
+        name: SESSION
+        path: /api
+        http-only: true
+        same-site: lax
+        secure: false                  # prod에서 true. Domain은 지정하지 않는다.
+  forward-headers-strategy: framework   # Nginx가 붙여 주는 X-Forwarded-* (https 여부 등) 반영
+
+spring:
+  application:
+    name: eumi-backend
+  autoconfigure:
+    exclude: org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
+  profiles:
+    default: local                      # 아무것도 지정하지 않으면 local
+  session:
+    timeout: 2h
+    jdbc:
+      initialize-schema: never          # Flyway 컨테이너가 기존 테이블을 관리한다.
+  mail:
+    default-encoding: UTF-8
+    properties:
+      "[mail.smtp.connectiontimeout]": 5000
+      "[mail.smtp.timeout]": 5000
+      "[mail.smtp.writetimeout]": 5000
+  jpa:
+    hibernate:
+      ddl-auto: validate                # 스키마는 Flyway(db/migration)가 만든다. JPA는 맞는지 확인만
+    open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 50MB               # Nginx 업로드 경로 한도(50m)와 맞춘다
+      max-request-size: 50MB
+
+# 서비스 간 주소 (로컬 기본값 / 운영은 compose가 환경변수로 넣는다)
+eumi:
+  ai:
+    mode: ${EUMI_AI_MODE:fake}
+    base-url: ${AI_BASE_URL:http://localhost:8000}
+    execution-limit: ${EUMI_AI_EXECUTION_LIMIT:}
+    grace-period: ${EUMI_AI_GRACE_PERIOD:}
+    unresponsive-after: ${EUMI_AI_UNRESPONSIVE_AFTER:}
+    cancel-wait: ${EUMI_AI_CANCEL_WAIT:}
+    fake-step-delay: ${EUMI_AI_FAKE_STEP_DELAY:1s}
+    http-timeout: ${EUMI_AI_HTTP_TIMEOUT:3s}
+  ai-base-url: ${AI_BASE_URL:http://localhost:8000}
+  pipeline-base-url: ${PIPELINE_BASE_URL:http://localhost:8100}
+  upload-dir: ${UPLOAD_DIR:./uploads}
+
+logging:
+  level:
+    org.hibernate.SQL: OFF
+    org.hibernate.orm.jdbc.bind: OFF
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: OFF

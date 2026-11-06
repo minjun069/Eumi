@@ -1,0 +1,73 @@
+/* Noto Sans KR 가변 글꼴(public/fonts, SIL OFL 1.1)을 굵기별 이름으로 등록 (V1과 같은 이름) */
+
+@font-face {
+  font-family: 'Noto Sans KR:Bold';
+  src: url('/fonts/NotoSansKR-VF.woff2') format('woff2');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR:Medium';
+  src: url('/fonts/NotoSansKR-VF.woff2') format('woff2');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR:Regular';
+  src: url('/fonts/NotoSansKR-VF.woff2') format('woff2');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+:root {
+  /* 서비스 화면 색 (V1 기준) */
+  --navy: #324085;
+  --navy-hover: #283470;
+  --text: #243247;
+  --text-muted: #6b7686;
+  --line: #dde3eb;
+  --bg-soft: #f4f6f9;
+  --blue-soft: #eaf1fa;
+  --blue-line: #73a7ec;
+  --link: #285c96;
+  --danger: #d64545;
+  --danger-hover: #bb3434;
+
+  /* 1440×1024 화면 (개발용 영역은 프로토타입에만 있다) */
+  --frame-width: 1440px;
+  --frame-height: 1024px;
+
+  color: var(--text);
+  background: #e9edf3;
+  font-family: 'Noto Sans KR:Regular', 'Noto Sans KR', sans-serif;
+  font-synthesis: none;
+
+  /* 한글은 낱말 중간에서 끊지 않는다. 띄어쓰기 없는 긴 영문·이메일은 칸을 넘지 않게 아무 데서나 끊는다 */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: var(--frame-width);
+  min-height: var(--frame-height);
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}

@@ -1,0 +1,11 @@
+# 의존성·빌드 결과물
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+vite.config.*.timestamp-*
+
+# 로그·환경 변수
+*.log
+.env*
+!.env.example

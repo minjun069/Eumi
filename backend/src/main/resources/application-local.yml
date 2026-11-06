@@ -1,0 +1,22 @@
+# 로컬 개발 — infra/에서 docker compose up -d 로 띄운 postgres에 붙는다
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/eumi}
+    username: ${DB_USERNAME:eumi_app}
+    password: ${DB_PASSWORD:app_local}   # 로컬 compose 전용 값 (infra/.env.example)
+  jpa:
+    show-sql: false
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      "[mail.smtp.auth]": ${SMTP_AUTH:false}
+      "[mail.smtp.starttls.enable]": ${SMTP_STARTTLS_ENABLED:false}
+
+eumi:
+  auth:
+    hash-key: ${EUMI_AUTH_HASH_KEY:local-only-eumi-auth-hash-key-never-use-in-production}
+  mail:
+    from: ${EUMI_MAIL_FROM:no-reply@eumi.test}

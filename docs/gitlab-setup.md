@@ -1,86 +1,68 @@
-# GitLab 저장소 초기 설정
+# GitLab 저장소 설정
 
-저장소 관리자(Maintainer 이상 권한) 1명이 진행합니다.
-GitLab 버전에 따라 메뉴 이름·위치가 조금 다를 수 있습니다.
+현재 설정 기록입니다. 
+GitLab 버전에 따라 메뉴 이름 · 위치가 조금 다를 수 있습니다.
 
-## 1. 첫 커밋 올리기
+- 마지막 확인: 2026-11-01
 
-```bash
-git clone <저장소 주소>
-cd <저장소 폴더>
-
-# 압축 파일의 내용을 이 폴더 안에 바로 풉니다.
-# .gitignore, .gitattributes, .editorconfig, .gitlab/ 같은 숨김 파일도 함께 들어가야 합니다.
-git status            # .gitignore, .gitlab/ 등이 목록에 보이는지 확인
-
-git add .
-git commit -m "chore: [init] 초기 디렉터리 구조와 협업 템플릿 추가"
-git branch -M master
-git push -u origin master
-
-# 개발 통합 브랜치
-git switch -c develop
-git push -u origin develop
-```
-
-## 2. 기본 브랜치와 보호 브랜치
+## 1. 브랜치
 
 **Settings > Repository**
 
-- Branch defaults(기본 브랜치): `develop`
-- Protected branches
+- 기본 브랜치(Branch defaults): `develop`
+- 보호 브랜치(Protected branches)
 
-| 브랜치 | Allowed to merge | Allowed to push and merge |
-|---|---|---|
-| `master` | Maintainers | No one |
-| `develop` | Developers + Maintainers | No one |
+| 브랜치 | Allowed to merge | Allowed to push and merge | Allowed to force push |
+|---|---|---|---|
+| `master` | Maintainers | No one | 끔 |
+| `develop` | Developers + Maintainers | No one | 끔 |
 
-## 3. Merge Request 설정
+## 2. Merge Request
 
 **Settings > Merge requests**
 
-- Squash commits when merging: Encourage (권장)
-- Enable "Delete source branch" option by default: 체크
-- 승인 필수 규칙(Approval rules)은 GitLab 요금제에 따라 사용할 수 없을 수 있습니다. 이 경우 "리뷰어 1명 승인 후 병합"을 팀 규칙으로 운영합니다.
-
-## 4. 라벨
-
-**Manage > Labels** (버전에 따라 Project information > Labels)
-
-| 구분 | 라벨 |
-|---|---|
-| 파트 | `FE`, `BE`, `AI`, `DATA`, `DB`, `INFRA`, `DOCS` |
-| 우선순위 | `P0`, `P1`, `P2`, `P99` (기능명세서 우선순위와 같음) |
-| 유형 | `bug` |
-
-## 5. 마일스톤
-
-**Plan > Milestones** (버전에 따라 Issues > Milestones)
-
-| 이름 | 시작일 | 마감일 |
+| 항목 | 값 | 이유 |
 |---|---|---|
-| 1차 | 2026-10-26 | 2026-10-31 |
-| 2차 | 2026-11-02 | 2026-11-08 |
+| Merge method | Merge commit | |
+| Squash commits when merging | Allow | MR마다 작성자가 선택 |
+| Squash commit message template | %{title} / %{all_commits} / MR: %{reference} (줄마다 띄움) | 합친 커밋에도 각 커밋 메시지와 Jira 키를 남기기 위해 |
+| Enable "Delete source branch" option by default | 켬 | 병합된 작업 브랜치 정리 |
+| All threads must be resolved | 켬 | 리뷰 댓글을 해결해야 병합 ([CONTRIBUTING 3.2](../CONTRIBUTING.md#32-리뷰-진행-순서)) |
 
-## 6. 팀원 권한
+승인을 강제하는 설정(Approval rules)은 GitLab 요금제에 따라 쓸 수 없을 수 있습니다. 승인 필수 범위는 팀 규칙으로 지킵니다.
+
+## 3. 멤버
 
 **Manage > Members**
 
-- 저장소 관리자 1~2명: Maintainer
-- 나머지 팀원: Developer
-
-## 7. 다음 단계 (각 파트 담당)
-
-각자 `develop`에서 `chore/{폴더}-init` 브랜치(예: `chore/backend-init`)를 만들고, 담당 폴더에 프로젝트를 생성해 `develop`으로 MR을 올립니다.
-
-| 폴더 | 생성 방법 | 주의 |
+| 이름 | 역할 | 권한 |
 |---|---|---|
-| `frontend/` | Vite React 템플릿 | 폴더 안에서 `npm create vite@latest .` 실행 후 "Ignore files and continue" 선택 (`.gitkeep` 때문) |
-| `backend/` | Spring Initializr (Gradle) | 내려받은 압축 파일의 내용을 `backend/` 안에 풉니다 |
-| `ai/` | FastAPI | Python 버전과 의존성 파일(`requirements.txt` 등)을 함께 커밋 |
-| `data/` | Python 환경 파일 | 원본 데이터는 `data/raw/`에 두며 커밋되지 않음 |
-| `db/` | 확정된 스키마 SQL | `db/migration/V1__init.sql`부터 번호 순서대로 |
+| 김민재 | BE · FE · Infra | Maintainer |
+| 김민준 | PM · AI | Maintainer |
+| 강병민 | DE | Developer 이상 |
+| 이지석 | DA | Developer 이상 |
+| 이지원 | -  | Developer 이상 |
+| 배유진 | -  | Developer 이상 |
 
-- 프로젝트 생성 도구가 하위 폴더에 `.git`을 만들었다면 반드시 지웁니다. (저장소 안에 저장소가 생기는 것 방지)
-- 각 폴더의 `.gitkeep`은 프로젝트 파일이 들어간 뒤 지워도 됩니다.
-- 파트별 실행 방법은 해당 폴더의 README에 적습니다.
+
+## 4. 연동
+
+| 대상 | 방식 | 상태 |
+|---|---|---|
+| Jenkins | 서버(EC2)의 Jenkins 잡 `eumi-deploy` (https://k15b201.p.ssafy.io/jenkins/). 저장소는 프로젝트 액세스 토큰 `eumi-jenkins-read`(Reporter, `read_repository`)로 읽음. 웹훅(Settings > Webhooks): `https://k15b201.p.ssafy.io/jenkins/project/eumi-deploy`, Push events · 브랜치 `master`, SSL 검증, Secret token(값은 Jenkins에만) | 사용 중 (2026-10-31). 토큰 만료 2026-12-02 전에 인프라 담당이 교체 |
+| Jira | 커밋 본문과 MR 설명에 이슈 키를 적음 ([CONTRIBUTING 2장](../CONTRIBUTING.md#2-커밋-메시지)) | GitLab–Jira 연동(Settings > Integrations > Jira)이 켜져 있으면 Jira 이슈에 커밋이 자동으로 연결됨. 켜져 있는지 확인 필요 |
+
+## 5. 쓰지 않는 기능
+
+- GitLab 이슈 · 라벨 · 마일스톤: 일정과 이슈는 Jira로 관리합니다.
+
+## 6. 설정 이력
+
+| 날짜 | 내용 |
+|---|---|
+| 2026-10-26 | 초기 디렉터리 구조 · 협업 규칙 · 템플릿 (master, develop 생성) |
+| 2026-10-27 | Jenkins 연결 테스트용 `Jenkinsfile` (master) |
+| 2026-10-30 | backend · frontend 초기 프로젝트 병합, master의 `Jenkinsfile`을 develop에 반영, 기본 브랜치 develop, master · develop 보호 |
+| 2026-10-30 | 공통 규칙(버전, 로그인 결정 기록), 로컬 개발 DB(Flyway V1~V6, 계정 · 권한) 병합 |
+| 2026-10-30 | 개발 인원 4명 기준으로 협업 규칙 개편 (MR 리뷰, Jira, DB, 비밀값) |
+| 2026-10-31 | 운영 배포 파일(`infra/deploy` · `infra/scripts`) 병합, 이전 개인 토큰 대신 프로젝트 액세스 토큰 `eumi-jenkins-read` 발급, Jenkins 웹훅(Push events · `master`) 등록, develop → master 병합으로 자동 배포 시작 |

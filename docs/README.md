@@ -2,10 +2,11 @@
 
 | 문서 | 파일 | 상태 |
 |---|---|---|
-| 테이블 정의서 | - | 새 기능명세 기준으로 다시 작성 예정 |
-| ERD | - | 새 기능명세 기준으로 다시 작성 예정 |
-| API 명세 | - | 예정 |
-| AI 런타임 연동 API | [ai-runtime-api-20261029.md](ai-runtime-api-20261029.md) | 백엔드·AI 협의용 초안 |
+| 테이블 정의서 | - | 저장소 밖 팀 산출물 2.3.0. DB 기준은 `db/migration` |
+| ERD | - | 저장소 밖 팀 산출물. DB 기준은 `db/migration` |
+| API 계약 (OpenAPI) | [api/openapi.json](api/openapi.json) | 2.3.0 (11/2) |
+| AI 에이전트 패널 동작 | [api/ai-agent-panel.md](api/ai-agent-panel.md) | 확정 (11/2, A 방식) |
 | 저장소 초기 설정 | [gitlab-setup.md](gitlab-setup.md) | - |
+| 결정 기록: 로그인 방식 · 에이전트 흐름 전달 | [decisions/login-sse.md](decisions/login-sse.md) | 확정 (11/2 수정: 에이전트 흐름 SSE → 1초 조회) |
 
 문서를 고치면 파일 이름의 날짜를 바꾸고, 이전 판은 지워 최신 판만 남깁니다. (이전 판은 Git 기록에 남습니다.)

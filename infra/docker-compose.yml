@@ -1,0 +1,228 @@
+# ==========================================================================
+# 로컬 개발용 Compose (infra/ 폴더에서 실행)
+#   cp .env.example .env      → 처음 한 번
+#   docker compose up -d      → postgres + Flyway(스키마 · 권한 적용) + mailpit
+#   docker compose down       → 끄기 (-v를 붙이면 로컬 DB를 지우고 처음부터 다시 만든다)
+# 모든 포트는 127.0.0.1에만 연다.
+#
+# 데이터 파이프라인(MinIO · Kafka · Spark)은 profile "data"에 있어 데이터 파트만 켠다. 다른 파트는 위 명령 그대로.
+#   docker compose --profile data up -d --build   → 위 3개 + minio + kafka + spark (+ 버킷 · 토픽 생성)
+#   docker compose --profile data down            → 끌 때도 profile을 붙여야 파이프라인 컨테이너까지 내려간다
+# ==========================================================================
+name: eumi-dev
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?infra/.env가 필요합니다 (cp .env.example .env)}
+      # postgres-init/01-eumi-roles.sh가 계정을 만들 때 쓴다 (DB를 처음 만들 때 한 번만)
+      EUMI_OWNER_PASSWORD: ${EUMI_OWNER_PASSWORD}
+      EUMI_APP_PASSWORD: ${EUMI_APP_PASSWORD}
+      EUMI_PIPELINE_PASSWORD: ${EUMI_PIPELINE_PASSWORD}
+      EUMI_AI_PASSWORD: ${EUMI_AI_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+      - ../db/roles:/eumi/roles:ro
+    healthcheck:
+      # 127.0.0.1(TCP)로 확인해야 계정 만들기가 끝난 뒤에 healthy가 된다
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # db/migration(V 파일 + afterMigrate)과 db/seed(R__ 파일)를 eumi_owner로 적용하고 끝난다
+  flyway:
+    image: flyway/flyway:13.11.1
+    command: migrate
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/eumi
+      FLYWAY_USER: eumi_owner
+      FLYWAY_PASSWORD: ${EUMI_OWNER_PASSWORD}
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql,filesystem:/flyway/seed
+      FLYWAY_CONNECT_RETRIES: "10"
+    volumes:
+      - ../db/migration:/flyway/sql:ro
+      - ../db/seed:/flyway/seed:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 회원가입 인증 메일 · 임시 비밀번호 확인용 가짜 메일 서버
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "127.0.0.1:8025:8025"   # 메일함 화면
+      - "127.0.0.1:1025:1025"   # SMTP (Spring 메일 발송)
+
+  # ---------- 데이터 파이프라인 (profile: data) ----------
+
+  # 원본 · 생성 데이터 저장소 (S3 호환). API 9000. 이 빌드에는 내장 웹 콘솔이 없어 아래 s3manager(9001)로 본다
+  #   MinIO가 2025년에 커뮤니티 이미지 배포를 중단해(docker.io/minio, quay.io/minio 모두 삭제됨)
+  #   Bitnami가 마지막으로 빌드한 RELEASE.2025-07-23 이미지를 쓴다. 문제가 생기면 RustFS(rustfs/rustfs)가 대안.
+  minio:
+    image: bitnamilegacy/minio:2025.7.23-debian-12-r5
+    profiles: ["data"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?infra/.env에 MINIO_ROOT_USER가 필요합니다 (.env.example 참고)}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?infra/.env에 MINIO_ROOT_PASSWORD가 필요합니다 (.env.example 참고)}
+      MINIO_DEFAULT_BUCKETS: ${MINIO_BUCKET}     # 시작할 때 버킷을 만든다 (이미 있으면 넘어감)
+    ports:
+      - "127.0.0.1:9000:9000"   # S3 API
+    volumes:
+      - miniodata:/bitnami/minio/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # MinIO 버킷을 브라우저로 보는 웹 UI (http://localhost:9001). 저장하는 데이터는 없다
+  s3manager:
+    image: cloudlena/s3manager:v0.12.0
+    profiles: ["data"]
+    environment:
+      ENDPOINT: minio:9000
+      ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
+      SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
+      USE_SSL: "false"
+      REGION: us-east-1
+    ports:
+      - "127.0.0.1:9001:8080"
+    depends_on:
+      minio:
+        condition: service_healthy
+
+  # 메시지 큐 (KRaft 단일 노드). 호스트는 localhost:9092, 컨테이너 안에서는 kafka:19092
+  kafka:
+    image: apache/kafka:3.9.2
+    profiles: ["data"]
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"   # 토픽은 kafka-init이 만든다
+      KAFKA_LOG_RETENTION_HOURS: 168
+    ports:
+      - "127.0.0.1:9092:9092"
+    volumes:
+      - kafkadata:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:19092 --list >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 15s
+
+  # 토픽을 만들고 끝난다 (flow_hourly: 키 = grid_cd, 파티션 6)
+  kafka-init:
+    image: apache/kafka:3.9.2
+    profiles: ["data"]
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:19092 --create --if-not-exists \
+          --topic ${KAFKA_TOPIC_FLOW:-flow_hourly} --partitions 6 --replication-factor 1
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:19092 --describe --topic ${KAFKA_TOPIC_FLOW:-flow_hourly}
+
+  # Spark 3.5 (local[*]) + S3A · PostgreSQL JDBC · Kafka 커넥터 (infra/pipeline/Dockerfile)
+  #   잡 실행: docker compose --profile data exec pipeline spark-submit pipeline/<잡>.py
+  #   저장소의 data/ 폴더가 /opt/eumi/data 로 마운트된다. 실행 중인 잡의 UI는 http://localhost:4040
+  # ----- 데이터 파이프라인 실행 (Spark + Airflow, 이미지 하나). 모든 배치 · 스트리밍 스크립트는 이 컨테이너 안에서 돈다 -----
+  pipeline:
+    build: ./pipeline
+    image: eumi/pipeline:3.5.9-airflow2.10
+    profiles: ["data"]
+    environment: &pipeline-env
+      # S3A(hadoop-aws) · s3fs 가 읽는 MinIO 자격 증명. 엔드포인트는 spark-defaults.conf (http://minio:9000)
+      AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      KAFKA_BOOTSTRAP: kafka:19092
+      KAFKA_TOPIC_FLOW: ${KAFKA_TOPIC_FLOW:-flow_hourly}
+      PIPELINE_DB_URL: jdbc:postgresql://postgres:5432/eumi
+      PIPELINE_DB_USER: eumi_pipeline
+      PIPELINE_DB_PASSWORD: ${EUMI_PIPELINE_PASSWORD}
+      PIPELINE_DB_DSN: postgresql://eumi_pipeline:${EUMI_PIPELINE_PASSWORD}@postgres:5432/eumi
+      DATA_GO_KR_SERVICE_KEY: ${DATA_GO_KR_SERVICE_KEY:-}
+      KAKAO_REST_KEY: ${KAKAO_REST_KEY:-}
+      MODEL_VERSION: ${MODEL_VERSION:-v20261102}
+      TZ: Asia/Seoul
+      # Airflow (메타 DB 는 postgres 의 airflow DB, 태스크는 이 컨테이너 안에서 LocalExecutor 로)
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD}@postgres:5432/airflow
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/eumi/data/airflow/dags
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Seoul
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "false"
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+    ports:
+      - "127.0.0.1:4040:4040"   # Spark UI (잡이 돌 때만)
+    volumes: &pipeline-volumes
+      - ../data:/opt/eumi/data
+      - sparkcheckpoint:/opt/eumi/checkpoint
+      - airflowlogs:/opt/airflow/logs
+    working_dir: /opt/eumi/data
+    command: ["airflow", "scheduler"]
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+      minio:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  # Airflow 웹 UI http://localhost:8081 (계정은 .env 의 AIRFLOW_ADMIN_*)
+  pipeline-web:
+    image: eumi/pipeline:3.5.9-airflow2.10
+    profiles: ["data"]
+    environment: *pipeline-env
+    volumes: *pipeline-volumes
+    ports:
+      - "127.0.0.1:8081:8080"
+    command: ["airflow", "webserver"]
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+
+  # 메타 DB 마이그레이션 + 관리자 계정 (한 번 돌고 끝난다. 다시 실행해도 안전)
+  pipeline-init:
+    image: eumi/pipeline:3.5.9-airflow2.10
+    profiles: ["data"]
+    environment: *pipeline-env
+    volumes: *pipeline-volumes
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - airflow db migrate && airflow users create --username "${AIRFLOW_ADMIN_USER}" --password "${AIRFLOW_ADMIN_PASSWORD}" --firstname Eumi --lastname Admin --role Admin --email admin@eumi.local || true
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  miniodata:
+  kafkadata:
+  sparkcheckpoint:
+  airflowlogs:
