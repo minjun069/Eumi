@@ -1,8 +1,10 @@
 -- 인사이트 보고서 구조 변경 1단계: 그래프 3칸 고정 / PostgreSQL 17
 -- 2026-11-06 AI 담당자 회의 결정 ('Eumi ERD 변경 기록' > 위험 탐지 대시보드 > 11/6 인사이트 보고서 구조 변경)
 --   * 동·월마다 한 행. 퀵 인사이트 1개와 그래프 3개 · 그래프별 설명 3개를 칸으로 둔다 (그래프 수 3개 고정).
---   * 그래프 칸에는 AI가 고른 그래프 코드(V01~V08)를 넣는다. 화면은 코드로 Tableau 그래프를 찾아 임베딩한다.
---     DB는 형식(V + 숫자 2자리)만 검사하고, 허용 코드 목록은 백엔드가 확인한다. 그래프가 늘어도 DB는 그대로다.
+--   * 그래프 칸에는 AI가 고른 Tableau 시트 이름(EmbedDetailV01~EmbedDetailV08)을 그대로 넣는다.
+--     화면은 이 이름으로 Tableau 그래프(views/<워크북>/<시트 이름>)를 임베딩한다.
+--     DB는 주소에 넣을 수 있는 형식(영문으로 시작, 영문·숫자·밑줄)만 검사하고, 허용 시트 목록은 백엔드가 확인한다.
+--     그래프가 늘어도 DB는 그대로다. 저장된 값이 곧 시트 이름이므로 Tableau 시트 이름은 바꾸지 않는다.
 --   * 저장 주체가 AI에서 백엔드로 바뀐다. AI는 만든 보고서를 백엔드 API로 보내고, 백엔드가 저장한다.
 --     흐름: 월 데이터 적재 → 데이터 분석 파이프라인(검증까지) → 백엔드 확인 → AI에 생성 요청 → AI가 백엔드 API로 전달 → 저장
 --   * result_updated_at: 보고서를 만들 때 읽은 결과 행의 region_result.updated_at.
@@ -18,7 +20,7 @@
 --
 -- 규칙
 --   * 한 행은 새 형식 8칸이 모두 있거나, 8칸이 모두 비고 예전 형식(summary_lines · report)이 있어야 한다.
---   * 퀵 인사이트와 설명은 공백만으로 채울 수 없다. 그래프 코드는 'V' + 숫자 2자리, 3개가 서로 달라야 한다.
+--   * 퀵 인사이트와 설명은 공백만으로 채울 수 없다. 그래프 칸은 시트 이름 형식, 3개가 서로 달라야 한다.
 --   * 같은 동·월은 덮어쓴다. 결과(region_result)를 지우면 보고서도 함께 지워진다 (V5 FK 그대로).
 --
 -- 저장 (Spring). 결과 행의 updated_at이 AI가 보낸 값과 같을 때만 넣고, 같은 동·월은 덮어쓴다.
@@ -66,9 +68,11 @@ ALTER TABLE region_insight_report
     ADD CONSTRAINT ck_region_insight_report_text CHECK (
         quick_insight ~ '\S' AND desc_1 ~ '\S' AND desc_2 ~ '\S' AND desc_3 ~ '\S'
     ),
-    -- 그래프 코드 형식: 'V' + 숫자 2자리 (허용 목록은 백엔드)
-    ADD CONSTRAINT ck_region_insight_report_codes CHECK (
-        graph_1 ~ '^V[0-9]{2}$' AND graph_2 ~ '^V[0-9]{2}$' AND graph_3 ~ '^V[0-9]{2}$'
+    -- 그래프 칸 형식: Tableau 시트 이름 (영문으로 시작, 영문·숫자·밑줄. 허용 목록은 백엔드)
+    ADD CONSTRAINT ck_region_insight_report_sheets CHECK (
+        graph_1 ~ '^[A-Za-z][A-Za-z0-9_]*$'
+        AND graph_2 ~ '^[A-Za-z][A-Za-z0-9_]*$'
+        AND graph_3 ~ '^[A-Za-z][A-Za-z0-9_]*$'
     ),
     -- 같은 그래프를 두 칸에 넣지 않는다
     ADD CONSTRAINT ck_region_insight_report_graphs CHECK (
@@ -102,11 +106,11 @@ LEFT JOIN region_insight_report i
 -- 논리명 · 규칙
 COMMENT ON TABLE  region_insight_report IS '읍면동 인사이트 보고서 (동·월마다 하나, AI가 만들고 백엔드가 저장)';
 COMMENT ON COLUMN region_insight_report.quick_insight IS '퀵 인사이트 (읍면동 화면 위쪽 위험 설명 2~3줄)';
-COMMENT ON COLUMN region_insight_report.graph_1 IS '그래프 1 (AI가 고른 그래프 코드, V01~V08)';
+COMMENT ON COLUMN region_insight_report.graph_1 IS '그래프 1 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01)';
 COMMENT ON COLUMN region_insight_report.desc_1 IS '그래프 1 설명';
-COMMENT ON COLUMN region_insight_report.graph_2 IS '그래프 2 (AI가 고른 그래프 코드, V01~V08)';
+COMMENT ON COLUMN region_insight_report.graph_2 IS '그래프 2 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01)';
 COMMENT ON COLUMN region_insight_report.desc_2 IS '그래프 2 설명';
-COMMENT ON COLUMN region_insight_report.graph_3 IS '그래프 3 (AI가 고른 그래프 코드, V01~V08)';
+COMMENT ON COLUMN region_insight_report.graph_3 IS '그래프 3 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01)';
 COMMENT ON COLUMN region_insight_report.desc_3 IS '그래프 3 설명';
 COMMENT ON COLUMN region_insight_report.result_updated_at IS '기준 결과 수정 시각 (보고서를 만들 때 읽은 region_result.updated_at, 다르면 옛 보고서)';
 COMMENT ON COLUMN region_insight_report.summary_lines IS '퀵 인사이트 문장 목록 (예전 형식, 2단계에서 삭제)';
