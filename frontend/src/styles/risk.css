@@ -55,17 +55,23 @@
   min-width: 72px;
 }
 
+/* 왼쪽 열 ① 지도·②, 오른쪽 열 ③·⑤. 두 열의 아래 끝을 맞추려고 짧은 열의 마지막 패널이 남는 높이를 채운다
+   (11/5 기준 왼쪽이 35px 더 길다: 지도의 지표 버튼·안내 줄) */
 .risk-dashboard {
   display: grid;
   grid-template-columns: 664px minmax(0, 1fr);
   gap: 18px;
-  align-items: start;
 }
 
 .risk-column {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
   min-width: 0;
+}
+
+.risk-column > :last-child {
+  flex: 1;
 }
 
 /* 읍면동 화면에 있는 동안 숨겨 두는 시군구 화면 (RiskScreen).
@@ -179,16 +185,67 @@
   background: #fff;
 }
 
+/* 도구 모음을 숨기면 Tableau는 도구 모음 높이만큼 더 크게 띄우고 여기서 잘라 보인다 (TableauWorksheet).
+   hidden은 스크롤할 수 있는 상자라 지표 전환 때 Tableau가 포커스를 옮기면 27px 내려가 도구 모음이 드러난다. clip은 스크롤되지 않는다 */
 .tableau-host {
   display: flex;
   justify-content: center;
   width: 100%;
   min-width: 0;
+  overflow: clip;
 }
 
 .tableau-host tableau-viz {
   display: block;
   flex: none;
+}
+
+/* 대시보드 일부만 보일 때(⑥ 지도만): 틀은 보일 크기로 가운데에 두고, Tableau는 위·왼쪽으로 밀어 넣는다 (TableauWorksheet crop) */
+.tableau-host.is-cropped {
+  justify-content: flex-start;
+  margin: 0 auto;
+}
+
+.tableau-host.is-cropped tableau-viz {
+  margin: var(--crop-y) 0 0 var(--crop-x);
+}
+
+.risk-panel.is-tableau .grid-legend {
+  margin-left: 13px;
+}
+
+/* ⑥ 격자 지도의 색 범례 (RiskDongScreen GridLegend, 게시본 범례와 같은 색·범위) */
+.grid-legend {
+  display: grid;
+  grid-template-columns: 200px auto;
+  column-gap: 14px;
+  align-items: center;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.grid-legend-title {
+  grid-column: 1 / -1;
+  color: var(--text);
+}
+
+.grid-legend-bar {
+  height: 12px;
+  border: 1px solid #c9d1dc;
+  border-radius: 2px;
+}
+
+.grid-legend-scale {
+  display: flex;
+  grid-row: 3;
+  justify-content: space-between;
+}
+
+.grid-legend-note {
+  grid-row: 2;
+  grid-column: 2;
 }
 
 /* 확인 전·실패 때 Tableau를 덮는다 (숨기지 않고 덮어야 iframe이 느려지지 않는다) */
@@ -269,9 +326,10 @@
   margin-bottom: 2px;
 }
 
+/* 왼쪽 열(요약·⑥·퀵 인사이트)은 ⑥ 대시보드 폭 640px가 들어가게 메인 화면 왼쪽 열과 같은 664px */
 .risk-dong-body {
   display: grid;
-  grid-template-columns: 548px minmax(0, 1fr);
+  grid-template-columns: 664px minmax(0, 1fr);
   gap: 18px;
   align-items: start;
 }
@@ -383,10 +441,13 @@
   flex: 1;
 }
 
-/* 인사이트 보고서: 오른쪽 패널 안에서 스크롤 */
+/* 인사이트 보고서: 왼쪽 열 높이에 맞추고 패널 안에서 스크롤.
+   높이 0으로 행 높이에 끼어들지 않게 한 뒤 행(= 왼쪽 열) 높이만큼 늘린다 */
 
 .risk-report-panel {
-  max-height: 790px;
+  align-self: stretch;
+  height: 0;
+  min-height: 100%;
   overflow-y: auto;
 }
 

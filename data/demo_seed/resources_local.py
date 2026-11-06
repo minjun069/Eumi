@@ -1,0 +1,80 @@
+"""동 단위 가상 복지자원 (시연 기관이 고위험 동에서 직접 운영한다고 가정한 프로그램).
+
+실제 기관 · 사업이 아니다. 운영 기관명은 시연 기관 이름만 쓴다.
+대표 사례자(scenario_hero.py) 상담 기록에 나오는 프로그램과 이름을 맞춰, 사례자 → 자원 추천 흐름을 시연할 수 있게 한다.
+period_end 가 지난 자원은 화면에서 자동으로 '종료'로 보인다 (manual_status 는 담당자가 고른 값).
+"""
+
+GANGNAM_ORG = "이음이 강남 시연기관"
+CHUNCHEON_ORG = "이음이 춘천 시연기관"
+
+LOCAL_RESOURCES = [
+    # ---------- 강남구 ----------
+    dict(org="gangnam", dong="1168064000", name="중장년 남성 요리교실 '혼밥 탈출'",
+         target="역삼1동 거주 40~60대 1인가구 남성", ages=["중장년", "노년"], gender="남",
+         period=("2026-03-02", "2026-12-18"), fee=0, status="진행 중", capacity=12, participants=10, manager="demo1",
+         content="주 1회 2시간, 장보기부터 조리 · 정리까지 함께 하는 소그룹 요리교실. 만든 음식은 함께 먹고 남은 반찬은 나눠 간다. "
+                 "8회 과정 수료 후 참여자 자조모임으로 이어진다.",
+         apply="동주민센터 또는 시연기관 사례관리 담당자에게 전화 신청 (사례관리 대상자 우선)"),
+    dict(org="gangnam", dong="1168064000", name="이웃 안부 살피미",
+         target="역삼1동 고립 위험 1인가구 (중장년 · 어르신)", ages=["중장년", "노년"], gender="무관",
+         period=("2026-01-05", "2026-12-31"), fee=0, status="진행 중", capacity=40, participants=31, manager="demo2",
+         content="교육받은 주민 활동가가 주 1회 방문하거나 전화로 안부를 확인한다. 3일 이상 연락이 닿지 않으면 담당 사회복지사에게 바로 알린다.",
+         apply="사례관리 담당자가 대상자 동의를 받아 연계"),
+    dict(org="gangnam", dong="1168058000", name="주말 어르신 걷기 모임",
+         target="삼성1동 거주 65세 이상 어르신 (보행 보조기 사용 가능)", ages=["노년"], gender="무관",
+         period=("2026-04-04", "2026-11-28"), fee=0, status="진행 중", capacity=20, participants=14, manager="demo1",
+         content="매주 토요일 오전 봉은사로 일대 1시간 걷기와 스트레칭. 주말에 혼자 지내는 어르신의 외출과 이웃 만남을 돕는다. 비 오는 날은 경로당 실내 체조로 바꾼다.",
+         apply="전화 또는 경로당 방문 신청"),
+    dict(org="gangnam", dong="1168058000", name="한파 대비 어르신 쉼터",
+         target="삼성1동 난방 취약 어르신", ages=["노년"], gender="무관",
+         period=("2025-12-01", "2026-02-27"), fee=0, status="진행 중", capacity=30, participants=22, manager="demo1",
+         content="한파 특보 기간 경로당을 오후 9시까지 개방하고 따뜻한 차와 간식을 제공. 거동이 불편한 어르신은 전기요 · 방한용품을 전달한다.",
+         apply="동주민센터 또는 담당자 전화"),
+    dict(org="gangnam", dong="1168061000", name="청년 마음 쉼터 상담실",
+         target="대치2동 거주 · 생활권 19~39세 고립 · 은둔 청년과 그 가족", ages=["청년"], gender="무관",
+         period=("2026-01-12", "2026-12-23"), fee=0, status="진행 중", capacity=15, participants=9, manager="demo2",
+         content="메시지 상담으로 시작해 방문 상담, 소그룹 활동까지 단계별로 진행한다. 부모 대상 가족 상담(월 1회)을 함께 운영한다.",
+         apply="본인 또는 가족이 메시지 · 전화로 신청"),
+    dict(org="gangnam", dong="1168052100", name="중장년 재도약 자조모임",
+         target="논현1동 실직 · 이혼 등으로 고립된 40~64세", ages=["중장년"], gender="무관",
+         period=("2026-02-02", "2026-12-21"), fee=0, status="진행 중", capacity=12, participants=8, manager="demo1",
+         content="월 2회 저녁 모임. 구직 정보 나눔, 생활 리듬 점검, 정신건강복지센터 연계를 함께 한다.",
+         apply="사례관리 담당자 연계 또는 전화 신청"),
+    dict(org="gangnam", dong="1168075000", name="어르신 말벗 전화",
+         target="수서동 독거 어르신", ages=["노년"], gender="무관",
+         period=("2026-01-05", "2026-12-31"), fee=0, status="진행 중", capacity=50, participants=37, manager="demo2",
+         content="자원봉사자가 주 2회 정해진 시간에 전화해 안부와 건강을 확인하고 말벗이 되어 드린다.",
+         apply="동주민센터 또는 담당자 전화"),
+    # ---------- 춘천시 ----------
+    dict(org="chuncheon", dong="5111035000", name="마을 공동 밥상",
+         target="서면 거주 혼자 식사하는 어르신 · 중장년", ages=["중장년", "노년"], gender="무관",
+         period=("2026-03-03", "2026-12-29"), fee=0, status="진행 중", capacity=25, participants=21, manager="demo1",
+         content="주 3회 점심, 마을회관에서 함께 밥을 짓고 먹는다. 거동이 불편한 분께는 도시락을 배달한다.",
+         apply="이장 또는 시연기관 담당자에게 전화"),
+    dict(org="chuncheon", dong="5111034000", name="찾아가는 이동 목욕",
+         target="남면 거주 거동 불편 어르신", ages=["노년"], gender="무관",
+         period=("2026-01-06", "2026-12-15"), fee=0, status="진행 중", capacity=20, participants=16, manager="demo1",
+         content="목욕 차량이 월 2회 마을을 찾아가 목욕과 간단한 건강 확인을 한다.",
+         apply="생활지원사 또는 담당자 연계"),
+    dict(org="chuncheon", dong="5111040000", name="면 지역 병원 동행 차량",
+         target="남산면 거주 대중교통 이용이 어려운 어르신", ages=["노년"], gender="무관",
+         period=("2026-01-06", "2026-12-29"), fee=0, status="진행 중", capacity=30, participants=26, manager="demo2",
+         content="예약제로 시내 병원 · 약국까지 왕복 이동과 진료 동행을 지원한다 (주 2회 운행).",
+         apply="이용 3일 전까지 전화 예약"),
+    dict(org="chuncheon", dong="5111032000", name="마을회관 어르신 건강체조",
+         target="동산면 거주 65세 이상 어르신", ages=["노년"], gender="무관",
+         period=("2026-03-10", "2026-11-24"), fee=0, status="진행 중", capacity=25, participants=19, manager="demo1",
+         content="주 1회 마을회관에서 낙상 예방 체조와 혈압 측정. 끝난 뒤 다과를 나누며 서로 안부를 묻는다.",
+         apply="마을회관 현장 참여"),
+    dict(org="chuncheon", dong="5111038000", name="돌봄 가족 쉼 프로그램",
+         target="북산면 치매 · 거동 불편 가족을 돌보는 보호자", ages=["중장년", "노년"], gender="무관",
+         period=("2026-04-07", "2026-12-08"), fee=0, status="진행 중", capacity=10, participants=6, manager="demo2",
+         content="월 1회 보호자 모임과 1:1 상담. 모임 시간 동안 돌봄 대상자는 임시 돌봄을 받는다.",
+         apply="담당자 상담 후 연계"),
+    dict(org="chuncheon", dong="5111036000", name="여름 무더위 쉼터",
+         target="사북면 폭염 취약 어르신", ages=["노년"], gender="무관",
+         period=("2026-06-15", "2026-09-15"), fee=0, status="종료", capacity=30, participants=24, manager="demo1",
+         content="폭염 기간 마을회관을 냉방 쉼터로 운영하고 생수 · 쿨토시를 나눴다.",
+         apply="현장 이용"),
+]
