@@ -1,6 +1,7 @@
 """등록된 Tableau 표시 조건을 결정론적으로 검사한다. 외부 요청은 수행하지 않는다."""
 
 import json
+from collections.abc import Collection
 from datetime import date
 from hashlib import sha256
 from typing import Annotated, Literal, NotRequired
@@ -16,7 +17,7 @@ from pydantic import (
 )
 from typing_extensions import TypedDict
 
-from src.tools.tableau_catalog import Text, registered_catalog
+from src.tools.tableau_catalog import Text, registered_catalog, resolve_allowed_views
 
 
 @with_config(ConfigDict(extra="forbid", strict=True))
@@ -100,9 +101,12 @@ def _issue(code, path, message, requested, allowed=()) -> ValidationIssue:
     }
 
 
-def validate_visualization(request: VisualizationRequest) -> VisualizationResult:
+def validate_visualization(
+    request: VisualizationRequest, *, allowed_view_keys: Collection[str] = ()
+) -> VisualizationResult:
     """부적합도 검사 결과로 반환한다. 허용값 자동 보정·부분 적용은 하지 않는다."""
     catalog = registered_catalog()
+    allowed = resolve_allowed_views(allowed_view_keys)
     result: VisualizationResult = {
         "valid": False,
         "validation_scope": "registered_configuration",
@@ -126,19 +130,19 @@ def validate_visualization(request: VisualizationRequest) -> VisualizationResult
         return result
 
     key = request["view_key"]
-    view = catalog["views"].get(key)
-    if view is None:
+    if key not in allowed:
         issues.append(
             _issue(
-                "unknown_view",
+                "view_not_allowed",
                 "view_key",
-                "등록된 뷰를 선택하세요.",
+                "이번 실행에서 허용된 뷰를 선택하세요.",
                 key,
-                catalog["views"],
+                sorted(allowed),
             )
         )
         return result
 
+    view = catalog["views"][key]
     profile = catalog["input_profiles"][view["input_profile"]]
     definitions = profile["parameters"]
     parameters = {

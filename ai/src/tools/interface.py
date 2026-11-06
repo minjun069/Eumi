@@ -1,6 +1,6 @@
 """Python 도구를 LangChain의 표준 호출·모델 스키마에 연결한다."""
 
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 
 from langchain_core.tools import BaseTool, StructuredTool
 
@@ -8,15 +8,19 @@ from src.tools.process import process_adapter, process_data
 from src.tools.query import DataProvider, query_adapter, query_data
 from src.tools.render import render_adapter, render_visualization
 from src.tools.tableau import validate_visualization, visualization_adapter
+from src.tools.tableau_catalog import resolve_allowed_views
 
 
-def create_tools(providers: Mapping[str, DataProvider]) -> list[BaseTool]:
+def create_tools(
+    providers: Mapping[str, DataProvider], *, allowed_view_keys: Collection[str] = ()
+) -> list[BaseTool]:
     """호출별 권한 검사가 가능한 자료 공급자를 연결한 독립 도구 목록을 만든다.
 
     입력 JSON 스키마와 실제 검증은 같은 TypedDict/TypeAdapter에서 가져온다.
     자동 재시도, 작업 이력, 공개 산출물 등록은 이 인터페이스의 책임이 아니다.
     """
     registered = dict(providers)
+    allowed_views = resolve_allowed_views(allowed_view_keys)
 
     def query(**arguments):
         return query_data(arguments, registered)
@@ -28,14 +32,27 @@ def create_tools(providers: Mapping[str, DataProvider]) -> list[BaseTool]:
         return render_visualization(arguments)
 
     def validate_tableau(**arguments):
-        return validate_visualization(arguments)
+        return validate_visualization(arguments, allowed_view_keys=allowed_views)
+
+    def input_schema(name, adapter):
+        schema = adapter.json_schema()
+        if name == "validate_visualization":
+            view = schema["properties"]["view_key"]
+            view["description"] = "이번 실행에서 호출 측이 허용한 뷰 ID"
+            if allowed_views:
+                view["enum"] = sorted(allowed_views)
+            else:
+                view["description"] = (
+                    "이번 실행에는 허용된 뷰가 없어 모든 호출이 거부됩니다."
+                )
+        return schema
 
     return [
         StructuredTool.from_function(
             func=fn,
             name=name,
             description=description,
-            args_schema=adapter.json_schema(),
+            args_schema=input_schema(name, adapter),
             metadata={"retry_safe": True},
         )
         for name, fn, adapter, description in (

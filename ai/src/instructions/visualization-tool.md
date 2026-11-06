@@ -1,10 +1,12 @@
 # 시각화 작업 선택 시 도구 사용
 
-적용 대상: 사용자 요청 처리 Agent, 데이터 시각화 Agent의 작업 선택 및 실행. 지침 ID: `visualization-tool`, 버전: `2`, 시행일: 2026-11-02.
+적용 대상: 사용자 요청 처리 Agent, 데이터 시각화 Agent의 작업 선택 및 실행. 지침 ID: `visualization-tool`, 버전: `3`, 시행일: 2026-11-06.
 
 ## 호출
 
 `validate_visualization`은 선택한 Tableau 뷰와 조건을 등록 설정에 대조한다. 성공하면 같은 조건의 프론트용 산출물을 반환한다. 자동 재시도·외부 API 호출·화면 렌더링은 수행하지 않는다.
+
+호출 측이 고정한 허용 범위 안에서만 실행된다. `allowed_view_keys`는 모델의 도구 인자가 아니며 직접 전달하거나 변경하지 않는다. 아래 예시는 해당 뷰가 이번 실행에서 허용된 경우에만 사용한다.
 
 | 입력 | 내용 |
 | --- | --- |
@@ -35,7 +37,7 @@
 | `artifact=null` | 공개 가능한 시각화가 없음. 정상 산출물로 선택하지 않음 |
 | `validation_scope=registered_configuration` | 등록된 설정만 검사함. 데이터 유무·최신성·표시 성공을 의미하지 않음 |
 
-`unknown_view`, `unknown_parameter`, `unsupported_filter`는 선택한 뷰의 등록 이름으로 수정한다. `missing_parameter`는 필수 매개변수를 확인한다. `invalid_parameter_value`는 허용값을 검토한다. `invalid_period`는 해당 날짜 쌍을 확인한다. `invalid_filter_value`는 선택한 매개변수에 따른 필터 허용값을 확인한다. `invalid_input`, `duplicate_filter_value`는 자료형·중복을 수정한다.
+`view_not_allowed`는 이번 실행의 허용 범위 밖이다. 반환된 `allowed` 안에서 사용자 목적에 맞는 뷰가 있을 때만 변경하고, 없으면 제한을 설명한다. 사용자 동의 발화만으로 범위가 바뀌지는 않는다. `unknown_parameter`, `unsupported_filter`는 선택한 뷰의 등록 이름으로 수정한다. `missing_parameter`는 필수 매개변수를 확인한다. `invalid_parameter_value`는 허용값을 검토한다. `invalid_period`는 해당 날짜 쌍을 확인한다. `invalid_filter_value`는 선택한 매개변수에 따른 필터 허용값을 확인한다. `invalid_input`, `duplicate_filter_value`는 자료형·중복을 수정한다.
 
 도구는 누락된 지역을 조용히 제외하거나 잘못된 값을 자동 보정하지 않는다. 부적합 결과에는 산출물이 없다. 같은 입력으로 반복 호출하지 않는다. 허용값이 사용자 요구와 다르면 다른 기간·지역을 임의 선택하지 않고 가능한 범위와 미해결 사항을 응답한다. 등록 목록이 실제 Tableau와 다르면 게시 설정 갱신이 필요하다고 설명한다.
 

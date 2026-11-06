@@ -1,5 +1,6 @@
 """Tableau 등록 명세와 등록 시 일관성 검사. 모델 입력과 검증의 공통 원본."""
 
+from collections.abc import Collection
 from copy import deepcopy
 from datetime import date
 from functools import cache
@@ -176,3 +177,16 @@ def registered_catalog() -> TableauCatalog:
 def visualization_catalog() -> TableauCatalog:
     """등록 설정을 외부에 제공할 때 캐시 원본을 보호한다."""
     return deepcopy(registered_catalog())
+
+
+def resolve_allowed_views(allowed_view_keys: Collection[str] = ()) -> frozenset[str]:
+    """호출 측의 실행 범위를 고정한다. 생략은 전체 허용으로 해석하지 않는다."""
+    if not isinstance(allowed_view_keys, (list, tuple, set, frozenset)) or any(
+        not isinstance(key, str) or not key.strip() for key in allowed_view_keys
+    ):
+        raise ValueError("allowed_view_keys는 뷰 ID 목록이어야 합니다")
+    keys = frozenset(allowed_view_keys)
+    unknown = keys - registered_catalog()["views"].keys()
+    if unknown:
+        raise ValueError(f"allowed_view_keys의 미등록 뷰: {sorted(unknown)}")
+    return keys

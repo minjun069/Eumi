@@ -1,12 +1,18 @@
 """검토한 시각화 지침을 파일에서 읽는다. 유사도 검색 없이 항상 같은 원문을 제공한다."""
 
+from collections.abc import Collection
 from copy import deepcopy
 from pathlib import Path
 from typing import NotRequired
 
 from typing_extensions import TypedDict
 
-from src.tools.tableau_catalog import DateOrder, ParameterDefinition, registered_catalog
+from src.tools.tableau_catalog import (
+    DateOrder,
+    ParameterDefinition,
+    registered_catalog,
+    resolve_allowed_views,
+)
 
 
 class Guides(TypedDict):
@@ -53,9 +59,12 @@ def load_visualization_instructions() -> Guides:
     }
 
 
-def visualization_context(state, *, include_inputs: bool) -> VisualizationContext:
+def visualization_context(
+    state, *, include_inputs: bool, allowed_view_keys: Collection[str] = ()
+) -> VisualizationContext:
     """선택 목록과 입력 프로필을 공유하고 확인된 매개변수의 필터 값만 상세 제공한다."""
     catalog = registered_catalog()
+    allowed = resolve_allowed_views(allowed_view_keys)
     context: VisualizationContext = {
         "views": {
             key: {
@@ -63,13 +72,14 @@ def visualization_context(state, *, include_inputs: bool) -> VisualizationContex
                 for name in ("title", "purpose", "limitations", "input_profile")
             }
             for key, view in catalog["views"].items()
+            if key in allowed
         }
     }
     if not include_inputs:
         return context
 
     context["input_profiles"] = {}
-    for name in sorted({v["input_profile"] for v in catalog["views"].values()}):
+    for name in sorted({v["input_profile"] for v in context["views"].values()}):
         profile = catalog["input_profiles"][name]
         context["input_profiles"][name] = {
             "parameters": deepcopy(profile["parameters"]),
@@ -104,7 +114,7 @@ def visualization_context(state, *, include_inputs: bool) -> VisualizationContex
     collect(state)
     context["selected"] = {}
     for key, requested in selections.items():
-        if key not in catalog["views"] or not isinstance(requested, dict):
+        if key not in allowed or not isinstance(requested, dict):
             continue
         profile = catalog["input_profiles"][catalog["views"][key]["input_profile"]]
         parameters = {

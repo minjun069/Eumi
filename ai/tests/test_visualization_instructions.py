@@ -1,7 +1,14 @@
 """선택 단계의 입력량을 줄이면서 필요한 조건·후속 작업 정보를 보존한다."""
 
+from functools import partial
+
 from src.tools.tableau import validate_visualization
+from src.tools.tableau_catalog import visualization_catalog
 from src.visualization_instructions import visualization_context
+
+ALL_VIEWS = tuple(visualization_catalog()["views"])
+validate_visualization = partial(validate_visualization, allowed_view_keys=ALL_VIEWS)
+visualization_context = partial(visualization_context, allowed_view_keys=ALL_VIEWS)
 
 
 def test_interpretation_receives_only_selection_descriptions():

@@ -5,7 +5,7 @@ from copy import deepcopy
 import pytest
 from pydantic import ValidationError
 
-from src.tools import tableau
+from src.tools import tableau, tableau_catalog
 from src.tools.tableau_catalog import validate_catalog, visualization_catalog
 
 
@@ -36,11 +36,18 @@ def catalog():
 def install(monkeypatch, catalog):
     validated = validate_catalog(catalog)
     monkeypatch.setattr(tableau, "registered_catalog", lambda: validated)
+    monkeypatch.setattr(tableau_catalog, "registered_catalog", lambda: validated)
+
+
+def validate_visualization(request):
+    return tableau.validate_visualization(
+        request, allowed_view_keys=tuple(tableau.registered_catalog()["views"])
+    )
 
 
 def test_different_workbook_and_filter_types_share_one_validator(monkeypatch, catalog):
     install(monkeypatch, catalog)
-    result = tableau.validate_visualization(
+    result = validate_visualization(
         {
             "view_key": "AgeGroups",
             "parameters": {"measure": "ratio"},
@@ -55,7 +62,7 @@ def test_different_workbook_and_filter_types_share_one_validator(monkeypatch, ca
     ]
     assert {f["worksheet"] for f in data["filters"]} == {"연령별 수", "연령별 비율"}
     assert all(f["values"] == ["노년"] for f in data["filters"])
-    assert tableau.validate_visualization({"view_key": "Embed01RiskMap"})["valid"]
+    assert validate_visualization({"view_key": "Embed01RiskMap"})["valid"]
 
 
 @pytest.mark.parametrize(
@@ -75,7 +82,7 @@ def test_different_workbook_and_filter_types_share_one_validator(monkeypatch, ca
 )
 def test_selected_view_exclusively_owns_inputs(monkeypatch, catalog, arguments, code):
     install(monkeypatch, catalog)
-    result = tableau.validate_visualization({"view_key": "AgeGroups"} | arguments)
+    result = validate_visualization({"view_key": "AgeGroups"} | arguments)
     assert not result["valid"] and result["artifact"] is None
     assert result["issues"][0]["code"] == code
 
@@ -88,7 +95,7 @@ def test_view_without_any_parameters_or_filters(monkeypatch, catalog):
     }
     catalog["views"]["AgeGroups"]["filter_targets"] = {}
     install(monkeypatch, catalog)
-    result = tableau.validate_visualization({"view_key": "AgeGroups"})
+    result = validate_visualization({"view_key": "AgeGroups"})
     assert result["valid"]
     assert result["artifact"]["data"]["parameters"] == []
     assert result["artifact"]["data"]["filters"] == []
@@ -105,10 +112,10 @@ def test_only_declared_date_order_is_checked(monkeypatch, catalog):
         "parameters": {"from_date": "2025-06-01", "to_date": "2025-01-01"},
     }
     install(monkeypatch, catalog)
-    assert tableau.validate_visualization(request)["valid"]
+    assert validate_visualization(request)["valid"]
     profile["date_orders"] = [{"start": "from_date", "end": "to_date"}]
     install(monkeypatch, catalog)
-    result = tableau.validate_visualization(request)
+    result = validate_visualization(request)
     assert result["issues"][0]["code"] == "invalid_period"
     assert result["issues"][0]["requested"] == request["parameters"]
 

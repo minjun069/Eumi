@@ -2,6 +2,7 @@
 
 import json
 from copy import deepcopy
+from functools import partial
 
 import pytest
 from pydantic import TypeAdapter
@@ -12,6 +13,10 @@ from src.tools.tableau import (
     validate_visualization,
 )
 from src.tools.tableau_catalog import visualization_catalog
+
+validate_visualization = partial(
+    validate_visualization, allowed_view_keys=tuple(visualization_catalog()["views"])
+)
 
 
 def request(**overrides):
@@ -66,7 +71,7 @@ def test_all_registered_views_and_defaults(view_key):
 @pytest.mark.parametrize(
     "overrides,code,path",
     [
-        ({"view_key": "https://example.com/arbitrary"}, "unknown_view", "view_key"),
+        ({"view_key": "https://example.com/arbitrary"}, "view_not_allowed", "view_key"),
         ({"parameters": {"month": "2025-12"}}, "unknown_parameter", "parameters.month"),
         (
             {"parameters": {"p_city": "99999"}},
