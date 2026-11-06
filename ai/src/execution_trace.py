@@ -36,6 +36,7 @@ _recorder: ContextVar = ContextVar("execution_recorder", default=None)
 _span: ContextVar = ContextVar("execution_span", default=None)
 SECRET_FIELDS = {
     "api_key",
+    "database_url",
     "authorization",
     "x-api-key",
     "x-goog-api-key",

@@ -57,7 +57,11 @@ NODE_INSTRUCTIONS = {
         " 보존한다."
     ),
     "Selection": (
-        "작업 선택 및 실행 단계다. request 역할은 전문 Agent를 "
+        "작업 선택 단계다. 제공된 도구 명세는 실행기가 호출할 수 있는 작업 목록이다. "
+        "모델은 직접 도구를 호출하지 않고, 선택한 작업을 응답의 name과 "
+        "arguments_json에 작성한다. 실행기가 이 JSON을 읽어 실제 호출한다. "
+        "따라서 직접 함수 호출이 비활성인 것과 작업을 사용할 수 없는 것은 다르다. "
+        "request 역할은 전문 Agent를 "
         "호출하고, 전문 역할은 필요한 도구를 사용한다. "
         "interpretation 역할은 "
         "query_data/process_data만 호출한다. 비교표는 응답 "
