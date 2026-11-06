@@ -5,10 +5,12 @@
 GRANT USAGE ON SCHEMA public TO eumi_app, eumi_pipeline, eumi_ai;
 GRANT USAGE ON SCHEMA analysis TO eumi_pipeline, eumi_ai;
 
--- Spring: public 읽기·쓰기. 파이프라인·AI가 쓰는 테이블은 읽기만. Flyway 이력과 analysis는 접근 불가
+-- Spring: public 읽기·쓰기. 파이프라인이 쓰는 테이블은 읽기만. Flyway 이력과 analysis는 접근 불가
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO eumi_app;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO eumi_app;
-REVOKE INSERT, UPDATE, DELETE ON dim_region, region_result, region_insight_report FROM eumi_app;
+REVOKE INSERT, UPDATE, DELETE ON dim_region, region_result FROM eumi_app;
+--   인사이트 보고서: AI가 보낸 보고서를 Spring이 저장·덮어쓴다 (2026-11-06). 삭제는 결과를 지울 때 FK가 함께 한다
+REVOKE DELETE ON region_insight_report FROM eumi_app;
 REVOKE ALL ON flyway_schema_history FROM eumi_app;
 
 -- 파이프라인: analysis 읽기·쓰기, public은 dim_region(UPSERT)·region_result만
@@ -18,11 +20,12 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA analysis TO eumi_pipeline;
 GRANT SELECT, INSERT, UPDATE ON dim_region TO eumi_pipeline;
 GRANT SELECT, INSERT, UPDATE, DELETE ON region_result TO eumi_pipeline;
 
--- AI: analysis 읽기, public은 지역·결과·복지자원 조회만, 인사이트 보고서는 저장까지, AI 대화 메시지는 읽기·추가
+-- AI: analysis 읽기, public은 지역·결과·복지자원·인사이트 보고서 조회만, AI 대화 메시지는 읽기·추가
 --   회원·사례자·상담 기록·로그인 세션은 권한 없음 (사례자 정보는 Spring이 가려서 넘긴다)
 GRANT SELECT ON ALL TABLES IN SCHEMA analysis TO eumi_ai;
-GRANT SELECT ON dim_region, v_sido, v_sigungu, region_result, v_resource_summary TO eumi_ai;
-GRANT SELECT, INSERT, UPDATE ON region_insight_report TO eumi_ai;
+GRANT SELECT ON dim_region, v_sido, v_sigungu, region_result, v_resource_summary, region_insight_report TO eumi_ai;
+--   인사이트 보고서는 백엔드 API로 보내고 DB에 직접 쓰지 않는다 (2026-11-06). 예전에 준 저장 권한을 거둔다
+REVOKE INSERT, UPDATE, DELETE ON region_insight_report FROM eumi_ai;
 --   AI 대화: 이전 대화와 이번 질문을 읽고 진행·완료·실패·취소 행을 추가만 한다 (수정·삭제 불가)
 --   대화 행(ai_conversation)의 실행 종료 일시·삭제 예정일은 ai_message 트리거가 갱신하므로 권한이 필요 없다
 GRANT SELECT, INSERT ON ai_message TO eumi_ai;

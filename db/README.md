@@ -25,9 +25,9 @@ Spring Boot · FastAPI · 데이터 파이프라인이 같은 DB(`eumi`)를 쓰�
 | 계정 | 쓰는 곳 | 권한 요약 |
 |---|---|---|
 | `eumi_owner` | Flyway | 모든 테이블 소유. 앱 코드에서는 쓰지 않음 |
-| `eumi_app` | Spring Boot | public 읽기 · 쓰기 (`dim_region` · `region_result` · `region_insight_report`는 읽기만). analysis와 Flyway 이력은 접근 불가 |
+| `eumi_app` | Spring Boot | public 읽기 · 쓰기 (`dim_region` · `region_result`는 읽기만, `region_insight_report`는 삭제 없이 저장 · 덮어쓰기). analysis와 Flyway 이력은 접근 불가 |
 | `eumi_pipeline` | 데이터 파이프라인 | analysis 읽기 · 쓰기 · 삭제. public은 `dim_region` 넣기 · 수정, `region_result` 읽기 · 쓰기 · 삭제 |
-| `eumi_ai` | FastAPI | analysis 읽기. public은 지역 · 결과 · 복지자원 조회와 `region_insight_report` 저장. 회원 · 사례자 · 상담 기록은 접근 불가 |
+| `eumi_ai` | FastAPI | analysis 읽기. public은 지역 · 결과 · 복지자원 · `region_insight_report` 조회와 `ai_message` 추가. 인사이트 보고서는 백엔드 API로 보냄. 회원 · 사례자 · 상담 기록은 접근 불가 |
 
 - 권한은 `migration/afterMigrate.sql`이 마이그레이션마다 다시 적용합니다. 새 테이블은 자동으로 기본 권한을 받으므로, 예외(읽기만 등)만 이 파일에 추가합니다.
 - `afterMigrate.sql`은 버전 파일이 아니어서 병합 후에도 고칠 수 있고, 다음 `migrate` 때 다시 적용됩니다.
