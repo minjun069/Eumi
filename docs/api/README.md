@@ -6,8 +6,8 @@
 |---|---|---|
 | [openapi.json](openapi.json) | 화면 API의 요청 · 응답 · 오류 형식. FE 타입은 이 파일에서 만든다(`npm run gen:api`). 내부 연동 목록은 `x-internal-ai-api`에 있다 | 버전은 파일의 `info.version` |
 | [공통_응답_및_세션_규칙.md](공통_응답_및_세션_규칙.md) | API 전체 공통 규칙: 응답 형식, 오류 코드, 세션 · CSRF, 입력값, 검색 · 페이지, 권한. openapi.json의 작업 설명이 이 문서를 가리킨다 | 확정 (11/7 정리) |
-| [ai-agent-panel.md](ai-agent-panel.md) | AI 패널: `ai_message` 행 형식, 질문 · 조회 · 취소, BE ↔ AI 실행 요청, 질문 마스킹 범위 | 확정 (11/2). 11/6 결정은 연동 계약 MR에서 반영 |
-| [insight-report.md](insight-report.md) | 인사이트 보고서: 파이프라인 → BE → AI 흐름, 보고서 저장, 허용 시트 | 초안 (11/6). 연동 계약 MR에서 확정본으로 바꾼다 |
+| [ai-agent-panel.md](ai-agent-panel.md) | AI 패널: `ai_message` 행 형식, 질문 · 조회 · 취소, BE ↔ AI 실행 요청, 질문 마스킹 범위 | 확정 (11/2). 11/6 결정은 [변경 계획](../work-ref/내부_연동_변경_계획.md)의 구현이 끝나면 반영 |
+| [insight-report.md](insight-report.md) | 인사이트 보고서: 파이프라인 → BE → AI 흐름, 보고서 저장, 허용 시트 | 초안 (11/6). [변경 계획](../work-ref/내부_연동_변경_계획.md)의 구현이 끝나면 확정본으로 바꾼다 |
 
 ## 규칙
 
