@@ -24,7 +24,7 @@ Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. 공통 기
 - [AI1 수집 항목 기준 마스킹 범위 축소·계약 인계](docs/ai1/2026-11-03_masking-scope.md)
 - [협업 규칙](../CONTRIBUTING.md), [인증 결정](../docs/decisions/login-sse.md), [로컬 DB·메일](../infra/README.md)
 
-최종 API 계약은 이 작업 폴더의 [docs/api/openapi.json](../docs/api/openapi.json)이다 (버전은 파일의 `info.version`). AI는 [ai-agent-panel.md](../docs/api/ai-agent-panel.md)의 A 방식이 기준이다. [docs/work-ref](../docs/work-ref/README.md)의 `공통_응답_및_세션_규칙.md`와 `구현_트랜잭션_가이드.md`(작업 참고 사본)도 함께 읽되, 폐기된 SSE·AI 실행 계약을 적용하지 않는다. G1 문서에 남아 있는 2.2.0·과거 브랜치 안내는 당시의 기록이다.
+최종 API 계약은 이 작업 폴더의 [docs/api/openapi.json](../docs/api/openapi.json)이다 (버전은 파일의 `info.version`). AI는 [ai-agent-panel.md](../docs/api/ai-agent-panel.md)의 A 방식이 기준이다. [공통_응답_및_세션_규칙.md](../docs/api/공통_응답_및_세션_규칙.md)(API 공통 계약)와 [docs/work-ref](../docs/work-ref/README.md)의 `구현_트랜잭션_가이드.md`(작업 참고)도 함께 읽되, 폐기된 SSE·AI 실행 계약을 적용하지 않는다. G1 문서에 남아 있는 2.2.0·과거 브랜치 안내는 당시의 기록이다.
 
 ## 로컬 실행
 
