@@ -4,6 +4,8 @@ Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. 공통 기
 
 ## 먼저 읽을 기록
 
+아래는 작성 당시의 작업 · 인계 기록이다. 현재 기준은 [docs/spec](../docs/spec/README.md)(테이블 정의서 · API 명세 · 기능명세), [docs/api](../docs/api/)(연동 계약), [docs/decisions](../docs/decisions/)(결정 기록)이며, 기록의 내용이 이와 다르면 기준 문서를 따른다.
+
 - [11월 1일 재개 안내와 운영 설정 검토 사항](docs/g1/2026-11-01_이어가기.md)
 - [G1 현재 범위와 인계](docs/g1/README.md)
 - [G1 구현 결정](docs/g1/decisions.md)
@@ -22,11 +24,11 @@ Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. 공통 기
 - [AI1 수집 항목 기준 마스킹 범위 축소·계약 인계](docs/ai1/2026-11-03_masking-scope.md)
 - [협업 규칙](../CONTRIBUTING.md), [인증 결정](../docs/decisions/login-sse.md), [로컬 DB·메일](../infra/README.md)
 
-최종 API 계약은 이 작업 폴더의 [docs/api/openapi.json](../docs/api/openapi.json) 2.3.0이다. AI는 [ai-agent-panel.md](../docs/api/ai-agent-panel.md)의 A 방식이 기준이다. [docs/work-ref](../docs/work-ref/README.md)의 `공통_응답_및_세션_규칙.md`와 `구현_트랜잭션_가이드.md`(작업 참고 사본)도 함께 읽되, 폐기된 SSE·AI 실행 계약을 적용하지 않는다. G1 문서에 남아 있는 2.2.0·과거 브랜치 안내는 당시의 기록이다.
+최종 API 계약은 이 작업 폴더의 [docs/api/openapi.json](../docs/api/openapi.json)이다 (버전은 파일의 `info.version`). AI는 [ai-agent-panel.md](../docs/api/ai-agent-panel.md)의 A 방식이 기준이다. [docs/work-ref](../docs/work-ref/README.md)의 `공통_응답_및_세션_규칙.md`와 `구현_트랜잭션_가이드.md`(작업 참고 사본)도 함께 읽되, 폐기된 SSE·AI 실행 계약을 적용하지 않는다. G1 문서에 남아 있는 2.2.0·과거 브랜치 안내는 당시의 기록이다.
 
 ## 로컬 실행
 
-공용 PostgreSQL·Mailpit은 사용자가 `eumi-infra`에서 준비한다. 에이전트는 Docker Compose를 실행하지 않는다. 현재 공용 DB에는 V20261102_02까지 적용돼 있다. backend 폴더에서 실행한다.
+공용 PostgreSQL·Mailpit은 사용자가 `eumi-infra`에서 준비한다. 에이전트는 Docker Compose를 실행하지 않는다. backend 폴더에서 실행한다.
 
 ```powershell
 .\gradlew.bat bootRun
@@ -85,7 +87,7 @@ psql -h localhost -p 5432 -U eumi_app -d eumi -W -v ON_ERROR_STOP=1 -1 -f ../db/
 
 ## 환경변수
 
-AI1은 local에서 기본 `eumi.ai.mode=fake`다. prod는 `EUMI_AI_MODE`를 반드시 명시하고 운영 Compose가 해당 변수를 전달해야 한다. 시연은 fake, 실제 AI 전환은 http를 선택한다. HTTP 모드에는 AI 실행 제한·BE 여유·무응답 판정·취소 대기를 모두 명시해야 한다. 현재 실제 AI 실행 제한은 미확정이며 Fake 기본값은 개발 검증용이다. 설정 표와 `EUMI_AI_*` 변수는 [AI1 인계](docs/ai1/README.md)를 참고한다.
+AI1은 local에서 기본 `eumi.ai.mode=fake`다. prod는 `EUMI_AI_MODE`를 반드시 명시하고 운영 Compose가 해당 변수를 전달해야 한다. 시연은 fake, 실제 AI 전환은 http를 선택한다. HTTP 모드에는 AI 실행 제한·BE 여유·무응답 판정·취소 대기를 모두 명시해야 한다. 시간 값은 [ai-agent-panel.md](../docs/api/ai-agent-panel.md)의 계약을 따르고, 숫자는 AI 담당 확인 후 정한다. Fake 기본값은 개발 검증용이다. 설정 표와 `EUMI_AI_*` 변수는 [AI1 인계](docs/ai1/README.md)를 참고한다.
 
 | 이름 | 용도 | local 기본 | prod |
 |---|---|---|---|
@@ -107,7 +109,7 @@ SMTP 연결·읽기·쓰기 타임아웃은 각 5000ms다. prod는 필수 값의
 
 ## 기능별 연결 경계
 
-- 일반 JSON 성공은 `ApiResponse.of(data, request)`를 사용한다. Health와 204, SSE·파일 응답을 감싸지 않는다.
+- 일반 JSON 성공은 `ApiResponse.of(data, request)`를 사용한다. Health와 204, 파일 응답을 감싸지 않는다.
 - 업무 오류는 안정적인 코드와 필드 오류를 사용한다. 응답·로그에 암호·코드·가입 증명·SQL·예외 원문을 넣지 않는다.
 - A1은 활성 회원·암호·임시 암호 만료를 확인한 뒤 `SessionAuthenticationSupport.establish`를 호출한다. member_id 문자열 principal, 세션 ID 교체, 명시적 SecurityContext 저장과 기존 CSRF 정리를 수행한다. 회원 없음·탈퇴·암호 불일치·임시 암호 만료는 동일한 `INVALID_CREDENTIALS` 401이다.
 - 로그인 해시 비교는 트랜잭션 밖에서 실행하고 `/auth/me`의 최신 프로필 조회에만 읽기 전용 트랜잭션을 지정한다.
