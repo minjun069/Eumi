@@ -1,0 +1,195 @@
+{
+  "version": "3.2.0",
+  "revisedAt": "2026-11-05",
+  "defaultMapIndex": "risk",
+  "source": "frontend/src/tableau/tableauConfig.ts",
+  "embeddingApi": "v3",
+  "moduleUrl": "https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js",
+  "workbook": {
+    "name": "eumi_tableau_main_dashboard_v_master",
+    "baseUrl": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v_master",
+    "author": "jiseok.lee"
+  },
+  "published": {
+    "sigunguCodes": [
+      "11680",
+      "51110"
+    ],
+    "months": [
+      "2025-07",
+      "2025-08",
+      "2025-09",
+      "2025-10",
+      "2025-11",
+      "2025-12"
+    ]
+  },
+  "parameters": [
+    {
+      "name": "p_city",
+      "type": "string",
+      "meaning": "시군구 코드 5자리"
+    },
+    {
+      "name": "p_start",
+      "type": "date",
+      "meaning": "시작 월 1일 (②)"
+    },
+    {
+      "name": "p_end",
+      "type": "date",
+      "meaning": "종료 월 = 기준 월 1일 (①②③⑤)"
+    },
+    {
+      "name": "p_detail_adm",
+      "type": "string",
+      "meaning": "상세 워크북 전용. '시군구명 행정동명' (예: '강남구 역삼1동'), 행정동 코드 아님. 허용 값 목록과 글자가 같아야 한다"
+    }
+  ],
+  "filters": [],
+  "dongField": "읍면동 코드",
+  "productionViews": [
+    {
+      "id": "1",
+      "index": "risk",
+      "dashboard": "Embed01RiskMap",
+      "worksheet": "① 지도 · 종합 위험도",
+      "size": "640x440",
+      "state": "connected"
+    },
+    {
+      "id": "1",
+      "index": "background",
+      "dashboard": "Embed01VulnerabilityMap",
+      "worksheet": "① 지도 · 배경 취약성",
+      "size": "640x440",
+      "state": "connected"
+    },
+    {
+      "id": "1",
+      "index": "behavior",
+      "dashboard": "Embed01BehaviorMap",
+      "worksheet": "① 지도 · 행동 이상",
+      "size": "640x440",
+      "state": "connected"
+    },
+    {
+      "id": "2",
+      "dashboard": "Embed02RiskDistribution",
+      "worksheet": "② 월별 종합 위험도 단계 분포",
+      "size": "640x240",
+      "state": "connected"
+    },
+    {
+      "id": "3",
+      "dashboard": "Embed03Vulnerability",
+      "worksheet": "③ 읍면동별 배경 취약성 분포",
+      "size": "430x200",
+      "state": "connected"
+    },
+    {
+      "id": "5",
+      "dashboard": "Embed05BehaviorChange",
+      "worksheet": "⑤ 읍면동별 전월 대비 행동 변화",
+      "size": "430x480",
+      "state": "connected"
+    },
+    {
+      "id": "6",
+      "screen": "dong-detail",
+      "workbook": "detailWorkbook",
+      "dashboard": "EmbedDetailMap",
+      "worksheet": "DETAIL_MAP_100m",
+      "size": "640x560",
+      "parameters": [
+        "p_city",
+        "p_start",
+        "p_end",
+        "p_detail_adm"
+      ],
+      "state": "published"
+    }
+  ],
+  "excludedViews": [
+    {
+      "id": "4",
+      "name": "월별 행동 이상 지수 변화",
+      "decidedAt": "2026-11-05",
+      "reason": "메인 대시보드에 넣지 않기로 함. 오른쪽 열은 ③ 아래 ⑤"
+    }
+  ],
+  "toolbar": "Tableau Public은 도구 모음 숨김을 받지 않는다. FE가 대시보드 높이 + 27px로 띄운 뒤 아래를 잘라 숨기므로 임베드용 대시보드는 고정 크기를 유지한다",
+  "detailWorkbook": {
+    "name": "eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed",
+    "baseUrl": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed",
+    "author": "jiseok.lee",
+    "note": "읍면동 상세용(⑥ 상세 지도 + 인사이트 보고서 그래프 V01~V08). 메인 Embed01~05도 들어 있으나 메인 화면은 v_master를 계속 쓴다(워크북 49MB, v_master 72KB). 11/5 콘솔 확인: 모두 고정 크기, 단독 로드 2.1~3.0초"
+  },
+  "reportViews": [
+    {
+      "id": "V01",
+      "workbook": "detailWorkbook",
+      "dashboard": "EmbedDetailV01",
+      "worksheet": "DETAIL_V01_행동이상추이",
+      "size": "720x420",
+      "state": "published"
+    },
+    {
+      "id": "V02",
+      "workbook": "detailWorkbook",
+      "dashboard": "EmbedDetailV02",
+      "worksheet": "DETAIL_V02_주요행동지표",
+      "size": "720x560",
+      "state": "published"
+    },
+    {
+      "id": "V03",
+      "workbook": "detailWorkbook",
+      "dashboard": "EmbedDetailV03",
+      "worksheet": "DETAIL_V03_시간대활동",
+      "size": "720x420",
+      "state": "published"
+    },
+    {
+      "id": "V04",
+      "workbook": "detailWorkbook",
+      "dashboard": "EmbedDetailV04",
+      "worksheet": "DETAIL_V04_요일별활동",
+      "size": "720x420",
+      "state": "published"
+    },
+    {
+      "id": "V05",
+      "workbook": "detailWorkbook",
+      "dashboard": "EmbedDetailV05",
+      "worksheet": "DETAIL_V05_성연령활동변화",
+      "size": "720x440",
+      "state": "published"
+    },
+    {
+      "id": "V06",
+      "workbook": "detailWorkbook",
+      "dashboard": "EmbedDetailV06",
+      "worksheet": "DETAIL_V06_취약성요인",
+      "size": "900x440",
+      "state": "published"
+    },
+    {
+      "id": "V07",
+      "workbook": "detailWorkbook",
+      "dashboard": "EmbedDetailV07",
+      "worksheet": "DETAIL_V07_월별활동추이",
+      "size": "720x420",
+      "state": "published"
+    },
+    {
+      "id": "V08",
+      "workbook": "detailWorkbook",
+      "dashboard": "EmbedDetailV08",
+      "worksheet": "DETAIL_V08_격자점수분포",
+      "size": "720x440",
+      "state": "published"
+    }
+  ],
+  "reportViewsNote": "인사이트 보고서 그래프 후보 8종. AI가 동 · 월마다 3~4개를 골라 보고서에 그래프 ID로 저장하고, 화면은 그 ID만 임베드한다(계약 추가 예정). 매개변수는 ⑥과 같다"
+}
