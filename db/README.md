@@ -25,9 +25,9 @@ Spring Boot · FastAPI · 데이터 파이프라인이 같은 DB(`eumi`)를 쓰�
 | 계정 | 쓰는 곳 | 권한 요약 |
 |---|---|---|
 | `eumi_owner` | Flyway | 모든 테이블 소유. 앱 코드에서는 쓰지 않음 |
-| `eumi_app` | Spring Boot | public 읽기 · 쓰기 (`dim_region` · `region_result`는 읽기만, `region_insight_report`는 삭제 없이 저장 · 덮어쓰기). analysis와 Flyway 이력은 접근 불가 |
+| `eumi_app` | Spring Boot | public 읽기 · 쓰기 (`dim_region` · `region_result` · `region_insight_report`는 읽기만). analysis와 Flyway 이력은 접근 불가 |
 | `eumi_pipeline` | 데이터 파이프라인 | analysis 읽기 · 쓰기 · 삭제. public은 `dim_region` 넣기 · 수정, `region_result` 읽기 · 쓰기 · 삭제 |
-| `eumi_ai` | FastAPI | analysis 읽기. public은 지역 · 결과 · 복지자원 · `region_insight_report` 조회와 `ai_message` 추가. 인사이트 보고서는 백엔드 API로 보냄. 회원 · 사례자 · 상담 기록은 접근 불가 |
+| `eumi_ai` | FastAPI | analysis 읽기. public은 지역 · 결과 · 복지자원 조회, `region_insight_report` 조회 · 저장 · 덮어쓰기(삭제 없음), `ai_message` 조회 · 추가. 회원 · 사례자 · 상담 기록은 접근 불가 |
 
 - 권한은 `migration/afterMigrate.sql`이 마이그레이션마다 다시 적용합니다. 새 테이블은 자동으로 기본 권한을 받으므로, 예외(읽기만 등)만 이 파일에 추가합니다.
 - `afterMigrate.sql`은 버전 파일이 아니어서 병합 후에도 고칠 수 있고, 다음 `migrate` 때 다시 적용됩니다.
@@ -60,13 +60,13 @@ Spring Boot · FastAPI · 데이터 파이프라인이 같은 DB(`eumi`)를 쓰�
 - **가짜 데이터만** 넣습니다. 실제 개인정보는 넣지 않습니다.
 - seed 경로는 로컬(`infra/docker-compose.yml`)과 운영(`infra/deploy/docker-compose.prod.yml`) Flyway에 모두 켜져 있습니다. 파일을 넣으면 다음 `docker compose up -d flyway`와 배포 때 적용됩니다.
 - 운영에도 들어가므로 시연 계정의 평문 비밀번호는 넣지 않고 해시만 넣습니다.
-- 데이터 파트 seed(R__01, R__10~18)는 `data/pipeline/ops/make_seed.py`가 로컬 DB에서 만든다(임시 테이블에 COPY 후 `ON CONFLICT DO NOTHING`). 값이 바뀌면 다시 생성해 커밋하고, 로컬은 `docker compose up -d flyway`로 적용한다.
+- 데이터 파트 seed는 `data/pipeline/ops/make_seed.py`의 `TABLES` 목록에 있는 파일(`R__01`과 `R__10` 이후 번호)이고, 이 스크립트가 로컬 DB에서 만든다(임시 테이블에 COPY 후 `ON CONFLICT DO NOTHING`). 값이 바뀌면 다시 생성해 커밋하고, 로컬은 `docker compose up -d flyway`로 적용한다.
 
-| 파일 (예정) | 내용 | 담당 |
+| 파일 | 내용 | 담당 |
 |---|---|---|
 | `R__01_dim_region.sql` | 강남구 · 춘천시 행정동 | 강병민 |
 | `R__02_organization.sql` | 기관 | 김민재 |
 | `R__03_demo_member.sql` | 개발 · 시연용 회원 (PBKDF2 해시, OPEN-04) | 김민재 |
 | `R__04_welfare_resource.sql` | 시연용 복지자원 72건 (강남 실제 복지서비스 26 + 춘천 실제 통합돌봄 14 + 춘천 전역 가상 19 + 동 단위 가상 13). `data/demo_seed/make_demo_seed.py` 로 생성 | 강병민 |
 | `R__05_demo_case.sql` | 시연용 사례자 52명 · 담당자 · 상담 기록 186건 (가상 인물). 같은 스크립트로 생성 | 강병민 |
-| `R__10_dim_grid100.sql` ~ `R__19_bh_region_contribution.sql` | 데이터 파이프라인 결과 11개 테이블(격자 기준, 배경 상세 · 지표, 행동 지표, 읍면동 월별 결과, 격자 이상 점수, 실거래가, 지표별 기여도). 2025-07~12, 약 41 MB. `flow_detail`(760만 행)은 제외 | 강병민 |
+| `R__10_dim_grid100.sql` 이후 | 데이터 파이프라인 결과 테이블. 목록은 `make_seed.py`의 `TABLES` (격자 기준, 배경 상세 · 지표, 행동 지표, 읍면동 월별 결과, 격자 이상 점수, 실거래가, 지표별 기여도). 2025-07~12, 약 41 MB. `flow_detail`(760만 행)은 제외 | 강병민 |
