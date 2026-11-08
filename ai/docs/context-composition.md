@@ -8,11 +8,11 @@
 
 | 구성 | 책임 |
 | --- | --- |
-| [agent_nodes.py](C:/ssafy/free_proj/Eumi/ai/src/agent_nodes.py) | 업무 실행·결과 기록, 노드별 조립 함수 호출 |
-| [prompting.py](C:/ssafy/free_proj/Eumi/ai/src/prompting.py) | State 정보 선별, 지침·메시지 조립 |
-| [tool_specs.py](C:/ssafy/free_proj/Eumi/ai/src/tool_specs.py) | 기존 도구 명세를 역할별 모델 선택 입력으로 구성 |
-| [visualization_instructions.py](C:/ssafy/free_proj/Eumi/ai/src/visualization_instructions.py) | 시각화 지침 로딩, 뷰·입력 조건 구성 |
-| [gemini.py](C:/ssafy/free_proj/Eumi/ai/src/gemini.py) | OpenAI Responses API 연결, 도구·출력 설정, JSON 응답 검증·사용량 반환 |
+| [agent_nodes.py](../src/agent_nodes.py) | 업무 실행·결과 기록, 노드별 조립 함수 호출 |
+| [prompting.py](../src/prompting.py) | State 정보 선별, 지침·메시지 조립 |
+| [tool_specs.py](../src/tool_specs.py) | 기존 도구 명세를 역할별 모델 선택 입력으로 구성 |
+| [visualization_instructions.py](../src/visualization_instructions.py) | 시각화 지침 로딩, 뷰·입력 조건 구성 |
+| [gemini.py](../src/gemini.py) | OpenAI Responses API 연결, 도구·출력 설정, JSON 응답 검증·사용량 반환 |
 
 조립 결과는 호출 중 지역값이다. State나 별도 실행 저장소에 컨텍스트 사본을 유지하지 않는다.
 
@@ -107,7 +107,7 @@ user
 - `mime_type == "text/html"`인 객체를 HTML 생성 완료 표시로 대체한다.
 - 검증에서 거부된 결과도 판단용 입력에는 남긴다. 산출물 공개 시에는 `accepted_outputs`·`select_artifacts`가 별도로 검사한다.
 
-**하위 Agent**에는 선택한 하위 작업 목표, 상위의 조건·대화·이벤트·누적 예산을 전달한다. 새 실행 ID를 부여하고 `results=[]`, `response=None`으로 시작한다. 따라서 상위의 결과 이력과 공개 산출물은 자동으로 상속되지 않는다. 하위 반환값은 상위 `results`의 호출 결과로 기록한다. [하위 State 생성](C:/ssafy/free_proj/Eumi/ai/src/state.py)
+**하위 Agent**에는 선택한 하위 작업 목표, 상위의 조건·대화·이벤트·누적 예산을 전달한다. 새 실행 ID를 부여하고 `results=[]`, `response=None`으로 시작한다. 따라서 상위의 결과 이력과 공개 산출물은 자동으로 상속되지 않는다. 하위 반환값은 상위 `results`의 호출 결과로 기록한다. [하위 State 생성](../src/state.py)
 
 ## 6 현재 경계
 
@@ -119,6 +119,6 @@ user
 | State의 시스템 메시지 | 원래 API 역할로 전달하지 않고 user 본문 안에 `system` 역할 표시와 원문으로 포함 |
 | 보완 호출 식별 | 현재 선택 응답에 `retry_of` 필드와 해당 프롬프트 지침은 없음 |
 
-설계상 보관·연동 기준은 [컨텍스트 명세](C:/ssafy/free_proj/docs/ai-agent-context.md), 필드·쓰기 책임은 [State 명세](C:/ssafy/free_proj/docs/ieumi-agent-state.md)를 따른다.
+설계상 보관·연동 기준은 [컨텍스트 명세](ai-agent-context.md), 필드·쓰기 책임은 [State 명세](ieumi-agent-state.md)를 따른다.
 
 2026-11-06 사전 호환성 확인에서는 `gpt-6-sol`의 Responses API로 응답 6종과 조회·계산·하위 Agent 선택 3종이 통과했다. 이는 합성 입력을 사용한 모델 경계 확인이다. 이후 구현 변경의 테스트·실제 실행은 사용자 요청에 따라 수행하지 않았으며 테스트 파일도 수정하지 않았다.

@@ -72,4 +72,4 @@ Get-Content -LiteralPath "$roundtripDir/messages.json" -Encoding UTF8
 이 검증은 단일 질문·단일 프로세스의 임시 파일 왕복이다. 실제 PostgreSQL의 트랜잭션·권한·동시성, 운영 백엔드·SSE, 분석 보고서 저장, Tableau 브라우저 표시 검증은 포함하지 않는다. `outputs`는 로컬 검증 자료이며 Git에 포함하지 않는다.
 
 
-[AI 실행 안내](../README.md)
+[AI 실행 안내](../README.md) · [AI 문서 목록](README.md)

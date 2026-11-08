@@ -68,3 +68,6 @@ data/processed/
 *.key
 *.p12
 *.jks
+
+# 로컬 문서 편집기 설정
+.obsidian/

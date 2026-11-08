@@ -2,7 +2,7 @@
 
 ## Tableau 시각화 검증
 
-`validate_visualization(request, state=state)`는 선택한 뷰의 입력 프로필에 따라 매개변수·필터·필수값·날짜 순서·필터 의존 조건을 검사하고 `valid`, `issues`, `artifact`를 반환한다. 외부 호출은 없으며 부적합한 입력은 산출물 없이 구체적인 수정 정보를 반환한다. 입력·반환 계약과 실제 Agent 연결은 [Tableau 시각화 실행](../../TABLEAU.md)을 따른다. 아래 HTML 렌더러는 직접 사용 예제와 비교 근거표 생성용으로 유지하며 Agent가 선택하는 시각화는 Tableau 검증 도구다.
+`validate_visualization(request, state=state)`는 선택한 뷰의 입력 프로필에 따라 매개변수·필터·필수값·날짜 순서·필터 의존 조건을 검사하고 `valid`, `issues`, `artifact`를 반환한다. 외부 호출은 없으며 부적합한 입력은 산출물 없이 구체적인 수정 정보를 반환한다. 입력·반환 계약과 실제 Agent 연결은 [Tableau 시각화 실행](../../docs/TABLEAU.md)을 따른다. 아래 HTML 렌더러는 직접 사용 예제와 비교 근거표 생성용으로 유지하며 Agent가 선택하는 시각화는 Tableau 검증 도구다.
 
 DB 연결 없이 호출할 수 있는 Python 업무 함수다. 입력은 `TypedDict`, 경계 검증은 Pydantic `TypeAdapter`를 사용한다. State와 그래프 단계는 변경하지 않는다. 호출·검증 이력 기록과 재시도 판단은 작업 선택 및 실행 노드가 담당한다.
 

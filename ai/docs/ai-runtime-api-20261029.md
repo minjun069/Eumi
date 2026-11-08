@@ -8,7 +8,7 @@
 
 백엔드와 AI 서버는 공유 DB와 POST로 연동한다. 사용자 요청은 DB 행 식별자를 전달하고, 분석 파이프라인 완료에 따른 해석 실행·완료 알림은 본문 없는 신호만 전달한다. 프론트·백엔드 간 SSE는 해당 담당 범위다.
 
-전체 구조는 [아키텍처](../../docs/ai-agent-architecture.md), 내부 자료형은 [State](../../docs/ieumi-agent-state.md)를 따른다. 이 문서는 연동 계약을 정의하며 현재 구현 상태와 실행 방법은 [AI README](../ai/README.md)에서 관리한다.
+전체 구조는 [아키텍처](ai-agent-architecture.md), 내부 자료형은 [State](ieumi-agent-state.md)를 따른다. 이 문서는 연동 계약을 정의하며 현재 구현 상태와 실행 방법은 [AI README](../README.md)에서 관리한다.
 
 ## 2. API 명세
 
