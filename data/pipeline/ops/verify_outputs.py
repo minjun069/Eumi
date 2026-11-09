@@ -11,6 +11,8 @@
   - 격자 점수: bh_grid_anomaly 는 지표 10개가 모두 있는 격자만 · 다시 계산한 값과 같음
   - 실거래가: re_apt_trade 그 달 계약 행 > 0 · 거래 유형 · 금액(매매 · 전세 > 0, 월세는 월세 > 0 · 보증금 0 허용) · 좌표 범위 · 강남구/춘천시 동
 하나라도 실패하면 종료 코드 1 (Airflow 태스크 실패).
+검사마다 한 행을 analysis.pipeline_check 에 남긴다 (기준월 · 검사 이름 · 통과 여부 · 수치). Grafana 대시보드 · 알림이 이 표를 읽는다.
+  같은 달을 다시 돌리면 그 달 행을 지우고 다시 넣는다. 기록이 실패해도 검사 결과(종료 코드)는 바뀌지 않는다.
 실행  python3 pipeline/ops/verify_outputs.py --months 2025-12 …   |   --all (결과가 있는 모든 달)
 """
 import argparse
@@ -34,6 +36,33 @@ def one(cur, sql, *params):
     return cur.fetchone()
 
 
+RESULTS: list[tuple] = []  # (period_start, check_name, seq, passed, detail) — 끝에 analysis.pipeline_check 로
+
+
+def rec(m: str, name: str, passed: bool, detail: str, echo: bool = True) -> bool:
+    """검사 결과를 [OK]/[FAIL] 로 찍고, 그 달의 검사 행으로 모아 둔다 (seq 는 그 달 안에서 몇 번째 검사인지)."""
+    p = f"{m}-01"
+    RESULTS.append((p, name, sum(1 for r in RESULTS if r[0] == p) + 1, passed, detail))
+    return check(f"{m} {name}", passed, detail) if echo else passed
+
+
+def save_checks(conn) -> None:
+    """모은 검사 행을 analysis.pipeline_check 에 넣는다. 그 달 행을 지운 뒤 다시 넣어 마지막 실행 결과만 남긴다.
+    검사 도중 DB 오류가 났어도 쓸 수 있도록 먼저 rollback 한다 (검사는 읽기만 하므로 잃는 것이 없다)."""
+    if not RESULTS:
+        return
+    try:
+        conn.rollback()
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM analysis.pipeline_check WHERE period_start = ANY(%s::date[])", (sorted({r[0] for r in RESULTS}),))
+            cur.executemany("INSERT INTO analysis.pipeline_check (period_start, check_name, seq, passed, detail) VALUES (%s, %s, %s, %s, %s)", RESULTS)
+        conn.commit()
+        print(f"검사 결과 {len(RESULTS)}건 기록 (analysis.pipeline_check)", flush=True)
+    except Exception as e:  # 기록 실패가 검사 결과(종료 코드)를 바꾸지는 않는다
+        conn.rollback()
+        print(f"[WARN] 검사 결과 기록 실패: {e}", file=sys.stderr, flush=True)
+
+
 def prev_month(m: str) -> str:
     y, mm = int(m[:4]), int(m[5:])
     return f"{y - 1}-12" if mm == 1 else f"{y}-{mm - 1:02d}"
@@ -42,14 +71,14 @@ def prev_month(m: str) -> str:
 def check_background(cur, m):
     p = f"{m}-01"
     dongs, rows, items, vmin = one(cur, "SELECT count(DISTINCT adm_cd10), count(*), count(DISTINCT item_cd), min(value) FROM analysis.bg_region_detail WHERE period_start = %s", p)
-    ok = check(f"{m} 배경 상세", dongs == N_DONG and items >= 40 and (vmin or 0) >= 0, f"동 {dongs} · 행 {rows:,} · 항목 {items} · 최솟값 {vmin}")
+    ok = rec(m, "배경 상세", dongs == N_DONG and items >= 40 and (vmin or 0) >= 0, f"동 {dongs} · 행 {rows:,} · 항목 {items} · 최솟값 {vmin}")
     n, full, bad = one(cur, """SELECT count(*),
         count(*) FILTER (WHERE male_pct IS NOT NULL AND one_person_hh_pct IS NOT NULL AND non_apt_pct IS NOT NULL
                           AND age65_pct IS NOT NULL AND park_area_pct IS NOT NULL AND bus_stop_density IS NOT NULL),
         count(*) FILTER (WHERE greatest(male_pct, one_person_hh_pct, non_apt_pct, age65_pct, park_area_pct) > 100
                             OR least(male_pct, one_person_hh_pct, non_apt_pct, age65_pct, park_area_pct, bus_stop_density) < 0)
         FROM analysis.bg_region_indicator WHERE period_start = %s""", p)
-    ok &= check(f"{m} 배경 지표", n == N_DONG and full == N_DONG and bad == 0, f"행 {n} · 6개 모두 {full} · 범위 밖 {bad}")
+    ok &= rec(m, "배경 지표", n == N_DONG and full == N_DONG and bad == 0, f"행 {n} · 6개 모두 {full} · 범위 밖 {bad}")
     return ok
 
 
@@ -60,13 +89,13 @@ def check_flow(cur, m):
                    FROM analysis.flow_detail WHERE period_start = %s GROUP BY dim_type""", (p,))
     d = {r[0]: r[1:] for r in cur.fetchall()}
     if not d:
-        return check(f"{m} 유동 상세", False, "행 없음"), 0
+        return rec(m, "유동 상세", False, "행 없음"), 0
     grids = d.get("hour", (0, 0))[1]
     want = {"hour": 24, "weekday": 7, "sex_age": 12}
     shape = all(t in d and d[t][1] == grids and d[t][0] == grids * k for t, k in want.items())
     dc = d["hour"][2] == d["hour"][3] == days and d["sex_age"][2] == d["sex_age"][3] == days and 4 <= d["weekday"][2] <= d["weekday"][3] <= 5
     neg = min(v[4] for v in d.values()) < 0
-    return check(f"{m} 유동 상세", shape and dc and not neg,
+    return rec(m, "유동 상세", shape and dc and not neg,
                  f"격자 {grids:,} · 행 {sum(v[0] for v in d.values()):,} · 일수 {days} · day_count {[(t, v[2], v[3]) for t, v in d.items()]}"), grids
 
 
@@ -79,7 +108,7 @@ def check_behavior(cur, m, flow_grids, has_prev):
                             OR h30_hour_profile_distance NOT BETWEEN 0 AND 1 OR h31_weekday_profile_distance NOT BETWEEN 0 AND 1
                             OR h12_evening_day_ratio < 0 OR h13_commute_ratio < 0)
         FROM analysis.bh_grid_indicator WHERE period_start = %s""", p)
-    ok = check(f"{m} 격자 행동 지표", n == flow_grids and act == n and bad == 0 and ((chg > 0) == has_prev),
+    ok = rec(m, "격자 행동 지표", n == flow_grids and act == n and bad == 0 and ((chg > 0) == has_prev),
                f"격자 {n:,} (유동 {flow_grids:,}) · activity {act:,} · 변화 지표 있음 {chg:,} · 범위 밖 {bad}")
     n, full, lag_null = one(cur, """SELECT count(*),
         count(*) FILTER (WHERE activity_daily IS NOT NULL AND h12_evening_day_ratio IS NOT NULL AND h13_commute_ratio IS NOT NULL
@@ -91,7 +120,7 @@ def check_behavior(cur, m, flow_grids, has_prev):
              AND h30_hour_profile_distance IS NULL AND h31_weekday_profile_distance IS NULL)
         FROM analysis.bh_region_indicator WHERE period_start = %s""", p)
     want = (full == N_DONG) if has_prev else (lag_null == N_DONG)
-    ok &= check(f"{m} 읍면동 행동 지표", n == N_DONG and want, f"행 {n} · 13개 모두 {full} · 변화 지표 NULL {lag_null} (전월 {'있음' if has_prev else '없음'})")
+    ok &= rec(m, "읍면동 행동 지표", n == N_DONG and want, f"행 {n} · 13개 모두 {full} · 변화 지표 NULL {lag_null} (전월 {'있음' if has_prev else '없음'})")
     return ok
 
 
@@ -101,18 +130,18 @@ def check_result(cur, conn, assets, m, has_prev):
     db = pd.read_sql("SELECT r.adm_cd10, d.sgg_nm AS city, r.bg_score, r.bg_grade, r.bh_score, r.bh_grade, r.risk_grade "
                      "FROM public.region_result r JOIN public.dim_region d USING (adm_cd10) WHERE r.period_start = %s", conn, params=(p,))
     if not has_prev:
-        return check(f"{m} 읍면동 결과", len(db) == 0, f"전월 없음 → 행 0 이어야 함 (실제 {len(db)})")
+        return rec(m, "읍면동 결과", len(db) == 0, f"전월 없음 → 행 0 이어야 함 (실제 {len(db)})")
     for c in ("bg_score", "bh_score"):
         db[c] = db[c].astype(float)
     grade_ok = db.bg_grade.between(1, 3).all() and db.bh_grade.between(1, 3).all() and (db.risk_grade == db.bg_grade + db.bh_grade - 1).all()
     share = db.groupby("city").bh_grade.apply(lambda s: float((s == 3).mean())).to_dict()
-    ok = check(f"{m} 읍면동 결과", len(db) == N_DONG and grade_ok and all(0.10 <= v <= 0.30 for v in share.values()),
+    ok = rec(m, "읍면동 결과", len(db) == N_DONG and grade_ok and all(0.10 <= v <= 0.30 for v in share.values()),
                f"행 {len(db)} · 등급 규칙 {grade_ok} · 행동 등급 3 비율 {({k: round(v, 2) for k, v in share.items()})}")
     re = score_month(conn, assets, m).set_index("adm_cd10").reindex(db.adm_cd10)
     d_bg = float(np.nanmax(np.abs(re.bg_score.to_numpy() - db.bg_score.to_numpy())))
     d_bh = float(np.nanmax(np.abs(re.bh_score.to_numpy() - db.bh_score.to_numpy())))
     same_grade = int((re.risk_grade.to_numpy() == db.risk_grade.to_numpy()).sum())
-    ok &= check(f"{m} 결과 = 지금 지표로 재계산", d_bg <= 0.0051 and d_bh <= 0.0051 and same_grade == len(db),
+    ok &= rec(m, "결과 = 지금 지표로 재계산", d_bg <= 0.0051 and d_bh <= 0.0051 and same_grade == len(db),
                 f"bg_score 최대차 {d_bg:.4f} · bh_score 최대차 {d_bh:.4f} · 위험단계 일치 {same_grade}/{len(db)}")
     return ok
 
@@ -123,13 +152,13 @@ def check_contribution(conn, assets, m, has_prev):
     db = pd.read_sql("SELECT adm_cd10, indicator_cd, contribution FROM analysis.bh_region_contribution WHERE period_start = %s",
                      conn, params=(p,))
     if not has_prev:
-        return check(f"{m} 지표별 기여도", len(db) == 0, f"결과 없음 → 행 0 이어야 함 (실제 {len(db)})")
+        return rec(m, "지표별 기여도", len(db) == 0, f"결과 없음 → 행 0 이어야 함 (실제 {len(db)})")
     n_feat = len(assets.dong_features)
     info, re = contributions(conn, assets, m)
     both = db.merge(re, on=["adm_cd10", "indicator_cd"], how="outer", suffixes=("", "_re"))
     diff = float(np.nanmax(np.abs(both.contribution.astype(float) - both.contribution_re))) if len(both) else float("nan")
     ok = (len(db) == len(info) * n_feat and db.indicator_cd.nunique() == n_feat and both.isna().sum().sum() == 0 and diff <= 1e-5)
-    return check(f"{m} 지표별 기여도", ok, f"행 {len(db)} (동 {len(info)} × 지표 {n_feat}) · 재계산 최대차 {diff:.1e}")
+    return rec(m, "지표별 기여도", ok, f"행 {len(db)} (동 {len(info)} × 지표 {n_feat}) · 재계산 최대차 {diff:.1e}")
 
 
 def check_grid_anomaly(conn, assets, m, has_prev):
@@ -145,13 +174,13 @@ def check_grid_anomaly(conn, assets, m, has_prev):
     full = np.isfinite(df[feats].to_numpy()).all(axis=1)
     stored = df.anomaly_score.notna().to_numpy()
     if not has_prev:
-        return check(f"{m} 격자 이상 점수", stored.sum() == 0, f"전월 없음 → 행 0 이어야 함 (실제 {int(stored.sum())})")
+        return rec(m, "격자 이상 점수", stored.sum() == 0, f"전월 없음 → 행 0 이어야 함 (실제 {int(stored.sum())})")
     re = np.full(len(df), np.nan)
     for city in df.city.unique():
         mask = df.city.eq(city).to_numpy()
         re[mask] = assets.anomaly_score("grid", city, df.loc[mask])
     diff = float(np.nanmax(np.abs(re[stored] - df.anomaly_score.to_numpy()[stored]))) if stored.any() else float("nan")
-    return check(f"{m} 격자 이상 점수", (stored == full).all() and stored.sum() > 0 and diff <= 0.0051,
+    return rec(m, "격자 이상 점수", (stored == full).all() and stored.sum() > 0 and diff <= 0.0051,
                  f"점수 {int(stored.sum()):,} = 지표 10개 모두 있는 격자 {int(full.sum()):,} · 재계산 최대차 {diff:.4f}")
 
 
@@ -167,7 +196,7 @@ def check_apt(cur, m):
              OR lat NOT BETWEEN 33 AND 39 OR lon NOT BETWEEN 124 AND 132
              OR left(adm_cd10, 5) NOT IN {CITY_PREFIX})
         FROM analysis.re_apt_trade WHERE contract_date >= %s AND contract_date < %s""", first, nxt)
-    return check(f"{m} 실거래가", n > 0 and bad == 0, f"행 {n:,} · 유형 {by_type} · 규칙 위반 {bad}")
+    return rec(m, "실거래가", n > 0 and bad == 0, f"행 {n:,} · 유형 {by_type} · 규칙 위반 {bad}")
 
 
 def main() -> int:
@@ -186,18 +215,23 @@ def main() -> int:
         else:
             months = [f"{m[:4]}-{m[4:]}" for m in months_arg(args.months)]
         n_dim = one(cur, "SELECT (SELECT count(*) FROM public.dim_region), (SELECT count(*) FROM analysis.dim_grid100)")
-        ok &= check("기준 테이블", n_dim[0] == N_DONG and n_dim[1] > 0, f"행정동 {n_dim[0]} · 100m 격자 {n_dim[1]:,}")
-        for m in months:
-            has_prev = one(cur, "SELECT EXISTS (SELECT 1 FROM analysis.flow_detail WHERE period_start = %s)", f"{prev_month(m)}-01")[0]
-            print(f"--- {m} (전월 유동 {'있음' if has_prev else '없음'})", flush=True)
-            ok &= check_background(cur, m)
-            flow_ok, grids = check_flow(cur, m)
-            ok &= flow_ok
-            ok &= check_behavior(cur, m, grids, has_prev)
-            ok &= check_result(cur, conn, assets, m, has_prev)
-            ok &= check_contribution(conn, assets, m, has_prev)
-            ok &= check_grid_anomaly(conn, assets, m, has_prev)
-            ok &= check_apt(cur, m)
+        dim_ok, dim_detail = n_dim[0] == N_DONG and n_dim[1] > 0, f"행정동 {n_dim[0]} · 100m 격자 {n_dim[1]:,}"
+        ok &= check("기준 테이블", dim_ok, dim_detail)
+        try:
+            for m in months:
+                rec(m, "기준 테이블", dim_ok, dim_detail, echo=False)  # 달과 무관한 검사지만 달마다 한 벌이 되도록 같이 남긴다
+                has_prev = one(cur, "SELECT EXISTS (SELECT 1 FROM analysis.flow_detail WHERE period_start = %s)", f"{prev_month(m)}-01")[0]
+                print(f"--- {m} (전월 유동 {'있음' if has_prev else '없음'})", flush=True)
+                ok &= check_background(cur, m)
+                flow_ok, grids = check_flow(cur, m)
+                ok &= flow_ok
+                ok &= check_behavior(cur, m, grids, has_prev)
+                ok &= check_result(cur, conn, assets, m, has_prev)
+                ok &= check_contribution(conn, assets, m, has_prev)
+                ok &= check_grid_anomaly(conn, assets, m, has_prev)
+                ok &= check_apt(cur, m)
+        finally:
+            save_checks(conn)  # 검사 도중 예외가 나도 그때까지의 결과는 남긴다
     print(f"VERIFY {'PASS' if ok else 'FAIL'} ({', '.join(months)})", flush=True)
     return 0 if ok else 1
 

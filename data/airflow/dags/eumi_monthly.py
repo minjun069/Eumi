@@ -5,6 +5,7 @@
 - 첫 태스크 check_inputs 가 그 달 원본(SKT 월평균 · 주민등록)이 있는지 보고, 없으면 종료 코드 99 → 전체를 skip 한다
   (unpause 직후 Airflow 가 지난 스케줄 1건을 자동 실행하는데, 원본이 없는 달이면 API 호출 없이 건너뛰도록).
 - 마지막 태스크 verify_outputs 가 결과 테이블을 계약대로 검사한다 (행 수 · 범위 · 등급 규칙 · 지표로 다시 계산한 점수와 일치).
+  검사마다 한 행을 analysis.pipeline_check 에 남긴다 (Grafana 가 읽음). 실행 이력(돌았나)은 Airflow DB, 검사 결과(맞나)는 이 표.
 - 실행 이력은 Airflow 가 남긴다: 실행(dag run)별 기준월(conf) · 태스크별 상태 · 시작/종료 시각 · 로그(스크립트의 [OK]/[FAIL] 출력).
 - 태스크는 pipeline 컨테이너 안에서 python3 / spark-submit 로 스크립트를 그대로 호출한다 (ops/run_month.py 와 같은 순서).
   실패한 단계만 UI 에서 Clear 하면 그 단계부터 다시 돈다. 모든 스크립트는 같은 달을 다시 돌려도 안전하다(그 달 삭제 후 적재 · UPSERT).
