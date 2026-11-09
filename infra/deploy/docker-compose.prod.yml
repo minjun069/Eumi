@@ -95,9 +95,11 @@ services:
       # 인증 코드 · 가입 증명 해시 키 (비밀값. 서버에서 한 번 만들고 바꾸지 않는다)
       EUMI_AUTH_HASH_KEY: ${EUMI_AUTH_HASH_KEY:?.env.config에 EUMI_AUTH_HASH_KEY가 필요합니다}
       # AI 실행 방식: fake(가짜 AI가 진행·완료 행을 씀) / http(ai 서비스 호출). 비밀값이 아니라 여기 둔다.
-      #   application-prod.yml이 기본값 없이 읽으므로 빠지면 backend가 뜨지 않는다. ai 서비스를 추가하는 MR에서 http로 바꾼다
+      #   application-prod.yml이 기본값 없이 읽으므로 빠지면 backend가 뜨지 않는다.
+      #   http로 바꾸는 때: ai가 확정 계약(docs/api/ai-agent-panel.md)대로 응답하고, 시간 값 4개(EUMI_AI_EXECUTION_LIMIT 등)를 여기에 함께 넣을 때
       EUMI_AI_MODE: fake
-      # AI_BASE_URL: http://ai:8000            (ai 서비스를 추가할 때)
+      # ai 서비스 주소 (같은 compose 내부망). fake 모드에서는 쓰지 않는다
+      AI_BASE_URL: http://ai:8000
       # PIPELINE_BASE_URL: http://pipeline:8100 (pipeline 서비스를 추가할 때)
     volumes:
       - uploads:/data/uploads
@@ -129,16 +131,37 @@ services:
     mem_limit: 256m
     logging: *logging
 
-  # ---------- 준비되면 추가 (D8 · D9 결정 후) ----------
-  # ai:
-  #   image: eumi-ai:${AI_TAG:?.env.tags에 AI_TAG가 필요합니다}
-  #   restart: unless-stopped
-  #   environment:
-  #     DB_URL: postgresql://eumi_ai:${EUMI_AI_PASSWORD}@postgres:5432/eumi   (키 이름은 AI 담당과 맞춘다)
-  #     GMS_API_KEY: ${GMS_API_KEY:?.env.config에 GMS_API_KEY가 필요합니다}
-  #   mem_limit: 2g
-  #   logging: *logging
-  #   # ports 없음 — backend만 http://ai:8000 으로 호출
+  # AI 서버 (FastAPI, ai/Dockerfile은 AI 담당 관리, 헬스체크 GET /health). backend만 내부망 http://ai:8000 으로 부른다
+  #   - ports 없음, Nginx 경로 없음 → 바깥에서 닿지 않는다. 밖으로 나가는 연결은 LLM API뿐이다.
+  #   - profile "ai": 첫 배포 전(AI_TAG 없음)에는 뜨지 않는다. deploy.sh ai <태그>가 이름으로 띄운다.
+  #   - 변수에 :?를 쓰지 않는다. profile 서비스라도 :? 값이 비면 모든 compose 명령(backend 배포 포함)이 멈추기 때문이다.
+  #     빈 값 검사는 deploy.sh ai가 한다.
+  #   - 실행 중인 대화를 메모리에 두므로 컨테이너 1개 · worker 1개로만 띄운다.
+  ai:
+    image: eumi-ai:${AI_TAG:-none}
+    profiles: ["ai"]
+    restart: unless-stopped
+    # env_file을 쓰지 않는다: ai에는 자기 계정(eumi_ai) 비밀번호, LLM 키, AI 토큰만 넘긴다.
+    # 키 이름(SETTINGS_*)은 ai/src/settings.py가 읽는 이름이다.
+    environment:
+      SETTINGS_API_KEY: ${EUMI_LLM_API_KEY:-}
+      SETTINGS_DATABASE_URL: postgresql://eumi_ai:${EUMI_AI_PASSWORD:-}@postgres:5432/eumi
+      # AI → backend 알림(INT-07 행 저장 · INT-08 보고서 완료) 주소와 Bearer 토큰. 둘 다 없으면 ai가 시작되지 않는다.
+      #   backend가 INT-07 · 08을 받기 전에는 알림만 실패로 남고 저장된 행 · 보고서는 그대로다.
+      #   backend가 수신을 구현하면 같은 EUMI_AI_TOKEN을 backend environment에도 넘긴다 (키 이름은 BE가 정함)
+      SETTINGS_BACKEND_URL: http://backend:8080
+      SETTINGS_BACKEND_TOKEN: ${EUMI_AI_TOKEN:-}
+      SETTINGS_OUTPUT_DIR: /app/outputs
+      LANGFUSE_ENABLED: "false"
+      TZ: Asia/Seoul
+    # 실행 기록(질문 · 모델 입출력 추적)은 디스크에 남기지 않는다. 메모리 512MB 안에서만 쓰고 컨테이너를 바꾸면 지워진다
+    tmpfs:
+      - /app/outputs:size=512m,uid=10001
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 2g
+    logging: *logging
 
 volumes:
   pgdata:
