@@ -19,7 +19,7 @@ Langfuse로 Agent의 실행 경로·지연·실패·모델 사용량을 확인�
 
 | 항목 | 상태 | 현재 범위 |
 | --- | --- | --- |
-| 추적 연결 | 구현 | [모니터링 모듈](../src/monitoring.py)의 Langfuse SDK 5 콜백을 [모의 데모](../demo.py)와 [Gemini 시나리오](../scenario_demo.py)에 연결. 호출마다 별도 콜백 사용 |
+| 추적 연결 | 구현 | [모니터링 모듈](../src/monitoring.py)의 Langfuse SDK 5 콜백을 [모의 데모](../demo/demo.py)와 [Gemini 시나리오](../demo/scenario_demo.py)에 연결. 호출마다 별도 콜백 사용 |
 | 실행 식별 | 구현 | `execution.run_id`로 trace ID 생성, Session ID에는 `run_id` 사용. 최초 호출·재개를 같은 추적에 연결하고 `execution.version` 기록 |
 | 데이터 제한 | 구현 | 입력·출력·임의 메타데이터를 전송 속성에서 제외. 오류 문자열은 예외 종류로 치환하고 미디어 업로드 비활성화. 이름·ID·버전의 원문 포함 여부는 검사하지 않음 |
 | 장애·종료 처리 | 구현 | 추적 초기화·갱신·종료 실패는 경고 기록, 업무 재호출 없음. 종료 시 전송 대기열 처리. 잘못된 설정은 시작 시 거부 |

@@ -79,8 +79,8 @@ result = validate_visualization({
 `ai/`에서 실행한다. `.env`의 OpenAI 키 `SETTINGS_API_KEY`를 사용한다. `--model`을 생략하면 Settings의 모델을 사용하며 현재 기본값은 `gpt-6-sol`이다. 이 명령은 지침·카탈로그·요청과 도구 명세·응답 스키마를 OpenAI Responses API로 전송한다.
 
 ```powershell
-.\.venv\Scripts\python.exe tableau_demo.py --model gpt-6-sol --goal "2025년 12월 춘천시 후평3동의 배경 취약성 지도를 보여줘." --output outputs/tableau/state.json
-.\.venv\Scripts\python.exe -m pytest tests/tools/test_tableau.py tests/tools/test_tableau_catalog.py tests/test_visualization_events.py tests/test_visualization_instructions.py tests/test_tableau_agent.py -q
+.\.venv\Scripts\python.exe -m demo.tableau_demo --model gpt-6-sol --goal "2025년 12월 춘천시 후평3동의 배경 취약성 지도를 보여줘." --output outputs/tableau/state.json
+.\.venv\Scripts\python.exe -m pytest tests/tools/test_tableau.py tests/tools/test_tableau_catalog.py tests/test_visualization_events.py tests/test_agent_nodes.py -q
 ```
 
 `tableau_demo.py`는 실제 `build_nodes`·공통 그래프·검증 도구를 호출한다. 합성 자료나 모의 모델 분기를 공통 실행 코드에 넣지 않는다. 일반 실행 시간의 기본 한도는 180초이며 `--timeout` 값을 최초 State에 반영한다. 모델·도구·하위 Agent가 같은 잔여 시간과 누적 사용량을 공유한다. 한도 도달 후 별도 종료 예산은 [State의 실행 예산](ieumi-agent-state.md#실행-예산)을 따른다. 데모 외부에서 별도 timeout이나 호출 한도를 다시 설정하지 않는다. 이번 State 실행 경로 변경의 테스트·검사는 실행하지 않았다.

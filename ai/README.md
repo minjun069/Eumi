@@ -56,9 +56,9 @@ uv run pytest tests/test_api_roundtrip.py tests/test_database.py -q
 
 | 실행 | 명령 |
 | --- | --- |
-| 모의 노드로 그래프 연결 확인 | `uv run python demo.py --suite` |
-| 질문 재개 확인 | `uv run python demo.py --scenario question --answer "추가 정보"` |
-| 실제 OpenAI 모델·합성 자료로 S1~S3 실행 | `uv run python scenario_demo.py --suite --output outputs/scenarios` |
+| 모의 노드로 그래프 연결 확인 | `uv run python -m demo.demo --suite` |
+| 질문 재개 확인 | `uv run python -m demo.demo --scenario question --answer "추가 정보"` |
+| 실제 OpenAI 모델·합성 자료로 S1~S3 실행 | `uv run python -m demo.scenario_demo --suite --output outputs/scenarios` |
 | 저장한 결과를 HTML로 열람 | `uv run python report_html.py outputs/scenarios --output outputs/scenarios/report.html` |
 
 모델 데모는 `--model`, `--env-file`로 모델·설정 파일을 지정한다. 결과 폴더에 `report.json`, `answer.txt`, 산출물과 `report.html`을 저장한다. 모의 데모도 `--output 경로`로 기록을 저장할 수 있다. HTML 리포트에서 요청·응답·호출·검증·사용량을 확인한다.

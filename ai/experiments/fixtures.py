@@ -2,7 +2,7 @@
 
 업무 노드가 미구현이므로 현재는 노드 출력을 대체한다.
 실제 업무 노드 연결 후에는 모델·외부 도구의 입출력 경계만 대체한다.
-그래프 구성과 실행은 demo.py 및 테스트가 src.graph를 사용해 수행한다.
+그래프 구성과 실행은 demo/demo.py 및 테스트가 src.graph를 사용해 수행한다.
 """
 
 from collections.abc import Callable

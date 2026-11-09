@@ -112,7 +112,7 @@ rendered = tools["render_visualization"].invoke(
 
 `ainvoke`도 LangChain의 표준 비동기 인터페이스로 호출할 수 있다. 현재 공급 함수는 동기 함수이며 비동기 호출 시 라이브러리의 실행 스레드를 사용한다. 도구는 자동 재시도하지 않는다. 조회는 공급자에게 읽기 작업만 연결한다. `retry_safe` 메타데이터는 읽기·순수 계산·메모리 렌더링의 재실행 가능 여부를 나타내며 재시도 횟수·한도 판단을 대신하지 않는다.
 
-`ai/`에서 `python tool_demo.py --output outputs/tool-demo`를 실행하면 합성 자료 공급자를 실제 도구에 연결해 A/B/C의 -10%/-8%/-10% 변화율을 계산하고 `table.html`, `bar.html`, `line.html`, `map.html`, `report.json`을 생성한다. 합성 자료는 `experiments/tool_fixtures.py`, 예제 조립과 파일 저장은 `tool_demo.py`에 둔다. 도구 모듈에는 모의 응답이나 데모 분기를 넣지 않는다.
+`ai/`에서 `python -m demo.tool_demo --output outputs/tool-demo`를 실행하면 합성 자료 공급자를 실제 도구에 연결해 A/B/C의 -10%/-8%/-10% 변화율을 계산하고 `table.html`, `bar.html`, `line.html`, `map.html`, `report.json`을 생성한다. 합성 자료는 `experiments/tool_fixtures.py`, 예제 조립과 파일 저장은 `demo/tool_demo.py`에 둔다. 도구 모듈에는 모의 응답이나 데모 분기를 넣지 않는다.
 
 `src/agent_nodes.py`는 공통 그래프에 실제 업무 노드·모델·도구 선택을 연결한다. 작업 선택 및 실행 노드가 호출 결과를 `results[].output`에 기록하고 응답 작성 노드가 검증된 `artifact`를 선택한다. DB·HTTP·프론트 채팅 서비스 연동은 별도 구현 대상이다.
 
