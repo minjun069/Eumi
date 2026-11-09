@@ -22,7 +22,8 @@ public class HttpAgentClient implements AgentClient {
 
     public HttpAgentClient(AgentProperties properties, JsonMapper json) {
         this.properties = properties; this.json = json;
-        client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(properties.getHttpTimeout()).build();
+        client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(properties.getHttpTimeout())
+                .followRedirects(HttpClient.Redirect.NEVER).build();
     }
 
     private HttpResponse<String> send(UUID id, String operation, String path, String body, Duration timeout) {
@@ -42,13 +43,12 @@ public class HttpAgentClient implements AgentClient {
     }
 
     @Override
-    public void start(UUID id, long questionId) {
-        var response = send(id, "http-start", "/internal/agent/runs", json.writeValueAsString(new AgentDtos.QuestionCreated(id, questionId)),
+    public void start(UUID id, long questionId, AgentDtos.ScreenContext context) {
+        var response = send(id, "http-start", "/internal/agent/runs", json.writeValueAsString(new AgentDtos.RunRequest(id, questionId, context)),
                 properties.getHttpTimeout());
-        if (response.statusCode() == 202) return;
-        if (response.statusCode() == 409) {
-            var status = status(id);
-            if (status.running() && Long.valueOf(questionId).equals(status.questionId())) return;
+        if (response.statusCode() == 202) {
+            AgentDiagnostics.accepted(id, questionId);
+            return;
         }
         AgentDiagnostics.httpStatus(id, "start", response.statusCode());
         throw new Unavailable();
@@ -65,22 +65,4 @@ public class HttpAgentClient implements AgentClient {
         }
     }
 
-    @Override
-    public RunStatus status(UUID id) {
-        var response = send(id, "http-status", "/internal/agent/runs/" + id, null, properties.getHttpTimeout());
-        if (response.statusCode() != 200) {
-            AgentDiagnostics.httpStatus(id, "status", response.statusCode());
-            throw new Unavailable();
-        }
-        try {
-            var body = json.readTree(response.body());
-            var question = body.path("questionId");
-            if (!body.path("running").isBoolean() || (!question.isNull() && !question.isIntegralNumber())
-                    || (body.path("running").asBoolean() && (question.isNull() || question.asLong() < 1))) throw new Unavailable();
-            return new RunStatus(body.path("running").asBoolean(), question.isNull() ? null : question.asLong());
-        } catch (RuntimeException ex) {
-            AgentDiagnostics.failure(id, "status-parse", ex);
-            throw new Unavailable();
-        }
-    }
 }

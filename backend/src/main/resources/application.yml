@@ -42,6 +42,9 @@ spring:
 
 # 서비스 간 주소 (로컬 기본값 / 운영은 compose가 환경변수로 넣는다)
 eumi:
+  internal:
+    ai-token: ${EUMI_AI_TOKEN:}
+    pipeline-token: ${EUMI_PIPELINE_TOKEN:}
   ai:
     mode: ${EUMI_AI_MODE:fake}
     base-url: ${AI_BASE_URL:http://localhost:8000}

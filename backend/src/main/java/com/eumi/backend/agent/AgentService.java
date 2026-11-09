@@ -40,7 +40,7 @@ public class AgentService {
             return new AgentDtos.QuestionCreated(id, repository.insertQuestion(id, masker.mask(input.question())));
         });
         // AI는 반드시 질문 저장 커밋이 끝난 다음 호출한다.
-        lifecycle.start(created.conversationId(), created.questionId());
+        lifecycle.start(created.conversationId(), created.questionId(), input.context());
         return created;
     }
 
