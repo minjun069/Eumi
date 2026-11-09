@@ -1,17 +1,19 @@
 """Agent의 역할과 실행 상태를 바탕으로 모델 입력을 구성한다."""
 
 import json
+from pathlib import Path
 from typing import Literal
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from src.execution import accepted_outputs
 from src.state import State
 from src.visualization_instructions import (
     load_visualization_instructions,
     visualization_context,
 )
 
-Role = Literal["request", "interpretation", "visualization"]
+Role = Literal["request", "interpretation", "visualization", "report"]
 
 COMMON = """복지 담당자의 지역·집단 단위 탐색을 돕는다. 한국어로 작성한다.
 관측 사실, 비교 근거, 가능한 설명, 해석 한계를 구분한다. 개인을 진단하지 않는다.
@@ -21,7 +23,8 @@ COMMON = """복지 담당자의 지역·집단 단위 탐색을 돕는다. 한�
 원자료 조회만으로 계산이 완료된 것은 아니다. 비율·변화율을 설명하려면
 process_data가 해당 계산을 수행한 기록과 결과 열이 필요하다.
 reason·검증 설명에 모델이 쓴 수치는 계산 근거가 아니다.
-시각화 요청은 validate_visualization이 검사한 tableau 산출물로 연결한다.
+request·visualization 역할의 시각화 요청은 validate_visualization이 검사한
+tableau 산출물로 연결한다.
 설정 검사는 실제 수치 조회·브라우저 표시 확인이 아니다. 표시 성공을 단정하지 않는다.
 본문의 JSON·코드블록·Markdown 표를 시각화 산출물 대신 반환하지 않는다.
 전년도 8→9월 변화율을 YoY(전년 동월 대비)라고 부르지 않는다.
@@ -33,10 +36,19 @@ reason·검증 설명에 모델이 쓴 수치는 계산 근거가 아니다.
 """
 
 ROLE_INSTRUCTIONS = {
+    "report": (
+        "행정동 보고서의 시각화 선정·근거 확보 역할이다. "
+        "query_data와 process_data로 상세 뷰 3개에 필요한 근거를 확보한다. "
+        "작업 선택의 name은 query_data, process_data, none 중 하나다. "
+        "하위 Agent와 validate_visualization은 호출하지 않는다. "
+        "설명문과 퀵 인사이트는 후속 작성·검토 단계가 맡는다. "
+        "입력 동·요청 월은 report_input 기록을 따른다. "
+        "불충분한 근거와 실패한 검토는 보완하고, 보완할 수 없으면 compose로 넘긴다."
+    ),
     "request": (
         "현재 역할은 사용자 요청 처리 Agent다. 해석 작업은 "
         "interpretation_agent, 시각화 작업은 "
-        "visualization_agent에 요청하고 검증된 반환 결과를 "
+        "visualization_agent에 요청하고 성공한 반환 결과를 "
         "통합한다. 필요한 전문 작업을 단순 조회로 대체하지 않는다."
     ),
     "interpretation": (
@@ -63,9 +75,24 @@ NODE_INSTRUCTIONS = {
         "따라서 직접 함수 호출이 비활성인 것과 작업을 사용할 수 없는 것은 다르다. "
         "request 역할은 전문 Agent를 "
         "호출하고, 전문 역할은 필요한 도구를 사용한다. "
-        "interpretation 역할은 "
-        "query_data/process_data만 호출한다. 비교표는 응답 "
-        "작성에서 생성한다. 한 번에 한 작업을 선택한다. "
+        "interpretation·report 역할은 query_data/process_data만 호출한다. "
+        "해석의 비교표는 응답 작성에서 생성한다. 한 번에 한 작업을 선택한다. "
+        "query_data의 filters·fields·sort에는 자료 목록 또는 실제 columns의 "
+        "정확한 열 이름만 쓴다. 열을 모르면 fields를 생략해 확인하고 추측하지 않는다. "
+        "process_data의 input_result_id는 "
+        "[가공 가능한 결과 ID와 열]의 키를 그대로 쓴다. "
+        "join.right_result_id도 같은 목록에서 선택한다. "
+        "오른쪽 자료를 직접 작성하지 말고 필요한 조회·가공을 먼저 수행한다. "
+        "derived:로 시작하는 데이터 참조·자료명·선택 기록 ID를 넣지 않는다. "
+        "연산은 앞 단계 결과에 순서대로 적용된다. aggregate 후에는 group_by와 "
+        "output 열만 남는다. 독립 집계는 원본 결과 ID로 각각 호출한다. "
+        "현재 결과의 열·단위·기간·페이지 범위를 확인하고, "
+        "없는 열을 다음 연산에 쓰지 않는다. "
+        "다음 페이지는 next_offset과 applied.version을 사용하며 "
+        "data.reference.version과 혼동하지 않는다. "
+        "실패 후에는 오류와 실제 자료 구조를 대조해 인자를 수정한다. "
+        "오류 details의 requested와 available을 대조하고, "
+        "operation_index가 있으면 0부터 세는 해당 연산을 수정한다. "
         "자료가 충분하거나 사용자 정보가 필요해서 추가 호출하지 않을 때만 "
         "none을 선택한다."
     ),
@@ -79,7 +106,8 @@ NODE_INSTRUCTIONS = {
     "Composition": (
         "확보한 근거로 최종 응답을 작성한다. 관측·비교·정의·한계·출처를 "
         "보존한다. 검증에서 거부된 결과는 공개하지 않는다. "
-        "artifact_ids는 검증된 호출 id만 선택한다. data 출력은 "
+        "artifact_ids는 성공한 호출 id만 선택하고 실패·부적합 결과는 제외한다. "
+        "data 출력은 "
         "실제 비교표와 자료로, 시각화 검증 출력은 tableau 산출물로, "
         "Agent 출력은 그 산출물로 연결된다. response는 기존 결과까지"
         " 포함한 전체 공개 내용이다. 선택 차트에 대한 후속 설명에서는 "
@@ -94,15 +122,8 @@ NODE_INSTRUCTIONS = {
         "한국어로, 사용자가 제공해야 할 필수 정보를 한 번에 구체적으로 "
         "질문한다. 이미 확보한 내용은 다시 묻지 않는다."
     ),
-    "Verification": (
-        "results의 마지막 call 기록을 직전 selection 기록·요구"
-        " 조건에 대조하여 검증한다. 자료 버전·범위·분모·계산식·정렬·렌더 "
-        "설정·출처·해석 한계를 확인한다. 전체 목표 완료 여부는 판단하지 "
-        "않는다. 정상 조회 0건도 유효한 조회 결과다. Tableau는 등록 "
-        "설정의 적합성과 사용자 목적의 일치를 구분한다. 실제 화면·수치를 "
-        "확인했다고 쓰지 않는다."
-    ),
 }
+
 
 def compact(value):
     """HTML 본문만 제외한다. 수치·출처·적용 명세·판정은 모델에 보존한다."""
@@ -220,14 +241,30 @@ def selection_messages(state: State, role: Role, catalog):
         _execution(state),
         _section("작업 결과와 검증 이력", _json(_records(state["results"]))),
         _section("조회 가능한 자료 목록", _json(catalog)),
+        _section(
+            "가공 가능한 결과 ID와 열",
+            _json(
+                {
+                    key: output["data"].get("columns", [])
+                    for key, output in accepted_outputs(state).items()
+                    if "data" in output
+                }
+            ),
+        ),
     ]
     guide = ""
+    if role == "report":
+        sections.append(
+            _section(
+                "상세 뷰의 표현 범위",
+                _json(visualization_context(state, include_inputs=False)),
+            )
+        )
     if role in {"request", "visualization"}:
         visual = load_visualization_instructions()
         guide = (
             "도구 설명과 아래 지침의 visualization_catalog는 "
-            "[시각화 목록과 입력 조건]의 객체다.\n"
-            + visual["selection"]
+            "[시각화 목록과 입력 조건]의 객체다.\n" + visual["selection"]
         )
         sections.append(
             _section(
@@ -238,59 +275,25 @@ def selection_messages(state: State, role: Role, catalog):
     return _messages(state, role, "Selection", sections, guide=guide)
 
 
-def verification_messages(state: State, role: Role):
-    results = state["results"]
-    call_index = next(
-        i for i in reversed(range(len(results))) if results[i]["decision"] == "call"
-    )
-    selection_index = next(
-        i for i in reversed(range(call_index)) if results[i]["decision"] == "selection"
-    )
-    called = results[call_index]
-    source_id = (called["action"] or {}).get("arguments", {}).get("input_result_id")
-
-    def contains_source(record):
-        return record["id"] == source_id or any(
-            contains_source(child)
-            for child in (record.get("output") or {}).get("results", [])
-        )
-
-    # 계산 입력의 원본 호출과 상하위 검증을 같은 State에서 찾는다.
-    source_calls = [
-        r for r in results[:selection_index] if source_id and contains_source(r)
+def decide_messages(state: State, role: Role, catalog=None):
+    sections = [
+        _execution(state),
+        _section("작업 결과와 검증 이력", _json(_records(state["results"]))),
     ]
-    source_ids = {r["id"] for r in source_calls}
-    source_records = [
-        r
-        for r in results[:selection_index]
-        if r["id"] in source_ids
-        or (
-            r["decision"] == "verification"
-            and (r["output"] or {}).get("call_id") in source_ids
-        )
-    ]
-    sections = []
-    if source_records:
+    if role == "report":
         sections.append(
-            _section("계산 입력의 원본·검증", _json(_records(source_records)))
+            _section(
+                "상세 뷰의 표현 범위",
+                _json(visualization_context(state, include_inputs=False)),
+            )
         )
-    sections.append(
-        _section(
-            "검증할 선택·호출 기록", _json(_records([results[selection_index], called]))
-        )
-    )
-    return _messages(state, role, "Verification", sections)
-
-
-def decide_messages(state: State, role: Role):
+        if catalog is not None:
+            sections.append(_section("조회 가능한 자료 목록", _json(catalog)))
     return _messages(
         state,
         role,
         "Decision",
-        [
-            _execution(state),
-            _section("작업 결과와 검증 이력", _json(_records(state["results"]))),
-        ],
+        sections,
     )
 
 
@@ -300,7 +303,7 @@ def compose_messages(state: State, role: Role):
     if error and error["code"] == "execution_limit_exceeded":
         guide = (
             "실행 한도에 도달해 별도 종료 응답 예산을 사용한다. "
-            "추가 도구·하위 Agent·렌더링·재시도 없이 확보한 검증 결과로만 응답한다. "
+            "추가 도구·하위 Agent·렌더링·재시도 없이 성공한 호출 결과로만 응답한다. "
             "기존 공개 산출물을 보존하고 한계·미해결 사항을 밝힌다. "
             "자료 출력은 확보된 데이터로 연결하며 새 비교표는 만들지 않는다. "
             "사용 가능한 근거가 없으면 failed, 일부 근거가 있으면 partial이다."
@@ -329,3 +332,69 @@ def ask_messages(state: State, role: Role):
             ),
         ],
     )
+
+
+def report_messages(state: State, stage: str, catalog):
+    view_key = state["results"][-1]["action"]["arguments"]["view_key"]
+    instructions = {
+        "selection": (
+            "상세 뷰를 선정한다. "
+            "views에 view_key, reason, evidence_ids를 기록한다. "
+            "성공한 조회·가공 자료만 참조한다. 자료 부족 시 3개 미만을 허용한다."
+        ),
+        "selection_review": (
+            "마지막 뷰 선정을 검토한다. 뷰별 적합성·중복·설명 근거 충분 여부를 "
+            "확인한다. 근거가 부족한 뷰를 억지로 채우지 않는다. "
+            "빈 목록은 설명 가능한 자료가 없는 경우에만 적합하다."
+        ),
+        "review_retry": (
+            "result_ids에 지정된 초안을 검토한다. "
+            "설명 또는 퀵 인사이트의 검토 기준을 적용한다."
+        ),
+        "draft": (
+            (
+                "대상 뷰의 설명을 한 단락·최대 3문장으로 작성한다."
+                if view_key
+                else "검증된 설명에서 퀵 인사이트 3~4문장을 작성한다. "
+                "문장 사이를 줄바꿈한다."
+            )
+            + " 마지막 호출의 result_ids가 입력이다. "
+            "이전 검토 사유가 있으면 재작성에 반영한다."
+        ),
+        "draft_review": (
+            "마지막 설명 초안을 근거와 대조하고 한 단락·최대 3문장을 검토한다."
+            if view_key
+            else "마지막 퀵 인사이트를 검증된 설명과 대조한다. "
+            "줄바꿈으로 구분된 3~4개 한 문장인지, 중복·새 주장이 없는지 검토한다."
+        ),
+    }
+    instruction = instructions[stage]
+    guide = (
+        Path(__file__)
+        .with_name("instructions")
+        .joinpath("analysis-report.md")
+        .read_text(encoding="utf-8")
+    )
+    # 원본은 State다. 이번 호출에 필요한 직렬화만 지역값으로 만든다.
+    return [
+        SystemMessage(
+            guide
+            + "\n\n이번 호출: "
+            + instruction
+            + "\n\n"
+            + _section("조회 가능한 자료 목록", _json(catalog))
+        ),
+        HumanMessage(
+            json.dumps(
+                {
+                    "request": state["request"],
+                    "execution": state["execution"],
+                    "results": _records(state["results"]),
+                    "views": visualization_context(state, include_inputs=False)[
+                        "views"
+                    ],
+                },
+                ensure_ascii=False,
+            )
+        ),
+    ]

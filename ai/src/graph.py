@@ -1,7 +1,6 @@
 """Agent의 실행 흐름과 상태 전이를 관리한다."""
 
 import asyncio
-
 from collections.abc import Awaitable, Callable
 from copy import deepcopy
 from sys import maxsize
@@ -16,7 +15,16 @@ from pydantic import ConfigDict, TypeAdapter, with_config
 from typing_extensions import TypedDict
 
 from src.exceptions import LimitReached
-from src.execution import consume, exhausted, finalizing, record, remaining, require, timed
+from src.execution import (
+    accepted_outputs,
+    consume,
+    exhausted,
+    finalizing,
+    record,
+    remaining,
+    require,
+    timed,
+)
 from src.execution_trace import trace_span
 from src.state import Error, State, StateUpdate, state_adapter
 
@@ -61,36 +69,49 @@ def _stop(state: State, *, cause: str, code: str):
     if previous.get("content"):
         content = previous["content"] + "\n\n" + cause
     reply = {
-        "id": str(uuid4()), "kind": "final", "label": "실행 종료",
-        "content": content, "artifacts": deepcopy(previous.get("artifacts", [])),
+        "id": str(uuid4()),
+        "kind": "final",
+        "label": "실행 종료",
+        "content": content,
+        "artifacts": deepcopy(previous.get("artifacts", [])),
     }
     useful = (
         bool(previous.get("artifacts"))
-        or (previous.get("kind") in {"intermediate", "final"} and bool(previous.get("content")))
-    ) or any(
-        item["decision"] == "verification"
-        and (item["output"] or {}).get("accepted") is True
-        for item in state["results"]
-    )
+        or (
+            previous.get("kind") in {"intermediate", "final"}
+            and bool(previous.get("content"))
+        )
+    ) or bool(accepted_outputs(state))
     execution = state["execution"] | {
         "status": "partial" if useful else "failed",
         "error": state["execution"]["error"] or {"code": code, "cause": cause},
     }
-    return Command(update={
-        "results": state["results"], "execution": execution, "response": reply,
-        "messages": [AIMessage(content, id=reply["id"])],
-    }, goto=END)
+    return Command(
+        update={
+            "results": state["results"],
+            "execution": execution,
+            "response": reply,
+            "messages": [AIMessage(content, id=reply["id"])],
+        },
+        goto=END,
+    )
 
 
 def _limited(state: State, name: str, exc: LimitReached):
     was_finalizing = finalizing(state)
     usage = state["execution"]["budget"][exc.resource]
-    state["results"].append(record(
-        name, "limit_reached", str(exc), success=False,
-        output={"code": exc.code, "resource": exc.resource, **usage},
-    ))
+    state["results"].append(
+        record(
+            name,
+            "limit_reached",
+            str(exc),
+            success=False,
+            output={"code": exc.code, "resource": exc.resource, **usage},
+        )
+    )
     state["execution"]["error"] = state["execution"]["error"] or {
-        "code": exc.code, "cause": str(exc),
+        "code": exc.code,
+        "cause": str(exc),
     }
     if (
         not was_finalizing
@@ -98,24 +119,33 @@ def _limited(state: State, name: str, exc: LimitReached):
         and remaining(state, "final_active_seconds") > 0
     ):
         state["execution"]["status"] = "running"
-        return Command(update={
-            "results": state["results"], "execution": state["execution"],
-        }, goto="compose")
+        return Command(
+            update={
+                "results": state["results"],
+                "execution": state["execution"],
+            },
+            goto="compose",
+        )
     return _stop(
-        state, code=exc.code,
+        state,
+        code=exc.code,
         cause="실행 한도에 도달했습니다. 기존 공개 결과를 보존하며, "
-        "검증을 마치지 못한 결과는 새 근거로 공개하지 않습니다.",
+        "실패·부적합 결과는 새 근거로 공개하지 않습니다.",
     )
 
 
-def _wrap_node(name: str, fn: Node, finish: Callable[[State], Completion]):
+def _wrap_node(
+    name: str, fn: Node, finish: Callable[[State], Completion]
+):
     node = RunnableLambda(fn)
 
     def apply(original: State, state: State, command: Command):
         if command.graph is not None or command.goto not in DESTINATIONS[name]:
             raise ValueError(f"Disallowed transition: {name}")
         update = update_adapter.validate_python(command.update)
-        allowed = {"results", "request"} if name == "interpret" else {"results", "response"}
+        allowed = (
+            {"results", "request"} if name == "interpret" else {"results", "response"}
+        )
         if update.keys() - allowed:
             raise ValueError(f"Disallowed State update: {name}")
         records = update.get("results", [])
@@ -141,10 +171,14 @@ def _wrap_node(name: str, fn: Node, finish: Callable[[State], Completion]):
             update["messages"] = [AIMessage(response["content"], id=response["id"])]
         execution = state["execution"] | {"status": status}
         if command.goto == END:
-            completion = completion_adapter.validate_python(finish(deepcopy(state | update)))
+            completion = completion_adapter.validate_python(
+                finish(deepcopy(state | update))
+            )
             if finalizing(state):
                 completion = {
-                    "status": "failed" if completion["status"] == "failed" else "partial",
+                    "status": "failed"
+                    if completion["status"] == "failed"
+                    else "partial",
                     "error": state["execution"]["error"],
                 }
             execution.update(completion)
@@ -167,35 +201,54 @@ def _wrap_node(name: str, fn: Node, finish: Callable[[State], Completion]):
                     require(prepared, "active_seconds")
                     consume(prepared, "steps")
                 command = await timed(
-                    prepared, lambda: node.ainvoke(prepared, config),
+                    prepared,
+                    lambda: node.ainvoke(prepared, config),
                     contains_child=name == "act",
                 )
                 # 동기 처리까지 포함한 실측을 반영한 뒤 다음 업무로 진행한다.
-                resource = "final_active_seconds" if finalizing(prepared) else "active_seconds"
+                resource = (
+                    "final_active_seconds" if finalizing(prepared) else "active_seconds"
+                )
                 if remaining(prepared, resource) <= 0:
                     # 노드가 반환한 새 기록은 한도 종료에서도 보존한다.
-                    pending = update_adapter.validate_python(command.update).get("results", [])
+                    pending = update_adapter.validate_python(command.update).get(
+                        "results", []
+                    )
                     known = {item["id"] for item in prepared["results"]}
-                    prepared["results"].extend(item for item in pending if item["id"] not in known)
+                    prepared["results"].extend(
+                        item for item in pending if item["id"] not in known
+                    )
                     raise exhausted(prepared, resource)
                 result = apply(state, prepared, command)
             except LimitReached as exc:
                 result = _limited(prepared, name, exc)
             except Exception as exc:
-                prepared["results"].append(record(
-                    name, "execution_failed", "노드 실행 실패", success=False,
-                    output={"code": getattr(exc, "code", "runtime_error"),
-                            "error_type": type(exc).__name__},
-                ))
+                prepared["results"].append(
+                    record(
+                        name,
+                        "execution_failed",
+                        "노드 실행 실패",
+                        success=False,
+                        output={
+                            "code": getattr(exc, "code", "runtime_error"),
+                            "error_type": type(exc).__name__,
+                        },
+                    )
+                )
                 result = _stop(
-                    prepared, code=getattr(exc, "code", "runtime_error"),
-                    cause="실행 오류로 요청을 완료하지 못했습니다. 기존 공개 결과를 보존합니다.",
+                    prepared,
+                    code=getattr(exc, "code", "runtime_error"),
+                    cause="실행 오류로 요청을 완료하지 못했습니다. "
+                    "기존 공개 결과를 보존합니다.",
                 )
             if span:
-                span.update(output={
-                    "node_update": command.update if command is not None else None,
-                    "applied_update": result.update, "goto": result.goto,
-                })
+                span.update(
+                    output={
+                        "node_update": command.update if command is not None else None,
+                        "applied_update": result.update,
+                        "goto": result.goto,
+                    }
+                )
             return result
 
     def run(state: State, config):
@@ -240,8 +293,9 @@ def compile_graph(
     graph = StateGraph(State)
     for name, fn in nodes.items():
         graph.add_node(
-            name, _wrap_node(name, fn, finish),
-            destinations=tuple(dict.fromkeys((*DESTINATIONS[name], "compose", END)))
+            name,
+            _wrap_node(name, fn, finish),
+            destinations=tuple(dict.fromkeys((*DESTINATIONS[name], "compose", END))),
         )
     graph.add_node("wait", _wait_for_input, destinations=("interpret",))
     graph.add_conditional_edges(
@@ -251,5 +305,5 @@ def compile_graph(
         ),
         ["act", "interpret"],
     )
-    # LangGraph superstep 수는 업무 단계가 아니다. State의 steps를 유일한 실행 한도로 쓴다.
+    # LangGraph superstep 수와 업무 단계는 다르다. State의 steps로 제한한다.
     return graph.compile(checkpointer=checkpointer).with_config(recursion_limit=maxsize)
