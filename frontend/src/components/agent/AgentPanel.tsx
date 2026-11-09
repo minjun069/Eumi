@@ -1,6 +1,8 @@
 import "@/styles/agent.css"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import type { AgentMessage } from "@/api/agentApi"
+import { AgentArtifacts } from "@/components/agent/AgentArtifacts"
+import { type AnswerArtifacts, artifactsByAnswer } from "@/components/agent/artifactData"
 import { EXAMPLE_QUESTIONS } from "@/components/agent/agentExamples"
 import { Emphasized } from "@/components/common/Emphasized"
 import { AGENT_MESSAGES, agentStore, isEndRow, useAgentState } from "@/stores/agentStore"
@@ -10,7 +12,7 @@ import { formatDateTime } from "@/utils/datetime"
  * AI Agent 패널 (FR-071~079): 헤더의 AI 아이콘으로 열고, 본문 오른쪽 위를 덮는다.
  * - 질문 행 → 진행 행(단계 이름, 상세는 펼쳐 보기) → 끝 행(완료 답변 / 실패 + 다시 질문 / 중단)
  * - 실행 중에는 보내기를 막고 중단 버튼을 보인다. 화면 문맥은 AI에 보내지 않는다 (ai-agent-panel.md 1장)
- * - artifacts(표·그래프)는 형식이 정해질 때까지 그리지 않는다
+ * - 완료 행의 artifacts(Tableau 카드, 정화한 표·SVG)를 답변 아래에 그린다 (AgentArtifacts, 내부_연동_변경_계획.md 2-7)
  */
 export function AgentPanel() {
   const { open, messages, running, sending, cancelling, notice, loadedFrom } = useAgentState()
@@ -18,6 +20,11 @@ export function AgentPanel() {
   const [draft, setDraft] = useState("")
   const scrollRef = useRef<HTMLDivElement>(null)
   const turns = toTurns(messages)
+  // 완료 행마다 그릴 산출물. 앞 답변에 이미 나온 그래프·표는 다시 그리지 않는다
+  const artifacts = useMemo(
+    () => artifactsByAnswer(messages.filter((message) => message.status === "완료")),
+    [messages],
+  )
 
   // 마지막 질문이 맨 위에 오도록 스크롤한다 (답이 길어도 첫 줄부터 읽게).
   // 답이 아래에 붙어 높이가 늘 때마다 다시 맞춘다
@@ -78,7 +85,12 @@ export function AgentPanel() {
           </div>
         )}
         {turns.map((turn) => (
-          <Turn key={turn.question.messageId} turn={turn} busy={busy} />
+          <Turn
+            key={turn.question.messageId}
+            turn={turn}
+            busy={busy}
+            artifacts={turn.end ? artifacts.get(turn.end.messageId) : undefined}
+          />
         ))}
       </div>
 
@@ -147,7 +159,7 @@ function toTurns(messages: AgentMessage[]): AgentTurn[] {
   return turns
 }
 
-function Turn({ turn, busy }: { turn: AgentTurn; busy: boolean }) {
+function Turn({ turn, busy, artifacts }: { turn: AgentTurn; busy: boolean; artifacts: AnswerArtifacts | undefined }) {
   const { question, steps, end } = turn
   const status = end === null ? "running" : end.status === "완료" ? "done" : end.status === "실패" ? "failed" : "cancelled"
   return (
@@ -165,11 +177,14 @@ function Turn({ turn, busy }: { turn: AgentTurn; busy: boolean }) {
           )
         )}
         {end === null && <p className="agent-working">답변을 만드는 중…</p>}
-        {/* TODO(artifacts 형식 미정, AI·FE 합의): end.artifacts는 형식이 정해지면 표·그래프로 그린다 */}
         {end?.status === "완료" && (
-          <p className="agent-text">
-            <Emphasized text={end.content ?? ""} />
-          </p>
+          <>
+            <p className="agent-text">
+              <Emphasized text={end.content ?? ""} />
+            </p>
+            {/* 진행 행의 artifacts는 그리지 않는다 (같은 그래프가 겹친다) */}
+            <AgentArtifacts answer={artifacts} />
+          </>
         )}
         {end?.status === "실패" && (
           <div className="agent-failed">
