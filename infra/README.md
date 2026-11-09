@@ -132,6 +132,24 @@ docker compose --profile data exec pipeline spark-submit pipeline/<잡>.py
 
 MinIO가 2025년에 커뮤니티 에디션 이미지 배포를 중단해 `docker.io/minio/minio`, `quay.io/minio/minio` 모두 받을 수 없다. Bitnami가 마지막으로 빌드한 RELEASE.2025-07-23 이미지(`bitnamilegacy/minio`)를 쓴다. 더 갱신되지 않으므로 운영 반영 때는 RustFS(`rustfs/rustfs`) 같은 대안을 검토한다.
 
+### 모니터링 대시보드 (Grafana)
+
+http://localhost:3000/d/eumi-pipeline — "Eumi 파이프라인" 하나. 파일 `grafana/provisioning/dashboards/json/eumi_pipeline.json`이 원본이고 Grafana가 30초마다 다시 읽는다. **화면에서 고친 것은 저장되지 않는다.** 고치려면 파일을 바꾸고 커밋한다 (패널 하나를 화면에서 만들어 본 뒤 Inspect → Panel JSON 을 복사해 파일에 넣는 방법이 편하다).
+
+| 줄 | 패널 | 읽는 곳 | 보는 것 |
+|---|---|---|---|
+| 이번 달 한눈에 | 마지막 실행 · 다음 실행 · 적재된 최신 달 · 검사 결과 · 울린 알림 | airflow · eumi | 지금 상태 한 줄씩. 실패 · 멈춤은 빨강 |
+| 실행 | 실행 이력(표) · 실행 × 단계 상태판 · 단계별 소요 시간 · 단계별 실패 · 재시도 | airflow (`dag_run` · `task_instance`) | 어느 실행의 어느 단계가 왜 멈췄나 |
+| 데이터 품질 | 테이블 최신성 · 달별 검사 결과 · 달별 행 수 · 전월 대비 변화 · 위험 단계 분포 · 실거래가 수집 | eumi (결과 테이블 · `analysis.pipeline_check`) | 결과가 계약대로 채워졌나 |
+| 인프라 | Airflow 스케줄러 · DB 크기 · DB 접속 수 · 테이블 크기 · 오래 도는 쿼리 | airflow `job` · `pg_stat_*` | DB · 스케줄러가 버티고 있나 |
+
+- 패널 제목 옆 ⓘ 에 뜻과 조치가 적혀 있다.
+- 숫자 칸은 canvas 패널이다 (이름 13px 회색 → 값 30px → 부가 정보 12px 회색). 값 · 색은 SQL 의 `status` 열에, 부가 정보는 `sub` 열에 묶여 있다.
+- 달 단위 표 · 막대는 대시보드 기간(기본 최근 6개월)과 무관하게 DB 에 있는 달을 전부 보여준다. 기간이 걸리는 것은 실행 이력 · 실패 · 재시도뿐이다.
+- 단계 이름(01 원본 확인 … 17 결과 검증)은 SQL 안의 `tasks` 표에 적혀 있다. DAG 에 단계를 넣거나 빼면 실행 줄 패널 3개의 그 표를 같이 고친다. 검사 이름 목록(달별 검사 결과)도 `verify_outputs.py` 와 맞춘다.
+- 달별 행 수 · 변화율은 `flow_detail`(월 127만 행)을 세느라 2~3초 걸린다. 느리면 두 패널의 새로고침을 늦춘다.
+- Grafana 계정 `eumi_monitor`는 쿼리 30초 제한 · 동시 접속 10개라 대시보드가 DB 를 멈추게 하지는 않는다.
+
 ## 운영 (https://k15b201.p.ssafy.io)
 
 `develop` → `master` MR을 병합하면 Jenkins가 바뀐 서비스만 빌드 · 배포한다. 담당: 인프라 (김민재).

@@ -863,7 +863,7 @@
         "minVizHeight": 16,
         "maxVizHeight": 300,
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true },
-        "text": {}
+        "text": { "titleSize": 13, "valueSize": 18 }
       },
       "fieldConfig": {
         "defaults": {
@@ -905,7 +905,7 @@
         "minVizHeight": 16,
         "maxVizHeight": 300,
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true },
-        "text": {}
+        "text": { "titleSize": 13, "valueSize": 18 }
       },
       "fieldConfig": {
         "defaults": {
