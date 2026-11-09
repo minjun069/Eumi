@@ -29,4 +29,12 @@ final class AgentDiagnostics {
         log.warn("AI terminal message substituted conversationId={} questionId={} operation={} status={}",
                 id, questionId, operation, status);
     }
+
+    static void accepted(UUID id, long questionId) {
+        log.info("AI HTTP accepted conversationId={} messageId={} status=202", id, questionId);
+    }
+
+    static void notified(UUID id, long messageId, long questionId, String status) {
+        log.info("AI message notification conversationId={} messageId={} questionId={} status={}", id, messageId, questionId, status);
+    }
 }

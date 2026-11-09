@@ -15,10 +15,10 @@ export type Conditions = {
 export type Filter = {
   fieldName: string
   isAllSelected?: boolean
-  appliedValues?: { value: unknown }[]
+  appliedValues?: { value: unknown; formattedValue?: string }[]
 }
 
-export type ParameterValue = { value: unknown; hasAlias?: boolean; aliasValue?: string }
+export type ParameterValue = { value: unknown; formattedValue?: string; hasAlias?: boolean; aliasValue?: string }
 
 export type Parameter = {
   name: string
@@ -63,7 +63,8 @@ export type Viz = HTMLElement & {
   workbook: {
     activeSheet: Worksheet | Dashboard | { name: string; sheetType: "story" }
     activateSheetAsync: (name: string) => Promise<unknown>
-    changeParameterValueAsync: (name: string, value: string) => Promise<unknown>
+    /** 날짜 매개변수는 'YYYY-MM-DD' 글자나 UTC 기준 Date */
+    changeParameterValueAsync: (name: string, value: string | Date) => Promise<unknown>
     getParametersAsync: () => Promise<Parameter[]>
   }
 }

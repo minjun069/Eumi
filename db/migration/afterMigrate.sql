@@ -31,3 +31,14 @@ REVOKE DELETE ON region_insight_report FROM eumi_ai;
 --   AI 대화: 이전 대화와 이번 질문을 읽고 진행·완료·실패·취소 행을 추가만 한다 (수정·삭제 불가)
 --   대화 행(ai_conversation)의 실행 종료 일시·삭제 예정일은 ai_message 트리거가 갱신하므로 권한이 필요 없다
 GRANT SELECT, INSERT ON ai_message TO eumi_ai;
+
+-- 모니터링(Grafana, eumi_monitor): 읽기만. analysis 전체와 public의 지역·결과. 회원·사례자·상담·복지자원·AI 대화는 권한 없음
+--   계정은 eumi_db_roles.sql이 만든다. 계정이 없는 환경(모니터링을 켜지 않은 DB)에서도 마이그레이션이 멈추지 않도록 있을 때만 준다
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'eumi_monitor') THEN
+        GRANT USAGE ON SCHEMA public, analysis TO eumi_monitor;
+        GRANT SELECT ON ALL TABLES IN SCHEMA analysis TO eumi_monitor;
+        GRANT SELECT ON dim_region, region_result TO eumi_monitor;
+    END IF;
+END $$;

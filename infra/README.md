@@ -6,8 +6,9 @@
 |---|---|
 | `docker-compose.yml` | PostgreSQL 17 + Flyway(스키마 · 권한 적용) + Mailpit. profile `ai`: AI 서버(`ai/Dockerfile`). profile `data`: MinIO · Kafka · pipeline(Spark + Airflow) (데이터 파트만, 아래 참고) |
 | `.env.example` | 로컬 비밀번호 목록. `.env`로 복사해서 쓴다 (`.env`는 커밋하지 않음) |
-| `postgres-init/01-eumi-roles.sh` | DB를 처음 만들 때 계정 4개와 `eumi` DB 생성 (`db/roles/eumi_db_roles.sql` 실행) |
+| `postgres-init/01-eumi-roles.sh` | DB를 처음 만들 때 계정 5개와 `eumi` DB 생성 (`db/roles/eumi_db_roles.sql` 실행) |
 | `pipeline/` | 데이터 파이프라인 실행 이미지 (`Dockerfile`: Python 3.12 + Spark 3.5.9 + Airflow 2.10, `spark-defaults.conf`, `requirements.txt`). profile `data`에서 빌드 |
+| `grafana/provisioning/` | Grafana 설정 파일: `datasources/`(eumi · airflow DB), `dashboards/`(json/ 의 대시보드 자동 등록), 알림. profile `data`의 grafana 컨테이너가 읽는다 |
 
 ### 처음 실행
 
@@ -48,7 +49,7 @@ docker compose logs flyway   # "Successfully applied …" (처음이면 V1부터
 |---|---|
 | 주소 | 호스트 `http://localhost:8000` (backend 기본값 `AI_BASE_URL`과 같음), 운영은 내부망 `http://ai:8000`만 |
 | DB | `eumi_ai` 계정. compose가 `SETTINGS_DATABASE_URL`을 넣는다 |
-| LLM 키 | `ai/.env`의 `SETTINGS_API_KEY` (각자 발급, 커밋 금지). 없으면 ai가 시작되지 않는다 |
+| LLM 키 | `ai/.env`의 `SETTINGS_API_KEY` (각자 발급, 커밋 금지). 없으면 ai가 시작되지 않는다. GMS 키면 같은 파일에 `SETTINGS_BASE_URL` · `SETTINGS_MODEL`도 넣는다 (값은 AI 담당 안내, 없으면 OpenAI 주소로 보낸다) |
 | backend 주소 · AI 토큰 | compose가 `SETTINGS_BACKEND_URL`(호스트 backend 8080) · `SETTINGS_BACKEND_TOKEN`(기본 `ai_token_local`)을 넣는다. 없으면 ai가 시작되지 않는다 |
 | 헬스체크 | `GET /health` → `{"status":"UP"}` (`ai/Dockerfile`의 HEALTHCHECK). 서버가 떠 있다는 뜻이고 DB · 모델 연결을 보장하지는 않는다 |
 | 실행 기록 | 컨테이너 `/app/outputs` (볼륨 `aioutputs`). 보기: `MSYS_NO_PATHCONV=1 docker compose cp ai:/app/outputs ../ai/outputs/docker` |
@@ -67,12 +68,18 @@ docker compose --profile ai stop ai               # 끄기
 
 Git Bash는 `/app/...` 같은 컨테이너 안 경로를 Windows 경로(`C:/Program Files/Git/app/...`)로 바꿔 버린다. 컨테이너 경로가 들어가는 명령 앞에는 `MSYS_NO_PATHCONV=1`을 붙인다 (서버의 리눅스 셸에서는 필요 없음).
 
-backend를 ai에 붙여 보려면 호스트에서 http 모드로 실행한다(Git Bash). 시간 값 4개는 AI 담당이 확정하기 전까지 아래 제안값으로 둔다. 변수는 이 명령에만 적용된다.
+backend를 ai에 붙여 보려면 호스트에서 http 모드로 실행한다(Git Bash). 변수는 이 명령에만 적용된다.
+
+- 시간 값 4개는 AI 담당이 확정하기 전까지 제안값(AI `runtime_timeout` 300초 기준, [ai-agent-panel.md](../docs/api/ai-agent-panel.md) 5절)으로 둔다.
+- http 모드는 내부 연동 토큰 두 개가 없으면 backend가 뜨지 않는다.
+  - `EUMI_AI_TOKEN`은 로컬 compose가 ai에 넣는 `SETTINGS_BACKEND_TOKEN`과 같아야 한다 (기본 `ai_token_local`, `infra/.env`에 `EUMI_AI_TOKEN`을 따로 넣었으면 그 값).
+  - `EUMI_PIPELINE_TOKEN`은 로컬용으로 아무 값이나 넣되 AI 토큰과 달라야 한다.
 
 ```bash
 cd backend
-EUMI_AI_MODE=http EUMI_AI_EXECUTION_LIMIT=90s EUMI_AI_GRACE_PERIOD=5s \
-EUMI_AI_UNRESPONSIVE_AFTER=40s EUMI_AI_CANCEL_WAIT=3s ./gradlew bootRun
+EUMI_AI_MODE=http EUMI_AI_EXECUTION_LIMIT=330s EUMI_AI_GRACE_PERIOD=5s \
+EUMI_AI_UNRESPONSIVE_AFTER=40s EUMI_AI_CANCEL_WAIT=3s \
+EUMI_AI_TOKEN=ai_token_local EUMI_PIPELINE_TOKEN=pipeline_token_local ./gradlew bootRun
 ```
 
 ## 데이터 파이프라인 (MinIO · Kafka · Spark · Airflow)
@@ -86,7 +93,8 @@ EUMI_AI_UNRESPONSIVE_AFTER=40s EUMI_AI_CANCEL_WAIT=3s ./gradlew bootRun
 | kafka | `apache/kafka` 3.9.2 (KRaft 단일 노드) | `localhost:9092` | `kafka:19092` | 토픽 `flow_hourly` (파티션 6, 키 grid_cd). kafka-init이 만들고 끝난다 |
 | pipeline | `pipeline/Dockerfile` (python 3.12 + pyspark 3.5.9 + Java 17 + S3A · PostgreSQL JDBC · Kafka 커넥터 + Airflow 2.10 + `data/requirements.txt`) | Spark 잡 UI http://localhost:4040 | — | Airflow 스케줄러. 모든 배치 · 스트리밍 스크립트가 이 안에서 돈다 (local[*]). 저장소 `data/`가 `/opt/eumi/data`로 마운트 |
 | pipeline-web | 같은 이미지 | http://localhost:8081 (계정 `.env` AIRFLOW_ADMIN_*) | — | Airflow 웹 UI (DAG 실행 · 로그) |
-| pipeline-init | 같은 이미지 | — | — | Airflow 메타 DB 마이그레이션 + 관리자 계정 (한 번 돌고 종료) |
+| pipeline-init | 같은 이미지 | — | — | Airflow 메타 DB 마이그레이션 + 관리자 계정 + Grafana 계정의 실행 이력 읽기 권한(`data/airflow/grant_monitor.py`) (한 번 돌고 종료) |
+| grafana | `grafana/grafana-oss` 12.4.3 | http://localhost:3000 (계정 `.env` GRAFANA_ADMIN_*) | — | 파이프라인 모니터링. Prometheus 없이 PostgreSQL을 읽기 전용 계정 `eumi_monitor`로 직접 조회(eumi DB 결과 테이블 + airflow DB 실행 이력). 데이터소스 · 대시보드 · 알림은 `grafana/provisioning/` 파일로 등록되어 화면에서 고칠 수 없다 |
 
 ### 켜기 · 끄기
 
@@ -99,6 +107,12 @@ docker compose --profile data down            # 끌 때도 --profile data (없�
 
 - 데이터까지 지우고 처음부터: `docker compose --profile data down -v` (DB · MinIO · Kafka · Spark 체크포인트 볼륨 모두 삭제)
 - Airflow 메타 DB: 새 볼륨이면 `postgres-init/02-airflow-db.sh`가 `airflow` 계정 · DB를 만든다. **이미 있는 로컬 DB**에는 한 번 수동으로: `docker compose exec postgres psql -U postgres -c "CREATE ROLE airflow LOGIN PASSWORD 'airflow_local'" -c "CREATE DATABASE airflow OWNER airflow"`
+- Grafana 계정 `eumi_monitor`: 새 볼륨이면 `postgres-init/01-eumi-roles.sh`가 만든다. **이미 있는 로컬 DB**에는 한 번 수동으로 만든 뒤 Flyway와 pipeline-init을 다시 돌려 권한을 준다:
+  ```bash
+  docker compose exec postgres psql -U postgres -c "CREATE ROLE eumi_monitor LOGIN PASSWORD 'monitor_local' CONNECTION LIMIT 10" -c "ALTER ROLE eumi_monitor SET statement_timeout = '30s'" -c "GRANT pg_read_all_stats TO eumi_monitor"
+  docker compose run --rm flyway migrate && docker compose --profile data up -d pipeline-init
+  ```
+  확인: http://localhost:3000 → Connections → Data sources → `eumi` · `airflow` 각각 Test 가 초록색
 - 연결 확인: `docker compose --profile data exec pipeline spark-submit pipeline/ops/check_infra.py` → 마지막 줄 `CHECK_INFRA PASS` (s3a 쓰기 · 읽기, 테이블 11개, JDBC, DML 권한, Kafka 메시지 1건 왕복)
 
 ### 접속 정보 (로컬 전용, `.env.example`)
@@ -108,6 +122,7 @@ docker compose --profile data down            # 끌 때도 --profile data (없�
 | MinIO | 루트 계정 `eumi_minio` / `minio_local123` (스크립트 · Spark · s3manager 공통), 버킷 `sgi` |
 | Kafka | 호스트 `localhost:9092`, 컨테이너 `kafka:19092`, 토픽 `flow_hourly` |
 | PostgreSQL | `eumi_pipeline` / `pipeline_local` (위 표와 같음) |
+| Grafana | 웹 `admin` / `grafana_local`, DB 조회 계정 `eumi_monitor` / `monitor_local` |
 
 ### Spark 잡 실행
 
@@ -162,7 +177,8 @@ master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migra
 - **배포 조건:** `ai/Dockerfile`과 서버 코드 `ai/api.py`가 둘 다 저장소에 있을 때만 Jenkins가 빌드 · 배포한다. `ai/` 바로 아래 `.md`와 `ai/docs/`만 바뀌면 다시 빌드하지 않는다.
 - **배포 순서와 실패:** ai → backend → web 순서다. ai가 실패하면 이전 ai로 되돌리고 빌드를 노란색(UNSTABLE)으로 표시한 뒤 backend · web 배포는 계속한다.
 - **첫 배포 전 준비:** 서버 `.env.config`에 `EUMI_LLM_API_KEY`(AI 담당 전달)와 `EUMI_AI_TOKEN`(서버에서 `openssl rand -hex 32`)을 넣는다. 값이 없으면 `deploy.sh ai`가 멈춘다. `EUMI_AI_PASSWORD`는 이미 있다.
-- **연결 방식:** backend는 `EUMI_AI_MODE: fake`인 동안 ai를 부르지 않는다. http로 바꾸는 조건은 compose의 backend 주석에 있다.
+- **내부 연동 토큰:** backend도 `EUMI_AI_TOKEN`(ai와 같은 값)과 `EUMI_PIPELINE_TOKEN`(서버에서 따로 만든 다른 값)을 받는다. fake인 동안은 없어도 backend가 뜨고, http 모드는 둘 다 있어야 뜬다.
+- **연결 방식:** backend는 `EUMI_AI_MODE: fake`인 동안 ai를 부르지 않는다. http로 바꾸는 조건(GMS 주소 · 모델, 시간 값 4개, 토큰 `:?`)은 compose의 backend 주석에 있다.
 - **실행 기록:** 컨테이너 메모리(`/app/outputs`, 512MB)에만 남고 ai를 다시 배포하면 지워진다.
 
 배포 뒤 확인 (서버, jenkins 계정):
@@ -175,6 +191,7 @@ scripts/dc.sh --profile ai logs --tail=50 ai         # "Uvicorn running on http:
 scripts/dc.sh exec -T backend wget -S -O /dev/null --header 'Content-Type: application/json' --post-data '{}' http://ai:8000/internal/agent/runs 2>&1 | grep 'HTTP/'
 # ai → DB (eumi_ai 계정)
 scripts/dc.sh --profile ai exec -T ai /app/.venv/bin/python -c "import os, psycopg; psycopg.connect(os.environ['SETTINGS_DATABASE_URL']).close(); print('db ok')"
-# ai → LLM API (바깥 연결): 401 또는 200이면 나가는 길은 열려 있다
-scripts/dc.sh --profile ai exec -T ai /app/.venv/bin/python -c "import httpx; print(httpx.get('https://api.openai.com/v1/models', timeout=5).status_code)"
+# ai → LLM API (바깥 연결): compose의 SETTINGS_BASE_URL(GMS 주소)로 요청한다. 키는 보내지 않는다.
+#   200 · 401 · 404가 나오면 나가는 길은 열려 있다 (연결 오류 · 시간 초과면 막힘). 주소가 아직 없으면 OpenAI 주소로 확인한다
+scripts/dc.sh --profile ai exec -T ai /app/.venv/bin/python -c "import os, httpx; u = os.environ.get('SETTINGS_BASE_URL', 'https://api.openai.com/v1').rstrip('/'); print(u, httpx.get(u + '/models', timeout=5).status_code)"
 ```

@@ -36,7 +36,7 @@ public class FakeAgentClient implements AgentClient {
     }
 
     @Override
-    public void start(UUID id, long questionId) {
+    public void start(UUID id, long questionId, AgentDtos.ScreenContext context) {
         var run = new Run(questionId, clock.instant());
         var existing = runs.putIfAbsent(id, run);
         if (existing != null) {
@@ -90,9 +90,8 @@ public class FakeAgentClient implements AgentClient {
         finally { runs.remove(id, run); }
     }
 
-    @Override
-    public RunStatus status(UUID id) {
+    public boolean isRunning(UUID id) {
         var run = runs.get(id);
-        return run == null || run.finished.get() ? new RunStatus(false, null) : new RunStatus(true, run.questionId);
+        return run != null && !run.finished.get();
     }
 }

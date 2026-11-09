@@ -751,7 +751,7 @@ export interface paths {
         put?: never;
         /**
          * AI 질문 등록
-         * @description 질문 행을 저장하고 AI에 실행을 요청한다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 첫 질문(conversationId=null)이면 대화 UUID를 만들고 ai_conversation과 질문 행을 한 트랜잭션으로 저장한다. 이어서 질문이면 대화 행을 잠그고(FOR UPDATE) 소유자를 확인하며, 끝 행이 없는 질문이 있으면 409다. 남의 대화·보관 기간이 지난 대화는 404다. 커밋 뒤 내부 AI API(POST /internal/agent/runs {conversationId, questionId})를 부르고, AI는 접수만 바로 돌려준 뒤 ai_message에 진행·완료 행을 직접 저장한다. 호출이 바로 실패하면 BE가 실패 행을 쓴다. 화면은 202를 받으면 API-03-S1을 after=questionId로 1초마다 조회한다. 저장 전 마스킹의 지원 표지·형식·값 경계·제외 범위는 ai-agent-panel.md의 질문 마스킹 범위를 따른다. 마스킹 형식이 아닌 질문을 거절하는 별도 검증 오류는 추가하지 않는다.
+         * @description 질문 행을 저장하고 AI에 실행을 요청한다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 첫 질문(conversationId=null)이면 대화 UUID를 만들고 ai_conversation과 질문 행을 한 트랜잭션으로 저장한다. 이어서 질문이면 대화 행을 잠그고(FOR UPDATE) 소유자를 확인하며, 끝 행이 없는 질문이 있으면 409다. 남의 대화·보관 기간이 지난 대화는 404다. 커밋 뒤 내부 AI API(INT-01, POST /internal/agent/runs {conversationId, messageId, context?}, messageId = 이 질문 행 ID)를 부르고, AI는 접수만 바로 돌려준 뒤 ai_message에 진행·완료 행을 직접 저장한다. context는 형식만 검사해 그대로 넘기고 저장하지 않는다. 호출이 실패해도 바로 실패 행을 쓰지 않고, 질문 시각 + AI 실행 제한 + 여유 시간이 지난 뒤에만 BE가 실패 행을 쓴다(ai-agent-panel.md 4절). 화면은 202를 받으면 API-03-S1을 after=questionId로 1초마다 조회한다. 저장 전 마스킹의 지원 표지·형식·값 경계·제외 범위는 ai-agent-panel.md의 질문 마스킹 범위를 따른다. 마스킹 형식이 아닌 질문을 거절하는 별도 검증 오류는 추가하지 않는다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -771,7 +771,7 @@ export interface paths {
         };
         /**
          * AI 대화 메시지 조회
-         * @description after보다 큰 messageId의 행을 오름차순으로 돌려준다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 실행 중에는 1초마다 마지막으로 받은 messageId로, 대화를 열거나 새로고침하면 after=0으로 부른다. 끝 행(완료·실패·취소)을 받으면 화면은 조회를 멈춘다. 소유자만 조회하며 남의 대화·보관 기간이 지난 대화는 404다. 마지막 질문에 끝 행이 없고 새 행이 정해진 시간 동안 없으면 BE가 AI 실행 상태를 확인해 같은 질문으로 한 번 다시 요청하고, 질문 시각 + AI 실행 제한 + 여유 시간이 지나면 실패 행을 쓴다.
+         * @description after보다 큰 messageId의 행을 오름차순으로 돌려준다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 실행 중에는 1초마다 마지막으로 받은 messageId로, 대화를 열거나 새로고침하면 after=0으로 부른다. 끝 행(완료·실패·취소)을 받으면 화면은 조회를 멈춘다. 소유자만 조회하며 남의 대화·보관 기간이 지난 대화는 404다. 마지막 질문에 끝 행이 없고 새 행이 응답 없음 기준 동안 없으면 BE가 같은 messageId로 INT-01을 질문당 한 번 다시 보내고(상태 조회 INT-03은 없다), 질문 시각 + AI 실행 제한 + 여유 시간이 지나면 실패 행을 쓴다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -800,28 +800,6 @@ export interface paths {
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
         post: operations["agentApi_cancelRun"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/resources/document-extractions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * PDF 복지자원 양식 추출
-         * @description 신규 설계 계약. multipart file의 실제 PDF 내용·확장자·20MiB 한도를 검사한다. 인프라 상한 50MB와 구별한다. 추출값과 누락 필드를 반환하며 자원을 저장하지 않는다. 기존 사용자 수정값 덮어쓰기는 FE 확인 후 수행한다. 임시 파일은 성공·실패 모두 finally에서 제거한다. 부분 추출은 200, 읽기 불가는 422, 연동 장애 503이다.
-         *
-         *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
-         */
-        post: operations["resourceApi_extractDocument"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2144,70 +2122,25 @@ export interface components {
              */
             periodEnd: string;
         };
-        /** @description 찾지 못한 필드는 null. 담당자·상태·참여자 수는 추출하지 않는다. */
-        DocumentExtract: {
-            /** @description 자원명. trim 후 필수 */
-            resourceName: string | null;
-            /** @description 수행·담당 기관명. 등록 기관 ID와 별도 */
-            operatingOrgName: string | null;
-            /** @description 지원 대상 */
-            target: string | null;
-            /** @description 하나 이상. 무관은 다른 연령대와 함께 선택할 수 없다. 서버가 중복을 제거 */
-            supportAgeGroups: (("청소년" | "청년" | "중장년" | "노년" | "무관")[] & (("무관"[] | null) | ("청소년" | "청년" | "중장년" | "노년")[])) | null;
-            /**
-             * @description 지원 성별
-             * @enum {string|null}
-             */
-            supportGender: "남" | "여" | "무관" | null;
-            /**
-             * @description 시군구 코드 5자리
-             * @example 11680
-             */
-            sigunguCode: string | null;
-            /**
-             * @description 행정동 코드 10자리. 법정동 코드와 구분
-             * @example 1168066000
-             */
-            dongCode: string | null;
-            /**
-             * Format: date
-             * @description 운영 시작일. 종료일 이하여야 한다
-             * @example 2026-10-30
-             */
-            periodStart: string | null;
-            /**
-             * Format: date
-             * @description 운영 종료일
-             * @example 2026-10-30
-             */
-            periodEnd: string | null;
-            /** @description 이용자 부담금, 원 단위 정수. 0은 무료 */
-            fee: number | null;
-            /** @description 정원 */
-            capacity: number | null;
-            /** @description 지원 내용. 비우면 null */
-            supportContent: string | null;
-            /** @description 신청 방법. 비우면 null */
-            applyMethod: string | null;
-        };
-        DocumentExtractionResult: {
-            extracted: components["schemas"]["DocumentExtract"];
-            /** @description 필수 입력 중 추출되지 않은 항목의 필드명 */
-            missingFields: ("resourceName" | "operatingOrgName" | "target" | "supportAgeGroups" | "supportGender" | "sigunguCode" | "dongCode" | "periodStart" | "periodEnd" | "fee" | "capacity" | "supportContent" | "applyMethod")[];
-            warnings: string[];
-        };
         /** @description 현재 HealthController 원문 응답. 공통 envelope의 예외. */
         HealthData: {
             /** @enum {string} */
             status: "UP";
         };
-        DocumentExtractionResult_Success: {
-            /** @enum {boolean} */
-            success: true;
-            data: components["schemas"]["DocumentExtractionResult"];
-            meta: components["schemas"]["ResponseMeta"];
+        /** @description 화면 문맥. 질문할 때 화면에서 보고 있는 행정동과 기준 월이다. 둘 다 생략할 수 있고 {}도 받는다. BE는 형식만 검사해 INT-01로 그대로 넘기고 저장하지 않는다. AI는 질문에 대상(동 · 기간)이 없을 때만 이 값을 기본 대상으로 쓰고, 답에 어느 동 · 월 기준인지 밝힌다. 모르는 필드나 문자열이 아닌 값은 400 INVALID_JSON, 형식이 틀리면 400 VALIDATION_ERROR (ai-agent-panel.md 3-1). */
+        ScreenContext: {
+            /**
+             * @description 행정동 코드 10자리. 법정동 코드와 구분
+             * @example 1168064000
+             */
+            dongCode?: string;
+            /**
+             * @description 기준 월 YYYY-MM (01~12, 0000년 제외)
+             * @example 2025-12
+             */
+            month?: string;
         };
-        /** @description 질문 등록. 첫 질문이면 conversationId는 null이고 서버가 대화를 만든다. */
+        /** @description 질문 등록. 첫 질문이면 conversationId는 null이고 서버가 대화를 만든다. 위험 탐색 · 읍면동 화면에서 질문하면 context를 붙인다. */
         AgentQuestionRequest: {
             /**
              * Format: uuid
@@ -2217,6 +2150,7 @@ export interface components {
             conversationId: string | null;
             /** @description 질문. 서버는 AI 패널 계약의 질문 마스킹 범위에 따라 이름·생년월일 명시 필드와 ASCII 이메일·표준 하이픈형 휴대전화만 치환한 뒤 저장한다. 이름 표지는 이름·성명·성함·사례자명·회원명이며 생년월일 표지는 생년월일이다. 값은 세미콜론(;)·줄바꿈·입력 끝까지 가리고 구분자 밖의 질문은 보존한다. 지원 범위 밖의 식별정보는 남을 수 있으며 완전한 비식별화를 보장하지 않는다. 질문 본문은 로그에 남기지 않는다. 정확한 형식과 제외 범위는 ai-agent-panel.md의 질문 마스킹 범위를 따른다. */
             question: string;
+            context?: components["schemas"]["ScreenContext"];
         };
         /** @description 저장된 질문. 화면은 이 questionId 이후의 행을 조회한다. */
         AgentQuestionCreated: {
@@ -5889,12 +5823,6 @@ export interface operations {
         };
         requestBody: {
             content: {
-                /**
-                 * @example {
-                 *       "conversationId": null,
-                 *       "question": "이 동의 위험이 왜 올랐어?"
-                 *     }
-                 */
                 "application/json": components["schemas"]["AgentQuestionRequest"];
             };
         };
@@ -6161,155 +6089,6 @@ export interface operations {
             };
             /** @description INTERNAL_SERVER_ERROR */
             500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    resourceApi_extractDocument: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description GET /api/auth/csrf가 발급한 XSRF-TOKEN 쿠키의 원문 값. 비로그인 변경 요청도 필요. */
-                "X-XSRF-TOKEN": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * Format: binary
-                     * @description PDF 1개, 최대 20MiB
-                     */
-                    file: string;
-                };
-            };
-        };
-        responses: {
-            /** @description 성공 */
-            200: {
-                headers: {
-                    /** @example no-store */
-                    "Cache-Control"?: string;
-                    "X-Request-Id"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "success": true,
-                     *       "data": {
-                     *         "extracted": {
-                     *           "resourceName": "건강 걷기 교실",
-                     *           "operatingOrgName": "강남구보건소",
-                     *           "target": "지역 주민",
-                     *           "supportAgeGroups": [
-                     *             "노년"
-                     *           ],
-                     *           "supportGender": "남",
-                     *           "sigunguCode": "11680",
-                     *           "dongCode": "1168066000",
-                     *           "periodStart": "2026-10-01",
-                     *           "periodEnd": "2026-12-31",
-                     *           "fee": 0,
-                     *           "capacity": 25,
-                     *           "supportContent": null,
-                     *           "applyMethod": null
-                     *         },
-                     *         "missingFields": [],
-                     *         "warnings": []
-                     *       },
-                     *       "meta": {
-                     *         "requestId": "c9814a56-22d4-45f9-a203-e8492ac44e73",
-                     *         "timestamp": "2026-10-30T10:00:00+09:00"
-                     *       }
-                     *     }
-                     */
-                    "application/json": components["schemas"]["DocumentExtractionResult_Success"];
-                };
-            };
-            /** @description VALIDATION_ERROR / INVALID_MULTIPART */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description UNAUTHENTICATED */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description FORBIDDEN / PASSWORD_CHANGE_REQUIRED / CSRF_INVALID */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description FILE_TOO_LARGE */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description UNSUPPORTED_MEDIA_TYPE */
-            415: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description DOCUMENT_UNREADABLE */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description RATE_LIMITED */
-            429: {
-                headers: {
-                    /** @example 60 */
-                    "Retry-After"?: number;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description INTERNAL_SERVER_ERROR */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description AI_UNAVAILABLE */
-            503: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -119,6 +119,8 @@
 
 .agent-answer {
   display: grid;
+  /* 표·Tableau가 넓어도 말풍선이 패널 밖으로 늘어나지 않게 */
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   border-radius: 12px 12px 12px 2px;
   padding: 12px 14px;
@@ -214,6 +216,162 @@
   color: var(--text-muted);
 }
 
+/* 완료 행의 artifacts: Tableau 카드, 정화한 표·SVG (내부_연동_변경_계획.md 2-7) */
+
+.agent-artifacts {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.agent-artifact {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #d5e0f0;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fbfcff;
+  font-size: 12.5px;
+  line-height: 19px;
+}
+
+.agent-artifact-title {
+  margin-bottom: 6px;
+  color: var(--navy);
+  font-family: 'Noto Sans KR:Bold', sans-serif;
+  font-size: 13.5px;
+}
+
+.agent-tableau-frame {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* Tableau는 대시보드 고정 크기로 띄우고 틀 폭에 맞춰 줄인다 (줄여도 클릭·툴팁 위치는 맞는다) */
+.agent-tableau-host {
+  transform-origin: 0 0;
+}
+
+/* tableau-viz는 inline 요소라 height 100%가 iframe 기본 높이(150px)로 남는다 */
+.agent-tableau-host tableau-viz {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.agent-tableau-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  background: rgb(255 255 255 / 92%);
+  font-size: 13px;
+}
+
+.agent-tableau-cover p {
+  margin: 0;
+}
+
+.agent-tableau-cover[role="alert"] {
+  color: var(--danger);
+}
+
+.agent-artifacts-repeated {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.agent-artifact-source {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--link);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.agent-artifact-notes {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.agent-artifact-notes summary {
+  cursor: pointer;
+}
+
+.agent-artifact-notes ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+/* AI가 만든 HTML: 원래 문서의 style은 지우므로 여기서 꾸민다. 길면 카드 안에서 스크롤 */
+.agent-artifact-html {
+  max-height: 460px;
+  overflow: auto;
+}
+
+.agent-artifact-html h1 {
+  margin: 0 0 6px;
+  color: var(--navy);
+  font-family: 'Noto Sans KR:Bold', sans-serif;
+  font-size: 13.5px;
+  font-weight: 400;
+}
+
+.agent-artifact-html p,
+.agent-artifact-html li {
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+
+.agent-artifact-html ul {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+
+.agent-artifact-html svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.agent-artifact-html table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.agent-artifact-html th,
+.agent-artifact-html td {
+  border: 1px solid #d5e0f0;
+  padding: 4px 6px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.agent-artifact-html th {
+  background: #eef3fb;
+  font-family: 'Noto Sans KR:Medium', sans-serif;
+  font-weight: 400;
+}
+
+.agent-artifact-html details {
+  margin-top: 8px;
+}
+
+.agent-artifact-html summary {
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
 /* 입력칸 위 안내 (실행 중에 다시 질문, 대화 없음, 질문 실패) */
 .agent-notice {
   margin: 0;
@@ -272,7 +430,8 @@
 }
 
 /* 0.2.3 추천 카드 (A5-A)
-   TODO(artifacts 형식 미정): 지금 패널은 그리지 않는다. 추천이 artifacts로 오게 되면 다시 쓴다 */
+   TODO(추천 형식 미정): 지금 패널은 그리지 않는다. artifacts 형식(2-7: tableau · table · chart · map)에 추천이 없다.
+   추천 형식이 정해지면 다시 쓴다 */
 
 .rec-cards {
   display: grid;

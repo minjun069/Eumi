@@ -6,7 +6,7 @@ Spring Boot · FastAPI · 데이터 파이프라인이 같은 DB(`eumi`)를 쓰�
 |---|---|
 | `migration/V*__*.sql` | 스키마 변경. Flyway가 버전 순서대로 한 번씩 적용 |
 | `migration/afterMigrate.sql` | Flyway 콜백. 마이그레이션이 끝날 때마다 계정별 권한을 다시 적용 |
-| `roles/eumi_db_roles.sql` | 계정 4개와 `eumi` DB 생성. Flyway 밖에서 환경마다 한 번 실행 (로컬은 compose가 처음 실행할 때 자동) |
+| `roles/eumi_db_roles.sql` | 계정 5개와 `eumi` DB 생성. Flyway 밖에서 환경마다 한 번 실행 (로컬은 compose가 처음 실행할 때 자동) |
 | `seed/` | 개발 · 시연용 초기 데이터 |
 
 로컬 DB 실행 방법은 [infra/README.md](../infra/README.md)에 있습니다.
@@ -28,6 +28,7 @@ Spring Boot · FastAPI · 데이터 파이프라인이 같은 DB(`eumi`)를 쓰�
 | `eumi_app` | Spring Boot | public 읽기 · 쓰기 (`dim_region` · `region_result` · `region_insight_report`는 읽기만). analysis와 Flyway 이력은 접근 불가 |
 | `eumi_pipeline` | 데이터 파이프라인 | analysis 읽기 · 쓰기 · 삭제. public은 `dim_region` 넣기 · 수정, `region_result` 읽기 · 쓰기 · 삭제 |
 | `eumi_ai` | FastAPI | analysis 읽기. public은 지역 · 결과 · 복지자원 조회, `region_insight_report` 조회 · 저장 · 덮어쓰기(삭제 없음), `ai_message` 조회 · 추가. 회원 · 사례자 · 상담 기록은 접근 불가 |
+| `eumi_monitor` | Grafana | 읽기만. analysis 전체, public은 `dim_region` · `region_result`, 세션 통계(`pg_read_all_stats`). airflow DB는 `dag` · `dag_run` · `task_instance` · `job`만 (`data/airflow/grant_monitor.py`). 동시 접속 10개 · 쿼리 30초 제한 |
 
 - 권한은 `migration/afterMigrate.sql`이 마이그레이션마다 다시 적용합니다. 새 테이블은 자동으로 기본 권한을 받으므로, 예외(읽기만 등)만 이 파일에 추가합니다.
 - `afterMigrate.sql`은 버전 파일이 아니어서 병합 후에도 고칠 수 있고, 다음 `migrate` 때 다시 적용됩니다.

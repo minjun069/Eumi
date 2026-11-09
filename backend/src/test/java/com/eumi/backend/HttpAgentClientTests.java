@@ -63,42 +63,46 @@ class HttpAgentClientTests {
     @AfterEach void stopServer() { if (server != null) server.stop(0); }
 
     @Test
-    void implementsAllThreeInternalOperationsWithoutQuestionText() {
+    void implementsStartAndCancelWithoutStatusRequestsOrQuestionText() {
         UUID id = UUID.randomUUID();
         responses.add(new Response(202, ""));
-        responses.add(new Response(200, "{\"running\":true,\"questionId\":101}"));
         responses.add(new Response(202, ""));
         client.start(id, 101);
-        assertThat(client.status(id)).isEqualTo(new AgentClient.RunStatus(true, 101L));
         client.cancel(id);
-        assertThat(requests).extracting(Request::method).containsExactly("POST", "GET", "POST");
+        assertThat(requests).extracting(Request::method).containsExactly("POST", "POST");
         assertThat(requests).allSatisfy(request -> {
             assertThat(request.protocol()).isEqualTo("HTTP/1.1");
             assertThat(request.upgrade()).isNull();
         });
         assertThat(requests).extracting(Request::path).containsExactly("/internal/agent/runs",
-                "/internal/agent/runs/" + id, "/internal/agent/runs/" + id + "/cancel");
+                "/internal/agent/runs/" + id + "/cancel");
         var body = json.readTree(requests.getFirst().body());
         assertThat(body.size()).isEqualTo(2);
         assertThat(body.path("conversationId").asText()).isEqualTo(id.toString());
-        assertThat(body.path("questionId").asLong()).isEqualTo(101);
+        assertThat(body.path("messageId").asLong()).isEqualTo(101);
     }
 
     @Test
-    void duplicateStartOfSameQuestionIsIdempotentAfterStatusCheck() {
-        responses.add(new Response(409, ""));
-        responses.add(new Response(200, "{\"running\":true,\"questionId\":101}"));
-        client.start(UUID.randomUUID(), 101);
+    void repeatedStartUsesSameMessageIdAndContextWithoutStatusCheck() {
+        responses.add(new Response(202, ""));
+        responses.add(new Response(202, ""));
+        UUID id = UUID.randomUUID();
+        var context = new com.eumi.backend.agent.AgentDtos.ScreenContext("1168064000", "2025-12");
+        client.start(id, 101, context);
+        client.start(id, 101, context);
         assertThat(requests).hasSize(2);
+        assertThat(requests.get(0).body()).isEqualTo(requests.get(1).body());
+        assertThat(json.readTree(requests.getFirst().body()).path("context").path("dongCode").asText()).isEqualTo(context.dongCode());
     }
 
     @Test
-    void rejectsFailuresAndMalformedStatusWithoutExposingResponseBody() {
+    void rejectsFailuresAndConflictsWithoutExposingResponseBodyOrQueryingStatus() {
         responses.add(new Response(503, "sensitive-internal-body"));
         assertThatThrownBy(() -> client.start(UUID.randomUUID(), 101)).isInstanceOf(AgentClient.Unavailable.class)
                 .hasMessage("AI client request failed");
-        responses.add(new Response(200, "{\"running\":true,\"questionId\":null}"));
-        assertThatThrownBy(() -> client.status(UUID.randomUUID())).isInstanceOf(AgentClient.Unavailable.class);
+        responses.add(new Response(409, ""));
+        assertThatThrownBy(() -> client.start(UUID.randomUUID(), 101)).isInstanceOf(AgentClient.Unavailable.class);
+        assertThat(requests).hasSize(2).allSatisfy(request -> assertThat(request.method()).isEqualTo("POST"));
     }
 
     @Test
@@ -107,9 +111,9 @@ class HttpAgentClientTests {
         properties.setBaseUrl(URI.create("http://127.0.0.1:" + server.getAddress().getPort()));
         properties.setHttpTimeout(Duration.ofMillis(300));
         var bounded = new HttpAgentClient(properties, json);
-        responses.add(new Response(200, "{\"running\":false,\"questionId\":null}", 2000));
+        responses.add(new Response(202, "synthetic", 2000));
         long started = System.nanoTime();
-        assertThatThrownBy(() -> bounded.status(UUID.randomUUID())).isInstanceOf(AgentClient.Unavailable.class);
+        assertThatThrownBy(() -> bounded.start(UUID.randomUUID(), 101)).isInstanceOf(AgentClient.Unavailable.class);
         assertThat(Duration.ofNanos(System.nanoTime() - started)).isLessThan(Duration.ofMillis(1500));
     }
 
@@ -117,8 +121,8 @@ class HttpAgentClientTests {
     void connectionFailureLogsActualCauseClass(CapturedOutput output) {
         server.stop(0);
         server = null;
-        assertThatThrownBy(() -> client.status(UUID.randomUUID())).isInstanceOf(AgentClient.Unavailable.class);
-        assertThat(output.getOut()).contains("operation=http-status", "exceptionType=ConnectException")
+        assertThatThrownBy(() -> client.start(UUID.randomUUID(), 101)).isInstanceOf(AgentClient.Unavailable.class);
+        assertThat(output.getOut()).contains("operation=http-start", "exceptionType=ConnectException")
                 .doesNotContain("exceptionType=ExecutionException");
     }
 }

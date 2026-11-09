@@ -65,6 +65,12 @@ public class AgentRepository {
                 + "WHERE question_id = ? AND status IN ('완료', '실패', '취소'))", Boolean.class, questionId));
     }
 
+    public Optional<AgentDtos.StoredNotification> notification(UUID conversationId, long messageId) {
+        return jdbc.query("SELECT question_id, status FROM ai_message WHERE conversation_id = ? AND message_id = ? AND role = 'AI'",
+                (rs, row) -> new AgentDtos.StoredNotification(rs.getLong(1), rs.getString(2)), conversationId, messageId)
+                .stream().findFirst();
+    }
+
     public void insertAi(UUID id, long questionId, String status, String content, String details) {
         jdbc.update("INSERT INTO ai_message(conversation_id, question_id, role, status, content, details) "
                 + "VALUES (?, ?, 'AI', ?, ?, ?)", id, questionId, status, content, details);
