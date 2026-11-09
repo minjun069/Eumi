@@ -4,7 +4,7 @@
 
 | 파일 | 용도 |
 |---|---|
-| `docker-compose.yml` | PostgreSQL 17 + Flyway(스키마 · 권한 적용) + Mailpit. profile `data`: MinIO · Kafka · pipeline(Spark + Airflow) (데이터 파트만, 아래 참고) |
+| `docker-compose.yml` | PostgreSQL 17 + Flyway(스키마 · 권한 적용) + Mailpit. profile `ai`: AI 서버(`ai/Dockerfile`). profile `data`: MinIO · Kafka · pipeline(Spark + Airflow) (데이터 파트만, 아래 참고) |
 | `.env.example` | 로컬 비밀번호 목록. `.env`로 복사해서 쓴다 (`.env`는 커밋하지 않음) |
 | `postgres-init/01-eumi-roles.sh` | DB를 처음 만들 때 계정 4개와 `eumi` DB 생성 (`db/roles/eumi_db_roles.sql` 실행) |
 | `pipeline/` | 데이터 파이프라인 실행 이미지 (`Dockerfile`: Python 3.12 + Spark 3.5.9 + Airflow 2.10, `spark-defaults.conf`, `requirements.txt`). profile `data`에서 빌드 |
@@ -39,6 +39,41 @@ docker compose logs flyway   # "Successfully applied …" (처음이면 V1부터
 
 - 화면: http://localhost:8025
 - SMTP(Spring 설정): `localhost:1025`, 인증 없음
+
+## AI 서버 (profile `ai`)
+
+운영과 같은 `ai/Dockerfile`(AI 담당 관리)로 빌드한다. 의존성은 `ai/pyproject.toml` · `ai/uv.lock` 그대로(`uv sync --locked --no-dev`, Python 3.12)이고, `ai/Dockerfile`과 서버 코드(`ai/api.py`)가 있어야 뜬다. 주고받는 형식은 [docs/api](../docs/api/README.md)와 진행 중인 [내부 연동 변경 계획](../docs/work-ref/내부_연동_변경_계획.md)을 따른다.
+
+| 항목 | 값 |
+|---|---|
+| 주소 | 호스트 `http://localhost:8000` (backend 기본값 `AI_BASE_URL`과 같음), 운영은 내부망 `http://ai:8000`만 |
+| DB | `eumi_ai` 계정. compose가 `SETTINGS_DATABASE_URL`을 넣는다 |
+| LLM 키 | `ai/.env`의 `SETTINGS_API_KEY` (각자 발급, 커밋 금지). 없으면 ai가 시작되지 않는다 |
+| backend 주소 · AI 토큰 | compose가 `SETTINGS_BACKEND_URL`(호스트 backend 8080) · `SETTINGS_BACKEND_TOKEN`(기본 `ai_token_local`)을 넣는다. 없으면 ai가 시작되지 않는다 |
+| 헬스체크 | `GET /health` → `{"status":"UP"}` (`ai/Dockerfile`의 HEALTHCHECK). 서버가 떠 있다는 뜻이고 DB · 모델 연결을 보장하지는 않는다 |
+| 실행 기록 | 컨테이너 `/app/outputs` (볼륨 `aioutputs`). 보기: `MSYS_NO_PATHCONV=1 docker compose cp ai:/app/outputs ../ai/outputs/docker` |
+
+```bash
+cd infra
+docker compose up -d                              # DB가 먼저 떠 있어야 한다
+docker compose --profile ai up -d --build ai      # ai/ 코드가 바뀌면 --build로 다시 빌드
+docker compose --profile ai ps ai                 # ai: Up … (healthy)
+docker compose --profile ai logs --tail=50 ai     # "Uvicorn running on http://0.0.0.0:8000"
+curl -s http://localhost:8000/health              # {"status":"UP"}
+# ai → DB (eumi_ai 계정)
+MSYS_NO_PATHCONV=1 docker compose --profile ai exec ai /app/.venv/bin/python -c "import os, psycopg; psycopg.connect(os.environ['SETTINGS_DATABASE_URL']).close(); print('db ok')"
+docker compose --profile ai stop ai               # 끄기
+```
+
+Git Bash는 `/app/...` 같은 컨테이너 안 경로를 Windows 경로(`C:/Program Files/Git/app/...`)로 바꿔 버린다. 컨테이너 경로가 들어가는 명령 앞에는 `MSYS_NO_PATHCONV=1`을 붙인다 (서버의 리눅스 셸에서는 필요 없음).
+
+backend를 ai에 붙여 보려면 호스트에서 http 모드로 실행한다(Git Bash). 시간 값 4개는 AI 담당이 확정하기 전까지 아래 제안값으로 둔다. 변수는 이 명령에만 적용된다.
+
+```bash
+cd backend
+EUMI_AI_MODE=http EUMI_AI_EXECUTION_LIMIT=90s EUMI_AI_GRACE_PERIOD=5s \
+EUMI_AI_UNRESPONSIVE_AFTER=40s EUMI_AI_CANCEL_WAIT=3s ./gradlew bootRun
+```
 
 ## 데이터 파이프라인 (MinIO · Kafka · Spark · Airflow)
 
@@ -94,6 +129,7 @@ MinIO가 2025년에 커뮤니티 에디션 이미지 배포를 중단해 `docker
 
 ```
 사용자 ─ https ─> Nginx(443) ─┬─ /api/      → backend   127.0.0.1:8080 ─> postgres (내부망, 포트 없음)
+                              │                 └─ http://ai:8000 → ai (내부망, 포트 없음) ─> postgres · LLM API
                               ├─ /jenkins/  → Jenkins   127.0.0.1:9090
                               └─ /          → web       127.0.0.1:3000
 master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migrate(백업 → Flyway) → Deploy(헬스체크 · 실패 시 되돌림) → Cleanup
@@ -101,7 +137,7 @@ master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migra
 
 | 파일 | 서버 위치 | 용도 |
 |---|---|---|
-| `deploy/docker-compose.prod.yml` | `/srv/eumi/` | 운영 서비스 (postgres · backend · web · mailpit, flyway는 실행할 때만) |
+| `deploy/docker-compose.prod.yml` | `/srv/eumi/` | 운영 서비스 (postgres · ai · backend · web · mailpit, flyway는 실행할 때만) |
 | `deploy/.env.config.example` | `/srv/eumi/.env.config` | 운영 비밀값 키 목록. 값은 서버에서 무작위로 만들고 git에 두지 않는다 |
 | `deploy/nginx/eumi.conf` | `/etc/nginx/sites-available/eumi` | HTTPS · 경로 연결. 인프라 담당이 손으로 반영 (Jenkins는 다르면 경고만) |
 | `deploy/nginx/eumi-bootstrap.conf` | (인증서 첫 발급 때만) | |
@@ -120,3 +156,25 @@ master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migra
 - 운영 DB 비밀번호 · 키는 서버 `/srv/eumi/.env.config`(jenkins 소유, 권한 600)에만 있다. 필요하면 인프라 담당에게 요청한다.
 - 병합된 마이그레이션은 운영 DB에 그대로 적용된다. 컬럼 삭제 · 이름 변경처럼 이전 버전 코드가 깨지는 변경은 "추가 → 코드 전환 → 다음 배포에서 삭제" 두 번에 나눈다.
 - 배포 결과는 `https://k15b201.p.ssafy.io/jenkins/`의 `eumi-deploy`에서 본다 (읽기 전용 계정은 인프라 담당에게 요청. Jenkins는 서버 관리자 권한으로 동작하므로 실행 · 설정 권한은 인프라 담당만 가진다). 롤백 · 복구는 서버 접속이 필요하므로 인프라 담당이 진행한다.
+
+### AI 서버 (ai)
+
+- **배포 조건:** `ai/Dockerfile`과 서버 코드 `ai/api.py`가 둘 다 저장소에 있을 때만 Jenkins가 빌드 · 배포한다. `ai/` 바로 아래 `.md`와 `ai/docs/`만 바뀌면 다시 빌드하지 않는다.
+- **배포 순서와 실패:** ai → backend → web 순서다. ai가 실패하면 이전 ai로 되돌리고 빌드를 노란색(UNSTABLE)으로 표시한 뒤 backend · web 배포는 계속한다.
+- **첫 배포 전 준비:** 서버 `.env.config`에 `EUMI_LLM_API_KEY`(AI 담당 전달)와 `EUMI_AI_TOKEN`(서버에서 `openssl rand -hex 32`)을 넣는다. 값이 없으면 `deploy.sh ai`가 멈춘다. `EUMI_AI_PASSWORD`는 이미 있다.
+- **연결 방식:** backend는 `EUMI_AI_MODE: fake`인 동안 ai를 부르지 않는다. http로 바꾸는 조건은 compose의 backend 주석에 있다.
+- **실행 기록:** 컨테이너 메모리(`/app/outputs`, 512MB)에만 남고 ai를 다시 배포하면 지워진다.
+
+배포 뒤 확인 (서버, jenkins 계정):
+
+```bash
+cd /srv/eumi
+scripts/dc.sh --profile ai ps ai                     # ai: Up … (healthy)
+scripts/dc.sh --profile ai logs --tail=50 ai         # "Uvicorn running on http://0.0.0.0:8000", 오류 없음
+# backend → ai (내부망): 빈 본문이라 "400 Bad Request"가 나오면 연결된 것이다
+scripts/dc.sh exec -T backend wget -S -O /dev/null --header 'Content-Type: application/json' --post-data '{}' http://ai:8000/internal/agent/runs 2>&1 | grep 'HTTP/'
+# ai → DB (eumi_ai 계정)
+scripts/dc.sh --profile ai exec -T ai /app/.venv/bin/python -c "import os, psycopg; psycopg.connect(os.environ['SETTINGS_DATABASE_URL']).close(); print('db ok')"
+# ai → LLM API (바깥 연결): 401 또는 200이면 나가는 길은 열려 있다
+scripts/dc.sh --profile ai exec -T ai /app/.venv/bin/python -c "import httpx; print(httpx.get('https://api.openai.com/v1/models', timeout=5).status_code)"
+```

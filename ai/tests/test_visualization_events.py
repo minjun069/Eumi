@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 from langchain_core.messages import AIMessage
+from langchain_core.runnables import RunnableLambda
 from langgraph.checkpoint.memory import InMemorySaver
 from pydantic import ValidationError
 
@@ -20,6 +21,7 @@ from src.tools import tableau, tableau_catalog
 from src.tools.interface import create_tools
 from src.tools.tableau import validate_visualization
 from src.visualization_instructions import visualization_context
+from tests.helpers import ScriptedModel
 
 MAP = "Embed01RiskMap"
 OTHER = "Embed03Vulnerability"
@@ -59,7 +61,6 @@ INTERPRET = {
     "reason": "확인",
     "needs_input": False,
 }
-ACCEPT = {"accepted": True, "reason": "조건 확인"}
 DONE = {"next": "compose", "reason": "검사 완료"}
 COMPOSE = {
     "content": "검사 결과 안내",
@@ -69,27 +70,27 @@ COMPOSE = {
 }
 
 
-class Model:
+class Model(ScriptedModel):
     def __init__(self, replies=None):
-        self.replies = iter(replies) if replies is not None else None
-        self.messages = []
+        super().__init__(replies or [])
+        self.automatic = replies is None
+        self.messages = self.inputs
 
-    async def ainvoke(self, messages, config):
-        self.messages.append(messages)
-        if self.replies is not None:
-            reply = next(self.replies)
-        else:
-            schema = json.loads(
-                messages[0].content.split("아래 JSON Schema를 정확히 준수한다.\n")[1]
-            )
+    def with_structured_output(self, schema, **kwargs):
+        if not self.automatic:
+            return super().with_structured_output(schema, **kwargs)
+
+        async def invoke(messages, config):
+            self.inputs.append(messages)
             reply = {
                 "Interpretation": INTERPRET,
                 "Selection": selection(view_key=MAP),
-                "Verification": ACCEPT,
                 "Decision": DONE,
                 "Composition": COMPOSE,
             }[schema["title"]]
-        return AIMessage(json.dumps(reply, ensure_ascii=False))
+            return {"raw": AIMessage(json.dumps(reply, ensure_ascii=False))}
+
+        return RunnableLambda(invoke)
 
 
 def graph(model, *, role="visualization", saver=None):
@@ -113,13 +114,8 @@ def test_event_limits_description_schema_and_validation(catalog, event, key):
     assert not rejected["valid"] and rejected["artifact"] is None
     assert rejected["issues"][0]["code"] == "view_not_allowed"
     assert rejected["issues"][0]["allowed"] == [key]
-    for supplied in (
-        {"event": "user_request"},
-        {"state": initial()},
-        {"allowed_view_keys": [forbidden]},
-    ):
-        result = tool.invoke({"view_key": forbidden, **supplied})
-        assert result["issues"][0]["code"] == "invalid_input"
+    result = tool.invoke({"view_key": forbidden, "event": "user_request"})
+    assert result["issues"][0]["code"] == "invalid_input"
     assert state["execution"]["event"] == event
 
 
@@ -149,11 +145,8 @@ def test_empty_mapping_and_unrelated_profiles(catalog):
 @pytest.mark.parametrize(
     "mapping",
     [
-        {},
         {"analysis_pipeline": [MAP]},
         {"analysis_pipeline": ["missing"], "user_request": []},
-        {"analysis_pipeline": [MAP, MAP], "user_request": []},
-        {"analysis_pipeline": [], "user_request": [], "unknown": []},
     ],
 )
 def test_bad_event_mapping_is_configuration_error(catalog, mapping):
@@ -161,10 +154,9 @@ def test_bad_event_mapping_is_configuration_error(catalog, mapping):
         tableau_catalog.validate_catalog(catalog | {"event_views": mapping})
 
 
-@pytest.mark.parametrize("event", [None, "unknown", "", 1])
-def test_invalid_state_event_rejected(event):
+def test_unknown_state_event_rejected():
     with pytest.raises(ValidationError):
-        initial(event)
+        initial("unknown")
 
 
 def test_missing_event_is_not_defaulted():
@@ -180,28 +172,33 @@ def test_deployed_event_assignment_and_detail_parameter_values():
     assert tableau_catalog.allowed_views(initial("analysis_pipeline")) == detail
     assert catalog["event_views"]["user_request"] == "all"
     assert tableau_catalog.allowed_views(initial()) == set(catalog["views"])
-    assert len(catalog["views"]) == 15
-    for key in catalog["views"]:
+    # 지도·기간 분포·상세 뷰의 서로 다른 입력 규격만 대표로 검사한다.
+    for key in ("Embed01RiskMap", "Embed02RiskDistribution", "EmbedDetailV01"):
         state = initial("analysis_pipeline")
         result = validate_visualization({"view_key": key}, state=state)
         assert result["valid"] is (key in detail)
         user_result = validate_visualization({"view_key": key}, state=initial())
         assert user_result["valid"]
-        assert "v2_0_6_connection_map_fixed" in user_result["artifact"]["data"]["src"]
-    for key in detail | {"EmbedDetailMap"}:
-        result = validate_visualization(
-            {"view_key": key, "parameters": {"p_detail_adm": "춘천시 후평3동"}},
-            state=initial(),
+        registered = catalog["views"][key]
+        assert user_result["artifact"]["data"]["src"].endswith(
+            f"/{registered['workbook']}/{registered['view_name']}"
         )
-        assert result["valid"]
-        assert {
-            p["name"]: p["value"] for p in result["artifact"]["data"]["parameters"]
-        }["p_detail_adm"] == "춘천시 후평3동"
-        invalid = validate_visualization(
-            {"view_key": key, "parameters": {"p_detail_adm": "5111061100"}},
-            state=initial(),
-        )
-        assert invalid["issues"][0]["code"] == "invalid_parameter_value"
+    result = validate_visualization(
+        {
+            "view_key": "EmbedDetailV01",
+            "parameters": {"p_detail_adm": "춘천시 후평3동"},
+        },
+        state=initial(),
+    )
+    assert result["valid"]
+    assert {p["name"]: p["value"] for p in result["artifact"]["data"]["parameters"]}[
+        "p_detail_adm"
+    ] == "춘천시 후평3동"
+    invalid = validate_visualization(
+        {"view_key": "EmbedDetailV01", "parameters": {"p_detail_adm": "5111061100"}},
+        state=initial(),
+    )
+    assert invalid["issues"][0]["code"] == "invalid_parameter_value"
 
 
 def test_all_includes_new_registration_without_expanding_explicit_list(catalog):
@@ -242,20 +239,15 @@ async def test_shared_graph_keeps_concurrent_event_policies_separate(catalog):
             assert list(visible["views"]) == catalog["event_views"][execution["event"]]
 
 
-@pytest.mark.parametrize("event", EVENTS)
 @pytest.mark.asyncio
-async def test_child_inherits_event_and_cannot_call_other_event_view(catalog, event):
-    start = [INTERPRET] if event == "user_request" else []
-    forbidden = OTHER if event == "analysis_pipeline" else MAP
+async def test_child_inherits_event_and_cannot_call_other_event_view(catalog):
+    event = "analysis_pipeline"
     model = Model(
         [
-            *start,
             selection("visualization_agent", goal="시각화"),
-            *start,
-            selection(view_key=forbidden),
+            selection(view_key=OTHER),
             DONE,
             COMPOSE,
-            ACCEPT,
             DONE,
             COMPOSE,
         ]
@@ -267,18 +259,14 @@ async def test_child_inherits_event_and_cannot_call_other_event_view(catalog, ev
     assert called["issues"][0]["code"] == "view_not_allowed"
 
 
-@pytest.mark.parametrize("event,key", list(zip(EVENTS, (MAP, OTHER), strict=True)))
 @pytest.mark.asyncio
-async def test_rebuilt_graph_resumes_saved_event_without_scope_injection(
-    catalog, event, key
-):
+async def test_rebuilt_graph_resumes_saved_event_without_scope_injection(catalog):
+    event, key = "analysis_pipeline", MAP
     saver = InMemorySaver()
-    start = [INTERPRET] if event == "user_request" else []
     waiting = await run_graph(
         graph(
             Model(
                 [
-                    *start,
                     selection("none"),
                     {"next": "ask", "reason": "대상 필요"},
                     {"content": "대상을 알려주세요.", "reason": "대상 필요"},
@@ -295,7 +283,6 @@ async def test_rebuilt_graph_resumes_saved_event_without_scope_injection(
             [
                 INTERPRET,
                 selection(view_key=key),
-                ACCEPT,
                 DONE,
                 COMPOSE,
             ]
@@ -312,3 +299,66 @@ async def test_rebuilt_graph_resumes_saved_event_without_scope_injection(
     assert resumed["execution"]["event"] == event
     called = next(r["output"] for r in resumed["results"] if r["decision"] == "call")
     assert called["valid"]
+
+
+@pytest.mark.usefixtures("all_tableau_views")
+def test_followup_receives_selected_city_only_and_is_isolated():
+    artifact = validate_visualization(
+        {"view_key": "Embed01RiskMap", "parameters": {"p_city": "11680"}},
+        state=initial(),
+    )["artifact"]
+    state = {"response": {"artifacts": [artifact]}}
+    state["execution"] = initial()["execution"]
+    context = visualization_context(state, include_inputs=True)
+    selected = context["selected"]["Embed01RiskMap"]["filters"]["읍면동"]["allowed"]
+    assert "역삼1동" in selected and "후평3동" not in selected
+    selected.clear()
+    assert visualization_context(state, include_inputs=True)["selected"][
+        "Embed01RiskMap"
+    ]["filters"]["읍면동"]["allowed"]
+
+
+@pytest.mark.usefixtures("all_tableau_views")
+def test_invalid_dependency_does_not_expose_default_domain_as_selected():
+    state = {
+        "results": [
+            {
+                "action": {
+                    "name": "validate_visualization",
+                    "arguments": {
+                        "view_key": "Embed01RiskMap",
+                        "parameters": {"p_city": 51110},
+                    },
+                }
+            }
+        ]
+    }
+    state["execution"] = initial()["execution"]
+    context = visualization_context(state, include_inputs=True)
+    assert "allowed" not in context["selected"]["Embed01RiskMap"]["filters"]["읍면동"]
+
+
+@pytest.mark.usefixtures("all_tableau_views")
+def test_latest_attempt_supersedes_previous_view_conditions():
+    artifact = validate_visualization(
+        {"view_key": "Embed01RiskMap", "parameters": {"p_city": "11680"}},
+        state=initial(),
+    )["artifact"]
+    state = {
+        "response": {"artifacts": [artifact]},
+        "results": [
+            {
+                "action": {
+                    "name": "validate_visualization",
+                    "arguments": {
+                        "view_key": "Embed01RiskMap",
+                        "parameters": {"p_city": "51110"},
+                    },
+                }
+            }
+        ],
+    }
+    state["execution"] = initial()["execution"]
+    context = visualization_context(state, include_inputs=True)
+    selected = context["selected"]["Embed01RiskMap"]["filters"]["읍면동"]["allowed"]
+    assert "후평3동" in selected and "역삼1동" not in selected

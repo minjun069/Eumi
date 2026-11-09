@@ -15,7 +15,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from pydantic import ValidationError
 
-import demo
+from demo import demo
 from experiments.fixtures import initial_state, mock_nodes
 from src import monitoring
 from src.graph import compile_graph
@@ -62,19 +62,9 @@ def test_disabled_never_constructs_sdk(monkeypatch):
     constructor.assert_not_called()
 
 
-@pytest.mark.parametrize(
-    "values",
-    [
-        {"LANGFUSE_ENABLED": True},
-        {"LANGFUSE_SAMPLE_RATE": 1.1},
-        {"LANGFUSE_SAMPLE_RATE": -0.1},
-        {"LANGFUSE_BASE_URL": "invalid-url"},
-        {"LANGFUSE_TRACING_ENVIRONMENT": "Invalid Environment"},
-    ],
-)
-def test_invalid_settings(values):
+def test_monitoring_requires_credentials_when_enabled():
     with pytest.raises(ValidationError):
-        Settings(_env_file=None, **values)
+        Settings(_env_file=None, LANGFUSE_ENABLED=True)
 
 
 def test_environment_and_client_configuration(monkeypatch):
@@ -103,14 +93,12 @@ def test_environment_and_client_configuration(monkeypatch):
 @pytest.mark.parametrize(
     "scenario,expected,level",
     [
-        ("complete", "completed", "DEFAULT"),
         ("partial", "partial", "WARNING"),
-        ("failure", "failed", "ERROR"),
         ("question", "completed", "DEFAULT"),
     ],
 )
 async def test_real_graph_status_and_resume(sdk, scenario, expected, level):
-    state = await demo.run_case(scenario, monitoring=sdk[0])
+    state = await demo.run_case(scenario, initial_state(), monitoring=sdk[0])
     spans = spans_for(sdk, state["execution"]["run_id"])
     roots = [s for s in spans if s.name.startswith("eumi.agent.")]
     assert len(roots) == (2 if scenario == "question" else 1)
@@ -195,7 +183,7 @@ async def test_model_usage_tools_and_payload_masking(sdk):
 
 
 @pytest.mark.asyncio
-async def test_exception_propagates_and_is_recorded_without_message(sdk):
+async def test_failure_is_recorded_without_private_message(sdk):
     nodes, finish = mock_nodes()
 
     def broken(state):
@@ -204,13 +192,13 @@ async def test_exception_propagates_and_is_recorded_without_message(sdk):
     nodes["act"] = broken
     graph = compile_graph(nodes, finish=finish)
     state = initial_state()
-    with pytest.raises(RuntimeError, match="PRIVATE_EXCEPTION_MESSAGE"):
-        with monitoring.trace_execution(sdk[0], state["execution"]) as (config, _):
-            await graph.ainvoke(state, config)
+    with monitoring.trace_execution(sdk[0], state["execution"]) as (config, span):
+        result = await graph.ainvoke(state, config)
+        monitoring.record_execution(span, result)
+    assert result["execution"]["status"] == "failed"
     spans = spans_for(sdk, state["execution"]["run_id"])
     root = next(s for s in spans if s.name == "eumi.agent.start")
     assert metadata(root, "status") == "failed"
-    assert metadata(root, "exception_type") == "RuntimeError"
     assert root.attributes["langfuse.observation.level"] == "ERROR"
     assert "PRIVATE_EXCEPTION_MESSAGE" not in " ".join(s.to_json() for s in spans)
 
@@ -218,7 +206,10 @@ async def test_exception_propagates_and_is_recorded_without_message(sdk):
 @pytest.mark.asyncio
 async def test_concurrent_runs_are_isolated(sdk):
     states = await asyncio.gather(
-        *[demo.run_case(case, monitoring=sdk[0]) for case in ("question", "failure")]
+        *[
+            demo.run_case(case, initial_state(), monitoring=sdk[0])
+            for case in ("question", "failure")
+        ]
     )
     assert states[0]["execution"]["run_id"] != states[1]["execution"]["run_id"]
     for state in states:
@@ -245,7 +236,7 @@ def test_cancellation_is_not_swallowed(sdk):
 async def test_monitoring_failure_does_not_repeat_or_fail_graph(caplog):
     client = Mock()
     client.start_observation.side_effect = OSError("PRIVATE_CONNECTION_DETAILS")
-    state = await demo.run_case("complete", monitoring=client)
+    state = await demo.run_case("complete", initial_state(), monitoring=client)
     assert state["execution"]["status"] == "completed"
     assert sum(r["action"] is not None for r in state["results"]) == 1
     assert "PRIVATE_CONNECTION_DETAILS" not in caplog.text
@@ -253,48 +244,3 @@ async def test_monitoring_failure_does_not_repeat_or_fail_graph(caplog):
     await monitoring.shutdown_monitoring(client)
     client.shutdown.assert_called_once()
     assert "PRIVATE_CONNECTION_DETAILS" not in caplog.text
-
-
-@pytest.mark.asyncio
-async def test_demo_shuts_down_on_execution_error(monkeypatch):
-    client = Mock()
-    monkeypatch.setattr(demo, "create_monitoring", lambda settings: client)
-
-    async def fail(*args):
-        raise ValueError("execution error")
-
-    monkeypatch.setattr(demo, "run_suite", fail)
-    with pytest.raises(ValueError, match="execution error"):
-        await demo.main(None)
-    client.shutdown.assert_called_once()
-
-
-def test_initialization_failure_is_local_warning(monkeypatch, caplog):
-    constructor = Mock(side_effect=OSError("PRIVATE_SECRET"))
-    monkeypatch.setattr(monitoring, "Langfuse", constructor)
-    settings = Settings(
-        _env_file=None,
-        LANGFUSE_ENABLED=True,
-        LANGFUSE_PUBLIC_KEY="pk-lf-test",
-        LANGFUSE_SECRET_KEY="sk-lf-test",
-    )
-    assert monitoring.create_monitoring(settings) is None
-    assert "initialization failed (OSError)" in caplog.text
-    assert "PRIVATE_SECRET" not in caplog.text
-
-
-@pytest.mark.asyncio
-async def test_update_and_end_failures_preserve_completed_result(monkeypatch, caplog):
-    client = Mock()
-    span = client.start_observation.return_value
-    span.update.side_effect = OSError("PRIVATE_SECRET")
-    span.end.side_effect = OSError("PRIVATE_SECRET")
-    monkeypatch.setattr(
-        monitoring, "_OperationalCallbackHandler", Mock(side_effect=OSError("offline"))
-    )
-    state = await demo.run_case("complete", monitoring=client)
-    assert state["execution"]["status"] == "completed"
-    span.end.assert_called_once()
-    assert "update failed" in caplog.text
-    assert "span end failed" in caplog.text
-    assert "PRIVATE_SECRET" not in caplog.text

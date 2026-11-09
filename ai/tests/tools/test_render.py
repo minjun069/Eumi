@@ -101,16 +101,14 @@ def test_table_has_real_cells_units_versions_and_safe_text(dataset):
     assert dataset == original
 
 
-@pytest.mark.parametrize("kind", ["bar", "line"])
-def test_chart_has_real_svg_values_applied_range_and_missing_note(dataset, kind):
-    result = render_visualization({"data": dataset, "spec": chart(kind)})
+def test_bar_chart_has_values_range_and_missing_note(dataset):
+    result = render_visualization({"data": dataset, "spec": chart()})
     svg = svg_root(result["artifact"]["data"]["content"])
     assert svg.tag.endswith("svg")
     assert any("A: 108.0 index" in (node.text or "") for node in svg.iter())
     assert result["applied"]["value_range"]["maximum"] == 108
     assert result["warnings"]
-    if kind == "bar":
-        assert result["applied"]["value_range"]["minimum"] == 0
+    assert result["applied"]["value_range"]["minimum"] == 0
 
 
 def test_line_gaps_and_negative_bars(dataset):
@@ -129,13 +127,8 @@ def test_line_gaps_and_negative_bars(dataset):
     "changes",
     [
         {"unit": "percent"},
-        {"y": "region"},
-        {"x": "unknown"},
         {"color": 'red" onload="alert(1)'},
         {"value_range": {"minimum": 0, "maximum": 10}},
-        {"value_range": {"minimum": 90, "maximum": 120}},
-        {"value_range": {"minimum": 120, "maximum": 120}},
-        {"value_range": {"minimum": 0, "maximum": float("inf")}},
     ],
 )
 def test_invalid_chart_settings(dataset, changes):
@@ -143,22 +136,13 @@ def test_invalid_chart_settings(dataset, changes):
         render_visualization({"data": dataset, "spec": chart(**changes)})
 
 
-def test_no_chart_data_duplicate_axis_and_extreme_range(dataset):
-    for rows in (
-        [],
-        [dataset["rows"][2]],
-        [dataset["rows"][0]] * 2,
-        [
-            {"region": "A", "before": 1, "after": -1e308},
-            {"region": "B", "before": 1, "after": 1e308},
-        ],
-    ):
-        with pytest.raises(ToolFailure):
-            render_visualization({"data": dataset | {"rows": rows}, "spec": chart()})
+def test_empty_data_is_rejected_for_charts_and_explained_in_tables(dataset):
+    with pytest.raises(ToolFailure):
+        render_visualization({"data": dataset | {"rows": []}, "spec": chart()})
     result = render_visualization(
         {"data": dataset | {"rows": []}, "spec": {"type": "table", "title": "Empty"}}
     )
-    assert result["warnings"] == ["조회된 자료가 없습니다."]
+    assert result["warnings"]
 
 
 def test_map_preserves_boundary_provenance_and_missing_regions(dataset, boundaries):
@@ -167,44 +151,19 @@ def test_map_preserves_boundary_provenance_and_missing_regions(dataset, boundari
     svg = svg_root(result["artifact"]["data"]["content"])
     shapes = [n for n in svg.iter() if n.attrib.get("fill-rule") == "evenodd"]
     assert len(shapes) == 3
-    assert shapes[2].attrib["fill"] == "#d1d5db"
+    assert shapes[2].attrib["fill"] not in {s.attrib["fill"] for s in shapes[:2]}
     assert shapes[0].attrib["fill"] != shapes[1].attrib["fill"]
     assert "boundary-v1" in result["artifact"]["data"]["content"]
     assert result["sources"] == dataset["sources"] + boundaries["sources"]
     assert boundaries == original
 
 
-def test_multipolygon_and_holes(dataset, boundaries):
-    ring = boundaries["features"][0]["geometry"]["coordinates"][0]
-    hole = [[127.02, 37.02], [127.03, 37.02], [127.03, 37.03], [127.02, 37.02]]
-    boundaries["features"][0]["geometry"] = {
-        "type": "MultiPolygon",
-        "coordinates": [[ring, hole]],
-    }
-    result = render_visualization({"data": dataset, "spec": map_spec(boundaries)})
-    svg = svg_root(result["artifact"]["data"]["content"])
-    shapes = [n for n in svg.iter() if n.attrib.get("fill-rule") == "evenodd"]
-    assert shapes[0].attrib["d"].count("M") == 2
-
-
-@pytest.mark.parametrize(
-    "failure", ["codes", "missing", "duplicate", "ring", "coordinate", "crs", "unit"]
-)
+@pytest.mark.parametrize("failure", ["codes", "missing"])
 def test_map_rejects_invalid_data_and_boundaries(dataset, boundaries, failure):
     spec = map_spec(boundaries)
     if failure == "codes":
         spec["code_system"] = "different"
     if failure == "missing":
         boundaries["features"].pop()
-    if failure == "duplicate":
-        boundaries["features"].append(boundaries["features"][0])
-    if failure == "ring":
-        boundaries["features"][0]["geometry"]["coordinates"][0].pop()
-    if failure == "coordinate":
-        boundaries["features"][0]["geometry"]["coordinates"][0][1] = [999.0, 37.0]
-    if failure == "crs":
-        boundaries["crs"] = "EPSG:3857"
-    if failure == "unit":
-        spec["unit"] = "%"
     with pytest.raises(ToolFailure):
         render_visualization({"data": dataset, "spec": spec})

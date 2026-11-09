@@ -1,6 +1,6 @@
 # 이음이 API 명세
 
-- 판: 2.4.0 초안 (2026-11-06)
+- 판: 2.4.0 초안 (2026-11-06, 11/9 INT-06 삭제)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_API_명세표.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - API 형식의 기준은 `docs/api/openapi.json`, 내부 연동은 `docs/api/ai-agent-panel.md` · `docs/api/insight-report.md`다. 계약이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -11,7 +11,7 @@
 
 - 제목: 이음이 API 명세표
 - 요약: API 2.4.0 초안  46개 작업 (구현 38 · 예정 8)  * 필수 입력  기본 경로 /api
-- 출처: eumi/docs/api/openapi.json 2.3.0 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04~06)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동')
+- 출처: eumi/docs/api/openapi.json 2.3.0 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장)
 
 ### API-01 로그인 상태와 메뉴 프로필 조회
 - 페이지 범위: /login·공통
@@ -338,8 +338,8 @@
 ## 내부 AI API
 
 - 제목: 내부 연동 API
-- 요약: 6개 작업  BE ↔ AI · 파이프라인 → BE  AI 서버(/internal/)는 인증 없음 · BE 내부 경로(/api/internal/)는 호출자별 서비스 토큰  둘 다 Nginx에 열지 않음 (BE 쪽 /api/internal/ 차단은 추가 예정) · BE 내부 경로는 세션 · CSRF 없는 별도 보안 체인
-- 출처: AI 에이전트 패널 동작 흐름 (A 방식) 2026-11-02 · 응답 필드와 시간 값은 AI 담당자와 확정 · 인사이트 보고서 INT-04~06은 2026-11-06 초안 (A 방식: 생성 세대를 저장하지 않음, 결과 시각 resultUpdatedAt으로 옛 보고서 판단)
+- 요약: 5개 작업  BE ↔ AI · 파이프라인 → BE  AI 서버(/internal/)는 인증 없음 · BE 내부 경로(/api/internal/)는 호출자별 서비스 토큰  둘 다 Nginx에 열지 않음 (Nginx는 /api/internal/을 404로 막음) · BE 내부 경로는 세션 · CSRF 없는 별도 보안 체인 · 인사이트 보고서는 AI가 DB에 직접 저장
+- 출처: AI 에이전트 패널 동작 흐름 (A 방식) 2026-11-02 · 응답 필드와 시간 값은 AI 담당자와 확정 · 인사이트 보고서 INT-04 · 05는 2026-11-06 초안 (A 방식: 생성 세대를 저장하지 않음, 결과 시각 resultUpdatedAt으로 옛 보고서 판단) · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 region_insight_report에 직접 저장, insight-report.md 4절)
 
 ### INT-01 AI 실행 시작<br>신규 설계
 - 구간: BE → AI
@@ -369,13 +369,7 @@
 - 구간: BE → AI
 - 요청 경로: POST /internal/insight-reports/runs
 - 요청 형식: 인증 없음 (내부 네트워크)<br><br>본문 application/json<br>requestId*:string(uuid, INT-04를 처리하며 BE가 만든 값 = INT-04 응답의 X-Request-Id · meta.requestId); month*:string(YYYY-MM); targets*:[{dongCode*:string(10자리); resultUpdatedAt*:string(YYYY-MM-DDTHH:mm:ss.SSSSSS)}] 동 중복 없음
-- 응답 형식: 202 application/json<br>accepted*:integer<br>400 본문 오류<br>접수만 바로 돌려주고 뒤에서 동별로 생성 · 동마다 INT-06으로 전달 · AI는 region_insight_report에 쓰지 않음(eumi_ai 읽기만)<br>같은 달 요청이 겹치면 진행 중 작업을 멈추고 새 요청으로 다시 시작 권장 (BE가 옛 보고서를 거르는 것은 결과 시각이 바뀐 경우뿐. 12·13단계만 재실행해 시각이 같으면 늦은 응답이 새 보고서를 덮을 수 있음)
-
-### INT-06 인사이트 보고서 저장 (동별)<br>신규 초안
-- 구간: AI → BE
-- 요청 경로: PUT /api/internal/analysis/insight-reports/{month}/{dongCode}
-- 요청 형식: Authorization: Bearer <AI 토큰><br>path month*:string(YYYY-MM, 저장 시 그 달 1일 DATE); dongCode*:string(10자리, AI는 INT-05로 받은 동만 보냄)<br><br>본문 application/json<br>resultUpdatedAt*:string(INT-05에서 받은 값 그대로, YYYY-MM-DDTHH:mm:ss.SSSSSS 오프셋 없음 · 소수 6자리); quickInsight*:string(앞뒤 공백 뺀 뒤 코드 포인트 1~500자, 줄바꿈 허용, 2~3줄은 권고); graphs*:[{sheet*:string(EmbedDetailV01~V08); description*:string(앞뒤 공백 뺀 뒤 코드 포인트 1~1000자)}] 정확히 3개 · 서로 다름 · 순서 = 화면 순서; generatedAt*:string(date-time, 오프셋 포함)
-- 응답 형식: 200 application/json<br>month*:string; dongCode*:string; saved*:boolean<br>결과 행의 updated_at = resultUpdatedAt일 때만 저장 (INSERT … SELECT, 같은 동 · 월 덮어씀) · BE는 지금 결과 행 · 꼬리표 · 본문만 검사(대상 목록은 저장하지 않음) · 결과 적재와 동시에 진행되면 옛 꼬리표로 저장되거나 최신 보고서를 덮을 수 있음(조회에서 숨김, INT-04 재전송으로 복구) · 같은 본문 재전송도 200<br>400 VALIDATION_ERROR · INVALID_JSON · 401 UNAUTHENTICATED · 403 FORBIDDEN · 404 NOT_FOUND(결과 행 없음) · 409 RESULT_VERSION_MISMATCH(결과가 다시 쓰임 → 버림) · 500(같은 본문으로 재시도)
+- 응답 형식: 202 application/json<br>accepted*:integer<br>400 본문 오류<br>접수만 바로 돌려주고 뒤에서 동별로 생성 · AI가 동마다 region_insight_report에 직접 저장(eumi_ai INSERT · UPDATE, 결과 행 updated_at = resultUpdatedAt일 때만 반영, 같은 동 · 월 덮어씀, 0행이면 버림)<br>같은 달 요청이 겹치면 진행 중 작업을 멈추고 새 요청으로 다시 시작 권장 (저장 문장이 옛 보고서를 거르는 것은 결과 시각이 바뀐 경우뿐. 12·13단계만 재실행해 시각이 같으면 늦게 끝난 쪽이 새 보고서를 덮을 수 있음)
 
 ## 별도 범위
 
@@ -393,7 +387,7 @@
 ### FastAPI 내부
 - 대상: AI 실행·취소·상태 3개 · 인사이트 보고서 생성 요청 INT-05 (내부 AI API 시트) · PDF 추출
 - 현재 근거: AI: 2026-11-02 A 방식 결정 · PDF: 문서 신규 설계 계약
-- 경계: 브라우저는 Spring만 호출 · 대화 패널: AI가 ai_message에 직접 저장 · 인사이트 보고서: AI가 INT-06으로 BE에 보내고 BE만 저장
+- 경계: 브라우저는 Spring만 호출 · 대화 패널: AI가 ai_message에 직접 저장 · 인사이트 보고서: AI가 region_insight_report에 직접 저장 (BE는 생성 요청 · 조회만)
 - 선행 조건: 시간 값·artifacts 형식 합의 (이전 대화 범위는 11/2 '전체'로 결정, eumi_ai의 ai_message 읽기·추가 권한은 11/2 적용)
 - 검증: 행 단위 커밋·끝 행 하나·늦은 행 거부·취소 경합·질문 마스킹·시간 초과·부족 정보 되묻기
 

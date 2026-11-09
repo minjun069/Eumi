@@ -236,7 +236,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", help="OpenAI 모델 ID. 생략하면 Settings의 모델 사용")
     parser.add_argument("--scenario", choices=["S1", "S2"], default="S1")
     parser.add_argument(
-        "--env-file", type=Path, default=Path(__file__).with_name(".env")
+        "--env-file", type=Path, default=Path(__file__).resolve().parents[1] / ".env"
     )
     parser.add_argument("--output", type=Path, default=Path("outputs/gemini-scenarios"))
     raise SystemExit(asyncio.run(main(parser.parse_args())))

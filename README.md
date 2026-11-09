@@ -66,7 +66,7 @@
 |---|---|---|
 | 프론트엔드 | React · Vite · TypeScript · Tailwind CSS | 19.3.1 · 8.3.5 · 5.9.3 · 4.3.3 (Node 24) |
 | 백엔드 | Spring Boot · Java · Gradle | 4.1.2 · 21 · 9.8.2 |
-| AI Agent 서버 | FastAPI · LangChain · LangGraph | AI 파트 초기 설정 때 확정 |
+| AI Agent 서버 | FastAPI · LangChain Core · LangGraph | 0.162.0 · 1.7.0 · 1.2.18 |
 | 데이터 분석 | Python · Spark (PySpark) · Kafka · Airflow | 3.12 · 3.5.9 (Java 17) · 3.9.2 (KRaft) · 2.10.5 |
 | 원본 저장소 | MinIO (S3 호환) | 2025.7.23 (`bitnamilegacy/minio`) |
 | DB | PostgreSQL · Flyway | 17 · 13.11.1 |
@@ -81,6 +81,7 @@
 ├── frontend/          # React 웹 (Vite)
 ├── backend/           # Spring Boot API 서버
 ├── ai/                # FastAPI AI Agent 서버
+│   └── docs/          #   AI 설계·개발 문서
 ├── data/              # 데이터 수집 · 적재 · 분석
 │   ├── notebooks/     #   탐색 · 분석 노트북
 │   └── pipeline/      #   적재 · 분석 파이프라인
@@ -105,7 +106,8 @@
 | 공통 | Git, Docker Desktop (설치 + 실행) |
 | BE | JDK 21 |
 | FE | Node 24 |
-| AI · 데이터 | 각 파트가 정한 Python 환경 |
+| AI | Python 3.12 또는 3.13, uv |
+| 데이터 | 데이터 파트가 정한 Python 환경 |
 
 ### 받기와 로컬 DB
 
@@ -126,7 +128,7 @@ DB 계정, 메일 확인, 문제 해결은 [infra/README.md](infra/README.md)를
 |---|---|---|
 | 백엔드 | `cd backend` → `./gradlew bootRun` (또는 IntelliJ) | http://localhost:8080/api/health |
 | 프론트엔드 | `cd frontend` → `nvm use 24` → `npm ci` → `npm run dev` | http://localhost:5173 |
-| AI Agent 서버 | [ai/](ai/) | 포트 8000, `GET /health` |
+| AI Agent 서버 | [ai/](ai/README.md) | |
 | 데이터 파이프라인 | [data/](data/README.md) | |
 
 ## 팀 소개
@@ -144,6 +146,7 @@ DB 계정, 메일 확인, 문제 해결은 [infra/README.md](infra/README.md)를
 
 | 문서 | 위치 |
 |---|---|
+| AI 설계·개발 문서 | [ai/docs/README.md](ai/docs/README.md) |
 | 협업 규칙 (브랜치 · 커밋 · MR · 리뷰 · Jira · DB · 비밀값) | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | 로컬 개발 환경 (DB · 메일) | [infra/README.md](infra/README.md) |
 | DB 스키마 · 마이그레이션 규칙 | [db/README.md](db/README.md) |

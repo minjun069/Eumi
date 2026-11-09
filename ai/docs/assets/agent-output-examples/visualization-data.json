@@ -1,0 +1,48 @@
+{
+  "isSynthetic": true,
+  "description": "서비스 화면 설계를 위한 가상 수치. 실제 통계 아님.",
+  "referenceDate": "2026-09-30",
+  "source": "가상 자료 D3",
+  "definition": "65세 이상 1인 가구 수 / 전체 가구 수 * 100",
+  "settings": {
+    "chart": "horizontal-bar",
+    "sort": "ratio-desc",
+    "xAxisMin": 0,
+    "xAxisMax": 20,
+    "unit": "%",
+    "decimalPlaces": 1,
+    "fill": "#2679CF"
+  },
+  "data": [
+    {
+      "region": "C동",
+      "elderlySingleHouseholds": 1728,
+      "totalHouseholds": 12000,
+      "ratio": 14.4
+    },
+    {
+      "region": "A동",
+      "elderlySingleHouseholds": 1250,
+      "totalHouseholds": 10000,
+      "ratio": 12.5
+    },
+    {
+      "region": "E동",
+      "elderlySingleHouseholds": 1232,
+      "totalHouseholds": 11000,
+      "ratio": 11.2
+    },
+    {
+      "region": "B동",
+      "elderlySingleHouseholds": 768,
+      "totalHouseholds": 8000,
+      "ratio": 9.6
+    },
+    {
+      "region": "D동",
+      "elderlySingleHouseholds": 639,
+      "totalHouseholds": 9000,
+      "ratio": 7.1
+    }
+  ]
+}

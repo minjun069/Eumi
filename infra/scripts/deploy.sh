@@ -2,13 +2,13 @@
 # ==========================================================================
 # 서비스 하나를 새 이미지 태그로 바꾸고 헬스체크를 기다린다. 실패하면 이전 태그로 되돌린다.
 #
-# 사용법 (jenkins 계정으로):  sudo -u jenkins /srv/eumi/scripts/deploy.sh <backend|web> <태그>
+# 사용법 (jenkins 계정으로):  sudo -u jenkins /srv/eumi/scripts/deploy.sh <ai|backend|web> <태그>
 #   롤백도 같은 명령에 이전 태그를 주면 된다.
 #   보관 중인 태그 보기:  docker images eumi-backend
 #   배포 기록:            /srv/eumi/deploy-history.log
 #
 # 교체하는 몇 초~1분 동안은 해당 서비스 응답이 끊길 수 있다 (무중단 배포는 쓰지 않는다).
-# ai · pipeline은 compose에 서비스를 추가할 때 아래 case에도 한 줄씩 추가한다.
+# pipeline은 compose에 서비스를 추가할 때 아래 case에도 한 줄 추가한다.
 # ==========================================================================
 set -euo pipefail
 
@@ -16,15 +16,26 @@ APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$APP_DIR"
 COMPOSE=(docker compose -f docker-compose.prod.yml --env-file .env.config --env-file .env.tags)
 
-USAGE="사용법: deploy.sh <backend|web> <태그>"
+USAGE="사용법: deploy.sh <ai|backend|web> <태그>"
 SVC="${1:?$USAGE}"
 TAG="${2:?$USAGE}"
 
 case "$SVC" in
+  ai)      KEY=AI_TAG ;;
   backend) KEY=BACKEND_TAG ;;
   web)     KEY=WEB_TAG ;;
   *) echo "[deploy] 알 수 없는 서비스: $SVC ($USAGE)" >&2; exit 1 ;;
 esac
+
+# ai의 비밀값은 compose가 :? 없이 넘기므로(profile 서비스라도 :?는 모든 compose 명령을 멈춘다) 여기서 먼저 확인한다
+if [ "$SVC" = ai ]; then
+  for k in EUMI_AI_PASSWORD EUMI_LLM_API_KEY EUMI_AI_TOKEN; do
+    if ! grep -qE "^$k=.+" .env.config; then
+      echo "[deploy] .env.config에 $k 값이 없습니다 — ai를 배포하지 않습니다 (.env.config.example 참고)" >&2
+      exit 1
+    fi
+  done
+fi
 
 if ! docker image inspect "eumi-$SVC:$TAG" >/dev/null 2>&1; then
   echo "[deploy] 이미지가 없습니다: eumi-$SVC:$TAG — 보관 중인 태그:" >&2

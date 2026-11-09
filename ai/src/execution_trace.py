@@ -35,7 +35,9 @@ class SpanRecord(TypedDict):
 _recorder: ContextVar = ContextVar("execution_recorder", default=None)
 _span: ContextVar = ContextVar("execution_span", default=None)
 SECRET_FIELDS = {
+    "backend_token",
     "api_key",
+    "database_url",
     "authorization",
     "x-api-key",
     "x-goog-api-key",

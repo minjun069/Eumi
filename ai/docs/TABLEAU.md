@@ -4,11 +4,11 @@
 
 ## 지침과 실행 연결
 
-- [시각화 작업 선택](src/instructions/visualization-selection.md): 목적별 뷰, 기간 의미, 조건 결정, 지원하지 않는 요청 처리.
-- [시각화 작업 선택 시 도구 사용](src/instructions/visualization-tool.md): 입력·오류 처리·재작업·산출물 선택·프론트 전달 조건.
-- `build_nodes(..., role="request" | "visualization")`가 두 지침을 읽는다. 작업 목적 파악에는 선택 지침·뷰 요약, 작업 선택에는 두 지침·뷰 요약·공유 입력 프로필을 제공한다. 검증·진행 판단·응답 작성·질문 작성에는 전체 지침·카탈로그를 반복 첨부하지 않고 실제 요청·호출 결과를 사용한다.
+- [시각화 작업 선택](../src/instructions/visualization-selection.md): 목적별 뷰, 기간 의미, 조건 결정, 지원하지 않는 요청 처리.
+- [시각화 작업 선택 시 도구 사용](../src/instructions/visualization-tool.md): 입력·오류 처리·재작업·산출물 선택·프론트 전달 조건.
+- `build_nodes(..., role="request" | "visualization")`가 두 지침을 읽는다. 작업 목적 파악에는 선택 지침·뷰 요약, 작업 선택에는 두 지침·뷰 요약·공유 입력 프로필을 제공한다. 진행 판단·응답 작성·질문 작성에는 전체 지침·카탈로그를 반복 첨부하지 않고 실제 요청·호출 결과를 사용한다.
 - `visualization_catalog.views`의 목적·한계는 등록 명세에서 가져온다. `input_profiles`는 같은 규격을 한 번만 전달하고, 매개변수별 전체 필터 목록은 생략한다. 기존 산출물·호출 이력으로 확인한 매개변수의 상세값은 `selected`에 제공한다. 처음 요청한 필터값은 사용자가 명시한 값으로 검증하며 부적합 사유에 해당 조건의 허용값이 반환된다. 상세 조회를 위한 모델 왕복은 추가하지 않는다.
-- `create_tools()`의 `validate_visualization`을 실제 작업 선택 및 실행 노드에서 호출한다. 정상 결과는 기존 모델 검증에서 요청 목적과의 일치를 판단하고, 응답 작성에서 검증된 호출 ID로 원본 산출물을 선택한다.
+- `create_tools()`의 `validate_visualization`을 실제 작업 선택 및 실행 노드에서 호출한다. 정상 결과는 작업 진행 판단으로 전달하고, 응답 작성에서 성공한 호출 ID로 원본 산출물을 선택한다. 호출 후 별도 모델 검증은 수행하지 않는다.
 - `valid=false`는 검사 완료 결과다. 부적합 사유를 별도 검증 이력에 남기고 공개 후보에서 제외한다. 모델은 조건을 수정하거나 필요한 정보를 요청하며, 부적합 결과를 보완하는 후속 호출은 인자 변경·대체 도구 여부와 관계없이 공유 retries.used에 누적한다.
 
 HTML 렌더러는 직접 도구 사용 예제와 조회·가공 근거 비교표 생성에 남아 있다. Agent의 시각화 작업 선택에서는 게시된 Tableau 검증 도구를 사용한다. 합성 가구 비율로 임의 막대 차트를 생성하던 기존 S2 시나리오는 현재 Tableau 지원 범위를 검증하는 시나리오가 아니다.
@@ -27,7 +27,7 @@ HTML 렌더러는 직접 도구 사용 예제와 조회·가공 근거 비교표
 
 ### 뷰와 입력 프로필
 
-[tableau_catalog.json](src/tools/tableau_catalog.json)이 선택 설명과 실행 명세의 원본이다. 현재 새 워크북 `eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed`의 임베드 뷰 15개, 강남구·춘천시, 2025년 7~12월이 등록돼 있다. 등록 목록에서 벗어난 요청을 다른 값으로 자동 보정하지 않는다.
+[tableau_catalog.json](../src/tools/tableau_catalog.json)이 선택 설명과 실행 명세의 원본이다. 현재 새 워크북 `eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed`의 임베드 뷰 15개, 강남구·춘천시, 2025년 7~12월이 등록돼 있다. 등록 목록에서 벗어난 요청을 다른 값으로 자동 보정하지 않는다.
 
 | 등록 항목 | 내용 |
 | --- | --- |
@@ -43,7 +43,7 @@ HTML 렌더러는 직접 도구 사용 예제와 조회·가공 근거 비교표
 
 새 뷰는 `views`에 추가하고 같은 조건이면 기존 프로필을 참조한다. 조건이 다르면 프로필을 추가하며, 도시·기간이 없는 뷰는 해당 항목을 등록하지 않는다. 각 필터에 여러 대상 시트를 지정할 수 있고 모든 대상에 같은 조건을 적용한다. 다른 워크북도 뷰별로 지정한다. 뷰 종류마다 별도 도구·Python 분기를 추가하지 않는다.
 
-[tableau_catalog.py](src/tools/tableau_catalog.py)의 `validate_catalog()`가 자료형·필수 필드, 프로필·필터 참조, 허용값·기본값·표시 이름, 날짜 규칙과 기본 날짜 순서, 의존 필터의 허용 목록 누락·중복을 검사한다. 구성 오류는 사용자 입력의 `valid=false`로 숨기지 않고 등록 오류로 거부한다. 파일은 프로세스에서 처음 읽을 때 검사·캐시하므로 갱신한 설정 배포 후 프로세스를 다시 시작한다.
+[tableau_catalog.py](../src/tools/tableau_catalog.py)의 `validate_catalog()`가 자료형·필수 필드, 프로필·필터 참조, 허용값·기본값·표시 이름, 날짜 규칙과 기본 날짜 순서, 의존 필터의 허용 목록 누락·중복을 검사한다. 구성 오류는 사용자 입력의 `valid=false`로 숨기지 않고 등록 오류로 거부한다. 파일은 프로세스에서 처음 읽을 때 검사·캐시하므로 갱신한 설정 배포 후 프로세스를 다시 시작한다.
 
 2026-11-06 새 게시본의 15개 임베드 뷰 로딩·시트·매개변수·필터 명세를 확인했다. 기존 6개 뷰의 후평3동 필터와 상세 9개 뷰의 표시값 매개변수 적용·재조회를 확인하고 공개 워크북 계산식으로 기간 의미를 대조했다. 모든 지역·월 조합의 데이터 존재를 검사한 결과는 아니다. `catalog_revision`은 원자료 버전이 아니다.
 
@@ -79,11 +79,11 @@ result = validate_visualization({
 `ai/`에서 실행한다. `.env`의 OpenAI 키 `SETTINGS_API_KEY`를 사용한다. `--model`을 생략하면 Settings의 모델을 사용하며 현재 기본값은 `gpt-6-sol`이다. 이 명령은 지침·카탈로그·요청과 도구 명세·응답 스키마를 OpenAI Responses API로 전송한다.
 
 ```powershell
-.\.venv\Scripts\python.exe tableau_demo.py --model gpt-6-sol --goal "2025년 12월 춘천시 후평3동의 배경 취약성 지도를 보여줘." --output outputs/tableau/state.json
-.\.venv\Scripts\python.exe -m pytest tests/tools/test_tableau.py tests/tools/test_tableau_catalog.py tests/test_visualization_events.py tests/test_visualization_instructions.py tests/test_tableau_agent.py -q
+.\.venv\Scripts\python.exe -m demo.tableau_demo --model gpt-6-sol --goal "2025년 12월 춘천시 후평3동의 배경 취약성 지도를 보여줘." --output outputs/tableau/state.json
+.\.venv\Scripts\python.exe -m pytest tests/tools/test_tableau.py tests/tools/test_tableau_catalog.py tests/test_visualization_events.py tests/test_agent_nodes.py -q
 ```
 
-`tableau_demo.py`는 실제 `build_nodes`·공통 그래프·검증 도구를 호출한다. 합성 자료나 모의 모델 분기를 공통 실행 코드에 넣지 않는다. 일반 실행 시간의 기본 한도는 180초이며 `--timeout` 값을 최초 State에 반영한다. 모델·도구·하위 Agent가 같은 잔여 시간과 누적 사용량을 공유한다. 한도 도달 후 별도 종료 예산은 [State의 실행 예산](../../docs/ieumi-agent-state.md#실행-예산)을 따른다. 데모 외부에서 별도 timeout이나 호출 한도를 다시 설정하지 않는다. 이번 State 실행 경로 변경의 테스트·검사는 실행하지 않았다.
+`tableau_demo.py`는 실제 `build_nodes`·공통 그래프·검증 도구를 호출한다. 합성 자료나 모의 모델 분기를 공통 실행 코드에 넣지 않는다. 일반 실행 시간의 기본 한도는 180초이며 `--timeout` 값을 최초 State에 반영한다. 모델·도구·하위 Agent가 같은 잔여 시간과 누적 사용량을 공유한다. 한도 도달 후 별도 종료 예산은 [State의 실행 예산](ieumi-agent-state.md#실행-예산)을 따른다. 데모 외부에서 별도 timeout이나 호출 한도를 다시 설정하지 않는다. 이번 State 실행 경로 변경의 테스트·검사는 실행하지 않았다.
 
 
 2026-11-02 검증: 도구·통합·관련 회귀 테스트 202개와 변경 코드의 Ruff 검사·포맷 검사가 통과했다. 기존 6개 뷰와 합성 등록 명세로 다른 워크북·연령대 필터·여러 대상 시트·기간 없는 뷰·다른 이름의 날짜 순서를 확인했다. 합성 명세는 테스트에만 존재하며 실제 지원 뷰 목록에 포함하지 않는다. 통합 테스트는 외부 모델 응답만 대체하고 실제 업무 노드·그래프·검증 함수·산출물 선택을 실행했다. 실제 Gemini API 시험은 자동 승인 검토에서 외부 전송 승인이 필요해 실행되지 않았다. 프론트 채팅 표시 성공을 확인한 결과가 아니다.

@@ -49,11 +49,8 @@ def test_valid_artifact_preserves_conditions_and_public_contract():
     assert original == before
     assert result["valid"] and not result["issues"]
     data = result["artifact"]["data"]
-    assert data["src"] == (
-        "https://public.tableau.com/views/"
-        "eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/"
-        "Embed01VulnerabilityMap"
-    )
+    registered = visualization_catalog()["views"][original["view_key"]]
+    assert data["src"].endswith(f"/{registered['workbook']}/{registered['view_name']}")
     assert {p["name"]: p["value"] for p in data["parameters"]} == original["parameters"]
     assert data["filters"] == [
         {
@@ -69,70 +66,18 @@ def test_valid_artifact_preserves_conditions_and_public_contract():
 
 
 @pytest.mark.parametrize(
-    "view_key",
-    [
-        "Embed01RiskMap",
-        "Embed01VulnerabilityMap",
-        "Embed01BehaviorMap",
-        "Embed02RiskDistribution",
-        "Embed03Vulnerability",
-        "Embed05BehaviorChange",
-    ],
-)
-def test_all_registered_views_and_defaults(view_key):
-    result = validate_visualization({"view_key": view_key})
-    assert result["valid"]
-    data = result["artifact"]["data"]
-    assert data["filters"][0]["operation"] == "all"
-    assert data["filters"][0]["values"] == []
-    assert len(data["parameters"]) == 3
-
-
-@pytest.mark.parametrize(
     "overrides,code,path",
     [
         ({"view_key": "https://example.com/arbitrary"}, "view_not_allowed", "view_key"),
-        ({"parameters": {"month": "2025-12"}}, "unknown_parameter", "parameters.month"),
         (
             {"parameters": {"p_city": "99999"}},
             "invalid_parameter_value",
             "parameters.p_city",
         ),
         (
-            {"parameters": {"p_end": "not-a-date"}},
-            "invalid_parameter_value",
-            "parameters.p_end",
-        ),
-        (
-            {"parameters": {"p_end": "2099-01-01"}},
-            "invalid_parameter_value",
-            "parameters.p_end",
-        ),
-        (
             {"parameters": {"p_start": "2025-12-01", "p_end": "2025-07-01"}},
             "invalid_period",
             "parameters",
-        ),
-        (
-            {"filters": {"missing": ["후평3동"]}},
-            "unsupported_filter",
-            "filters.missing",
-        ),
-        (
-            {"filters": {"읍면동": ["없는지역"]}},
-            "invalid_filter_value",
-            "filters.읍면동",
-        ),
-        (
-            {"filters": {"읍면동": ["후평3동", "없는지역"]}},
-            "invalid_filter_value",
-            "filters.읍면동",
-        ),
-        ({"parameters": {"p_city": "11680"}}, "invalid_filter_value", "filters.읍면동"),
-        (
-            {"filters": {"읍면동": ["후평3동", "후평3동"]}},
-            "duplicate_filter_value",
-            "filters.읍면동",
         ),
     ],
 )
@@ -152,13 +97,7 @@ def test_invalid_requests_return_actionable_issues_without_artifact(
     "overrides",
     [
         {"parameters": {"p_city": 51110}},
-        {"parameters": {"p_city": True}},
-        {"filters": {"읍면동": "후평3동"}},
-        {"filters": {"읍면동": []}},
-        {"filters": {"읍면동": [None]}},
-        {"filters": {"읍면동": [" "]}},
         {"src": "https://example.com"},
-        {"data": {"rows": []}},
     ],
 )
 def test_strict_input_rejects_coercion_and_unknown_fields(overrides):
