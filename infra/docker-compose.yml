@@ -234,7 +234,8 @@ services:
     profiles: ["data"]
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?infra/.env에 GRAFANA_ADMIN_PASSWORD가 필요합니다 (.env.example 참고)}
+      # 기본값을 두어 .env 에 키가 없는 팀원의 docker compose up 도 막지 않는다 (로컬 전용 값)
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-grafana_local}
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
