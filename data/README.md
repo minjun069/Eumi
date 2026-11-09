@@ -64,7 +64,7 @@ docker compose --profile data exec pipeline spark-submit pipeline/<모듈>/<스�
 | 11 | M4 | `m4_analysis/batch_region_result.py` | 호스트 | 배경 6 + 행동 12 → `region_result` (점수 · 등급 · 위험단계) |
 | 12 | M4-3 | `m4_analysis/batch_bh_contribution.py` | 호스트 | `region_result` + `bh_region_indicator` → `bh_region_contribution` (지표별 기여도) |
 | 13 | M4-3 | `m4_analysis/batch_grid_anomaly.py` | 호스트 | `bh_grid_indicator` → `bh_grid_anomaly` |
-| 14 | 검증 | `ops/verify_outputs.py` | 호스트 | 결과 테이블 계약 검사: 행 수 · 범위 · 등급 규칙 · 지표로 재계산한 점수와 일치. 실패하면 멈춤 |
+| 14 | 검증 | `ops/verify_outputs.py` | 호스트 | 결과 테이블 계약 검사: 행 수 · 범위 · 등급 규칙 · 지표로 재계산한 점수와 일치. 실패하면 멈춤. 검사마다 한 행을 `analysis.pipeline_check` 에 남김 |
 | 15 | 운영 | `ops/make_seed.py` | 호스트 | 결과 테이블 → `db/seed/R__*.sql` (서버 반영, 아래. 값이 바뀐 달이 있을 때만) |
 
 - 첫 달(전월 없음)은 변화 지표 4개(h26 · h29 · h30 · h31)가 NULL → 행동 점수 · 단계를 내지 않고 `region_result` 에 넣지 않는다 (DA 방침).
@@ -75,7 +75,7 @@ docker compose --profile data exec pipeline spark-submit pipeline/<모듈>/<스�
   - 첫 태스크 `check_inputs`(`ops/check_month_inputs.py`)가 그 달의 SKT 월평균 · 주민등록 원본이 MinIO 에 있는지 보고, 없으면 그 실행 전체를 skip 한다. unpause 직후 Airflow 가 지난 스케줄 1건을 자동 실행하므로, 원본이 없는 달에 API 호출 · 적재가 일어나지 않게 하는 안전장치다.
   - 재처리: UI 의 Trigger DAG w/ config 또는 `docker compose --profile data exec pipeline airflow dags trigger eumi_monthly --conf '{"months": ["2025-12"]}'`. 실패한 태스크는 UI 에서 Clear 하면 그 태스크부터 다시 돈다.
   - **실행 이력**: 별도 테이블 없이 Airflow 기록을 쓴다. UI 의 Grid 화면에서 실행(dag run)별 기준월 · 태스크별 성공/실패 · 소요 시간을 보고, 태스크를 누르면 로그(스크립트의 `[OK]/[FAIL]` 출력, 적재 행 수)가 나온다. CLI 는 `airflow dags list-runs -d eumi_monthly`, `airflow tasks states-for-dag-run eumi_monthly <run_id>`. 로그 파일은 pipeline 컨테이너 `/opt/airflow/logs/dag_id=eumi_monthly/…`(볼륨 `airflowlogs`), 메타 정보는 postgres 의 `airflow` DB 에 남는다.
-  - **결과 검증** `ops/verify_outputs.py`: 달마다 배경 · 유동 · 행동 지표 · 결과 · 격자 점수 · 실거래가를 검사하고, 결과 점수가 지금 지표로 다시 계산한 값과 같은지(0.005 이내)까지 본다. 하나라도 틀리면 태스크가 실패한다. 단독 실행은 `python3 pipeline/ops/verify_outputs.py --all`.
+  - **결과 검증** `ops/verify_outputs.py`: 달마다 배경 · 유동 · 행동 지표 · 결과 · 격자 점수 · 실거래가를 검사하고, 결과 점수가 지금 지표로 다시 계산한 값과 같은지(0.005 이내)까지 본다. 하나라도 틀리면 태스크가 실패한다. 검사 결과는 달 · 검사 이름마다 한 행씩 `analysis.pipeline_check` 에 남고(같은 달을 다시 돌리면 덮어씀), Grafana 대시보드 · 알림이 이 표를 읽는다. 단독 실행은 `python3 pipeline/ops/verify_outputs.py --all`.
   - 확인(2026-11-03): 12월 수동 실행 14개 태스크 성공, 실행 3분 50초.
 
 ## 모듈별 메모
