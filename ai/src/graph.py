@@ -135,7 +135,7 @@ def _limited(state: State, name: str, exc: LimitReached):
 
 
 def _wrap_node(
-    name: str, fn: Node, finish: Callable[[State], Completion]
+    name: str, fn: Node, finish: Callable[[State], Completion], publish=None
 ):
     node = RunnableLambda(fn)
 
@@ -188,6 +188,8 @@ def _wrap_node(
         return Command(update=update, goto=command.goto)
 
     async def arun(state: State, config):
+        if publish is not None:
+            await publish(state, name)
         prepared = deepcopy(state_adapter.validate_python(state))
         with trace_span("node", name, {"state": prepared}) as span:
             command = None
@@ -249,6 +251,11 @@ def _wrap_node(
                         "goto": result.goto,
                     }
                 )
+            if (
+                publish is not None
+                and (result.update.get("response") or {}).get("kind") == "intermediate"
+            ):
+                await publish(state | result.update, None)
             return result
 
     def run(state: State, config):
@@ -286,6 +293,7 @@ def compile_graph(
     *,
     finish: Callable[[State], Completion],
     checkpointer=None,
+    publish=None,
 ):
     """State의 시작 이벤트로 진입한다. 질문 재개에는 checkpointer가 필요하다."""
     if nodes.keys() != DESTINATIONS.keys():
@@ -294,7 +302,7 @@ def compile_graph(
     for name, fn in nodes.items():
         graph.add_node(
             name,
-            _wrap_node(name, fn, finish),
+            _wrap_node(name, fn, finish, publish),
             destinations=tuple(dict.fromkeys((*DESTINATIONS[name], "compose", END))),
         )
     graph.add_node("wait", _wait_for_input, destinations=("interpret",))

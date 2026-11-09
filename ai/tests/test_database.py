@@ -7,7 +7,9 @@ from uuid import uuid4
 import pytest
 from langchain_core.messages import HumanMessage
 
+from api import create_report_states
 from experiments.api_roundtrip import FileDatabase
+from src.agent_nodes import publish_report
 from src.database import Database, QuestionFinished, QuestionNotFound, question_id
 from src.settings import Settings
 from src.state import create_state
@@ -65,6 +67,8 @@ async def test_question_load_preserves_actual_ids_and_previous_artifacts(monkeyp
     assert [m.id for m in state["messages"]] == ["1", "2", "3"]
     assert state["response"]["artifacts"] == rows[1]["artifacts"]
     assert state["request"]["goal"] == "그 차트 설명"
+    assert state["results"] == []
+    assert all(value["used"] == 0 for value in state["execution"]["budget"].values())
     assert db.calls[0][1] == (conversation, 3)
 
 
@@ -155,3 +159,40 @@ async def test_file_boundary_persists_question_and_result_without_memory_state(
         await FileDatabase(config, path).load_question(conversation, 101)
     with pytest.raises(QuestionNotFound):
         await db.load_question(uuid4(), 101)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("commit_error", [False, True])
+async def test_report_uses_original_analysis_timestamp_and_nulls(
+    monkeypatch, commit_error
+):
+    from datetime import date, datetime
+
+    db, committed = database(
+        monkeypatch,
+        {
+            "period_start": date(2025, 12, 1),
+            "adm_cd10": "1168066000",
+            "updated_at": datetime(2025, 12, 15, 1, 2, 3, 123456),
+        },
+    )
+    state = create_report_states(
+        {"requestId": "db-test", "month": "2025-12", "dongCodes": ["1168066000"]},
+        db.settings,
+    )[0]
+    await db.prepare_report(state)
+    assert committed
+    publish_report(state)
+    writer, saved_commits = database(monkeypatch, None, commit_error=commit_error)
+    if commit_error:
+        with pytest.raises(ConnectionError):
+            await writer.save_report(state)
+        assert not saved_commits
+    else:
+        await writer.save_report(state)
+        assert saved_commits
+    sql, params = writer.calls[0]
+    assert "ON CONFLICT (period_start, adm_cd10) DO UPDATE" in sql
+    assert params[:3] == ("2025-12-01", "1168066000", "2025-12-15T01:02:03.123456")
+    assert params[4:] == (None,) * 7
+    assert "1168066000" not in sql

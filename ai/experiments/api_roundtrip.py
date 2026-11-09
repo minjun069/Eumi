@@ -13,8 +13,7 @@ from uuid import UUID, uuid4
 import httpx
 import uvicorn
 from fastapi import FastAPI, Response
-from langchain_core.messages import HumanMessage
-from pydantic import TypeAdapter
+from pydantic import SecretStr, TypeAdapter
 
 from api import Notification, create_app
 from src.database import (
@@ -22,14 +21,14 @@ from src.database import (
     MessageRow,
     QuestionFinished,
     QuestionNotFound,
-    UnmappedResponse,
+    conversation_state,
+    response_row,
 )
 from src.database import (
     question_id as state_question_id,
 )
 from src.gemini import create_model
 from src.settings import Settings
-from src.state import create_state
 
 SAMPLE_QUESTION = (
     "2025년 12월 서울특별시 강남구 전체 읍면동의 종합 위험도 지도를 보여 주세요. "
@@ -49,6 +48,17 @@ class StoredMessage(MessageRow):
 stored_messages = TypeAdapter(list[StoredMessage])
 
 
+def write_json(path, rows, adapter):
+    payload = adapter.dump_json(adapter.validate_python(rows), indent=2)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(".tmp")
+    with temporary.open("wb") as stream:
+        stream.write(payload)
+        stream.flush()
+        os.fsync(stream.fileno())
+    temporary.replace(path)
+
+
 class FileDatabase(Database):
     """단일 프로세스 왕복 실험용. 질문·응답 원본을 파일에서 읽고 저장한다."""
 
@@ -61,16 +71,7 @@ class FileDatabase(Database):
         return stored_messages.validate_json(self.path.read_bytes())
 
     def write(self, rows):
-        payload = stored_messages.dump_json(
-            stored_messages.validate_python(rows), indent=2
-        )
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = self.path.with_suffix(".tmp")
-        with temporary.open("wb") as stream:
-            stream.write(payload)
-            stream.flush()
-            os.fsync(stream.fileno())
-        temporary.replace(self.path)
+        write_json(self.path, rows, stored_messages)
 
     def seed(self, conversation_id, question_id, content):
         if self.path.exists():
@@ -113,21 +114,19 @@ class FileDatabase(Database):
             for r in rows
         ):
             raise QuestionFinished
-        state = create_state(
-            {"goal": question["content"]},
-            self.settings,
-            messages=[HumanMessage(question["content"], id=str(requested_id))],
-            version=self.settings.version,
-            event="user_request",
+        history = sorted(
+            (
+                r
+                for r in rows
+                if r["conversation_id"] == conversation_id
+                and r["message_id"] <= requested_id
+            ),
+            key=lambda r: r["message_id"],
         )
-        state["execution"]["run_id"] = str(conversation_id)
-        return state
+        return conversation_state(history, conversation_id, self.settings)
 
     async def save_response(self, state):
-        status, response = state["execution"]["status"], state["response"]
-        mapping = {"completed": "완료", "failed": "실패", "cancelled": "취소"}
-        if status not in mapping or response is None:
-            raise UnmappedResponse(status)
+        response = response_row(state)
         conversation_id = UUID(state["execution"]["run_id"])
         question_id = state_question_id(state)
         await self.load_question(conversation_id, question_id)
@@ -139,10 +138,7 @@ class FileDatabase(Database):
                 "message_id": saved_id,
                 "question_id": question_id,
                 "role": "AI",
-                "status": mapping[status],
-                "content": response["content"] if status == "completed" else None,
-                "details": None,
-                "artifacts": response["artifacts"] or None,
+                **response,
                 "created_at": datetime.now(UTC).isoformat(),
             }
         )
@@ -200,18 +196,19 @@ async def roundtrip(
     received = []
     receiver = FastAPI()
 
-    @receiver.post("/notifications", response_class=Response, status_code=204)
+    @receiver.post(
+        "/api/internal/agent/notifications", response_class=Response, status_code=204
+    )
     async def receive(body: Notification):
-        assert body["conversation_id"] == conversation_id
-        assert body["question_id"] == question_id
+        assert body["conversationId"] == conversation_id
         # 새 연결·파일 재읽기로 저장 후 알림임을 확인한다.
         if file_db:
             row = next(
                 (
                     r
                     for r in FileDatabase(settings, file_db).read()
-                    if r["conversation_id"] == body["conversation_id"]
-                    and r["message_id"] == body["message_id"]
+                    if r["conversation_id"] == body["conversationId"]
+                    and r["message_id"] == body["messageId"]
                 ),
                 None,
             )
@@ -220,18 +217,19 @@ async def roundtrip(
                 cursor = await connection.execute(
                     "SELECT question_id, role, status FROM public.ai_message "
                     "WHERE conversation_id = %s AND message_id = %s",
-                    (body["conversation_id"], body["message_id"]),
+                    (body["conversationId"], body["messageId"]),
                 )
                 row = await cursor.fetchone()
         assert row and row["question_id"] == question_id and row["role"] == "AI"
-        assert row["status"] in {"완료", "실패", "취소"}
+        assert row["status"] in {"진행", "완료", "실패", "취소"}
         received.append(
             {k: str(v) if isinstance(v, UUID) else v for k, v in body.items()}
         )
         return Response(status_code=204)
 
     async with serve(receiver) as callback:
-        settings.notification_url = f"{callback}/notifications"
+        settings.backend_url = callback
+        settings.backend_token = SecretStr("local-test-token")
         model = create_model(settings).model_copy(
             update={
                 "reasoning_effort": "low",
@@ -245,14 +243,14 @@ async def roundtrip(
                 response = await client.post(
                     f"{url}/internal/agent/runs",
                     json={
-                        "conversation_id": str(conversation_id),
-                        "question_id": question_id,
+                        "conversationId": str(conversation_id),
+                        "messageId": question_id,
                     },
                 )
                 if response.status_code != 202 or response.content:
                     raise RuntimeError(f"접수 실패: HTTP {response.status_code}")
                 print("HTTP 202 accepted", flush=True)
-                tasks = list(app.state.tasks.values())
+                tasks = [task for _, task in app.state.tasks.values()]
                 while any(not task.done() for task in tasks):
                     for journal in (output / str(conversation_id)).glob(
                         "*/trace.jsonl"
@@ -280,7 +278,7 @@ async def roundtrip(
     stored_before_notification = bool(
         saves
         and notifications
-        and saves[-1]["ended_at"] <= notifications[0]["started_at"]
+        and saves[-1]["ended_at"] <= notifications[-1]["started_at"]
     )
     model_http_verified = bool(models) and all(
         s.get("http_request", {}).get("body", {}).get("model") == model_name

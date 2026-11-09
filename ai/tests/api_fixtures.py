@@ -7,7 +7,13 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables import RunnableLambda
 
 from experiments.scenario_fixtures import CATALOG, PROVIDERS
-from src.database import Database, QuestionFinished, QuestionNotFound, question_id
+from src.database import (
+    Database,
+    QuestionFinished,
+    QuestionNotFound,
+    question_id,
+    response_row,
+)
 from src.state import create_state, state_adapter
 
 
@@ -38,8 +44,6 @@ class OfflineModel:
                     "arguments_json": '{"target":"D3"}',
                     "reason": "시연 자료 조회",
                 }
-            elif title == "Verification":
-                value = {"accepted": True, "reason": "시연 자료 구조 확인"}
             elif title == "Decision":
                 value = {"next": "compose", "reason": "자료 조회 완료"}
             elif title == "Composition":
@@ -72,7 +76,7 @@ class MemoryDatabase(Database):
     async def load_question(self, conversation_id, requested_id):
         if conversation_id != self.conversation_id or requested_id != self.question:
             raise QuestionNotFound
-        if self.saved:
+        if any(response_row(s)["status"] != "진행" for s in self.saved):
             raise QuestionFinished
         goal = "시연용 D3 가구 자료를 조회하고 비교표로 설명해 주세요."
         state = create_state(
@@ -86,9 +90,8 @@ class MemoryDatabase(Database):
         return state
 
     async def save_response(self, state):
-        if state["execution"]["status"] != "completed":
-            raise ValueError("Experiment did not complete")
+        response_row(state)
         assert question_id(state) == self.question
         saved = state_adapter.dump_python(state, mode="json")
         self.saved.append(saved)
-        return 102
+        return 101 + len(self.saved)

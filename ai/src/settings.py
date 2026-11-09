@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     model: str = "gpt-6-sol"
     api_key: SecretStr | None = None
+    base_url: HttpUrl = HttpUrl("https://api.openai.com/v1")
     max_steps: int = Field(default=20, ge=1)
     max_tool_calls: int = Field(default=10, ge=1)
     max_agent_calls: int = Field(default=10, ge=0)
@@ -23,8 +24,10 @@ class Settings(BaseSettings):
     runtime_timeout: float = Field(default=60, gt=0)
     llm_timeout: float = Field(default=30, gt=0)
     database_url: SecretStr | None = None
-    notification_url: HttpUrl | None = None
-    notification_timeout: float = Field(default=10, gt=0)
+    backend_url: HttpUrl | None = None
+    backend_token: SecretStr | None = None
+    notification_timeout: float = Field(default=1, gt=0)
+    report_concurrency: int = Field(default=2, ge=1)
     database_timeout: int = Field(default=10, ge=1)
     output_dir: Path = Path("outputs/api")
     version: str = "ai-api-v1"

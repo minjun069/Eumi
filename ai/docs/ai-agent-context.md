@@ -21,7 +21,7 @@ State의 쓰기 범위와 모델에 제공할 읽기 컨텍스트를 구분한�
 
 공통 subject·info·요청 수정 번호는 두지 않는다. 대상이 아직 불명확하면 작업 중 goal을 구체화하거나 필요한 정보를 조회·질문한다. 자료 검색·RAG는 작업 선택 및 실행의 도구 호출로 수행하고 출처를 그 output에 남긴다.
 
-사용자 실행 요청 POST는 conversation_id와 message_id만 전달한다. AI 서버는 해당 Member 질문 행에서 실제 발화를 읽는다. 저장·호출 계약은 [연동 API 초안](ai-runtime-api-20261029.md)을 따른다.
+사용자 실행 요청은 conversationId·messageId와 선택적 context(dongCode·month)를 전달한다. AI 서버는 해당 Member 질문 행과 이전 대화에서 실제 발화를 읽어 새 실행을 만든다. 입력 원본은 results의 run_request 기록, 화면 문맥은 기존 request.constraints.preferred에 둔다. 저장·호출 계약은 [연동 API 초안](ai-runtime-api-20261029.md)을 따른다.
 
 ## 2. 컨텍스트 구성 시 고려사항
 

@@ -1,6 +1,6 @@
 # AI Agent
 
-지역 분석 결과의 해석·시각화·사용자 요청을 처리한다. 공통 그래프와 State 기반 실행·질문 재개, OpenAI 모델 연결, 사용자 요청 API·DB 저장을 구현했다. 시각화는 등록된 Tableau 뷰를 사용한다.
+지역 분석 결과의 해석·시각화·사용자 요청을 처리한다. 공통 그래프와 State 기반 실행, OpenAI 모델 연결, 사용자 요청 API·DB 저장을 구현했다. 시각화는 등록된 Tableau 뷰를 사용한다.
 
 ## 설치·설정
 
@@ -17,40 +17,49 @@ uv sync --locked
 | `SETTINGS_API_KEY` | 실제 OpenAI 모델 호출 |
 | `SETTINGS_MODEL` | 모델 선택. 기본값은 `gpt-6-sol` |
 | `SETTINGS_DATABASE_URL` | API의 PostgreSQL 연결 |
-| `SETTINGS_NOTIFICATION_URL` | 응답 저장 후 백엔드 POST 알림 |
+| `SETTINGS_BACKEND_URL` · `SETTINGS_BACKEND_TOKEN` | INT-07·08 주소와 Bearer 인증 |
+| `SETTINGS_BASE_URL` | 모델 API 주소. 기본 OpenAI 직접 연결 |
 | `LANGFUSE_*` | 선택적 원격 추적. 기본 비활성, 설정은 [모니터링 문서](docs/ai-agent-monitoring.md) 참조 |
 
-## 사용자 요청 API
+## API와 컨테이너 실행
 
-백엔드가 질문을 `public.ai_message`에 커밋한 뒤 호출한다. AI는 질문과 `public.region_result`를 조회하고, 실행 → 답변 저장·커밋 → 백엔드 알림 순서로 처리한다. 알림 실패 시 모델을 다시 실행하거나 저장된 답변을 삭제하지 않는다.
+[연동 API](docs/ai-runtime-api-20261029.md)가 입력·상태 코드·저장·알림·재요청 기준이다.
+사용자 요청은 단계별 행 저장과 INT-07, 보고서 요청은 직접 저장과 INT-08을 연결한다.
+되묻기는 완료 행으로 저장하고 다음 질문은 대화 기록을 읽는 새 실행이다.
+보고서 생성 생략·시점 비교·기존 실행 중 거절은 없다.
 
 ```powershell
 uv run uvicorn api:create_app --factory --host 127.0.0.1 --port 8000 --workers 1
 ```
 
-아래는 현재 API 구현 기준이다.
-
-| 항목 | 입출력·조건 |
-| --- | --- |
-| 실행 요청 | `POST /internal/agent/runs`, 본문 `{"conversation_id":"UUID","question_id":101}` |
-| 접수 응답 | 본문 없는 202 |
-| 오류 응답 | 422: 본문 오류, 404: 질문 없음, 409: 종료된 질문·실행 중인 대화, 503: DB·알림 설정 부재 또는 DB 장애 |
-| 완료 알림 | `conversation_id`, 원래 질문의 `question_id`, 새 AI 행의 `message_id`를 POST |
-| 알림 수신 | 백엔드는 AI 행을 재조회·전달하고 본문 없는 204 반환. 다른 상태·본문·timeout은 전달 실패 |
-| 실행 기록 | `outputs/api/<conversation_id>/<실행 폴더>/`에 `trace.jsonl`, 종료 후 `report.json`·`report.html` 저장 |
-
-중복 방지는 단일 프로세스의 실행 중 대화와 DB의 종료 행을 기준으로 한다. 재시작 복구·다중 워커 중복 방지·자동 재알림·질문 재개 및 취소 API는 없다. `waiting_input`·`partial`은 DB 대응 계약이 없어 완료로 저장하지 않고 `UnmappedResponse`로 기록한다. 실행 기록은 재개용 체크포인트가 아니다.
-
-실제 PostgreSQL 저장·알림 왕복은 **미검증**이다. 확인하려면 DB에 커밋된 실제 질문 ID로 실행한다. `experiments.api_roundtrip`은 실제 모델을 호출하며, 기본 모델은 저비용 `gpt-5.6-luna`다. `--file-db`를 지정한 경우에만 DB를 임시 파일로 대체한다.
+`SETTINGS_BACKEND_URL`·`SETTINGS_BACKEND_TOKEN`이 없으면 시작하지 않는다.
+`GET /health`는 서버 생존 확인이며 DB·모델 연결 성공을 뜻하지 않는다.
 
 ```powershell
-uv run python -m experiments.api_roundtrip --conversation-id <실제-UUID> --question-id <실제-ID>
-uv run pytest tests/test_api_roundtrip.py tests/test_database.py -q
+docker build -t eumi-ai .
+docker run --rm --env-file .env -p 8000:8000 --memory=2g eumi-ai
 ```
 
-단위 테스트는 외부 연결을 대체하므로 실제 DB 왕복의 검증 근거가 아니다.
+컨테이너는 `uv sync --locked --no-dev`로 설치하며 비루트 사용자·1 worker로 실행한다.
+실제 배포의 환경변수·네트워크·출력 볼륨은 인프라 담당 범위다.
+OpenAI 직접 연결이 기본이며 GMS를 사용하면 `SETTINGS_BASE_URL`을 지정한다.
+GMS의 Responses API·모델 호환성은 실제 키로 검증해야 한다.
 
-파일 저장소로 실제 모델·HTTP 알림을 검증하는 준비·실행·모니터링·실패 확인 절차는 [API 왕복 검증](docs/api-roundtrip.md)을 따른다.
+보고서 작성·검토는 [보고서 생성 흐름](docs/temp/analysis-report-workflow.md)을 따른다.
+동별 기본 병렬 수는 2다. 실제 PostgreSQL 권한·NULL 제약과 BE 왕복은 미검증이다.
+V06 기여도와 V01 중앙 50% 범위 자료원은 기존 미연결 상태다.
+2GB에서의 메모리 사용량은 측정하지 않았다.
+
+```powershell
+uv run pytest tests/test_api_roundtrip.py tests/test_database.py tests/test_reports.py tests/test_report_roundtrip.py -q
+```
+
+2026-11-08: API·DB·보고서·그래프·런타임·State·프롬프트·모니터링·추적 회귀 114개 통과.
+변경한 Python 파일의 Ruff 검사도 통과했다. Docker 엔진이 실행되지 않아 이미지 빌드·2GB 메모리 측정은 수행하지 못했다.
+
+위 테스트는 외부 모델·DB를 대체한다. 실제 모델을 사용하는 파일 DB 검증은
+[API 왕복 검증](docs/api-roundtrip.md)을 따른다. 실행·전송 실패는 State와
+`outputs/api`의 trace·report.json·report.html에서 확인한다.
 
 ## 로컬 데모·리포트
 
@@ -67,4 +76,4 @@ uv run pytest tests/test_api_roundtrip.py tests/test_database.py -q
 
 ## 관련 문서
 
-[설계 명세 목록](docs/README.md) · [API 초안](docs/ai-runtime-api-20261029.md) · [코드 작업 지침](docs/CODING_GUIDELINES.md) · [컨텍스트 구성](docs/context-composition.md)
+[설계 명세 목록](docs/README.md) · [연동 API](docs/ai-runtime-api-20261029.md) · [코드 작업 지침](docs/CODING_GUIDELINES.md) · [컨텍스트 구성](docs/context-composition.md)

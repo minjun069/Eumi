@@ -85,14 +85,80 @@ def record_report_source(state, row):
 
 def question_id(state: State) -> int:
     """DB 질문 ID는 초기화 때 실제 사용자 메시지의 ID로 보존한다."""
-    message = next(
-        m for m in reversed(state["messages"]) if isinstance(m, HumanMessage)
+    request = next(
+        (r for r in state["results"] if r["decision"] == "run_request"), None
     )
-    return int(message.id)
+    if request:
+        return request["action"]["arguments"]["messageId"]
+    return int(
+        next(m for m in reversed(state["messages"]) if isinstance(m, HumanMessage)).id
+    )
 
 
+def response_row(state):
+    """내부 실행 상태를 대화 행으로 변환한다. 되묻기도 이번 질문의 끝 행이다."""
+    status, response = state["execution"]["status"], state["response"]
+    mapping = {
+        "running": "진행",
+        "waiting_input": "완료",
+        "completed": "완료",
+        "partial": "완료",
+        "failed": "실패",
+        "cancelled": "취소",
+    }
+    if status not in mapping or (
+        response is None and status not in {"failed", "cancelled"}
+    ):
+        raise UnmappedResponse(status)
+    response = response or {}
+    return {
+        "status": mapping[status],
+        "content": (
+            response.get("label") if status == "running" else response.get("content")
+        )
+        if status not in {"failed", "cancelled"}
+        else None,
+        "details": response.get("content") if status == "running" else None,
+        "artifacts": response.get("artifacts") or None,
+    }
 
 
+def conversation_state(rows, conversation_id, settings):
+    """DB/파일 경계가 읽은 실제 대화로 새 실행을 만든다."""
+    rows = message_rows.validate_python(rows)
+    question = rows[-1]
+    messages = []
+    for row in rows:
+        if row["content"]:
+            kind = HumanMessage if row["role"] == "Member" else AIMessage
+            messages.append(kind(row["content"], id=str(row["message_id"])))
+    state = create_state(
+        {"goal": question["content"]},
+        settings,
+        messages=messages,
+        version=settings.version,
+        event="user_request",
+    )
+    state["execution"]["run_id"] = str(conversation_id)
+    previous = next(
+        (
+            row
+            for row in reversed(rows[:-1])
+            if row["role"] == "AI" and row["status"] == "완료"
+        ),
+        None,
+    )
+    if previous:
+        state["response"] = response_adapter.validate_python(
+            {
+                "id": str(previous["message_id"]),
+                "kind": "final",
+                "label": "final",
+                "content": previous["content"] or "",
+                "artifacts": previous["artifacts"] or [],
+            }
+        )
+    return state
 
 
 # Dataset의 기존 열·행 계약으로 제공한다. 요청별 조회 결과를 캐시하지 않는다.
@@ -347,47 +413,10 @@ class Database:
             )
             if await cursor.fetchone():
                 raise QuestionFinished
-        rows = message_rows.validate_python(rows)
-        question = rows[-1]
-        messages = []
-        for row in rows:
-            if row["content"]:
-                kind = HumanMessage if row["role"] == "Member" else AIMessage
-                messages.append(kind(row["content"], id=str(row["message_id"])))
-        state = create_state(
-            {"goal": question["content"]},
-            self.settings,
-            messages=messages,
-            version=self.settings.version,
-            event="user_request",
-        )
-        state["execution"]["run_id"] = str(conversation_id)
-        previous = next(
-            (
-                row
-                for row in reversed(rows[:-1])
-                if row["role"] == "AI" and row["status"] == "완료"
-            ),
-            None,
-        )
-        if previous:
-            state["response"] = response_adapter.validate_python(
-                {
-                    "id": str(previous["message_id"]),
-                    "kind": "final",
-                    "label": "final",
-                    "content": previous["content"] or "",
-                    "artifacts": previous["artifacts"] or [],
-                }
-            )
-        return state
+        return conversation_state(rows, conversation_id, self.settings)
 
     async def save_response(self, state: State) -> int:
-        response = state["response"]
-        status = state["execution"]["status"]
-        mapping = {"completed": "완료", "failed": "실패", "cancelled": "취소"}
-        if status not in mapping or response is None:
-            raise UnmappedResponse(status)
+        row = response_row(state)
         async with await self.connect() as connection:
             cursor = await connection.execute(
                 "INSERT INTO public.ai_message "
@@ -397,10 +426,10 @@ class Database:
                 (
                     UUID(state["execution"]["run_id"]),
                     question_id(state),
-                    mapping[status],
-                    response["content"] if status == "completed" else None,
-                    None,
-                    Jsonb(response["artifacts"]) if response["artifacts"] else None,
+                    row["status"],
+                    row["content"],
+                    row["details"],
+                    Jsonb(row["artifacts"]) if row["artifacts"] else None,
                 ),
             )
             saved_id = (await cursor.fetchone())["message_id"]

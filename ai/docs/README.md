@@ -12,7 +12,7 @@
 | --- | --- |
 | [업무 범위](ieumi-workflow-agent-context.md) | 사용자, 문제, 지원 범위, 담당자 역할 |
 | [아키텍처](ai-agent-architecture.md) | 시스템 구성·담당 범위, 실행 API·상태 공유·공유 DB 구조 |
-| [백엔드 연동 API 초안](ai-runtime-api-20261029.md) | 양방향 POST 요청·빈 HTTP 응답, 대화 테이블·저장 담당과 협의 사항 |
+| [백엔드 연동 API](ai-runtime-api-20261029.md) | INT-01·02·05·07·08, 행 저장·알림, 시간·재요청·실패 처리 |
 | [기능 명세](ieumi-agent-components.md) | 용어, 도구 입출력, Agent별 역할·명세 |
 | [실행 흐름](ieumi-agent-workflow-design.md) | 시작 이벤트, 호출 순서, 중간 응답·화면 전달, 질문·재개·종료·오류 처리 |
 | [State](ieumi-agent-state.md) | 필드·자료형·노드별 쓰기 범위·실행 상태 |

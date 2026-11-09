@@ -16,7 +16,7 @@ def create_model(settings: Settings):
     return ChatOpenAI(
         model=settings.model,
         api_key=settings.api_key,
-        base_url="https://api.openai.com/v1",
+        base_url=str(settings.base_url),
         use_responses_api=True,
         use_previous_response_id=False,
         store=False,
