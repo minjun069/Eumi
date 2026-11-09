@@ -1,23 +1,24 @@
-# AI 에이전트 패널 계약 (A 방식, 2026-11-02 확정)
+# AI 에이전트 패널 계약 (A 방식, 2026-11-02 확정 · 11/9 AI-a 연결 반영)
 
 BE가 질문을 저장하고, AI(FastAPI)가 진행 단계와 답변을 DB(`ai_message`)에 직접 저장하고, 화면은 1초마다 새 행을 조회한다. SSE는 쓰지 않는다.
-API 형식은 `openapi.json` 2.3.1의 API-03·03-S1·03-S2·36~38, DB는 `db/migration/V20261102_02__ai_message.sql`이 기준이다.
+API 형식은 `openapi.json` 2.3.4의 API-03·03-S1·03-S2·36~38과 내부 연동 목록 `x-internal-api`의 INT-01 · 02 · 07, DB는 `db/migration/V20261102_02__ai_message.sql`이 기준이다.
+11/6 결정(INT-03 삭제, INT-07, 화면 문맥, 되묻기, artifacts)은 [변경 계획](../work-ref/내부_연동_변경_계획.md) 2절을 구현에 맞춰 옮겼다 (BE 245eec0, FE 0118e6f, AI bde4f50).
 
 ## 1. 구성 요소
 
 | 구성 요소 | 하는 일 |
 |---|---|
-| FE | 질문을 보내고, 1초마다 마지막으로 받은 행 이후를 조회해 붙인다. 끝 행(완료·실패·취소)을 받으면 조회를 멈춘다. 중단 버튼으로 취소를 요청한다 |
-| BE (Spring) | 로그인·대화 소유자 확인, 이 문서의 질문 마스킹 범위를 적용한 질문 행 저장, AI에 실행·취소 요청, 조회 API 제공. AI가 응답하지 않을 때만 실패·취소 행을 대신 쓴다 |
-| AI (FastAPI) | 대화 ID와 질문 행 ID를 받아 DB에서 이전 대화와 질문을 읽고, 진행·완료·실패·취소 행을 행마다 커밋해 저장한다. 대화 패널 결과는 BE로 보내지 않는다 (인사이트 보고서는 BE API로 보낸다: [insight-report.md](insight-report.md)) |
+| FE | 질문을 보내고, 1초마다 마지막으로 받은 행 이후를 조회해 붙인다. 끝 행(완료·실패·취소)을 받으면 조회를 멈춘다. 중단 버튼으로 취소를 요청한다. 위험 탐색 · 읍면동 화면에서는 보고 있는 동 · 월(화면 문맥)을 함께 보낸다. 완료 행의 artifacts를 그린다 |
+| BE (Spring) | 로그인·대화 소유자 확인, 이 문서의 질문 마스킹 범위를 적용한 질문 행 저장, 화면 문맥 형식 검사, AI에 실행·취소 요청, 조회 API 제공, AI 행 저장 알림(INT-07) 수신. AI가 응답하지 않을 때만 실패·취소 행을 대신 쓴다 |
+| AI (FastAPI) | 대화 ID · 질문 행 ID(`messageId`) · 화면 문맥을 받아 DB에서 이전 대화와 질문을 읽고, 진행·완료·실패·취소 행을 행마다 커밋해 저장한다. 행을 커밋할 때마다 BE에 알린다(INT-07). 답변 내용은 BE로 보내지 않는다 (인사이트 보고서는 [insight-report.md](insight-report.md)) |
 | DB | 행을 순서대로 쌓는다. 한 질문에 끝 행은 하나만 받는다. 끝 행이 들어오면 대화의 실행 종료 일시와 삭제 예정일을 갱신한다(트리거) |
 
 - 실행 ID = 대화 ID. 한 대화에서 실행은 동시에 하나다.
 - 질문 행은 BE(`eumi_app`)가, AI 행은 AI(`eumi_ai`)가 쓴다. AI가 응답하지 않을 때의 실패·취소 행만 BE가 `role='AI'`로 대신 쓴다.
 - 단계 하나 = 행 하나. AI는 단계를 시작할 때 진행 행을 한 번 저장하고, 단계별 완료 행은 두지 않는다. 다음 단계의 진행 행이나 끝 행이 들어오면 앞 단계가 끝난 것으로 본다.
 - AI는 같은 대화의 이전 기록을 **전체** 읽는다 (최근 몇 개로 자르지 않음). 길어서 문제가 되면 그때 범위를 줄인다.
-- AI 서버는 인증이 없고 Nginx에 열지 않는다. BE만 내부 네트워크로 부른다.
-- 화면 문맥(screen)은 보내지 않는다. 실패 원인은 저장하지 않는다.
+- **내부 경로 보안 (3-5):** AI 서버(`/internal/…`)는 인증이 없고 BE만 내부망으로 부른다. BE 내부 경로(`/api/internal/…`)는 호출자별 Bearer 토큰으로만 열린다. 둘 다 Nginx에 열지 않는다.
+- 화면 문맥은 INT-01로 넘기지만 저장하지 않는다 (3-1). 실패 원인은 저장하지 않는다.
 
 ## 2. ai_message 한 행
 
@@ -30,7 +31,7 @@ API 형식은 `openapi.json` 2.3.1의 API-03·03-S1·03-S2·36~38, DB는 `db/mig
 | status | status | `질문` / `진행` / `완료` / `실패` / `취소` (글자 그대로, DB CHECK) |
 | content | content | 질문 행: 질문 등록 당시의 마스킹 처리 결과(6절), 진행 행: 단계 이름, 완료 행: 최종 답변, 실패·취소 행: null |
 | details | details | 진행 행의 단계 상세 설명. 질문 행은 null |
-| artifacts | artifacts | 시각화 결과(표·그래프) JSON. 있을 때만. 형식은 AI·FE가 합의 (정해지기 전 FE는 무시) |
+| artifacts | artifacts | 시각화 결과(Tableau · 표 · 그래프) JSON 배열. 있을 때만. 형식은 2-1 |
 | created_at | createdAt | 저장 일시 |
 
 예: 질문 두 번, 두 번째는 사용자가 중단
@@ -47,49 +48,169 @@ API 형식은 `openapi.json` 2.3.1의 API-03·03-S1·03-S2·36~38, DB는 `db/mig
 
 DB가 막는 것: 같은 question_id에 끝 행 두 개(부분 UNIQUE), 이미 끝난 질문에 들어오는 AI 행(트리거), 다른 대화의 질문을 가리키는 행(복합 FK), role·status 오타(CHECK). 막힐 때 오류는 SQLSTATE 23505(끝난 질문) 또는 23514(CHECK)·23503(FK).
 
+### 2-1. artifacts 형식
+
+`ai_message.artifacts` = `[{type, data}, ...]` (대화 패널만)
+
+| type | data | 용도 |
+|---|---|---|
+| `tableau` | `schema_version: 1`, `view_key`, `src`(게시 뷰 주소), `title`, `parameters[{name, data_type, value}]`, `filters[{worksheet, field, operation, values}]`, `source{label, uri}`, `warnings` 등 (AI 코드의 TableauData) | 시각화의 주 경로. AI는 등록된 뷰를 검증한 뒤에만 만든다 |
+| `table` · `chart` · `map` | `{mime_type: "text/html", content}` | 근거 비교표 등 보조 경로 |
+
+- **저장:** 내용을 직접 담는다. 파일로 저장하고 참조만 넣는 방식은 쓰지 않는다.
+  - 내부 참조(파일 경로, DB ID 등)는 넣지 않는다. 공개 Tableau 주소와 출처 링크만 넣는다.
+  - 대화가 지워지면 산출물도 함께 지워진다.
+- **HTML:** AI는 글자를 이스케이프한 HTML(표 · SVG)을 담는다.
+- **상한(제안, AI 확인 후 확정):** 한 행에 항목 5개 이하, HTML 한 항목 100KB 이하. AI 쪽 규칙이다.
+- `tableau`의 `schema_version`을 올릴 때는 FE와 먼저 맞춘다.
+
+**FE가 그리는 규칙 (FE 0118e6f)**
+
+- **완료 행만 그린다.** 진행 행의 산출물은 그리지 않는다.
+- **`tableau`:**
+  - `schema_version`이 1이고 `src`가 `https://public.tableau.com/views/{워크북}/{뷰}` 형식일 때만 띄운다.
+  - `parameters` → `filters` 순서로 적용한다.
+  - 오류가 나거나 30초 안에 뜨지 않으면 "그래프를 불러오지 못했습니다"와 '다시 시도'를 보인다.
+- **`table` · `chart` · `map`:** DOMPurify로 정화해서 그린다.
+  - 스크립트, 이벤트 속성, 외부 주소(주소 속성, `url(...)`, 이미지 · 프레임 · 개체)를 지운다.
+  - `<style>`과 `style` · `class` 속성도 지운다. 그래서 AI가 head나 `<style>`에 넣은 스타일은 쓰이지 않고, 표 · SVG 모양은 FE CSS가 정한다.
+  - 문서 안 참조(`#id`)만 남긴다.
+- **건너뛰는 것:** 모르는 `type` · `schema_version`, 형식이 틀린 항목.
+- **반복:** 같은 대화에서 앞 완료 행에 이미 나온 산출물은 다시 그리지 않는다. 대신 "앞 답변과 같은 그래프·표 N개는 다시 그리지 않았어요"로 알린다. 되묻기 · 부분 완료 행에 AI가 이전 artifacts를 다시 싣기 때문이다.
+
 ## 3. API
 
 | 구간 | 요청 | 하는 일 |
 |---|---|---|
-| FE → BE | `POST /api/agent/questions` (API-03) | `{conversationId \| null, question}` → 202 `{conversationId, questionId}`. 끝 행이 없는 질문이 있으면 409 `RUN_ALREADY_ACTIVE`, 남의·만료 대화 404 |
+| FE → BE | `POST /api/agent/questions` (API-03) | `{conversationId \| null, question, context?}` → 202 `{conversationId, questionId}`. 끝 행이 없는 질문이 있으면 409 `RUN_ALREADY_ACTIVE`, 남의·만료 대화 404 |
 | FE → BE | `GET /api/agent/conversations/{id}/messages?after=` (API-03-S1) | after보다 큰 행을 오름차순으로 `{messages: [...]}`. 실행 중 1초마다, 대화를 열 때 after=0 |
 | FE → BE | `POST /api/agent/conversations/{id}/cancel` (API-03-S2) | 204. 이미 끝났어도 204 |
 | FE → BE | `GET /api/members/me/conversations` (API-36) | 대화 목록 (`v_conversation_summary`, 질문 수는 실패·취소 포함) |
 | FE → BE | `GET /api/members/me/conversations/{id}` (API-37) | 대화 전체, `messages`는 API-03-S1과 같은 형식 |
 | FE → BE | `DELETE /api/members/me/conversations/{id}` (API-38) | 실행 중이면 취소 요청 뒤 삭제, 메시지는 CASCADE |
-| BE → AI | `POST /internal/agent/runs` (INT-01) | `{conversationId, questionId}` → 202 접수만 하고 뒤에서 실행. 같은 대화가 실행 중이면 409 |
-| BE → AI | `POST /internal/agent/runs/{conversationId}/cancel` (INT-02) | 실행을 멈추고 취소 행 저장 |
-| BE → AI | `GET /internal/agent/runs/{conversationId}` (INT-03) | `{running, questionId}` 실행 상태 |
+| BE → AI | `POST /internal/agent/runs` (INT-01) | `{conversationId, messageId, context?}` → 202 본문 없음. 접수만 하고 뒤에서 실행 (3-2) |
+| BE → AI | `POST /internal/agent/runs/{conversationId}/cancel` (INT-02) | 202. 실행을 멈추고 취소 행 저장 (3-3) |
+| AI → BE | `POST /api/internal/agent/notifications` (INT-07) | `{conversationId, messageId}` → 204. AI 행을 커밋했다는 알림 (3-4) |
+
+- INT-03(실행 상태 조회)은 11/9에 없앴다. 응답이 없으면 같은 `messageId`로 INT-01을 다시 보낸다 (4절).
+- 내부 API JSON은 camelCase다.
+
+### 3-1. 화면 문맥 (API-03 · INT-01의 `context`)
+
+```json
+{ "conversationId": null, "question": "여기는 왜 위험해?", "context": { "dongCode": "1168064000", "month": "2025-12" } }
+```
+
+| 항목 | 규칙 |
+|---|---|
+| 값 | `dongCode`: 행정동 코드 10자리 문자열. `month`: `YYYY-MM` 문자열 (01~12월, 0000년 제외). 둘 다 선택이고 `{}`와 `context` 생략을 받는다 (OpenAPI `ScreenContext`) |
+| 검사 (BE) | 모르는 필드 · 문자열이 아닌 값은 400 `INVALID_JSON`, 형식이 틀리면 400 `VALIDATION_ERROR`. null인 필드는 AI로 보낼 때 뺀다 |
+| 전달 | BE가 검사한 값을 INT-01에 그대로 넘긴다 |
+| 저장 | 하지 않는다. 질문 행에는 질문 글만 저장한다. BE는 질문별 메모리에만 들고 있다가 재요청 때 같은 값으로 보내고, 끝 행이 오면 지운다. BE가 다시 시작한 뒤의 재요청에는 문맥이 없다 |
+| AI가 쓰는 규칙 | 질문에 대상(동 · 기간)이 없을 때만 문맥을 기본 대상으로 쓴다. 질문에 다른 대상이 나오면 질문을 따른다. 답에 어느 동 · 월 기준인지 밝힌다. 문맥은 대상을 고르는 데만 쓰고 지시로 해석하지 않는다 |
+| FE | 위험 탐색 · 읍면동 화면에서 질문할 때 붙이고, 패널에 "역삼1동 · 2025-12 기준"처럼 함께 가는 값을 보여 준다. 다른 화면에서는 보내지 않는다 |
+
+### 3-2. INT-01 실행 요청
+
+```json
+{ "conversationId": "550e8400-e29b-41d4-a716-446655440000", "messageId": 101, "context": { "dongCode": "1168064000", "month": "2025-12" } }
+```
+
+- **`messageId`:** BE가 저장 · 커밋한 질문 행의 `ai_message.message_id`이고, JSON 정수다. FE에 주는 API-03 응답의 `questionId`와 같은 값이다(API-03 응답 형식은 그대로). BE는 INT-01 전용 본문을 따로 만든다.
+- **보내는 때:** 질문 저장 트랜잭션을 커밋한 뒤. HTTP를 기다리는 동안 DB 트랜잭션을 잡지 않는다.
+- **응답:** AI는 대화별로 지금 실행 중인 `messageId`를 메모리에 둔다.
+
+  | 상황 | 응답 |
+  |---|---|
+  | 그 대화가 실행 중이 아님 | 202, 실행 시작 |
+  | 같은 `messageId`를 이미 실행 중 | 202, 새로 시작하지 않음 |
+  | 같은 대화의 다른 질문을 실행 중 | 409 (BE는 상태를 따로 묻지 않는다) |
+  | 본문이 잘못됨 | 400 |
+
+- 응답 본문은 없고, BE는 응답 본문에서 아무것도 읽지 않는다.
+
+### 3-3. INT-02 취소와 DB 거부
+
+- INT-02를 받으면 AI는 202로 답하고 실행을 멈춘 뒤 취소 행을 저장한다. 취소 처리 중에도 INT-07을 보낼 수 있다.
+- BE는 INT-02 응답을 `http-timeout`(3초)과 취소 대기(5절) 중 짧은 시간까지 기다린다. 응답을 못 받아도 취소 대기 시각까지 AI의 끝 행을 기다리고, 그때까지 끝 행이 없으면 취소 행을 대신 쓴다. 취소와 완료가 겹치면 먼저 저장된 끝 행만 남는다.
+- AI가 행을 쓰다 SQLSTATE 23505(이미 끝난 질문)로 거부되면 그 실행을 바로 끝낸다. 같은 행을 다시 쓰지 않는다. BE가 시간 초과 실패 행이나 취소 행을 대신 쓴 경우에도 AI가 스스로 멈춘다.
+
+### 3-4. INT-07 행 저장 알림
+
+`POST /api/internal/agent/notifications` · `{ "conversationId": "550e8400-e29b-41d4-a716-446655440000", "messageId": 102 }`
+
+| 항목 | 규칙 |
+|---|---|
+| 보내는 때 | AI 행(진행 · 완료 · 실패 · 취소)을 커밋한 직후. 커밋 전에는 보내지 않는다 |
+| `messageId` | 방금 커밋한 AI 행의 `message_id` (질문 행이 아님). 양의 JSON 정수 |
+| 응답 | 204 본문 없음. 모르는 필드 · 정수가 아닌 `messageId`는 400 `INVALID_JSON`, 값 오류는 400 `VALIDATION_ERROR`, 토큰이 없거나 틀리면 401 `UNAUTHENTICATED`, AI 토큰이 아니면 403 `FORBIDDEN`, 그 대화에 그 AI 행이 없으면 404 `NOT_FOUND` |
+| 재시도 | 최대 2번 보낸다. 5xx · 연결 오류 · 시간 초과일 때만 한 번 더 보내고, 4xx는 다시 보내지 않는다. 한 번의 제한 시간은 짧게 둔다(AI 기본값 1초). 실패해도 실행은 계속한다 (AI 구현 `ai/api.py`의 `notify`) |
+| 중복 · 순서 | BE는 같은 알림을 여러 번 받아도 결과가 같다 (재시도로 두 번 올 수 있다). 도착 순서에 기대지 않고, 알림 이력은 저장하지 않는다 |
+| BE가 하는 일 | 그 행이 그 대화의 AI 행인지 읽기만 해서 확인하고 로그를 남긴다. 끝 행이면 그 질문의 메모리 추적 상태(문맥, 재요청 기록, 취소 대기)를 정리한다. 행의 `question_id`로만 정리하므로, 앞 질문의 늦은 알림이 다음 질문의 상태를 지우지 않는다. 화면에 밀어 주지는 않는다(화면은 1초 조회 유지) |
+
+### 3-5. 내부 경로 보안
+
+| 경로 | 인증 | 호출자 |
+|---|---|---|
+| AI 서버 `/internal/…` (INT-01 · 02, 보고서 INT-05) | 없음 (내부망) | BE만 `http://ai:8000`으로 부른다 |
+| BE `/api/internal/agent/notifications` (INT-07) | `Authorization: Bearer <AI 토큰>` | AI |
+| BE `/api/internal/analysis/…` (보고서 INT-04 · 08) | 파이프라인 토큰 · AI 토큰 | AI-b에서 연다 ([insight-report.md](insight-report.md)) |
+
+- BE 내부 경로는 브라우저 체인과 따로 둔 보안 체인이다. 세션 · CSRF 쿠키를 만들지 않고, 브라우저 로그인으로 서비스 토큰을 대신할 수 없다. `Authorization` 머리가 둘 이상이면 401이다.
+- 토큰은 호출자마다 다르다: BE 설정 `eumi.internal.ai-token`(`EUMI_AI_TOKEN`) · `eumi.internal.pipeline-token`(`EUMI_PIPELINE_TOKEN`). AI의 `SETTINGS_BACKEND_TOKEN`은 BE의 AI 토큰과 같은 값이다. 값은 서버 `.env.config`에만 둔다.
+- 두 토큰이 같거나 공백 · 제어 문자 · `${`가 들어 있으면 backend가 뜨지 않는다. http 모드에서는 두 토큰이 모두 있어야 뜬다. fake 모드에서는 없어도 되고, 그때 INT-07은 401이다.
+- Nginx는 밖에서 오는 `/api/internal/`을 404로 막는다.
 
 ## 4. 상황별 동작
 
-**첫 질문**: FE 질문(대화 ID 없음) → BE가 대화 행 + 질문 행을 한 트랜잭션으로 저장(대화 행의 실행 종료 일시·삭제 예정일은 기본값) → 커밋 뒤 INT-01 → 202 → FE는 `after=questionId`로 1초마다 조회 → AI는 단계마다 진행 행을 쓰고 커밋 → 완료 행(답변, artifacts) → FE는 끝 행에서 멈춤.
+**첫 질문**: FE 질문(대화 ID 없음, 화면 문맥은 선택) → BE가 대화 행 + 질문 행을 한 트랜잭션으로 저장(대화 행의 실행 종료 일시·삭제 예정일은 기본값) → 커밋 뒤 INT-01 `{conversationId, messageId, context?}` → 202 → FE는 `after=questionId`로 1초마다 조회 → AI는 단계마다 진행 행을 쓰고 커밋한 뒤 INT-07 → 완료 행(답변, artifacts) → FE는 끝 행에서 멈춤.
 
 **이어서 질문**: FE가 대화 ID를 넣어 보냄(실행 중에는 보내기 버튼을 막음) → BE는 대화 행 `FOR UPDATE`, 소유자 확인, 끝 행 없는 질문이 있으면 409 → 나머지는 첫 질문과 같다. 이전 대화는 AI가 DB에서 직접 읽는다.
 
-**정보가 부족한 질문** (11/3 결정): 질문만으로 대상(지역·기간 등)을 정할 수 없으면 AI는 되묻는 내용을 완료 행으로 저장하고 실행을 끝낸다. 사용자의 답은 같은 대화의 다음 질문으로 보내고, AI는 이전 대화를 DB에서 읽어 이어 간다. 되묻기를 위한 별도 상태·API는 없다.
+**정보가 부족한 질문 (되묻기, 11/3 · 11/7 결정)**
+
+- 질문과 문맥만으로 대상(지역 · 기간 등)을 정할 수 없으면 AI는 되묻는 내용을 **완료 행**으로 저장하고 실행을 끝낸다. AI 내부 상태 waiting_input도 DB에는 완료 행이다. 실행을 열어 둔 채 기다리지 않는다.
+- 사용자의 답은 같은 대화의 **새 질문**(새 INT-01)으로 온다. 이어서 처리할지는 AI가 판단한다.
+  - 대화마다 대기 중인 실행은 하나만 둔다. 체크포인트가 있으면 이어 가고, 없으면 DB의 대화 기록으로 이어 간다. 관련 없는 질문이면 대기 중인 실행을 버리고 새로 시작한다.
+  - 체크포인트는 공유 DB 밖(AI 메모리 등)에 두고 AI가 정리한다. 다음 질문을 처리하면 정리하고, 대화가 삭제될 때 함께 버린다.
+- 일부만 답한 경우(partial)는 완료 행에 한계를 문장으로 담는다. 새 상태 값은 없다.
+- `question_id`는 "실행 한 번"의 번호다. 되묻기 뒤 재개도 새 실행 하나로 보고, 결과는 새 질문 행 아래에 붙는다.
 
 **새로고침·화면 이탈·네트워크 끊김**: 다시 들어오면 after=0으로 전체를 다시 그리고, 마지막 질문에 끝 행이 없으면 조회를 이어 간다. 조회가 한 번 실패해도 다음 조회가 마지막 id부터 이어 받는다. 401이면 로그인 화면.
 
-**사용자 중단**: FE cancel → BE가 소유자 확인 후 INT-02 → AI가 멈추고 취소 행 저장 → FE는 취소 행에서 멈춤. AI가 정해진 시간 안에 응답하지 않으면 BE가 취소 행을 쓴다. 취소와 완료가 겹치면 먼저 저장된 끝 행만 남는다(완료가 먼저면 화면에 답변이 보인다).
+**사용자 중단**: FE cancel → BE가 소유자 확인 후 INT-02 → AI가 멈추고 취소 행 저장 → FE는 취소 행에서 멈춤. 취소 대기 안에 끝 행이 없으면 BE가 취소 행을 쓴다 (3-3). 취소와 완료가 겹치면 먼저 저장된 끝 행만 남는다(완료가 먼저면 화면에 답변이 보인다).
 
-**실패·시간 초과·AI 불량**
+**실패·시간 초과·AI 응답 없음** (BE 구현 245eec0 기준)
 
 | 상황 | 처리 |
 |---|---|
 | AI 내부 오류 | AI가 실패 행 저장. FE는 실패 안내 |
-| 실행 시간 초과 | AI가 제한 시간에 멈추고 실패 행 저장 |
-| AI가 응답 없음 | 새 행이 정해진 시간 동안 없으면 BE가 조회를 처리할 때 INT-03으로 상태 확인 |
-| AI 불량 | 실행 중이 아니고 끝 행이 없으면 BE가 같은 questionId로 INT-01을 한 번만 다시 요청 |
-| 그래도 끝나지 않음 | 질문 시각 + AI 실행 제한 + 여유 시간이 지나면 BE가 실패 행. 그 뒤 AI의 늦은 행은 DB가 거부 |
+| 실행 시간 초과 | AI가 벽시계 상한에 걸리면 여유 시간 안에 실패 행 저장 |
+| AI가 응답 없음 | 새 행이 응답 없음 기준 동안 없고 끝 행도 없으면, BE가 같은 `messageId`(와 같은 문맥)로 INT-01을 **질문당 1번** 다시 보낸다. AI가 살아 있으면 202로 끝나고, 멈춰 있었으면 다시 시작한다. 재요청 기록은 BE 프로세스 메모리 기준이라, BE가 다시 시작하면 문맥 없이 1번 더 보낼 수 있다 |
+| 접수 실패 · 재요청 실패 | INT-01의 연결 실패 · 시간 초과 · 202가 아닌 응답만으로는 실패 행을 쓰지 않는다. 아래 마감까지 기다린다. 그동안 화면은 '답변을 만드는 중'이고 중단 버튼으로 끝낼 수 있다 |
+| 그래도 끝나지 않음 | 질문 시각 + 실행 제한 + 여유 시간이 지나야 BE가 실패 행을 쓴다. 그 뒤 AI의 늦은 행은 DB가 거부한다(23505) |
 
-**기록과 삭제**: 마이페이지 목록은 `v_conversation_summary`(첫 질문, 질문 수, 실행 종료 일시, 보관 기간 지난 대화 제외). 대화를 열면 지난 진행 단계·실패·취소까지 그대로 보인다. 보관은 실행 종료일(서울) + 3개월, 매일 한 번 만료 대화 삭제, 탈퇴 시 모두 삭제.
+**기록과 삭제**: 마이페이지 목록은 `v_conversation_summary`(첫 질문, 질문 수, 실행 종료 일시, 보관 기간 지난 대화 제외). 대화를 열면 지난 진행 단계·실패·취소·artifacts까지 그대로 보인다. 보관은 실행 종료일(서울) + 3개월, 매일 한 번 만료 대화 삭제, 탈퇴 시 모두 삭제.
 
-## 5. 아직 정할 것 (김민준, http 모드 전환 전까지)
+## 5. 시간 값
 
-- 시간 값 4개: AI 실행 제한, BE 여유 시간, '응답 없음'으로 보는 시간, 취소 응답 대기 → BE 설정 `eumi.ai.*`
-- artifacts 형식 (FE와 함께)
-- 정하기 전에는 운영을 fake 모드로 둔다. http 모드는 시간 값 4개가 모두 있어야 backend가 뜬다 (`AgentProperties`)
+BE는 질문 시각부터 벽시계로 재고, AI는 작업 시간 예산으로 멈춘다. 두 기준을 맞추려고 BE 값은 AI 설정에서 공식으로 정한다.
+
+| BE 설정 (환경변수) | 뜻 | 공식 | 운영 제안 (AI `runtime_timeout` 300초 기준, http 전환 때 확정) |
+|---|---|---|---|
+| `eumi.ai.execution-limit` (`EUMI_AI_EXECUTION_LIMIT`) | 질문 시각부터의 AI 실행 제한 | `runtime_timeout` + 마무리 시간 | 330초 |
+| `eumi.ai.grace-period` (`EUMI_AI_GRACE_PERIOD`) | 실행 제한 뒤 AI의 실패 행을 기다리는 여유 | AI가 한도에 걸린 뒤 실패 행을 커밋하는 시간 | 5초 |
+| `eumi.ai.unresponsive-after` (`EUMI_AI_UNRESPONSIVE_AFTER`) | 새 행이 없으면 INT-01을 한 번 다시 보내는 기준 | `llm_timeout`(30초) + 여유 | 40초 |
+| `eumi.ai.cancel-wait` (`EUMI_AI_CANCEL_WAIT`) | INT-02 뒤 취소 행을 기다리는 시간 | AI가 실행을 끊고 취소 행을 커밋하는 시간 | 3초 |
+
+- **http 모드:** 4개를 모두 적어야 backend가 뜬다. fake 모드는 개발 기본값(60 · 2 · 5 · 2초)을 쓴다. INT-01 · 02의 HTTP 제한은 `eumi.ai.http-timeout`(`EUMI_AI_HTTP_TIMEOUT`, 기본 3초)이다.
+- **AI 약속:**
+  - INT-01을 받은 때부터 실행 제한 안에 끝 행을 커밋한다. 그러려고 실행 전체에 벽시계 상한을 걸고, 상한에 걸리면 여유 시간 안에 실패 행을 커밋한다.
+  - 단계마다 진행 행을 써서, 행 사이 간격이 응답 없음 기준을 넘지 않게 한다.
+  - INT-02를 받으면 취소 대기 안에 취소 행을 커밋한다.
+  - AI 설정을 바꾸면 같은 공식으로 계산한 BE 값을 함께 알려 준다.
+- **벽시계 상한의 기준:** INT-01을 받을 때마다 새로 잰다. 되묻기 뒤의 대기 시간은 포함하지 않는다.
+- **아직 정할 것 (김민준):** 운영 시간 값 4개 확정, artifacts 상한, GMS 주소 · 모델에서 Responses API 동작. 정해지기 전에는 운영을 fake 모드로 둔다.
 
 ## 6. 질문 마스킹 범위
 

@@ -1,6 +1,6 @@
 # 이음이 API 명세
 
-- 판: 2.4.0 초안 (2026-11-06, 11/9 INT-06 · API-18 삭제)
+- 판: 2.4.0 초안 (2026-11-06, 11/9 INT-06 · API-18 삭제, 11/9 AI-a 반영: API-03 화면 문맥 · INT-01 · INT-07, INT-03 삭제)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_API_명세표.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - API 형식의 기준은 `docs/api/openapi.json`, 내부 연동은 `docs/api/ai-agent-panel.md` · `docs/api/insight-report.md`다. 계약이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -11,7 +11,7 @@
 
 - 제목: 이음이 API 명세표
 - 요약: API 2.4.0 초안  45개 작업 (구현 38 · 예정 7)  * 필수 입력  기본 경로 /api
-- 출처: eumi/docs/api/openapi.json 2.3.0 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장)
+- 출처: eumi/docs/api/openapi.json 2.3.0 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장) · AI 대화 패널 연결(API-03 화면 문맥, INT-01 messageId, INT-07, INT-03 삭제)은 2026-11-09 openapi 2.3.4 · ai-agent-panel.md
 
 ### API-01 로그인 상태와 메뉴 프로필 조회
 - 페이지 범위: /login·공통
@@ -30,15 +30,15 @@
 ### API-03 AI 질문 등록<br>신규 설계
 - 페이지 범위: 공통 Agent 패널
 - 요청 경로: POST /api/agent/questions
-- 요청 형식: 인증 SESSION 쿠키 · CSRF 필수<br><br>본문 application/json AgentQuestionRequest<br>conversationId*:string(uuid) 또는 null; question*:string(1~4000자)<br>저장 전 이름·생년월일 표지 값과 이메일·휴대전화(하이픈형)만 가림 · 그 밖의 식별정보는 남을 수 있음(완전한 비식별화 아님) · 질문 본문은 로그에 남기지 않음 · 범위는 ai-agent-panel.md 6절
-- 응답 형식: 202 application/json AgentQuestionCreated_Success<br>conversationId*:string(uuid); questionId*:integer(int64)<br>첫 질문이면 대화 생성 · 질문 행 저장 뒤 AI 실행 요청<br>409 RUN_ALREADY_ACTIVE: 끝 행이 없는 질문이 있음
-- 구현 (11/6): 구현 (운영 fake 모드)
+- 요청 형식: 인증 SESSION 쿠키 · CSRF 필수<br><br>본문 application/json AgentQuestionRequest<br>conversationId*:string(uuid) 또는 null; question*:string(1~4000자); context:ScreenContext{dongCode:string(숫자 10자리); month:string(YYYY-MM)} (선택, 위험 탐색 · 읍면동 화면에서 보고 있는 동 · 월, {}와 생략 허용, 저장 안 함, ai-agent-panel.md 3-1)<br>저장 전 이름·생년월일 표지 값과 이메일·휴대전화(하이픈형)만 가림 · 그 밖의 식별정보는 남을 수 있음(완전한 비식별화 아님) · 질문 본문은 로그에 남기지 않음 · 범위는 ai-agent-panel.md 6절
+- 응답 형식: 202 application/json AgentQuestionCreated_Success<br>conversationId*:string(uuid); questionId*:integer(int64)<br>첫 질문이면 대화 생성 · 질문 행 저장, 커밋 뒤 AI 실행 요청(INT-01)<br>400 INVALID_JSON: context의 모르는 필드 · 문자열이 아닌 값 · 400 VALIDATION_ERROR: context 형식 오류<br>409 RUN_ALREADY_ACTIVE: 끝 행이 없는 질문이 있음
+- 구현 (11/6): 구현 (운영 fake 모드. 11/9 context는 BE 구현, FE 연결은 2.3.4 gen:api 뒤)
 
 ### API-03-S1 AI 대화 메시지 조회<br>신규 설계
 - 페이지 범위: 공통 Agent 패널
 - 요청 경로: GET /api/agent/conversations/{conversationId}/messages
 - 요청 형식: 인증 SESSION 쿠키<br>path conversationId*:string(uuid); query after:integer(int64)<br>본문 없음
-- 응답 형식: 200 application/json AgentMessages_Success<br>messages*:AgentMessage[]<br>AgentMessage: messageId*:integer(int64); questionId*:integer(int64) 또는 null; role*:string(Member·AI); status*:string(질문·진행·완료·실패·취소); content*:string 또는 null(질문 행은 등록 당시 마스킹 처리 결과); details*:string 또는 null; artifacts*:JSON 또는 null(표·그래프, 형식은 AI·FE 합의); createdAt*:string(date-time)<br>after보다 큰 messageId만 오름차순 · 실행 중 1초마다, 대화를 열 때 after=0
+- 응답 형식: 200 application/json AgentMessages_Success<br>messages*:AgentMessage[]<br>AgentMessage: messageId*:integer(int64); questionId*:integer(int64) 또는 null; role*:string(Member·AI); status*:string(질문·진행·완료·실패·취소); content*:string 또는 null(질문 행은 등록 당시 마스킹 처리 결과); details*:string 또는 null; artifacts*:JSON 또는 null(Tableau · 표 · 그래프, 형식과 FE 표시 규칙은 ai-agent-panel.md 2-1); createdAt*:string(date-time)<br>after보다 큰 messageId만 오름차순 · 실행 중 1초마다, 대화를 열 때 after=0<br>새 행이 응답 없음 기준 동안 없으면 BE가 같은 messageId로 INT-01을 질문당 1번 다시 보냄 · 질문 시각 + 실행 제한 + 여유가 지나면 BE가 실패 행
 - 구현 (11/6): 구현 (운영 fake 모드)
 
 ### API-03-S2 AI 실행 중단<br>신규 설계
@@ -331,26 +331,20 @@
 ## 내부 AI API
 
 - 제목: 내부 연동 API
-- 요약: 5개 작업  BE ↔ AI · 파이프라인 → BE  AI 서버(/internal/)는 인증 없음 · BE 내부 경로(/api/internal/)는 호출자별 서비스 토큰  둘 다 Nginx에 열지 않음 (Nginx는 /api/internal/을 404로 막음) · BE 내부 경로는 세션 · CSRF 없는 별도 보안 체인 · 인사이트 보고서는 AI가 DB에 직접 저장
-- 출처: AI 에이전트 패널 동작 흐름 (A 방식) 2026-11-02 · 응답 필드와 시간 값은 AI 담당자와 확정 · 인사이트 보고서 INT-04 · 05는 2026-11-06 초안 (A 방식: 생성 세대를 저장하지 않음, 결과 시각 resultUpdatedAt으로 옛 보고서 판단) · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 region_insight_report에 직접 저장, insight-report.md 4절)
+- 요약: 5개 작업  BE ↔ AI · 파이프라인 → BE  AI 서버(/internal/)는 인증 없음 · BE 내부 경로(/api/internal/)는 호출자별 서비스 토큰(INT-07 AI 토큰, INT-04 파이프라인 토큰)  둘 다 Nginx에 열지 않음 (Nginx는 /api/internal/을 404로 막음) · BE 내부 경로는 세션 · CSRF 없는 별도 보안 체인 · 인사이트 보고서는 AI가 DB에 직접 저장
+- 출처: AI 에이전트 패널 동작 흐름 (A 방식) 2026-11-02 · 응답 필드와 시간 값은 AI 담당자와 확정 · 인사이트 보고서 INT-04 · 05는 2026-11-06 초안 (A 방식: 생성 세대를 저장하지 않음, 결과 시각 resultUpdatedAt으로 옛 보고서 판단) · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 region_insight_report에 직접 저장, insight-report.md 4절) · INT-01 messageId · 화면 문맥, INT-07 추가, INT-03 삭제는 2026-11-09 (ai-agent-panel.md 3절, openapi 2.3.4 x-internal-api)
 
 ### INT-01 AI 실행 시작<br>신규 설계
 - 구간: BE → AI
 - 요청 경로: POST /internal/agent/runs
-- 요청 형식: 인증 없음 (내부 네트워크)<br><br>본문 application/json<br>conversationId*:string(uuid); questionId*:integer(int64)
-- 응답 형식: 202 접수 응답만 바로 돌려주고 뒤에서 실행<br>409 같은 대화의 실행이 돌고 있음<br>AI는 대화 ID로 이전 대화를, questionId로 이번 질문을 ai_message에서 읽고 진행·완료·실패·취소 행을 직접 저장<br>질문에 대상 정보가 부족하면 되묻는 내용을 완료 행으로 저장 (사용자의 답은 같은 대화의 다음 질문)
+- 요청 형식: 인증 없음 (내부 네트워크)<br><br>본문 application/json<br>conversationId*:string(uuid); messageId*:integer(int64, 커밋된 질문 행 ID = API-03의 questionId); context:ScreenContext(선택, API-03에서 받은 그대로)
+- 응답 형식: 202 본문 없음, 접수만 바로 돌려주고 뒤에서 실행<br>같은 messageId가 실행 중이어도 202 · 같은 대화의 다른 질문이 실행 중이면 409 · 400 본문 오류<br>AI는 대화 ID로 이전 대화를, messageId로 이번 질문을 ai_message에서 읽고 진행·완료·실패·취소 행을 직접 저장하고 행마다 INT-07<br>응답이 없으면 BE가 같은 messageId로 질문당 1번 다시 보냄 (INT-03 대신)<br>질문에 대상 정보가 부족하면 되묻는 내용을 완료 행으로 저장 (사용자의 답은 같은 대화의 다음 질문)
 
 ### INT-02 AI 실행 취소<br>신규 설계
 - 구간: BE → AI
 - 요청 경로: POST /internal/agent/runs/{conversationId}/cancel
 - 요청 형식: 인증 없음 (내부 네트워크)<br>path conversationId*:string(uuid)<br>본문 없음
-- 응답 형식: 202 실행을 멈추고 취소 행 저장<br>정해진 시간 안에 응답이 없으면 BE가 취소 행을 대신 저장
-
-### INT-03 AI 실행 상태 확인<br>신규 설계
-- 구간: BE → AI
-- 요청 경로: GET /internal/agent/runs/{conversationId}
-- 요청 형식: 인증 없음 (내부 네트워크)<br>path conversationId*:string(uuid)<br>본문 없음
-- 응답 형식: 200 application/json<br>running*:boolean; questionId:integer(int64) 또는 null<br>새 행이 일정 시간 없을 때 BE가 확인 · 끝 행이 없고 AI가 그 질문을 실행 중이 아니면 같은 questionId로 INT-01을 질문당 한 번 재요청 (BE 메모리 기준, 시작 실패로 실패 행을 쓴 질문은 제외)
+- 응답 형식: 202 실행을 멈추고 취소 행 저장<br>BE는 http-timeout과 취소 대기 중 짧은 시간까지 응답을 기다리고, 취소 대기 안에 끝 행이 없으면 취소 행을 대신 저장
 
 ### INT-04 파이프라인 완료 알림<br>신규 초안
 - 구간: 파이프라인 → BE
@@ -363,6 +357,12 @@
 - 요청 경로: POST /internal/insight-reports/runs
 - 요청 형식: 인증 없음 (내부 네트워크)<br><br>본문 application/json<br>requestId*:string(uuid, INT-04를 처리하며 BE가 만든 값 = INT-04 응답의 X-Request-Id · meta.requestId); month*:string(YYYY-MM); targets*:[{dongCode*:string(10자리); resultUpdatedAt*:string(YYYY-MM-DDTHH:mm:ss.SSSSSS)}] 동 중복 없음
 - 응답 형식: 202 application/json<br>accepted*:integer<br>400 본문 오류<br>접수만 바로 돌려주고 뒤에서 동별로 생성 · AI가 동마다 region_insight_report에 직접 저장(eumi_ai INSERT · UPDATE, 결과 행 updated_at = resultUpdatedAt일 때만 반영, 같은 동 · 월 덮어씀, 0행이면 버림)<br>같은 달 요청이 겹치면 진행 중 작업을 멈추고 새 요청으로 다시 시작 권장 (저장 문장이 옛 보고서를 거르는 것은 결과 시각이 바뀐 경우뿐. 12·13단계만 재실행해 시각이 같으면 늦게 끝난 쪽이 새 보고서를 덮을 수 있음)
+
+### INT-07 AI 행 저장 알림<br>신규 설계
+- 구간: AI → BE
+- 요청 경로: POST /api/internal/agent/notifications
+- 요청 형식: Authorization: Bearer <AI 토큰><br><br>본문 application/json<br>conversationId*:string(uuid); messageId*:integer(int64, 양수, 방금 커밋한 AI 행 ID)
+- 응답 형식: 204 본문 없음<br>400 INVALID_JSON(모르는 필드 · 정수 아님) · 400 VALIDATION_ERROR · 401 UNAUTHENTICATED · 403 FORBIDDEN(AI 토큰 아님) · 404 NOT_FOUND(그 대화에 그 AI 행 없음)<br>AI 행 커밋 직후 보냄 · 최대 2번(5xx · 연결 오류 · 시간 초과일 때만 한 번 더, 4xx는 다시 안 보냄), 실패해도 실행 계속 · BE는 중복 · 순서에 기대지 않고, 끝 행이면 그 질문의 메모리 추적 상태를 정리 · 화면에는 밀지 않음(1초 조회 유지)
 
 ## 별도 범위
 
@@ -378,11 +378,11 @@
 - 검증: 동 선택·매개변수(시군구·기간)·로딩·게시 오류
 
 ### FastAPI 내부
-- 대상: AI 실행·취소·상태 3개 · 인사이트 보고서 생성 요청 INT-05 (내부 AI API 시트). PDF 추출(API-18)은 2026-11-09 범위 제외
+- 대상: AI 실행 · 취소(INT-01 · 02) · 행 저장 알림(INT-07) · 인사이트 보고서 생성 요청 INT-05 (내부 AI API 시트). PDF 추출(API-18)은 2026-11-09 범위 제외
 - 현재 근거: AI: 2026-11-02 A 방식 결정
 - 경계: 브라우저는 Spring만 호출 · 대화 패널: AI가 ai_message에 직접 저장 · 인사이트 보고서: AI가 region_insight_report에 직접 저장 (BE는 생성 요청 · 조회만)
-- 선행 조건: 시간 값·artifacts 형식 합의 (이전 대화 범위는 11/2 '전체'로 결정, eumi_ai의 ai_message 읽기·추가 권한은 11/2 적용)
-- 검증: 행 단위 커밋·끝 행 하나·늦은 행 거부·취소 경합·질문 마스킹·시간 초과·부족 정보 되묻기
+- 선행 조건: 운영 시간 값 확정 · GMS 주소 · 모델 (artifacts 형식은 11/9 ai-agent-panel.md 2-1, 이전 대화 범위는 11/2 '전체'로 결정, eumi_ai의 ai_message 읽기·추가 권한은 11/2 적용)
+- 검증: 행 단위 커밋·끝 행 하나·늦은 행 거부·취소 경합·질문 마스킹·시간 초과·부족 정보 되묻기·응답 없음 재요청 1회·INT-07 토큰과 행 소속
 
 ### 파이프라인
 - 대상: analysis 10테이블·public 결과

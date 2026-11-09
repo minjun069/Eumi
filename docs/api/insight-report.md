@@ -1,7 +1,7 @@
 # 인사이트 보고서 내부 연동 계약 (A 방식, 2026-11-06 초안 · 11/9 저장 주체 반영)
 
 파이프라인이 월 분석을 끝내면 BE가 그 달 동 목록을 AI(FastAPI)에 넘기고, AI는 동마다 보고서를 만들어 `region_insight_report`에 **직접 저장**한다. 화면은 API-11 · 12로 읽는다. 생성 상태(실행 기록)는 저장하지 않는다(A 방식).
-API 형식은 `openapi.json` 2.3.2의 `x-internal-ai-api` INT-04 · 05, DB는 `db/migration/V20261106_01__insight_report_slots.sql`이 기준이다. AI 담당(김민준) 확인 전 초안이며, 재시도 횟수 · 간격은 제안값이다.
+API 형식은 `openapi.json` 2.3.4의 `x-internal-api` INT-04 · 05, DB는 `db/migration/V20261106_01__insight_report_slots.sql`이 기준이다. AI 담당(김민준) 확인 전 초안이며, 재시도 횟수 · 간격은 제안값이다.
 
 - **저장 주체 (11/6 결정, [decisions/internal-integration.md](../decisions/internal-integration.md) 1번):** BE가 받아 저장하던 INT-06은 없앴다. 권한은 `afterMigrate.sql`로 바꿔 11/9 운영에 반영했다. V20261106_01의 머리 주석과 표 설명(COMMENT)에는 "백엔드가 저장"이 남아 있고, 2단계 V 파일에서 고친다.
 - **아직 바뀌지 않은 것:** INT-05 형식 변경(`dongCodes`, 본문 없는 202)과 생성 완료 알림(INT-08)은 [변경 계획](../work-ref/내부_연동_변경_계획.md) 3절에 있다. 구현이 끝나면 이 문서에 반영한다.
