@@ -59,7 +59,7 @@ class AgentRecoveryIntegrationTests extends AgentHttpSupport {
     }
 
     @Test
-    void immediateStartFailureOccursAfterCommitAndCreatesFailureMessage() throws Exception {
+    void startFailureOccursAfterCommitAndWaitsForAbsoluteDeadline() throws Exception {
         doAnswer(call -> {
             assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
             assertThat(TransactionSynchronizationManager.hasResource(jdbc.getDataSource())).isFalse();
@@ -68,27 +68,30 @@ class AgentRecoveryIntegrationTests extends AgentHttpSupport {
             assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_message WHERE conversation_id = ? AND message_id = ?",
                     Integer.class, id, questionId)).isEqualTo(1);
             throw new AgentClient.Unavailable();
-        }).when(client).start(any(), anyLong());
+        }).when(client).start(any(), anyLong(), any());
         var response = browser.post("/agent/questions", question(null, "실행 호출 실패 검사"));
         assertThat(response.statusCode()).isEqualTo(202);
-        assertThat(awaitEnd(conversation(body(response))).path("status").asText()).isEqualTo("실패");
+        UUID id = conversation(body(response));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_message WHERE conversation_id=? AND role='AI'", Integer.class, id)).isZero();
+        jdbc.update("UPDATE ai_message SET created_at=now()-interval '20 seconds' WHERE conversation_id=?", id);
+        assertThat(awaitEnd(id).path("status").asText()).isEqualTo("실패");
     }
 
     @Test
     void silentNonRunningQuestionIsRestartedOnlyOnce() throws Exception {
         UUID id = pendingConversation(1000);
         long questionId = pendingQuestion(id);
-        when(client.status(id)).thenReturn(new AgentClient.RunStatus(false, null));
         for (int i = 0; i < 3; i++) assertThat(browser.get(messagesPath(id)).statusCode()).isEqualTo(200);
-        verify(client, times(1)).start(id, questionId);
+        verify(client, times(1)).start(id, questionId, null);
     }
 
     @Test
-    void runningQuestionIsNotRestarted() throws Exception {
+    void recentProgressIsNotRestarted() throws Exception {
         UUID id = pendingConversation(1000);
-        when(client.status(id)).thenReturn(new AgentClient.RunStatus(true, pendingQuestion(id)));
+        jdbc.update("INSERT INTO ai_message(conversation_id,question_id,role,status,content) VALUES (?,?,'AI','진행','Synthetic progress')",
+                id, pendingQuestion(id));
         assertThat(browser.get(messagesPath(id)).statusCode()).isEqualTo(200);
-        verify(client, never()).start(any(), anyLong());
+        verify(client, never()).start(any(), anyLong(), any());
     }
 
     @Test
@@ -97,7 +100,7 @@ class AgentRecoveryIntegrationTests extends AgentHttpSupport {
         assertThat(awaitEnd(id).path("status").asText()).isEqualTo("실패");
         awaitLog(output, "operation=execution-timeout");
         assertThat(output.getOut()).contains("AI terminal message substituted", "status=실패");
-        verify(client, never()).start(any(), anyLong());
+        verify(client, never()).start(any(), anyLong(), any());
     }
 
     @Test
@@ -117,7 +120,7 @@ class AgentRecoveryIntegrationTests extends AgentHttpSupport {
         assertThat(awaitEnd(id).path("status").asText()).isEqualTo("취소");
         awaitLog(output, "operation=cancel-fallback");
         assertThat(output.getOut()).contains("AI terminal message substituted", "status=취소");
-        verify(client, never()).start(any(), anyLong());
+        verify(client, never()).start(any(), anyLong(), any());
     }
 
     @Test

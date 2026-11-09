@@ -115,7 +115,7 @@ class ConversationHistoryIntegrationTests {
         assertThat(messages.get(0).has("questionId") && messages.get(0).path("questionId").isNull()).isTrue();
         assertThat(messages.get(2).path("artifacts").path("synthetic").size()).isEqualTo(2);
         assertThat(data(browser.get("/members/me/conversations")).path("items").get(0).path("questionCount").asLong()).isEqualTo(3);
-        verify(client,never()).start(eq(id),anyLong());verify(client,never()).status(id);
+        verify(client,never()).start(eq(id),anyLong(),any());
     }
     @Test
     void foreignMissingAndExpiredConversationsAre404AndNeverCancelled()throws Exception {
@@ -139,7 +139,7 @@ class ConversationHistoryIntegrationTests {
         var request=new HashMap<String,Object>();request.put("conversationId",null);request.put("question","Synthetic running question");
         var accepted=browser.send("POST","/agent/questions",request);assertThat(accepted.statusCode()).isEqualTo(202);
         var created=body(accepted).path("data");UUID id=UUID.fromString(created.path("conversationId").asText());long q=created.path("questionId").asLong();
-        assertThat(client.status(id).running()).isTrue();
+        assertThat(((FakeAgentClient) client).isRunning(id)).isTrue();
         doAnswer(invocation->{
             assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
             assertThat(TransactionSynchronizationManager.hasResource(jdbc.getDataSource())).isFalse();
@@ -147,7 +147,7 @@ class ConversationHistoryIntegrationTests {
             return invocation.callRealMethod();
         }).when(client).cancel(id);
         noContent(browser.send("DELETE",path(id),null));verify(client,times(1)).cancel(id);
-        assertThat(client.status(id).running()).isFalse();assertThat(count("ai_conversation",id)).isZero();assertThat(count("ai_message",id)).isZero();
+        assertThat(((FakeAgentClient) client).isRunning(id)).isFalse();assertThat(count("ai_conversation",id)).isZero();assertThat(count("ai_message",id)).isZero();
         assertThat(writer.append(id,q,"완료","Synthetic late answer",null)).isFalse();
     }
     @Test
@@ -163,7 +163,7 @@ class ConversationHistoryIntegrationTests {
         UUID id=conversation(caller);question(id,"Synthetic pending question");
         jdbc.update("UPDATE public.ai_message SET created_at=now()-interval '1 hour' WHERE conversation_id=?",id);
         assertThat(data(browser.get(path(id))).path("messages").size()).isEqualTo(1);
-        verify(client,never()).start(eq(id),anyLong());verify(client,never()).status(id);verify(client,never()).cancel(id);
+        verify(client,never()).start(eq(id),anyLong(),any());verify(client,never()).cancel(id);
     }
     @ParameterizedTest @ValueSource(strings={"page=0","page=9007199254740992","page=abc","size=0","size=101","size=abc"})
     void invalidPaginationIs400(String query)throws Exception {error(browser.get("/members/me/conversations?"+query),400,"VALIDATION_ERROR");}
