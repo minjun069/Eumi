@@ -1,5 +1,5 @@
 {
-  "__comment": "Eumi 파이프라인 대시보드. 이 파일이 원본이다 (화면에서 고친 내용은 저장되지 않음). 고치려면 파일을 바꾸고 커밋한다. 30초 안에 Grafana 가 다시 읽는다. 한 화면 11개: 됐나 → 어디서 막히나 → 데이터가 쌓이나 → 버티나. 상세는 접힌 줄. 숫자 칸은 canvas 패널: 이름(13px 회색) → 값(30px, 상태 색) → 부가 정보(12px 회색). 패널 설명은 infra/README.md",
+  "__comment": "Eumi 파이프라인 대시보드. 이 파일이 원본이다 (화면에서 고친 내용은 저장되지 않음). 고치려면 파일을 바꾸고 커밋한다. 30초 안에 Grafana 가 다시 읽는다. 한 화면 11개: 현재 상태 → 실행 현황 → 데이터 현황 → 시스템 상태. 상세 정보는 접힌 줄. 숫자 칸은 canvas 패널: 이름(13px 회색) → 값(30px, 상태 색) → 부가 정보(12px 회색). 패널 설명은 infra/README.md",
   "uid": "eumi-pipeline",
   "title": "Eumi 파이프라인",
   "tags": ["eumi", "pipeline"],
@@ -14,7 +14,7 @@
   "annotations": { "list": [] },
   "links": [],
   "panels": [
-    { "id": 100, "type": "row", "title": "이번 달 됐나", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "panels": [] },
+    { "id": 100, "type": "row", "title": "현재 상태","collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "panels": [] },
     {
       "id": 101, "type": "canvas", "title": "",
       "description": "Airflow 의 eumi_monthly 가장 최근 실행. 끝난 시각은 한국 시간. 실패면 아래 상태판에서 어느 단계인지 본다",
@@ -87,7 +87,7 @@
       "options": { "alertName": "", "dashboardAlerts": false, "groupBy": [], "groupMode": "default", "maxItems": 10, "sortOrder": 1, "stateFilter": { "firing": true, "pending": true, "noData": false, "normal": false, "error": true }, "viewMode": "list" }
     },
 
-    { "id": 200, "type": "row", "title": "어디서 막히나 · 느려지나", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 }, "panels": [] },
+    { "id": 200, "type": "row", "title": "실행 현황","collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 }, "panels": [] },
     {
       "id": 203, "type": "table", "title": "실행 × 단계 상태판 (최근 6번)",
       "description": "가로 = 실행, 세로 = 단계. 초록 성공 / 빨강 실패 → Airflow 에서 로그 보고 Clear 로 재실행 / 주황 중단 → 앞 단계가 실패해 시작 못 함, 실패한 단계만 고치면 같이 돔 / 회색 건너뜀 → 그 달 원본이 없어 할 일이 없었음 (실패 아님) / 빈 칸 → 그때는 DAG 에 없던 단계",
@@ -124,7 +124,7 @@
           "custom": { "lineWidth": 0, "fillOpacity": 85, "gradientMode": "none", "axisPlacement": "auto", "axisLabel": "", "axisBorderShow": false }, "mappings": [] }, "overrides": [] }
     },
 
-    { "id": 300, "type": "row", "title": "데이터가 제대로 쌓이나", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 19 }, "panels": [] },
+    { "id": 300, "type": "row", "title": "데이터 현황","collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 19 }, "panels": [] },
     {
       "id": 301, "type": "table", "title": "테이블 최신성",
       "description": "결과 테이블마다 가장 최근 기준월, 그 달의 행 수, 전월 대비 행 수 변화, 마지막 적재 시각. 전월 대비가 ±30% 를 넘으면 빨강 (원본이 바뀌었거나 적재가 빠졌을 가능성). 기준 테이블(행정동 · 격자)과 연 단위 표는 '-'",
@@ -191,7 +191,7 @@
         "overrides": [ { "matcher": { "id": "byName", "options": "좌표 없음" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] } ] }
     },
 
-    { "id": 400, "type": "row", "title": "DB · 스케줄러가 버티나", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 30 }, "panels": [] },
+    { "id": 400, "type": "row", "title": "시스템 상태","collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 30 }, "panels": [] },
     {
       "id": 401, "type": "canvas", "title": "",
       "description": "Airflow 스케줄러가 살아 있는지. airflow DB job 표의 마지막 심장박동이 60초 안이면 정상. 멈추면 매월 5일 배치가 시작되지 않는다 → pipeline 컨테이너 재시작",
@@ -237,7 +237,7 @@
     },
 
     {
-      "id": 500, "type": "row", "title": "상세 (펼쳐서 봄)", "collapsed": true, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 36 },
+      "id": 500, "type": "row", "title": "상세 정보","collapsed": true, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 36 },
       "panels": [
         {
           "id": 201, "type": "table", "title": "실행 이력",
