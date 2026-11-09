@@ -68,17 +68,20 @@ def selection_tools(
                 del parameters["$defs"][definition]
             description += (
                 " 자료 전체를 재작성하지 말고 input_result_id를 사용한다. "
-                "calculate의 before는 분모열, after는 분자열이다. "
+                "calculate는 difference=after-before, "
                 "percentage=after/before*100, "
                 "percent_change=(after-before)/before*100."
                 " operations는 직전 연산 결과를 순서대로 처리한다. "
                 "aggregate 후에는 group_by 열과 output 열만 남는다. "
-                "원본 열로 별도 집계할 때는 같은 원본 input_result_id로 따로 호출한다. "
+                "독립 집계는 원본 input_result_id로 각각 호출한다. "
+                "유효값 개수는 대상 값 열을 count하고 missing=drop을 사용한다. "
                 "fields는 모든 연산이 끝난 뒤 남아 있는 열만 지정한다. "
                 "join.fields는 {오른쪽 원본 열: 새 결과 열} 방향이다. "
                 "join.right_result_id도 가공 가능한 State 결과 ID를 사용한다. "
-                "right 자료를 직접 작성하지 않는다. 오른쪽 자료의 필터·가공이 필요하면 "
-                "먼저 별도로 처리하고 그 호출 결과 ID를 지정한다. "
+                "오른쪽 필터·가공은 먼저 별도로 수행한다. "
+                "기간 비교는 양쪽을 각각 비교할 기간으로 한정하고, "
+                "동·지표 등 대상 식별 열을 keys에 포함한다. "
+                "결과에 양쪽 기간·대상 식별 열을 보존해 자기 비교·중복을 확인한다. "
                 "최대-최소는 범위이며 시작월-종료월 변화와 같지 않다."
             )
         elif name == "validate_visualization":

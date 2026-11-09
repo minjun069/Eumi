@@ -14,6 +14,8 @@ DB 연결 없이 호출할 수 있는 Python 업무 함수다. 입력은 `TypedD
 
 형식·자료 오류는 `ToolFailure`로 전달한다. 형식 오류는 `invalid_input`, 공급 자료 오류는 `invalid_data`, 없는 필드는 `invalid_field`다. 예외 원인은 Python 예외 체인에 남긴다. 도구는 실패를 빈 결과로 바꾸거나 자동 재시도하지 않는다.
 
+`invalid_field`의 `details.requested`는 검사한 열 목록, `available`은 실패 지점의 실제 열 목록이다. Agent에서 `invalid_data_reference`가 발생하면 `requested`에 입력한 참조값, `available`에 현재 State의 사용 가능한 자료 결과 ID를 기록한다. 가공 연산 내부 오류와 결합 참조 오류는 0부터 시작하는 `operation_index`도 제공한다. 최종 반환 열 선택 오류는 연산 바깥에서 발생하므로 순번을 붙이지 않는다. 이 정보는 기존 실패 결과 기록을 통해 다음 모델 선택에 전달한다.
+
 ## 검색·조회
 
 `query_data(request, providers)`는 등록된 대상의 공급 함수 `Callable[[], Dataset]`를 실행한다. 연결 코드는 접근이 허용된 공급자만 등록하고, 공급자는 실제 자료원의 권한을 검사한다. 이 등록 목록 자체가 서비스 사용자 인증을 대체하지 않는다.
@@ -49,6 +51,8 @@ DB 연결 없이 호출할 수 있는 Python 업무 함수다. 입력은 `TypedD
 `missing`은 기본 `error`다. `drop`은 연산에 필요한 값이 없는 행을 제외하고, `preserve`는 계산 결과를 null로 보존한다. preserve 집계에서 한 그룹에 결측값이 있으면 그 그룹의 집계도 null이다. 필터의 null 조건과 결합의 대응 없음은 각 연산의 명시적 의미를 따른다. 결측을 0으로 채우지 않는다. `fields`는 최종 반환 열, `decimals`는 최종 실수 반올림 자릿수(0~12)다.
 
 반환값의 `counts`는 각 연산의 입력·출력·제외 행 수이며, `excluded_rows`는 단계별 제외 수의 합이다. 집계로 합쳐진 행은 제외 수에 넣지 않는다. 빈 자료의 집계는 빈 결과이며 0이라는 측정값을 생성하지 않는다.
+
+각 연산은 직전 연산의 결과를 입력으로 받는다. `aggregate` 뒤에는 `group_by`와 `output` 열만 남으므로 원본 열을 사용하는 독립 집계는 원본 자료로 각각 호출한다. 최종 `fields`에도 마지막 연산 뒤 남아 있는 열만 지정한다.
 
 주요 실패 코드는 `incompatible_units`, `non_numeric_field`, `missing_value`, `zero_denominator`, `non_finite_result`, `duplicate_field`, `as_of_mismatch`, `join_key_mismatch`, `ambiguous_join`, `missing_join_key`, `invalid_cast`다. 위험지수 산출 모델이나 임의 Python·SQL 실행은 제공하지 않는다.
 
@@ -111,6 +115,10 @@ rendered = tools["render_visualization"].invoke(
 ```
 
 `ainvoke`도 LangChain의 표준 비동기 인터페이스로 호출할 수 있다. 현재 공급 함수는 동기 함수이며 비동기 호출 시 라이브러리의 실행 스레드를 사용한다. 도구는 자동 재시도하지 않는다. 조회는 공급자에게 읽기 작업만 연결한다. `retry_safe` 메타데이터는 읽기·순수 계산·메모리 렌더링의 재실행 가능 여부를 나타내며 재시도 횟수·한도 판단을 대신하지 않는다.
+
+Agent의 선택 명세에는 `query_data.target`을 등록된 자료 ID 목록으로 안내한다. `process_data`는 직접 호출 예제의 `data` 대신 `input_result_id`를 선택하며, 이 값은 State의 성공한 호출 결과 ID다. 노드가 해당 결과의 원본 `data`를 가져와 실행한다. `data.reference.id`의 `derived:` 값은 자료의 출처·버전 식별용이며 이 인자에 사용할 수 없다. 선택 입력과 명세의 ID 목록은 현재 State에서 매번 만들고, 실패하거나 검토에서 거부된 결과는 제외한다.
+
+Agent의 `join` 연산도 `right` 자료 본문 대신 `right_result_id`를 사용한다. 왼쪽과 같은 State 결과 목록에서 오른쪽 자료를 찾아 기존 `process_data`에 전달한다. ID가 없거나 사용 불가능한 결과를 가리키는 경우, 또는 `right` 본문을 직접 입력한 경우에는 `invalid_data_reference`로 거부한다. 오른쪽 자료를 필터링하려면 먼저 조회·가공한 결과 ID를 사용한다. 선택·호출 이력은 ID 인자를 보존하고, 도구 반환의 연산 이력·자료 참조에는 실제 사용한 자료가 남는다. Python 함수 직접 호출의 `data`와 `join.right` 계약은 유지한다.
 
 `ai/`에서 `python -m demo.tool_demo --output outputs/tool-demo`를 실행하면 합성 자료 공급자를 실제 도구에 연결해 A/B/C의 -10%/-8%/-10% 변화율을 계산하고 `table.html`, `bar.html`, `line.html`, `map.html`, `report.json`을 생성한다. 합성 자료는 `experiments/tool_fixtures.py`, 예제 조립과 파일 저장은 `demo/tool_demo.py`에 둔다. 도구 모듈에는 모의 응답이나 데모 분기를 넣지 않는다.
 

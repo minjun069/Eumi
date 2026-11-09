@@ -8,7 +8,7 @@ from typing import Annotated, Literal, NotRequired
 from pydantic import ConfigDict, Field, TypeAdapter, ValidationError, with_config
 from typing_extensions import TypedDict
 
-from src.exceptions import ToolFailure
+from src.exceptions import DataFailureDetails, ToolFailure
 
 Text = Annotated[str, Field(min_length=1, pattern=r"\S")]
 Scalar = str | int | float | bool | None
@@ -82,7 +82,10 @@ def read_dataset(value: object, code="invalid_data") -> Dataset:
 def require_columns(data: Dataset, names: list[str]) -> dict[str, Column]:
     columns = {column["name"]: column for column in data["columns"]}
     if len(set(names)) != len(names) or set(names) - columns.keys():
-        raise ToolFailure("invalid_field")
+        raise ToolFailure(
+            "invalid_field",
+            details=DataFailureDetails(requested=list(names), available=list(columns)),
+        )
     return columns
 
 
