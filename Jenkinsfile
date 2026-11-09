@@ -33,22 +33,34 @@ pipeline {
                     def sha = sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()
                     env.TAG = "master-${sha}"
 
-                    // 배포 순서: 의존받는 쪽 먼저 (ai · pipeline이 생기면 backend 앞에 추가)
-                    def order = ['backend', 'web']
-                    def dirs  = [backend: 'backend/', web: 'frontend/']
+                    // 배포 순서: 의존받는 쪽 먼저 (pipeline이 생기면 backend 앞에 추가)
+                    def order = ['ai', 'backend', 'web']
+                    def dirs  = [ai: 'ai/', backend: 'backend/', web: 'frontend/']
                     def services = order
                     def base = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
+
+                    // ai/ 바로 아래 .md와 ai/docs/는 설명 문서라 ai를 다시 빌드하지 않는다
+                    // (ai/src/instructions/*.md는 실행 중에 읽는 파일이라 바뀌면 빌드한다)
+                    def isDoc = { String f -> f.matches('ai/[^/]+\\.md') || f.startsWith('ai/docs/') }
 
                     if (base && sh(returnStatus: true, script: "git cat-file -e ${base}^{commit}") == 0) {
                         def files = sh(returnStdout: true, script: "git diff --name-only ${base} HEAD").trim().readLines()
                         if (files.any { it.startsWith('infra/deploy/docker-compose.prod.yml') }) {
                             echo '운영 compose가 바뀌었다 — 모든 서비스를 다시 배포'
                         } else {
-                            services = order.findAll { s -> files.any { f -> f.startsWith(dirs[s]) } }
+                            services = order.findAll { s -> files.any { f -> f.startsWith(dirs[s]) && !isDoc(f) } }
                         }
                         echo "비교 기준: ${base}"
                     } else {
                         echo '비교 기준 없음(첫 빌드) — 전체 배포'
+                    }
+
+                    // ai는 이미지 정의(ai/Dockerfile)와 서버 코드(ai/api.py)가 둘 다 있을 때만 배포한다
+                    if (!(fileExists('ai/Dockerfile') && fileExists('ai/api.py'))) {
+                        if (services.contains('ai')) {
+                            echo 'ai: ai/Dockerfile 또는 ai/api.py가 없어 이번에는 배포하지 않음'
+                        }
+                        services = services.findAll { it != 'ai' }
                     }
 
                     env.SERVICES = services.join(' ')
@@ -77,7 +89,7 @@ pipeline {
             when { expression { return env.SERVICES?.trim() ? true : false } }
             steps {
                 script {
-                    def ctx = [backend: 'backend', web: 'frontend']
+                    def ctx = [ai: 'ai', backend: 'backend', web: 'frontend']
                     env.SERVICES.tokenize(' ').each { s ->
                         sh "docker build -t eumi-${s}:${env.TAG} ${ctx[s]}"
                     }
@@ -98,7 +110,14 @@ pipeline {
             steps {
                 script {
                     env.SERVICES.tokenize(' ').each { s ->
-                        sh "\"\$APP_DIR/scripts/deploy.sh\" ${s} ${env.TAG}"
+                        if (s == 'ai') {
+                            // ai가 실패하면 deploy.sh가 이전 ai로 되돌린다. backend · web 배포는 계속하고 빌드를 노란색으로 표시한다
+                            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                                sh "\"\$APP_DIR/scripts/deploy.sh\" ai ${env.TAG}"
+                            }
+                        } else {
+                            sh "\"\$APP_DIR/scripts/deploy.sh\" ${s} ${env.TAG}"
+                        }
                     }
                 }
             }
