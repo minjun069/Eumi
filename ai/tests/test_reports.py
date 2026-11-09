@@ -15,11 +15,13 @@ from api import (
     execute_reports,
     start_month,
 )
+from experiments.report_roundtrip import FileReportDatabase
 from src.database import Database, record_report_source
 from src.settings import Settings
-from src.state import report_artifact, report_input
+from src.state import report_artifact, report_input, state_adapter
 from src.tools.data import read_dataset
 from tests.api_fixtures import section
+from tests.helpers import ScriptedModel, selection
 
 BODY = {"requestId": "report-1", "month": "2025-12", "dongCodes": ["1168066000"]}
 
@@ -323,6 +325,163 @@ async def test_duplicate_selection_never_reaches_writing_before_reselection(tmp_
     assert sequence[: sequence.index("ReportText")].count("ReportSelection") == 2
     assert len({db.saved[0][f"graph_{n}"] for n in range(1, 4)}) == 3
     assert state["execution"]["budget"]["retries"]["used"] == 1
+
+
+@pytest.mark.asyncio
+async def test_long_report_reselects_supported_scope_and_saves_partial(
+    tmp_path, monkeypatch
+):
+    for name in ("MAX_STEPS", "MAX_TOOL_CALLS", "RUNTIME_TIMEOUT"):
+        monkeypatch.delenv(f"SETTINGS_{name}", raising=False)
+    settings = Settings(
+        _env_file=None, output_dir=tmp_path / "runs", langfuse_enabled=False
+    )
+    db = FileReportDatabase(settings, tmp_path / "db")
+    db.seed(BODY)
+    states = create_report_states(BODY, settings)
+    await db.prepare_report(states[0])
+    states = [state_adapter.validate_json(state_adapter.dump_json(states[0]))]
+    scope = "해당 동의 6개월 추이만 설명하고 도시 비교는 제외한다."
+    rejection = f"도시 비교와 전월 기여도 차이의 근거가 없다. {scope}"
+
+    def choose_views(messages, *, limited=False):
+        records = json.loads(messages[1].content)["results"]
+        if limited:
+            assert any(r["reason"] == rejection for r in records)
+            assert any(
+                r["decision"] == "decision"
+                and r["output"]["next"] == "compose"
+                and r["reason"] == scope
+                for r in records
+            )
+        calls = [r for r in records if r["decision"] == "call"]
+        assert {
+            row["period_start"]
+            for call in calls[:6]
+            for row in call["output"]["data"]["rows"]
+        } == {f"2025-{month:02d}-01" for month in range(7, 13)}
+        return {
+            "views": [
+                {
+                    "view_key": "EmbedDetailV01",
+                    "reason": scope
+                    if limited
+                    else "동 추이와 도시 중앙 범위를 비교한다.",
+                    "evidence_ids": [r["id"] for r in calls[:6]],
+                },
+                {
+                    "view_key": "EmbedDetailV02",
+                    "reason": "요청 월 구성만 설명하고 전월 변화는 제외한다."
+                    if limited
+                    else "기여도 구성과 전월 변화를 설명한다.",
+                    "evidence_ids": [calls[-1]["id"]],
+                },
+            ]
+        }
+
+    replies = []
+    for target, months in (
+        ("public.region_result", range(7, 13)),
+        ("analysis.bh_region_contribution", range(8, 13)),
+    ):
+        for month in months:
+            replies.extend(
+                [
+                    selection(
+                        "query_data",
+                        {
+                            "target": target,
+                            "filters": [
+                                {
+                                    "field": "adm_cd10",
+                                    "operator": "eq",
+                                    "value": BODY["dongCodes"][0],
+                                },
+                                {
+                                    "field": "period_start",
+                                    "operator": "eq",
+                                    "value": f"2025-{month:02d}-01",
+                                },
+                            ],
+                        },
+                    ),
+                    {"next": "act", "reason": "후보 뷰의 기간별 근거 확보"},
+                ]
+            )
+    replies[-1] = {"next": "compose", "reason": "조회된 근거로 선정 검토"}
+    review = {"accepted": True, "reason": "선정된 설명 범위와 근거 일치"}
+    replies.extend(
+        [
+            choose_views,
+            {"accepted": False, "reason": rejection},
+            {"name": "none", "arguments_json": "{}", "reason": scope},
+            {"next": "compose", "reason": scope},
+            lambda messages: choose_views(messages, limited=True),
+            review,
+            {
+                "content": "시연용 예시 데이터의 동 점수는 7월 30점, 12월 35점입니다. "
+                "도시 비교는 제외했습니다."
+            },
+            review,
+            {
+                "content": "시연용 예시 데이터의 12월 기여도는 "
+                "SAMPLE_A 15, SAMPLE_B 20입니다. 전월 변화는 제외했습니다."
+            },
+            review,
+            {
+                "content": "시연용 예시 데이터의 동 점수는 7월 30점, 12월 35점입니다.\n"
+                "12월 기여도는 SAMPLE_A 15, SAMPLE_B 20입니다.\n"
+                "도시 비교와 전월 기여도 변화는 설명 범위에서 제외했습니다."
+            },
+            review,
+        ]
+    )
+    model = ScriptedModel(replies)
+    await execute_reports(states, database=db, model=model)
+
+    state = states[0]
+    assert state["execution"]["status"] == "partial", state["results"]
+    budget = state["execution"]["budget"]
+    assert {
+        key: budget[key]["limit"] for key in ("steps", "tool_calls", "active_seconds")
+    } == {"steps": 100, "tool_calls": 50, "active_seconds": 900}
+    assert 20 < budget["steps"]["used"] < budget["steps"]["limit"]
+    assert budget["tool_calls"]["used"] == 11
+    assert budget["retries"]["used"] == 1
+    assert state["execution"]["error"]["code"] == "incomplete"
+    assert not any(r["outcome"] == "failure" for r in state["results"])
+    row = report_artifact(state)
+    assert db.read_reports() == [row]
+    assert [row[f"graph_{n}"] for n in range(1, 4)] == [
+        "EmbedDetailV01",
+        "EmbedDetailV02",
+        None,
+    ]
+    assert row["desc_1"] and row["desc_2"] and row["quick_insight"]
+    assert row["desc_3"] is None
+    assert model.schemas[-12:] == [
+        "ReportSelection",
+        "Verification",
+        "Selection",
+        "Decision",
+        "ReportSelection",
+        "Verification",
+        "ReportText",
+        "Verification",
+        "ReportText",
+        "Verification",
+        "ReportText",
+        "Verification",
+    ]
+    records = section(model.inputs[-9], "작업 결과와 검증 이력")
+    assert any(r["reason"] == rejection for r in records)
+    assert records[-1]["reason"] == scope
+    for messages in model.inputs[-7:]:
+        records = json.loads(messages[1].content)["results"]
+        selected = next(
+            r for r in reversed(records) if r["decision"] == "report_selection"
+        )
+        assert selected["output"]["views"][0]["reason"] == scope
 
 
 @pytest.mark.asyncio

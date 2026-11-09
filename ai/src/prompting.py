@@ -20,7 +20,7 @@ COMMON = """복지 담당자의 지역·집단 단위 탐색을 돕는다. 한�
 확인되지 않은 수치·출처·원인·검증 성공을 만들지 않는다. 합성 자료는
 '시연용 예시 데이터'라고 표시한다. 가구 구성 비율을 고립 위험 순위로 설명하지 않는다.
 지표 정의·단위·분모·기간·버전을 확인한다. 계산은 도구로 수행한다.
-원자료 조회만으로 계산이 완료된 것은 아니다. 비율·변화율을 설명하려면
+원자료 조회만으로 계산이 완료된 것은 아니다. 차이·비율·변화율을 설명하려면
 process_data가 해당 계산을 수행한 기록과 결과 열이 필요하다.
 reason·검증 설명에 모델이 쓴 수치는 계산 근거가 아니다.
 request·visualization 역할의 시각화 요청은 validate_visualization이 검사한
@@ -35,15 +35,27 @@ tableau 산출물로 연결한다.
 선택 대상은 실제 대화에서 확인된 경우에만 특정한다.
 """
 
+REPORT_EVIDENCE = (
+    "뷰의 표현 범위 안에서 근거가 있는 내용만 설명할 수 있다. "
+    "뷰 선정 reason에 설명 범위와 제외할 비교를 명시하고, "
+    "작성·검토도 그 범위를 따른다. "
+    "자료 목록에 없는 근거나 제외한 비교를 필수 조건으로 요구하지 않는다. "
+    "비교 근거는 가공 기록과 결과의 양쪽 기간·대상·행 수를 대조한다. "
+    "자료 부족 시 뷰는 3개 미만도 허용하며, "
+    "설명 가능한 자료가 없을 때만 빈 목록을 반환한다."
+)
+
 ROLE_INSTRUCTIONS = {
     "report": (
         "행정동 보고서의 시각화 선정·근거 확보 역할이다. "
         "query_data와 process_data로 상세 뷰 3개에 필요한 근거를 확보한다. "
         "작업 선택의 name은 query_data, process_data, none 중 하나다. "
         "하위 Agent와 validate_visualization은 호출하지 않는다. "
-        "설명문과 퀵 인사이트는 후속 작성·검토 단계가 맡는다. "
+        "현재 완료 조건은 선정·설명에 필요한 근거 확보다. "
+        "설명문과 퀵 인사이트의 완성 여부는 후속 작성·검토 단계에서 판단한다. "
         "입력 동·요청 월은 report_input 기록을 따른다. "
-        "불충분한 근거와 실패한 검토는 보완하고, 보완할 수 없으면 compose로 넘긴다."
+        "근거가 충분하거나 공급 범위상 보완할 수 없으면 compose로 넘긴다. "
+        "선정 부적합 시 검토 사유에 따라 근거를 보완하거나 선정 범위를 조정한다."
     ),
     "request": (
         "현재 역할은 사용자 요청 처리 Agent다. 해석 작업은 "
@@ -74,9 +86,8 @@ NODE_INSTRUCTIONS = {
     ),
     "Selection": (
         "작업 선택 단계다. 제공된 도구 명세는 실행기가 호출할 수 있는 작업 목록이다. "
-        "모델은 직접 도구를 호출하지 않고, 선택한 작업을 응답의 name과 "
-        "arguments_json에 작성한다. 실행기가 이 JSON을 읽어 실제 호출한다. "
-        "따라서 직접 함수 호출이 비활성인 것과 작업을 사용할 수 없는 것은 다르다. "
+        "모델은 직접 도구를 호출하지 않고 name과 arguments_json에 작업을 작성한다. "
+        "직접 함수 호출이 비활성이어도 실행기가 이 선택을 읽어 호출한다. "
         "request 역할은 전문 Agent를 "
         "호출하고, 전문 역할은 필요한 도구를 사용한다. "
         "interpretation·report 역할은 query_data/process_data만 호출한다. "
@@ -87,18 +98,14 @@ NODE_INSTRUCTIONS = {
         "[가공 가능한 결과 ID와 열]의 키를 그대로 쓴다. "
         "join.right_result_id도 같은 목록에서 선택한다. "
         "오른쪽 자료를 직접 작성하지 말고 필요한 조회·가공을 먼저 수행한다. "
-        "derived:로 시작하는 데이터 참조·자료명·선택 기록 ID를 넣지 않는다. "
-        "연산은 앞 단계 결과에 순서대로 적용된다. aggregate 후에는 group_by와 "
-        "output 열만 남는다. 독립 집계는 원본 결과 ID로 각각 호출한다. "
+        "데이터 참조·자료명·선택 기록 ID를 대신 넣지 않는다. "
         "현재 결과의 열·단위·기간·페이지 범위를 확인하고, "
         "없는 열을 다음 연산에 쓰지 않는다. "
         "다음 페이지는 next_offset과 applied.version을 사용하며 "
         "data.reference.version과 혼동하지 않는다. "
-        "실패 후에는 오류와 실제 자료 구조를 대조해 인자를 수정한다. "
         "오류 details의 requested와 available을 대조하고, "
         "operation_index가 있으면 0부터 세는 해당 연산을 수정한다. "
-        "자료가 충분하거나 사용자 정보가 필요해서 추가 호출하지 않을 때만 "
-        "none을 선택한다."
+        "자료가 충분하거나 추가 확보가 불가능하면 none을 선택한다."
     ),
     "Decision": (
         "전체 목표와 확보 결과를 비교한다. 부족한 내용·이유를 기록하되 구체적인"
@@ -200,6 +207,15 @@ def _execution(state: State) -> str:
     )
 
 
+def _analysis_instructions() -> str:
+    return (
+        Path(__file__)
+        .with_name("instructions")
+        .joinpath("analysis-interpretation.md")
+        .read_text(encoding="utf-8")
+    )
+
+
 def _messages(state, role, node, sections, *, guide=""):
     instruction = NODE_INSTRUCTIONS[node]
     if guide:
@@ -207,7 +223,12 @@ def _messages(state, role, node, sections, *, guide=""):
     system = "\n\n".join(
         (
             _section("공통 원칙", COMMON),
-            _section("현재 Agent 역할", ROLE_INSTRUCTIONS[role]),
+            _analysis_instructions(),
+            _section(
+                "현재 Agent 역할",
+                ROLE_INSTRUCTIONS[role]
+                + ("\n" + REPORT_EVIDENCE if role == "report" else ""),
+            ),
             _section("이번 노드의 작업 지침", instruction),
         )
     )
@@ -344,12 +365,11 @@ def report_messages(state: State, stage: str, catalog):
         "selection": (
             "상세 뷰를 선정한다. "
             "views에 view_key, reason, evidence_ids를 기록한다. "
-            "성공한 조회·가공 자료만 참조한다. 자료 부족 시 3개 미만을 허용한다."
+            "성공한 조회·가공 자료만 참조한다."
         ),
         "selection_review": (
-            "마지막 뷰 선정을 검토한다. 뷰별 적합성·중복·설명 근거 충분 여부를 "
-            "확인한다. 근거가 부족한 뷰를 억지로 채우지 않는다. "
-            "빈 목록은 설명 가능한 자료가 없는 경우에만 적합하다."
+            "마지막 뷰 선정의 적합성·중복·설명 범위에 대한 근거 충분 여부를 검토한다. "
+            "부적합이면 근거 보완 또는 설명 범위 조정이 필요한 뷰와 이유를 명시한다."
         ),
         "review_retry": (
             "result_ids에 지정된 초안을 검토한다. "
@@ -382,7 +402,11 @@ def report_messages(state: State, stage: str, catalog):
     # 원본은 State다. 이번 호출에 필요한 직렬화만 지역값으로 만든다.
     return [
         SystemMessage(
-            guide
+            _analysis_instructions()
+            + "\n\n"
+            + guide
+            + "\n\n"
+            + REPORT_EVIDENCE
             + "\n\n이번 호출: "
             + instruction
             + "\n\n"

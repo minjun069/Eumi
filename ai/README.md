@@ -19,6 +19,8 @@ uv sync --locked
 | `SETTINGS_DATABASE_URL` | API의 PostgreSQL 연결 |
 | `SETTINGS_BACKEND_URL` · `SETTINGS_BACKEND_TOKEN` | INT-07·08 주소와 Bearer 인증 |
 | `SETTINGS_BASE_URL` | 모델 API 주소. 기본 OpenAI 직접 연결 |
+| `SETTINGS_MAX_STEPS` · `SETTINGS_MAX_TOOL_CALLS` | 공통 실행 한도. 기본 100단계·도구 50회 |
+| `SETTINGS_RUNTIME_TIMEOUT` | 공통 활성 실행 시간 한도. 기본 900초 |
 | `LANGFUSE_*` | 선택적 원격 추적. 기본 비활성, 설정은 [모니터링 문서](docs/ai-agent-monitoring.md) 참조 |
 
 ## API와 컨테이너 실행
@@ -60,6 +62,12 @@ uv run pytest tests/test_api_roundtrip.py tests/test_database.py tests/test_repo
 위 테스트는 외부 모델·DB를 대체한다. 실제 모델을 사용하는 파일 DB 검증은
 [API 왕복 검증](docs/api-roundtrip.md)을 따른다. 실행·전송 실패는 State와
 `outputs/api`의 trace·report.json·report.html에서 확인한다.
+
+2026-11-09: 보고서·조회·가공·API·State 관련 회귀 146개와 Ruff 검사를 통과했다.
+실제 모델(`gpt-5.6-luna`)·합성 자료·파일 DB 검증에서는 19단계·도구 9회로
+V01·V02·V04의 설명과 퀵 인사이트를 작성·검토·저장했다. 전월 기여도 차이(1·0),
+요일별 활동량 차이(-2), 도시 비교를 제외한 V01 설명 범위를 확인했다.
+실제 PostgreSQL·운영 BE·Tableau 화면 검증은 포함하지 않는다.
 
 ## 로컬 데모·리포트
 
