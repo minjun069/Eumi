@@ -36,7 +36,16 @@ def create_tools(
 
     def input_schema(name, adapter):
         schema = adapter.json_schema()
-        if name == "validate_visualization":
+        if name == "query_data":
+            target = schema["properties"]["target"]
+            target["description"] = (
+                "현재 등록된 자료 ID. 결과의 derived: 참조가 아니다."
+            )
+            if registered:
+                target["enum"] = sorted(registered)
+            else:
+                target["description"] += "; 등록 자료가 없어 조회할 수 없음"
+        elif name == "validate_visualization":
             view = schema["properties"]["view_key"]
             permitted = sorted(allowed_views(state))
             view["description"] = "현재 실행 이벤트에 허용된 Tableau 뷰 ID"

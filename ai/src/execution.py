@@ -46,6 +46,33 @@ def record(node, decision, reason, *, action=None, output=None, success=True):
     }
 
 
+def accepted_outputs(state):
+    """성공한 호출과 검토를 통과한 보고서 결과를 State에서 찾는다."""
+    accepted, rejected = set(), set()
+    for item in state["results"]:
+        output = item.get("output") or {}
+        if item["decision"] == "verification":
+            if output.get("accepted") is True:
+                accepted.add(output["call_id"])
+            elif output.get("accepted") is False:
+                rejected.add(output["call_id"])
+    outputs = {
+        item["id"]: item["output"]
+        for item in state["results"]
+        if (item["decision"] == "call" or item["id"] in accepted)
+        and item["id"] not in rejected
+        and item["outcome"] == "success"
+        and item.get("output") is not None
+        and item["output"].get("valid") is not False
+        and item["output"].get("execution", {}).get("status")
+        not in {"failed", "cancelled"}
+    }
+    for output in list(outputs.values()):
+        if "results" in output:
+            outputs.update(accepted_outputs(output))
+    return outputs
+
+
 def _elapsed(state, resource, started, baseline, final_baseline):
     budget = state["execution"]["budget"]
     elapsed = monotonic() - started

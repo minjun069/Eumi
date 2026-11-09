@@ -1,224 +1,136 @@
-import json
+"""현재 State 계약을 사용하는 그래프 검증. 모델·외부 도구는 호출하지 않는다."""
+
+from copy import deepcopy
 
 import pytest
-from langchain_core.messages import HumanMessage, ToolMessage
-from langchain_core.tools import tool
-from langchain_core.utils.function_calling import convert_to_openai_tool
+from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.graph import END
 from langgraph.types import Command
 
-from src.exceptions import ToolFailure
-from src.graph import Agent, compile_graph
+from experiments.fixtures import mock_nodes
+from src.graph import compile_graph
 from src.settings import Settings
-from src.state import create_state
-from tests.helpers import ScriptedModel, accept, finish
+from src.state import create_state, state_adapter
 
 
-def graph(model, *, tools=(), validate=accept, children=None, name="test"):
-    return Agent(
-        name=name,
-        model=model,
-        prompt="Temporary test agent.",
-        tools=tools,
-        validate=validate,
-        children=children or {},
+def initial():
+    return create_state(
+        {"goal": "test"},
+        Settings(_env_file=None),
+        messages=[SystemMessage("Test instruction", id="system")],
+        version="test",
+        event="user_request",
     )
 
 
-def initial(**settings):
-    return create_state({"goal": "Explain"}, Settings(_env_file=None, **settings))
-
-
-@pytest.mark.asyncio
-async def test_native_tool_validation_and_result_verification():
-    calls = []
-
-    @tool
-    def lookup(region: str) -> dict:
-        """Return a synthetic observation."""
-        calls.append(region)
-        return {"value": 12}
-
-    async def validate(state, result):
-        assert any(
-            isinstance(m, ToolMessage) and "12" in m.content
-            for m in state["execution"]["model_messages"]
-        )
-        return [] if result["content"] == "12" else ["Use observed value 12"]
-
-    model = ScriptedModel(
-        ("lookup", {}), ("lookup", {"region": "A"}), finish("wrong"), finish("12")
-    )
-    result = await compile_graph(
-        graph(model, tools=[lookup], validate=validate)
-    ).ainvoke(initial())
-    assert calls == ["A"]
-    assert result["response"]["content"] == "12"
-    assert model.invocations == 4
-
-
-@pytest.mark.asyncio
-async def test_disallowed_tool_is_not_executed():
-    result = await compile_graph(
-        graph(ScriptedModel(("unknown", {}), finish()))
-    ).ainvoke(initial())
-    assert any(
-        isinstance(m, ToolMessage) and m.status == "error"
-        for m in result["execution"]["model_messages"]
-    )
-
-
-@pytest.mark.asyncio
-async def test_verification_failure_is_bounded():
-    async def reject(state, result):
-        return ["Missing evidence"]
-
-    result = await compile_graph(
-        graph(ScriptedModel(finish()), validate=reject)
-    ).ainvoke(initial(max_steps=2))
-    assert result["execution"]["error"]["code"] == "steps_limit"
-
-
-@pytest.mark.asyncio
-async def test_child_interrupt_resumes_without_repeating_lookup_or_parent_model():
-    calls = []
-
-    @tool
-    def lookup() -> int:
-        """Read a synthetic value."""
-        calls.append(1)
-        return 12
-
-    child_model = ScriptedModel(
-        ("lookup", {}), ("ask_user", {"question": "Which region?"}), finish("12")
-    )
-    child = graph(child_model, tools=[lookup], name="analysis")
-    parent_model = ScriptedModel(("analysis", {"goal": "Explain"}), finish())
-    parent = compile_graph(
-        graph(parent_model, children={"analysis": child}), checkpointer=InMemorySaver()
-    )
+@pytest.mark.parametrize("scenario", ["intermediate", "question", "partial", "failure"])
+def test_scenarios_preserve_state_and_resume(scenario):
     state = initial()
+    original = deepcopy(state)
+    saver = InMemorySaver()
+    callbacks, completion = mock_nodes(scenario)
+    graph = compile_graph(callbacks, finish=completion, checkpointer=saver)
     config = {"configurable": {"thread_id": state["execution"]["run_id"]}}
-    paused = await parent.ainvoke(state, config)
-    assert paused["__interrupt__"][0].value["question"] == "Which region?"
-    saved = parent.get_state(config, subgraphs=True)
-    assert (
-        sum(
-            isinstance(m, HumanMessage)
-            for m in saved.values["execution"]["model_messages"]
+    snapshots = list(graph.stream(state, config, stream_mode="values"))
+    if scenario == "question":
+        saved = graph.get_state(config)
+        assert saved.next == ("wait",)
+        question = saved.values["response"]
+        records = deepcopy(saved.values["results"])
+        paused = graph.invoke(Command(resume=" "), config)
+        assert paused["execution"]["status"] == "waiting_input"
+        assert paused["response"] == question
+        assert paused["results"] == records
+        graph = compile_graph(callbacks, finish=completion, checkpointer=saver)
+        snapshots.extend(
+            graph.stream(Command(resume="answer"), config, stream_mode="values")
         )
-        == 2
-    )
-    history = saved.values["execution"]["model_messages"]
-    scope = history[-1].additional_kwargs["scope"]
-    messages = [m for m in history if m.additional_kwargs["scope"] == scope]
-    assert messages
-    assert messages[0].additional_kwargs["agent_path"] == ["analysis"]
-    result = await parent.ainvoke(Command(resume="A"), config)
-    assert result["response"]["content"] == "Done"
-    assert calls == [1]
-    assert child_model.invocations == 3
-    assert parent_model.invocations == 2
-    assert result["execution"]["budget"]["agent_calls"]["used"] == 1
-    assert result["execution"]["budget"]["tool_calls"]["used"] == 1
-
-
-@pytest.mark.asyncio
-async def test_child_failure_keeps_verified_grandchild_output():
-    artifact = {
-        "type": "analysis_interpretation",
-        "data": {"region": "A", "before": 100, "after": 112, "change": 12},
+    result = graph.get_state(config).values
+    state_adapter.validate_python(result)
+    assert state == original
+    assert result["execution"]["budget"]["steps"]["used"] > 0
+    assert {k: v["limit"] for k, v in result["execution"]["budget"].items()} == {
+        k: v["limit"] for k, v in original["execution"]["budget"].items()
     }
-    leaf = graph(ScriptedModel(finish(results=[artifact])), name="leaf")
-
-    async def fail(state, result):
-        raise RuntimeError("private error")
-
-    middle = graph(
-        ScriptedModel(("leaf", {"goal": "Read"}), finish()),
-        children={"leaf": leaf},
-        validate=fail,
+    assert result["execution"]["status"] == {
+        "partial": "partial",
+        "failure": "failed",
+    }.get(scenario, "completed")
+    assert result["response"]["kind"] == "final"
+    assert result["results"][0]["node"] == "interpret"
+    assert sum(r["action"] is not None for r in result["results"]) == (
+        2 if scenario == "intermediate" else 1
     )
-    parent = graph(
-        ScriptedModel(("middle", {"goal": "Read"}), finish(partial=True)),
-        children={"middle": middle},
+    assert sum(isinstance(m, HumanMessage) for m in result["messages"]) == (
+        scenario == "question"
     )
-    result = await compile_graph(parent).ainvoke(initial())
-    assert result["execution"]["status"] == "partial"
-    assert result["results"][0]["data"] == artifact["data"]
-    assert "private error" not in json.dumps(
-        [str(m) for m in result["execution"]["model_messages"]]
-    )
+    if scenario == "intermediate":
+        assert any(
+            (s.get("response") or {}).get("kind") == "intermediate"
+            and s["execution"]["status"] == "running"
+            for s in snapshots
+        )
 
 
-@pytest.mark.asyncio
-@pytest.mark.parametrize("safe, expected", [(True, 2), (False, 1)])
-async def test_retry_requires_safe_read_and_retryable_error(safe, expected):
-    calls = []
-
-    @tool
-    def lookup() -> int:
-        """Read synthetic data."""
-        calls.append(1)
-        if len(calls) == 1:
-            raise ToolFailure("unavailable", retryable=True)
-        return 12
-
-    lookup.metadata = {"retry_safe": safe}
-    result = await compile_graph(
-        graph(ScriptedModel(("lookup", {}), finish()), tools=[lookup])
-    ).ainvoke(initial())
-    assert len(calls) == expected
-    assert result["execution"]["budget"]["retries"]["used"] == expected - 1
+def response(kind="final", artifacts=None):
+    return {
+        "id": "response",
+        "kind": kind,
+        "label": "test",
+        "content": "result",
+        "artifacts": artifacts or [],
+    }
 
 
-@pytest.mark.asyncio
+def nodes():
+    return {
+        "interpret": lambda s: Command(update={}, goto="act"),
+        "act": lambda s: Command(update={}, goto="decide"),
+        "decide": lambda s: Command(update={}, goto="compose"),
+        "compose": lambda s: Command(update={"response": response()}, goto=END),
+        "ask": lambda s: Command(
+            update={"response": response("question")}, goto="wait"
+        ),
+    }
+
+
+def finish(state):
+    return {"status": "completed", "error": None}
+
+
 @pytest.mark.parametrize(
-    "bad",
+    "name,command",
     [
-        {"content": " "},
-        {"results": [{"type": "visualization", "data": {}, "unexpected": True}]},
-        {"references": [{"label": "source"}]},
+        ("act", Command(update={"request": {"goal": "overwrite"}}, goto="decide")),
+        ("act", Command(update={}, goto=END)),
+        ("ask", Command(update={}, goto="wait")),
+        ("compose", Command(update={"response": response("intermediate")}, goto=END)),
     ],
 )
-async def test_invalid_submissions_are_rejected_before_business_validation(bad):
-    seen = []
+def test_rejects_invalid_node_updates(name, command):
+    callbacks = nodes()
+    callbacks[name] = lambda s: command
+    if name == "ask":
+        callbacks["decide"] = lambda s: Command(update={}, goto="ask")
+    graph = compile_graph(callbacks, finish=finish)
+    result = graph.invoke(initial())
+    assert result["execution"]["status"] == "failed"
+    assert result["execution"]["error"]["code"] == "runtime_error"
+    assert result["request"] == initial()["request"]
 
-    async def validate(state, result):
-        seen.append(result)
-        return []
 
-    name, args = finish()
-    model = ScriptedModel((name, args | bad), finish("Corrected"))
-    output = await compile_graph(graph(model, validate=validate)).ainvoke(initial())
-    assert output["response"]["content"] == "Corrected"
-    assert len(seen) == 1
-    assert any(
-        isinstance(m, ToolMessage) and m.status == "error"
-        for m in output["execution"]["model_messages"]
+def test_progress_preserves_published_artifacts():
+    state = initial()
+    state["response"] = response(
+        "intermediate", [{"type": "table", "data": {"value": 1}}]
     )
-
-
-@pytest.mark.asyncio
-async def test_child_schema_and_validation_share_the_typed_request():
-    child_model = ScriptedModel(finish())
-    parent_model = ScriptedModel(
-        ("child", {"goal": "Explain", "constraints": {"unexpected": True}}),
-        ("child", {"goal": "Explain"}),
-        finish(),
+    callbacks = nodes()
+    callbacks["act"] = lambda s: Command(
+        update={"response": response("progress")}, goto="decide"
     )
-    parent = compile_graph(graph(parent_model, children={"child": graph(child_model)}))
-    schema = convert_to_openai_tool(parent_model.tools[0])["function"]["parameters"]
-    assert schema["required"] == ["goal"]
-    assert schema["additionalProperties"] is False
-    assert schema["properties"]["constraints"]["additionalProperties"] is False
-    assert (
-        "runtime"
-        not in convert_to_openai_tool(parent_model.tools[-1])["function"]["parameters"][
-            "properties"
-        ]
-    )
-    output = await parent.ainvoke(initial())
-    assert output["response"]["content"] == "Done"
-    assert output["execution"]["budget"]["agent_calls"]["used"] == 1
-    assert child_model.invocations == 1
+    graph = compile_graph(callbacks, finish=finish)
+    result = graph.invoke(state)
+    assert result["execution"]["status"] == "partial"
+    assert result["execution"]["error"]["code"] == "runtime_error"
+    assert result["response"]["artifacts"] == state["response"]["artifacts"]

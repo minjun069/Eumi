@@ -48,7 +48,14 @@ class Join(TypedDict):
     keys: Annotated[list[Text], Field(min_length=1)]
     how: Literal["inner", "left"]
     # 오른쪽 원본 열 -> 새 결과 열. 덮어쓰기와 자동 suffix는 허용하지 않는다.
-    fields: Annotated[dict[Text, Text], Field(min_length=1)]
+    fields: Annotated[
+        dict[Text, Text],
+        Field(
+            min_length=1,
+            description="키는 right에 실제 존재하는 원본 열, 값은 결과의 새 열 이름. "
+            '예: {"score": "score_previous"}. 반대 방향으로 쓰지 않는다.',
+        ),
+    ]
 
 
 @with_config(ConfigDict(extra="forbid", strict=True, allow_inf_nan=False))
@@ -280,52 +287,56 @@ def process_data(request: ProcessRequest) -> ProcessResult:
     inputs = [deepcopy(data)]
     missing = request.get("missing", "error")
     counts: list[OperationCount] = []
-    for op in request["operations"]:
-        with trace_span(
-            "operation",
-            op["operation"],
-            {"operation": op, "data": data, "missing": missing},
-        ) as span:
-            before = len(data["rows"])
-            match op["operation"]:
-                case "calculate":
-                    excluded = _calculate(data, op, missing)
-                case "aggregate":
-                    excluded = _aggregate(data, op, missing)
-                case "join":
-                    excluded = _join(data, op, inputs)
-                case "cast":
-                    excluded = _cast(data, op, missing)
-                case "filter":
-                    data["rows"] = matching_rows(data, op["conditions"])
-                    excluded = before - len(data["rows"])
-                case "sort":
-                    require_columns(
-                        data, list(dict.fromkeys(s["field"] for s in op["by"]))
-                    )
-                    for order in reversed(op["by"]):
-                        field = order["field"]
-                        present = [r for r in data["rows"] if r[field] is not None]
-                        absent = [r for r in data["rows"] if r[field] is None]
-                        data["rows"] = (
-                            sorted(
-                                present,
-                                key=lambda r: r[field],
-                                reverse=order["descending"],
-                            )
-                            + absent
+    for index, op in enumerate(request["operations"]):
+        try:
+            with trace_span(
+                "operation",
+                op["operation"],
+                {"operation": op, "data": data, "missing": missing},
+            ) as span:
+                before = len(data["rows"])
+                match op["operation"]:
+                    case "calculate":
+                        excluded = _calculate(data, op, missing)
+                    case "aggregate":
+                        excluded = _aggregate(data, op, missing)
+                    case "join":
+                        excluded = _join(data, op, inputs)
+                    case "cast":
+                        excluded = _cast(data, op, missing)
+                    case "filter":
+                        data["rows"] = matching_rows(data, op["conditions"])
+                        excluded = before - len(data["rows"])
+                    case "sort":
+                        require_columns(
+                            data, list(dict.fromkeys(s["field"] for s in op["by"]))
                         )
-                    excluded = 0
-            counts.append(
-                {
-                    "operation": op["operation"],
-                    "input_rows": before,
-                    "output_rows": len(data["rows"]),
-                    "excluded_rows": excluded,
-                }
-            )
-            if span:
-                span.update(output={"data": data, "counts": counts[-1]})
+                        for order in reversed(op["by"]):
+                            field = order["field"]
+                            present = [r for r in data["rows"] if r[field] is not None]
+                            absent = [r for r in data["rows"] if r[field] is None]
+                            data["rows"] = (
+                                sorted(
+                                    present,
+                                    key=lambda r: r[field],
+                                    reverse=order["descending"],
+                                )
+                                + absent
+                            )
+                        excluded = 0
+                counts.append(
+                    {
+                        "operation": op["operation"],
+                        "input_rows": before,
+                        "output_rows": len(data["rows"]),
+                        "excluded_rows": excluded,
+                    }
+                )
+                if span:
+                    span.update(output={"data": data, "counts": counts[-1]})
+        except ToolFailure as exc:
+            exc.details["operation_index"] = index
+            raise
     if "fields" in request:
         columns = require_columns(data, request["fields"])
         data["columns"] = [columns[name] for name in request["fields"]]
