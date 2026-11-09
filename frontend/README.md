@@ -44,7 +44,7 @@ $env:VITE_API_TARGET="http://localhost:8081"; npm run dev
 | `src/session/` | 로그인 상태(`sessionStore`), 복원·로그아웃·401 처리(`sessionActions`) |
 | `src/components/` | 레이아웃(헤더·메뉴), 로그인 필요 화면 보호, 확인 창·알림·빈 상태·입력·정렬 버튼·페이지 번호 부품 |
 | `src/screens/` | 화면 (`auth/` 로그인, `risk/` 고립 위험 탐색, `case/` 사례자 목록·상세·등록·수정·상담 창, `resource/` 복지자원 목록·상세·등록·수정, `my/` 마이페이지 탭·내 정보·담당 자원·AI 대화 기록·비밀번호 변경), `placeholder/` '준비 중' 화면과 화면별 예정 내용 |
-| `src/tableau/` | Tableau Public 대시보드 띄우기(Embedding API v3)와 게시본 설정. 워크북 하나에서 자리마다 임베드용 대시보드를 띄운다. 새 뷰가 게시되면 `tableauConfig.ts`에 대시보드·워크시트 이름과 크기를 채운다 |
+| `src/tableau/` | Tableau Public 대시보드 띄우기(Embedding API v3)와 게시본 설정. 워크북 하나에서 자리마다 임베드용 대시보드를 띄운다. 새 뷰가 게시되면 `tableauConfig.ts`에 대시보드·워크시트 이름과 크기를 채운다. AI 패널 완료 행의 Tableau 카드(`TableauArtifactCard`)는 AI가 준 게시 뷰 주소·매개변수·필터로 띄운다 (정화한 표·SVG는 `components/agent/AgentArtifacts`) |
 | `src/routes/paths.ts` | 화면 주소 |
 
 ## 규칙
