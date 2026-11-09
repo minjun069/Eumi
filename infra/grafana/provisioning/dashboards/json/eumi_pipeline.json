@@ -716,6 +716,240 @@
           { "matcher": { "id": "byName", "options": "좌표 없음" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] }
         ]
       }
+    },
+    {
+      "id": 400,
+      "type": "row",
+      "title": "인프라",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 69 },
+      "panels": []
+    },
+    {
+      "id": 401,
+      "type": "canvas",
+      "title": "",
+      "description": "Airflow 스케줄러가 살아 있는지. airflow DB job 표의 마지막 심장박동이 60초 안이면 정상. 멈추면 매월 5일 배치가 시작되지 않는다 → pipeline 컨테이너 재시작",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 70 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT CASE WHEN max(latest_heartbeat) > now() - interval '60 seconds' THEN 'ok' ELSE 'down' END AS status,\n       coalesce('마지막 신호 ' || round(extract(epoch FROM now() - max(latest_heartbeat))) || '초 전 · ' || max(hostname), '스케줄러 기록 없음') AS sub\nFROM job\nWHERE job_type = 'SchedulerJob' AND state = 'running'"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "noValue": "기록 없음",
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "status" },
+            "properties": [
+              { "id": "mappings", "value": [
+                { "type": "value", "options": {
+                  "ok": { "text": "정상", "color": "green", "index": 0 },
+                  "down": { "text": "멈춤", "color": "red", "index": 1 }
+                } }
+              ] }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "inlineEditing": false,
+        "showAdvancedTypes": true,
+        "panZoom": false,
+        "infinitePan": false,
+        "root": {
+          "type": "frame",
+          "name": "root",
+          "background": { "color": { "fixed": "transparent" } },
+          "border": { "color": { "fixed": "transparent" } },
+          "constraint": { "horizontal": "left", "vertical": "top" },
+          "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "Airflow 스케줄러" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" },
+              "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } },
+              "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 340, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "status" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" },
+              "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } },
+              "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 340, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" },
+              "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } },
+              "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 340, "height": 22 } }
+          ]
+        }
+      }
+    },
+    {
+      "id": 405,
+      "type": "canvas",
+      "title": "",
+      "description": "eumi DB 전체 크기와 가장 큰 표. 유동 상세(flow_detail)가 대부분을 차지한다",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 75 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH t AS (\n  SELECT c.relname, pg_total_relation_size(c.oid) AS s\n  FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace\n  WHERE c.relkind IN ('r', 'p') AND n.nspname IN ('analysis', 'public')\n  ORDER BY 2 DESC LIMIT 1)\nSELECT pg_size_pretty(pg_database_size(current_database())) AS status,\n       '가장 큰 표 ' || t.relname || ' ' || pg_size_pretty(t.s) AS sub\nFROM t"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "noValue": "-", "mappings": [] },
+        "overrides": []
+      },
+      "options": {
+        "inlineEditing": false,
+        "showAdvancedTypes": true,
+        "panZoom": false,
+        "infinitePan": false,
+        "root": {
+          "type": "frame",
+          "name": "root",
+          "background": { "color": { "fixed": "transparent" } },
+          "border": { "color": { "fixed": "transparent" } },
+          "constraint": { "horizontal": "left", "vertical": "top" },
+          "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "eumi DB 크기" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" },
+              "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } },
+              "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 340, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "status" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" },
+              "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } },
+              "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 340, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" },
+              "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } },
+              "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 340, "height": 22 } }
+          ]
+        }
+      }
+    },
+    {
+      "id": 402,
+      "type": "bargauge",
+      "title": "DB 접속 수 (최대 100)",
+      "description": "pg_stat_activity 의 계정별 접속 수. PostgreSQL max_connections 가 100 이라 전체가 80 을 넘으면 주황, 90 이면 빨강. 전에 접속을 다 써서 멈춘 적이 있다",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 11, "w": 9, "x": 6, "y": 70 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \"계정\", \"접속\" FROM (\n  SELECT 0 AS seq, '전체 (최대 ' || current_setting('max_connections') || ')' AS \"계정\", count(*) AS \"접속\"\n  FROM pg_stat_activity WHERE backend_type = 'client backend'\n  UNION ALL\n  SELECT 1, coalesce(usename, '(없음)'), count(*)\n  FROM pg_stat_activity WHERE backend_type = 'client backend' GROUP BY usename\n) x ORDER BY seq, \"접속\" DESC"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "valueMode": "color",
+        "namePlacement": "auto",
+        "showUnfilled": true,
+        "sizing": "auto",
+        "minVizWidth": 8,
+        "minVizHeight": 16,
+        "maxVizHeight": 300,
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true },
+        "text": {}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "min": 0,
+          "max": 100,
+          "decimals": 0,
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "orange", "value": 80 }, { "color": "red", "value": 90 } ] },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 403,
+      "type": "bargauge",
+      "title": "테이블 크기 (큰 순서)",
+      "description": "analysis · public 스키마 표의 디스크 크기 (인덱스 포함). 유동 상세가 월 1.27M 행씩 쌓여 제일 크다",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 11, "w": 9, "x": 15, "y": 70 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT n.nspname || '.' || c.relname AS \"테이블\", pg_total_relation_size(c.oid) AS \"크기\"\nFROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace\nWHERE c.relkind IN ('r', 'p') AND n.nspname IN ('analysis', 'public')\nORDER BY 2 DESC\nLIMIT 12"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "valueMode": "color",
+        "namePlacement": "auto",
+        "showUnfilled": true,
+        "sizing": "auto",
+        "minVizWidth": 8,
+        "minVizHeight": 16,
+        "maxVizHeight": 300,
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true },
+        "text": {}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#5794F2" },
+          "unit": "bytes",
+          "decimals": 1,
+          "min": 0,
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 404,
+      "type": "table",
+      "title": "오래 도는 쿼리 (10초 이상)",
+      "description": "지금 10초 넘게 돌고 있는 문장. 평소에는 비어 있어야 한다 (No data). 배치 중에는 유동 상세 적재 · 검증이 잠깐 보일 수 있다. Grafana 계정은 30초 제한이라 여기 오래 남지 않는다",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 81 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT usename AS \"계정\", datname AS \"DB\", state AS \"상태\",\n       round(extract(epoch FROM now() - query_start)) AS \"경과(초)\",\n       coalesce(wait_event_type || ': ' || wait_event, '-') AS \"대기\",\n       left(regexp_replace(query, '\\s+', ' ', 'g'), 160) AS \"쿼리\"\nFROM pg_stat_activity\nWHERE backend_type = 'client backend' AND state <> 'idle' AND pid <> pg_backend_pid()\n  AND query_start < now() - interval '10 seconds'\nORDER BY query_start"
+        }
+      ],
+      "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false, "reducer": ["sum"], "fields": "" } },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "filterable": false, "inspect": false },
+          "noValue": "-",
+          "mappings": []
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "계정" }, "properties": [ { "id": "custom.width", "value": 120 } ] },
+          { "matcher": { "id": "byName", "options": "DB" }, "properties": [ { "id": "custom.width", "value": 80 } ] },
+          { "matcher": { "id": "byName", "options": "상태" }, "properties": [ { "id": "custom.width", "value": 110 } ] },
+          { "matcher": { "id": "byName", "options": "경과(초)" }, "properties": [ { "id": "custom.width", "value": 90 }, { "id": "unit", "value": "s" } ] },
+          { "matcher": { "id": "byName", "options": "대기" }, "properties": [ { "id": "custom.width", "value": 160 } ] }
+        ]
+      }
     }
   ]
 }
