@@ -1,0 +1,193 @@
+{
+  "__comment": "Eumi 파이프라인 대시보드. 이 파일이 원본이다 (화면에서 고친 내용은 저장되지 않음). 고치려면 파일을 바꾸고 커밋한다. 30초 안에 Grafana 가 다시 읽는다. 패널 설명은 infra/README.md",
+  "uid": "eumi-pipeline",
+  "title": "Eumi 파이프라인",
+  "tags": ["eumi", "pipeline"],
+  "timezone": "Asia/Seoul",
+  "editable": false,
+  "graphTooltip": 1,
+  "refresh": "1m",
+  "time": { "from": "now-6M", "to": "now" },
+  "schemaVersion": 39,
+  "version": 1,
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "links": [],
+  "panels": [
+    {
+      "id": 100,
+      "type": "row",
+      "title": "이번 달 한눈에",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "panels": []
+    },
+    {
+      "id": 101,
+      "type": "stat",
+      "title": "마지막 실행",
+      "description": "Airflow 의 eumi_monthly 가장 최근 실행. 끝난 시각 (한국 시간)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 4, "w": 5, "x": 0, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT state || '|' || to_char(coalesce(end_date, start_date) AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') AS value\nFROM dag_run\nWHERE dag_id = 'eumi_monthly'\nORDER BY start_date DESC NULLS LAST\nLIMIT 1"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/.*/", "values": false },
+        "textMode": "value",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "noValue": "실행 없음",
+          "mappings": [
+            { "type": "regex", "options": { "pattern": "^success\\|(.*)$", "result": { "text": "성공 · $1", "color": "green", "index": 0 } } },
+            { "type": "regex", "options": { "pattern": "^failed\\|(.*)$", "result": { "text": "실패 · $1", "color": "red", "index": 1 } } },
+            { "type": "regex", "options": { "pattern": "^running\\|(.*)$", "result": { "text": "실행 중 · $1", "color": "blue", "index": 2 } } },
+            { "type": "regex", "options": { "pattern": "^queued\\|(.*)$", "result": { "text": "대기 · $1", "color": "text", "index": 3 } } }
+          ]
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 102,
+      "type": "stat",
+      "title": "다음 실행",
+      "description": "스케줄상 다음 실행 시각 (매월 5일 03:00, 전월 처리). DAG 가 일시정지면 '일시정지'",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 4, "w": 5, "x": 5, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT CASE WHEN is_paused THEN 'paused'\n            ELSE to_char(next_dagrun_create_after AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI')\n                 || ' (' || greatest((next_dagrun_create_after AT TIME ZONE 'Asia/Seoul')::date - (now() AT TIME ZONE 'Asia/Seoul')::date, 0) || '일 뒤)' END AS value\nFROM dag\nWHERE dag_id = 'eumi_monthly'"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/.*/", "values": false },
+        "textMode": "value",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "noValue": "DAG 없음",
+          "mappings": [
+            { "type": "value", "options": { "paused": { "text": "일시정지", "color": "orange", "index": 0 } } }
+          ]
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 103,
+      "type": "stat",
+      "title": "적재된 최신 달",
+      "description": "region_result 에 있는 가장 최근 기준월과 그 달을 마지막으로 적재한 시각",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 4, "w": 5, "x": 10, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT to_char(max(period_start), 'YYYY-MM') || ' · ' || to_char(max(updated_at), 'MM/DD') || ' 적재' AS value\nFROM public.region_result"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/.*/", "values": false },
+        "textMode": "value",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "blue" },
+          "noValue": "결과 없음",
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 104,
+      "type": "stat",
+      "title": "검사 결과 (최신 달)",
+      "description": "pipeline_check 의 가장 최근 달에서 통과한 검사 수 / 전체. 하나라도 실패면 빨강",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 4, "w": 5, "x": 15, "y": 1 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH m AS (SELECT max(period_start) AS p FROM analysis.pipeline_check)\nSELECT to_char(m.p, 'YYYY-MM') || ' ' || count(*) FILTER (WHERE passed) || '/' || count(*) AS value\nFROM analysis.pipeline_check c JOIN m ON c.period_start = m.p\nGROUP BY m.p"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/.*/", "values": false },
+        "textMode": "value",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "text" },
+          "noValue": "기록 없음",
+          "mappings": [
+            { "type": "regex", "options": { "pattern": "^(\\S+) (\\d+)/\\2$", "result": { "text": "$1 통과 $2/$2", "color": "green", "index": 0 } } },
+            { "type": "regex", "options": { "pattern": "^(\\S+) (\\d+)/(\\d+)$", "result": { "text": "$1 통과 $2/$3", "color": "red", "index": 1 } } }
+          ]
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 105,
+      "type": "alertlist",
+      "title": "울린 알림",
+      "description": "지금 켜져 있는 알림. 알림 규칙은 다음 작업에서 넣는다",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "options": {
+        "alertName": "",
+        "dashboardAlerts": false,
+        "groupBy": [],
+        "groupMode": "default",
+        "maxItems": 10,
+        "sortOrder": 1,
+        "stateFilter": { "firing": true, "pending": true, "noData": false, "normal": false, "error": true },
+        "viewMode": "list"
+      }
+    }
+  ]
+}
