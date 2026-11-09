@@ -1,6 +1,6 @@
 # 이음이 API 명세
 
-- 판: 2.4.0 초안 (2026-11-06, 11/9 INT-06 삭제)
+- 판: 2.4.0 초안 (2026-11-06, 11/9 INT-06 · API-18 삭제)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_API_명세표.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - API 형식의 기준은 `docs/api/openapi.json`, 내부 연동은 `docs/api/ai-agent-panel.md` · `docs/api/insight-report.md`다. 계약이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -10,7 +10,7 @@
 ## API 목록
 
 - 제목: 이음이 API 명세표
-- 요약: API 2.4.0 초안  46개 작업 (구현 38 · 예정 8)  * 필수 입력  기본 경로 /api
+- 요약: API 2.4.0 초안  45개 작업 (구현 38 · 예정 7)  * 필수 입력  기본 경로 /api
 - 출처: eumi/docs/api/openapi.json 2.3.0 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장)
 
 ### API-01 로그인 상태와 메뉴 프로필 조회
@@ -145,13 +145,6 @@
 - 요청 형식: 인증 SESSION 쿠키 · CSRF 필수<br><br>본문 application/json ResourceInput<br>resourceName*:string; operatingOrgName*:string; target*:string; supportAgeGroups*:string[]; supportGender*:string; sigunguCode*:string; dongCode:string 또는 null; periodStart*:string(date); periodEnd*:string(date); fee*:integer; status*:string; managerMemberId*:integer(int64); capacity*:integer; actualParticipants:integer 또는 null; supportContent:string 또는 null; applyMethod:string 또는 null
 - 응답 형식: 201 application/json resourceApi_createResource_Success<br>resourceId*:integer(int64)
 - 구현 (11/6): 구현
-
-### API-18 PDF 복지자원 양식 추출<br>신규 설계
-- 페이지 범위: 자원 등록 폼
-- 요청 경로: POST /api/resources/document-extractions
-- 요청 형식: 인증 SESSION 쿠키 · CSRF 필수<br><br>본문 multipart/form-data object<br>file*:string(binary) PDF 1개<br>실제 PDF 20MiB 검사는 BE · 인프라 상한은 Nginx 50m · Spring 50MB
-- 응답 형식: 200 application/json DocumentExtractionResult_Success<br>extracted*:DocumentExtract; missingFields*:string[]; warnings*:string[]
-- 구현 (11/6): 예정 11/11
 
 ### API-19 사례자 목록 조회
 - 페이지 범위: /cases
@@ -385,8 +378,8 @@
 - 검증: 동 선택·매개변수(시군구·기간)·로딩·게시 오류
 
 ### FastAPI 내부
-- 대상: AI 실행·취소·상태 3개 · 인사이트 보고서 생성 요청 INT-05 (내부 AI API 시트) · PDF 추출
-- 현재 근거: AI: 2026-11-02 A 방식 결정 · PDF: 문서 신규 설계 계약
+- 대상: AI 실행·취소·상태 3개 · 인사이트 보고서 생성 요청 INT-05 (내부 AI API 시트). PDF 추출(API-18)은 2026-11-09 범위 제외
+- 현재 근거: AI: 2026-11-02 A 방식 결정
 - 경계: 브라우저는 Spring만 호출 · 대화 패널: AI가 ai_message에 직접 저장 · 인사이트 보고서: AI가 region_insight_report에 직접 저장 (BE는 생성 요청 · 조회만)
 - 선행 조건: 시간 값·artifacts 형식 합의 (이전 대화 범위는 11/2 '전체'로 결정, eumi_ai의 ai_message 읽기·추가 권한은 11/2 적용)
 - 검증: 행 단위 커밋·끝 행 하나·늦은 행 거부·취소 경합·질문 마스킹·시간 초과·부족 정보 되묻기
