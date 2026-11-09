@@ -1,6 +1,6 @@
 # 이음이 테이블 정의서
 
-- 판: 2.4.0 (2026-11-06)
+- 판: 2.4.0 (2026-11-06, 11/9 보고서 저장 주체 설명 수정)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_테이블_정의서.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - DB의 실제 구조는 `db/migration`의 V 파일이 기준이다. V 파일이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -30,7 +30,7 @@
 | public.ai_conversation | AI 대화 | 5 | conversation_id | AI 대화 | V4__ai_conversation.sql<br>V20261102_02__ai_message.sql |
 | public.ai_message | AI 대화 메시지 | 9 | message_id | AI 대화 메시지 (질문·진행 단계·끝 행을 한 행씩) | V20261102_02__ai_message.sql |
 | public.region_result | 읍면동 월별 결과 (데이터 분석 정의, 파이프라인 적재) | 8 | period_start, adm_cd10 | 읍면동 월별 결과 (데이터 분석 정의, 파이프라인 적재) | V5__dashboard.sql |
-| public.region_insight_report | 읍면동 인사이트 보고서 (AI 생성, 백엔드 저장, 동·월마다 하나) | 11 | period_start, adm_cd10 | 퀵 인사이트와 그래프 3개 · 그래프별 설명 (AI가 만들어 백엔드 API로 보내면 백엔드가 저장) | V5__dashboard.sql<br>V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
+| public.region_insight_report | 읍면동 인사이트 보고서 (AI가 만들어 저장, 동·월마다 하나) | 11 | period_start, adm_cd10 | 퀵 인사이트와 그래프 3개 · 그래프별 설명 (AI가 eumi_ai 계정으로 직접 저장, 백엔드는 조회만) | V5__dashboard.sql<br>V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
 
 ### analysis
 
@@ -869,7 +869,7 @@
 -- SOURCE 2단계 초안 (다음 주 백엔드 MR과 함께 병합, 파일 이름 날짜는 병합일)
 -- 인사이트 보고서 구조 변경 2단계: 예전 형식 컬럼 삭제 / PostgreSQL 17
 -- 1단계: V20261106_01__insight_report_slots.sql
---   * 백엔드(API-11 · API-12 조회, 보고서 저장 API)가 새 컬럼을 쓰도록 바뀐 MR에 함께 넣는다.
+--   * 백엔드(API-11 · API-12 조회)가 새 컬럼을 쓰도록 바뀐 MR에 함께 넣는다. 보고서 저장은 AI가 한다 (2026-11-06 결정).
 --   * 파일 이름의 날짜는 병합하는 날로 바꾼다 (1단계 파일보다 뒤 버전이면 된다).
 --   * summary_lines · report를 지우고, 새 형식 8칸을 NOT NULL로 바꾼다.
 --   * v_region_insight는 컬럼을 빼야 하므로 지우고 다시 만든다.
@@ -922,4 +922,8 @@ JOIN dim_region d ON d.adm_cd10 = r.adm_cd10
 LEFT JOIN region_insight_report i
        ON i.period_start = r.period_start AND i.adm_cd10 = r.adm_cd10
       AND i.result_updated_at = r.updated_at;
+
+
+-- 저장 주체 설명을 고친다 (1단계 COMMENT는 '백엔드가 저장'으로 남아 있음)
+COMMENT ON TABLE region_insight_report IS '읍면동 인사이트 보고서 (동·월마다 하나, AI가 만들어 저장)';
 ```
