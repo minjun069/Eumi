@@ -3,7 +3,7 @@
 // - 읍면동 상세 ⑥: 상세 워크북(eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed, 11/5 이지석 게시)
 // 지도·그래프는 서비스 API가 아니라 Tableau Embedding API v3로 띄우고, 자리마다 그 대시보드를 하나씩 띄운다.
 // 게시본이 없는 자리는 '준비 중'으로 두고 다른 뷰를 대신 넣지 않는다.
-// 기준 문서: fe-ref의 대시보드_구현_확정안.md(11/3 개정), tableau_views.json 3.0.0. 11/5 결정으로 메인 화면은 ①②③⑤만 띄운다.
+// 기준 문서: docs/work-ref의 대시보드_구현_확정안.md(11/3 개정), tableau_views.json 3.0.0. 11/5 결정으로 메인 화면은 ①②③⑤만 띄운다.
 
 import type { RiskIndex } from "@/screens/risk/riskQuery"
 
