@@ -6,8 +6,9 @@
 |---|---|
 | `docker-compose.yml` | PostgreSQL 17 + Flyway(스키마 · 권한 적용) + Mailpit. profile `data`: MinIO · Kafka · pipeline(Spark + Airflow) (데이터 파트만, 아래 참고) |
 | `.env.example` | 로컬 비밀번호 목록. `.env`로 복사해서 쓴다 (`.env`는 커밋하지 않음) |
-| `postgres-init/01-eumi-roles.sh` | DB를 처음 만들 때 계정 4개와 `eumi` DB 생성 (`db/roles/eumi_db_roles.sql` 실행) |
+| `postgres-init/01-eumi-roles.sh` | DB를 처음 만들 때 계정 5개와 `eumi` DB 생성 (`db/roles/eumi_db_roles.sql` 실행) |
 | `pipeline/` | 데이터 파이프라인 실행 이미지 (`Dockerfile`: Python 3.12 + Spark 3.5.9 + Airflow 2.10, `spark-defaults.conf`, `requirements.txt`). profile `data`에서 빌드 |
+| `grafana/provisioning/` | Grafana 설정 파일: `datasources/`(eumi · airflow DB), `dashboards/`(json/ 의 대시보드 자동 등록), 알림. profile `data`의 grafana 컨테이너가 읽는다 |
 
 ### 처음 실행
 
@@ -51,7 +52,8 @@ docker compose logs flyway   # "Successfully applied …" (처음이면 V1부터
 | kafka | `apache/kafka` 3.9.2 (KRaft 단일 노드) | `localhost:9092` | `kafka:19092` | 토픽 `flow_hourly` (파티션 6, 키 grid_cd). kafka-init이 만들고 끝난다 |
 | pipeline | `pipeline/Dockerfile` (python 3.12 + pyspark 3.5.9 + Java 17 + S3A · PostgreSQL JDBC · Kafka 커넥터 + Airflow 2.10 + `data/requirements.txt`) | Spark 잡 UI http://localhost:4040 | — | Airflow 스케줄러. 모든 배치 · 스트리밍 스크립트가 이 안에서 돈다 (local[*]). 저장소 `data/`가 `/opt/eumi/data`로 마운트 |
 | pipeline-web | 같은 이미지 | http://localhost:8081 (계정 `.env` AIRFLOW_ADMIN_*) | — | Airflow 웹 UI (DAG 실행 · 로그) |
-| pipeline-init | 같은 이미지 | — | — | Airflow 메타 DB 마이그레이션 + 관리자 계정 (한 번 돌고 종료) |
+| pipeline-init | 같은 이미지 | — | — | Airflow 메타 DB 마이그레이션 + 관리자 계정 + Grafana 계정의 실행 이력 읽기 권한(`data/airflow/grant_monitor.py`) (한 번 돌고 종료) |
+| grafana | `grafana/grafana-oss` 12.4.3 | http://localhost:3000 (계정 `.env` GRAFANA_ADMIN_*) | — | 파이프라인 모니터링. Prometheus 없이 PostgreSQL을 읽기 전용 계정 `eumi_monitor`로 직접 조회(eumi DB 결과 테이블 + airflow DB 실행 이력). 데이터소스 · 대시보드 · 알림은 `grafana/provisioning/` 파일로 등록되어 화면에서 고칠 수 없다 |
 
 ### 켜기 · 끄기
 
@@ -64,6 +66,12 @@ docker compose --profile data down            # 끌 때도 --profile data (없�
 
 - 데이터까지 지우고 처음부터: `docker compose --profile data down -v` (DB · MinIO · Kafka · Spark 체크포인트 볼륨 모두 삭제)
 - Airflow 메타 DB: 새 볼륨이면 `postgres-init/02-airflow-db.sh`가 `airflow` 계정 · DB를 만든다. **이미 있는 로컬 DB**에는 한 번 수동으로: `docker compose exec postgres psql -U postgres -c "CREATE ROLE airflow LOGIN PASSWORD 'airflow_local'" -c "CREATE DATABASE airflow OWNER airflow"`
+- Grafana 계정 `eumi_monitor`: 새 볼륨이면 `postgres-init/01-eumi-roles.sh`가 만든다. **이미 있는 로컬 DB**에는 한 번 수동으로 만든 뒤 Flyway와 pipeline-init을 다시 돌려 권한을 준다:
+  ```bash
+  docker compose exec postgres psql -U postgres -c "CREATE ROLE eumi_monitor LOGIN PASSWORD 'monitor_local' CONNECTION LIMIT 10" -c "ALTER ROLE eumi_monitor SET statement_timeout = '30s'" -c "GRANT pg_read_all_stats TO eumi_monitor"
+  docker compose run --rm flyway migrate && docker compose --profile data up -d pipeline-init
+  ```
+  확인: http://localhost:3000 → Connections → Data sources → `eumi` · `airflow` 각각 Test 가 초록색
 - 연결 확인: `docker compose --profile data exec pipeline spark-submit pipeline/ops/check_infra.py` → 마지막 줄 `CHECK_INFRA PASS` (s3a 쓰기 · 읽기, 테이블 11개, JDBC, DML 권한, Kafka 메시지 1건 왕복)
 
 ### 접속 정보 (로컬 전용, `.env.example`)
@@ -73,6 +81,7 @@ docker compose --profile data down            # 끌 때도 --profile data (없�
 | MinIO | 루트 계정 `eumi_minio` / `minio_local123` (스크립트 · Spark · s3manager 공통), 버킷 `sgi` |
 | Kafka | 호스트 `localhost:9092`, 컨테이너 `kafka:19092`, 토픽 `flow_hourly` |
 | PostgreSQL | `eumi_pipeline` / `pipeline_local` (위 표와 같음) |
+| Grafana | 웹 `admin` / `grafana_local`, DB 조회 계정 `eumi_monitor` / `monitor_local` |
 
 ### Spark 잡 실행
 

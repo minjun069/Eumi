@@ -1,0 +1,44 @@
+# Grafana 데이터소스 (컨테이너가 뜰 때 자동 등록, 화면에서 수정 불가)
+# 둘 다 같은 PostgreSQL 의 읽기 전용 계정 eumi_monitor 로 붙는다. 비밀번호는 compose 가 환경변수로 넘긴다.
+#   eumi    : 결과 테이블 (analysis.*, public.dim_region · region_result) → 신선도 · 행 수 · 품질 검사 이력
+#   airflow : Airflow 메타 DB (dag · dag_run · task_instance · job) → 실행 이력 · 태스크별 소요 시간 · 스케줄러 생존
+# 동시 연결은 데이터소스마다 3개로 제한한다 (DB max_connections 100 을 다른 서비스와 나눠 쓴다)
+apiVersion: 1
+
+datasources:
+  - name: eumi
+    uid: eumi-db
+    type: grafana-postgresql-datasource
+    access: proxy
+    url: postgres:5432
+    user: eumi_monitor
+    isDefault: true
+    editable: false
+    secureJsonData:
+      password: ${EUMI_MONITOR_PASSWORD}
+    jsonData:
+      database: eumi
+      sslmode: disable
+      postgresVersion: 1700
+      timescaledb: false
+      maxOpenConns: 3
+      maxIdleConns: 1
+      connMaxLifetime: 600
+
+  - name: airflow
+    uid: airflow-db
+    type: grafana-postgresql-datasource
+    access: proxy
+    url: postgres:5432
+    user: eumi_monitor
+    editable: false
+    secureJsonData:
+      password: ${EUMI_MONITOR_PASSWORD}
+    jsonData:
+      database: airflow
+      sslmode: disable
+      postgresVersion: 1700
+      timescaledb: false
+      maxOpenConns: 3
+      maxIdleConns: 1
+      connMaxLifetime: 600

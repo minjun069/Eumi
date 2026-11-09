@@ -8,4 +8,5 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname postgres \
   -v app_pw="$EUMI_APP_PASSWORD" \
   -v pipeline_pw="$EUMI_PIPELINE_PASSWORD" \
   -v ai_pw="$EUMI_AI_PASSWORD" \
+  -v monitor_pw="${EUMI_MONITOR_PASSWORD:-monitor_local}" \
   -f /eumi/roles/eumi_db_roles.sql
