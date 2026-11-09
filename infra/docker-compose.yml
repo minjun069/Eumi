@@ -24,6 +24,7 @@ services:
       EUMI_APP_PASSWORD: ${EUMI_APP_PASSWORD}
       EUMI_PIPELINE_PASSWORD: ${EUMI_PIPELINE_PASSWORD}
       EUMI_AI_PASSWORD: ${EUMI_AI_PASSWORD}
+      EUMI_MONITOR_PASSWORD: ${EUMI_MONITOR_PASSWORD:-monitor_local}
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
@@ -249,7 +250,39 @@ services:
     volumes: *pipeline-volumes
     entrypoint: ["/bin/bash", "-c"]
     command:
-      - airflow db migrate && airflow users create --username "${AIRFLOW_ADMIN_USER}" --password "${AIRFLOW_ADMIN_PASSWORD}" --firstname Eumi --lastname Admin --role Admin --email admin@eumi.local || true
+      # 마지막 줄: Grafana 계정(eumi_monitor)에 실행 이력 테이블 읽기 권한 (테이블은 migrate 뒤에 생기므로 여기서)
+      - |
+        airflow db migrate && airflow users create --username "${AIRFLOW_ADMIN_USER}" --password "${AIRFLOW_ADMIN_PASSWORD}" --firstname Eumi --lastname Admin --role Admin --email admin@eumi.local || true
+        python3 airflow/grant_monitor.py
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ---------- 모니터링 (profile: data) ----------
+
+  # Grafana http://localhost:3000 (계정은 .env 의 GRAFANA_ADMIN_*). Prometheus 없이 PostgreSQL 을 직접 조회한다
+  #   데이터소스 · 대시보드 · 알림은 grafana/provisioning 의 파일로 등록되어 화면에서 고치지 않는다 (로컬 · 운영 같은 설정)
+  #   DB 계정은 읽기 전용 eumi_monitor (eumi DB 의 결과 테이블 + airflow DB 의 실행 이력)
+  grafana:
+    image: grafana/grafana-oss:12.4.3
+    profiles: ["data"]
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      # 기본값을 두어 .env 에 키가 없는 팀원의 docker compose up 도 막지 않는다 (로컬 전용 값)
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-grafana_local}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      GF_DATE_FORMATS_DEFAULT_TIMEZONE: Asia/Seoul
+      # provisioning/datasources/eumi.yml 이 읽는 값
+      EUMI_MONITOR_PASSWORD: ${EUMI_MONITOR_PASSWORD:-monitor_local}
+      TZ: Asia/Seoul
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafanadata:/var/lib/grafana
     depends_on:
       postgres:
         condition: service_healthy
@@ -261,3 +294,4 @@ volumes:
   kafkadata:
   sparkcheckpoint:
   airflowlogs:
+  grafanadata:
