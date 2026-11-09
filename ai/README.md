@@ -70,7 +70,7 @@ uv run pytest tests/test_api_roundtrip.py tests/test_database.py tests/test_repo
 | 실제 OpenAI 모델·합성 자료로 S1~S3 실행 | `uv run python -m demo.scenario_demo --suite --output outputs/scenarios` |
 | 저장한 결과를 HTML로 열람 | `uv run python report_html.py outputs/scenarios --output outputs/scenarios/report.html` |
 
-모델 데모는 `--model`, `--env-file`로 모델·설정 파일을 지정한다. 결과 폴더에 `report.json`, `answer.txt`, 산출물과 `report.html`을 저장한다. 모의 데모도 `--output 경로`로 기록을 저장할 수 있다. HTML 리포트에서 요청·응답·호출·검증·사용량을 확인한다.
+모델 데모는 `--model`, `--env-file`로 모델·설정 파일을 지정한다. 결과 폴더에 `report.json`, `answer.txt`, 산출물과 `report.html`을 저장한다. 모의 데모도 `--output 경로`로 기록을 저장할 수 있다. HTML 리포트는 전체 입출력 → 실행 흐름 → 노드별 입출력 → 실행 설정 → 이전 대화 순서로 확인한다. HTML·CSS·JavaScript 수정 위치와 다시 생성하는 방법은 [실행 모니터 수정 안내](report_viewer/README.md)를 따른다.
 
 합성 자료와 기존 S2 HTML 차트 시나리오는 실제 통계·현재 Tableau 지원 범위의 검증 근거가 아니다. 시각화 실행은 [Tableau 안내](docs/TABLEAU.md)를 따른다. 현재 모델 연결·공유 실행 예산 변경은 전체 시나리오 재검증 전이며, 이전 계약에 의존하는 테스트는 갱신이 필요하다.
 
