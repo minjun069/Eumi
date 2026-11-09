@@ -19,8 +19,8 @@ uv sync --locked
 | `SETTINGS_DATABASE_URL` | API의 PostgreSQL 연결 |
 | `SETTINGS_BACKEND_URL` · `SETTINGS_BACKEND_TOKEN` | INT-07·08 주소와 Bearer 인증 |
 | `SETTINGS_BASE_URL` | 모델 API 주소. 기본 OpenAI 직접 연결 |
-| `SETTINGS_MAX_STEPS` · `SETTINGS_MAX_TOOL_CALLS` | 공통 실행 한도. 기본 100단계·도구 50회 |
-| `SETTINGS_RUNTIME_TIMEOUT` | 공통 활성 실행 시간 한도. 기본 900초 |
+| `SETTINGS_MAX_STEPS` · `SETTINGS_MAX_TOOL_CALLS` | 공통 실행 한도. 기본 50단계·도구 30회 |
+| `SETTINGS_RUNTIME_TIMEOUT` | 공통 활성 실행 시간 한도. 기본 300초 |
 | `LANGFUSE_*` | 선택적 원격 추적. 기본 비활성, 설정은 [모니터링 문서](docs/ai-agent-monitoring.md) 참조 |
 
 ## API와 컨테이너 실행

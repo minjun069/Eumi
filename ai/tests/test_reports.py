@@ -444,7 +444,7 @@ async def test_long_report_reselects_supported_scope_and_saves_partial(
     budget = state["execution"]["budget"]
     assert {
         key: budget[key]["limit"] for key in ("steps", "tool_calls", "active_seconds")
-    } == {"steps": 100, "tool_calls": 50, "active_seconds": 900}
+    } == {"steps": 50, "tool_calls": 30, "active_seconds": 300}
     assert 20 < budget["steps"]["used"] < budget["steps"]["limit"]
     assert budget["tool_calls"]["used"] == 11
     assert budget["retries"]["used"] == 1
