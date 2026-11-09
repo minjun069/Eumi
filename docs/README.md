@@ -2,12 +2,12 @@
 
 | 문서 | 파일 | 상태 |
 |---|---|---|
-| 기준 문서: 테이블 정의서 · API 명세 · 기능명세 | [spec/](spec/README.md) (md 원본 + 엑셀) | 테이블 정의서 2.4.0 · API 명세 2.4.0 초안 · 기능명세 2.3.1 (11/9 PDF 범위 제외). DB 기준은 `db/migration` |
+| 기준 문서: 테이블 정의서 · API 명세 · 기능명세 | [spec/](spec/README.md) (md 원본 + 엑셀) | 테이블 정의서 2.4.0 · API 명세 2.4.0 초안 · 기능명세 2.3.2 (11/9 PDF 범위 제외 · AI-a 반영). DB 기준은 `db/migration` |
 | ERD | [spec/table-definition.md](spec/table-definition.md) | 최종 구조는 테이블 정의서에 있음. 그림은 저장소 밖 ERDCloud |
 | 확정 계약 목록 | [api/README.md](api/README.md) | 확정된 계약만 둠 |
 | API 공통 규칙 (응답 · 오류 · 세션 · 입력값 · 페이지) | [api/공통_응답_및_세션_규칙.md](api/공통_응답_및_세션_규칙.md) | 확정 (11/7 정리) |
-| API 계약 (OpenAPI) | [api/openapi.json](api/openapi.json) | 2.3.3 (11/9, PDF 추출 API-18 삭제 · 보고서 저장 INT-06 삭제) |
-| AI 에이전트 패널 동작 | [api/ai-agent-panel.md](api/ai-agent-panel.md) | 확정 (11/2, A 방식). 11/6 결정으로 바뀔 예정: [계획](work-ref/내부_연동_변경_계획.md) |
+| API 계약 (OpenAPI) | [api/openapi.json](api/openapi.json) | 2.3.4 (11/9, AI-a: API-03 화면 문맥 · INT-01 · INT-07, INT-03 삭제) |
+| AI 에이전트 패널 동작 | [api/ai-agent-panel.md](api/ai-agent-panel.md) | 확정 (11/2, A 방식 · 11/9 AI-a 연결 반영) |
 | 인사이트 보고서 내부 연동 | [api/insight-report.md](api/insight-report.md) | 초안 (11/6, 11/9 저장 주체 반영: AI가 DB에 직접 저장). 나머지 11/6 결정은 [계획](work-ref/내부_연동_변경_계획.md)대로 바뀔 예정 |
 | 저장소 초기 설정 | [gitlab-setup.md](gitlab-setup.md) | - |
 | 결정 기록: 로그인 방식 · 에이전트 흐름 전달 | [decisions/login-sse.md](decisions/login-sse.md) | 확정 (11/2 수정: 에이전트 흐름 SSE → 1초 조회) |

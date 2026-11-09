@@ -751,7 +751,7 @@ export interface paths {
         put?: never;
         /**
          * AI 질문 등록
-         * @description 질문 행을 저장하고 AI에 실행을 요청한다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 첫 질문(conversationId=null)이면 대화 UUID를 만들고 ai_conversation과 질문 행을 한 트랜잭션으로 저장한다. 이어서 질문이면 대화 행을 잠그고(FOR UPDATE) 소유자를 확인하며, 끝 행이 없는 질문이 있으면 409다. 남의 대화·보관 기간이 지난 대화는 404다. 커밋 뒤 내부 AI API(POST /internal/agent/runs {conversationId, questionId})를 부르고, AI는 접수만 바로 돌려준 뒤 ai_message에 진행·완료 행을 직접 저장한다. 호출이 바로 실패하면 BE가 실패 행을 쓴다. 화면은 202를 받으면 API-03-S1을 after=questionId로 1초마다 조회한다. 저장 전 마스킹의 지원 표지·형식·값 경계·제외 범위는 ai-agent-panel.md의 질문 마스킹 범위를 따른다. 마스킹 형식이 아닌 질문을 거절하는 별도 검증 오류는 추가하지 않는다.
+         * @description 질문 행을 저장하고 AI에 실행을 요청한다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 첫 질문(conversationId=null)이면 대화 UUID를 만들고 ai_conversation과 질문 행을 한 트랜잭션으로 저장한다. 이어서 질문이면 대화 행을 잠그고(FOR UPDATE) 소유자를 확인하며, 끝 행이 없는 질문이 있으면 409다. 남의 대화·보관 기간이 지난 대화는 404다. 커밋 뒤 내부 AI API(INT-01, POST /internal/agent/runs {conversationId, messageId, context?}, messageId = 이 질문 행 ID)를 부르고, AI는 접수만 바로 돌려준 뒤 ai_message에 진행·완료 행을 직접 저장한다. context는 형식만 검사해 그대로 넘기고 저장하지 않는다. 호출이 실패해도 바로 실패 행을 쓰지 않고, 질문 시각 + AI 실행 제한 + 여유 시간이 지난 뒤에만 BE가 실패 행을 쓴다(ai-agent-panel.md 4절). 화면은 202를 받으면 API-03-S1을 after=questionId로 1초마다 조회한다. 저장 전 마스킹의 지원 표지·형식·값 경계·제외 범위는 ai-agent-panel.md의 질문 마스킹 범위를 따른다. 마스킹 형식이 아닌 질문을 거절하는 별도 검증 오류는 추가하지 않는다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -771,7 +771,7 @@ export interface paths {
         };
         /**
          * AI 대화 메시지 조회
-         * @description after보다 큰 messageId의 행을 오름차순으로 돌려준다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 실행 중에는 1초마다 마지막으로 받은 messageId로, 대화를 열거나 새로고침하면 after=0으로 부른다. 끝 행(완료·실패·취소)을 받으면 화면은 조회를 멈춘다. 소유자만 조회하며 남의 대화·보관 기간이 지난 대화는 404다. 마지막 질문에 끝 행이 없고 새 행이 정해진 시간 동안 없으면 BE가 AI 실행 상태를 확인해 같은 질문으로 한 번 다시 요청하고, 질문 시각 + AI 실행 제한 + 여유 시간이 지나면 실패 행을 쓴다.
+         * @description after보다 큰 messageId의 행을 오름차순으로 돌려준다. 흐름: AI 에이전트 패널 동작 흐름 (A 방식) 문서. 실행 중에는 1초마다 마지막으로 받은 messageId로, 대화를 열거나 새로고침하면 after=0으로 부른다. 끝 행(완료·실패·취소)을 받으면 화면은 조회를 멈춘다. 소유자만 조회하며 남의 대화·보관 기간이 지난 대화는 404다. 마지막 질문에 끝 행이 없고 새 행이 응답 없음 기준 동안 없으면 BE가 같은 messageId로 INT-01을 질문당 한 번 다시 보내고(상태 조회 INT-03은 없다), 질문 시각 + AI 실행 제한 + 여유 시간이 지나면 실패 행을 쓴다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -2127,7 +2127,20 @@ export interface components {
             /** @enum {string} */
             status: "UP";
         };
-        /** @description 질문 등록. 첫 질문이면 conversationId는 null이고 서버가 대화를 만든다. */
+        /** @description 화면 문맥. 질문할 때 화면에서 보고 있는 행정동과 기준 월이다. 둘 다 생략할 수 있고 {}도 받는다. BE는 형식만 검사해 INT-01로 그대로 넘기고 저장하지 않는다. AI는 질문에 대상(동 · 기간)이 없을 때만 이 값을 기본 대상으로 쓰고, 답에 어느 동 · 월 기준인지 밝힌다. 모르는 필드나 문자열이 아닌 값은 400 INVALID_JSON, 형식이 틀리면 400 VALIDATION_ERROR (ai-agent-panel.md 3-1). */
+        ScreenContext: {
+            /**
+             * @description 행정동 코드 10자리. 법정동 코드와 구분
+             * @example 1168064000
+             */
+            dongCode?: string;
+            /**
+             * @description 기준 월 YYYY-MM (01~12, 0000년 제외)
+             * @example 2025-12
+             */
+            month?: string;
+        };
+        /** @description 질문 등록. 첫 질문이면 conversationId는 null이고 서버가 대화를 만든다. 위험 탐색 · 읍면동 화면에서 질문하면 context를 붙인다. */
         AgentQuestionRequest: {
             /**
              * Format: uuid
@@ -2137,6 +2150,7 @@ export interface components {
             conversationId: string | null;
             /** @description 질문. 서버는 AI 패널 계약의 질문 마스킹 범위에 따라 이름·생년월일 명시 필드와 ASCII 이메일·표준 하이픈형 휴대전화만 치환한 뒤 저장한다. 이름 표지는 이름·성명·성함·사례자명·회원명이며 생년월일 표지는 생년월일이다. 값은 세미콜론(;)·줄바꿈·입력 끝까지 가리고 구분자 밖의 질문은 보존한다. 지원 범위 밖의 식별정보는 남을 수 있으며 완전한 비식별화를 보장하지 않는다. 질문 본문은 로그에 남기지 않는다. 정확한 형식과 제외 범위는 ai-agent-panel.md의 질문 마스킹 범위를 따른다. */
             question: string;
+            context?: components["schemas"]["ScreenContext"];
         };
         /** @description 저장된 질문. 화면은 이 questionId 이후의 행을 조회한다. */
         AgentQuestionCreated: {
@@ -5809,12 +5823,6 @@ export interface operations {
         };
         requestBody: {
             content: {
-                /**
-                 * @example {
-                 *       "conversationId": null,
-                 *       "question": "이 동의 위험이 왜 올랐어?"
-                 *     }
-                 */
                 "application/json": components["schemas"]["AgentQuestionRequest"];
             };
         };
