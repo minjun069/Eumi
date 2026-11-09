@@ -77,7 +77,7 @@ services:
   backend:
     image: eumi-backend:${BACKEND_TAG:?.env.tags에 BACKEND_TAG가 필요합니다}
     restart: unless-stopped
-    # env_file을 쓰지 않는다: backend에는 자기 계정(eumi_app) 비밀번호만 넘긴다.
+    # env_file을 쓰지 않는다: backend에는 자기 계정(eumi_app) 비밀번호, 해시 키, 내부 연동 토큰만 넘긴다.
     # BE가 새 설정 키를 정하면 여기에 "이름: ${이름:?...}" 한 줄, .env.config에 값 한 줄을 추가한다.
     environment:
       SPRING_PROFILES_ACTIVE: prod
@@ -94,9 +94,17 @@ services:
       EUMI_MAIL_FROM: no-reply@k15b201.p.ssafy.io
       # 인증 코드 · 가입 증명 해시 키 (비밀값. 서버에서 한 번 만들고 바꾸지 않는다)
       EUMI_AUTH_HASH_KEY: ${EUMI_AUTH_HASH_KEY:?.env.config에 EUMI_AUTH_HASH_KEY가 필요합니다}
+      # 내부 연동 토큰 (비밀값, 호출자마다 다른 값. BE 설정 eumi.internal.ai-token · pipeline-token)
+      #   EUMI_AI_TOKEN: AI → backend 알림(INT-07 · 08). ai의 SETTINGS_BACKEND_TOKEN과 같은 값이다 (아래 ai environment)
+      #   EUMI_PIPELINE_TOKEN: 파이프라인 → backend 월 분석 완료 알림(INT-04). Airflow에도 같은 값을 넘긴다
+      #   두 값이 같거나 공백 · 제어 문자 · "${"가 들어 있으면 backend가 뜨지 않는다.
+      #   fake인 동안은 비어 있어도 뜬다(그때 INT-07은 401). http로 바꾸는 커밋에서 둘 다 :?로 바꾼다 (http는 둘 다 있어야 뜬다)
+      EUMI_AI_TOKEN: ${EUMI_AI_TOKEN:-}
+      EUMI_PIPELINE_TOKEN: ${EUMI_PIPELINE_TOKEN:-}
       # AI 실행 방식: fake(가짜 AI가 진행·완료 행을 씀) / http(ai 서비스 호출). 비밀값이 아니라 여기 둔다.
       #   application-prod.yml이 기본값 없이 읽으므로 빠지면 backend가 뜨지 않는다.
-      #   http로 바꾸는 때: ai가 확정 계약(docs/api/ai-agent-panel.md)대로 응답하고, 시간 값 4개(EUMI_AI_EXECUTION_LIMIT 등)를 여기에 함께 넣을 때
+      #   http로 바꾸는 때: ai의 GMS 주소 · 모델(SETTINGS_BASE_URL · SETTINGS_MODEL)이 들어가 답변이 되고, 시간 값 4개
+      #   (EUMI_AI_EXECUTION_LIMIT · GRACE_PERIOD · UNRESPONSIVE_AFTER · CANCEL_WAIT, docs/api/ai-agent-panel.md 5절)를 여기에 넣고, 위 토큰 두 줄을 :?로 바꿀 때
       EUMI_AI_MODE: fake
       # ai 서비스 주소 (같은 compose 내부망). fake 모드에서는 쓰지 않는다
       AI_BASE_URL: http://ai:8000
@@ -147,11 +155,16 @@ services:
       SETTINGS_API_KEY: ${EUMI_LLM_API_KEY:-}
       SETTINGS_DATABASE_URL: postgresql://eumi_ai:${EUMI_AI_PASSWORD:-}@postgres:5432/eumi
       # AI → backend 알림(INT-07 행 저장 · INT-08 보고서 완료) 주소와 Bearer 토큰. 둘 다 없으면 ai가 시작되지 않는다.
-      #   backend가 INT-07 · 08을 받기 전에는 알림만 실패로 남고 저장된 행 · 보고서는 그대로다.
-      #   backend가 수신을 구현하면 같은 EUMI_AI_TOKEN을 backend environment에도 넘긴다 (키 이름은 BE가 정함)
+      #   토큰은 backend environment의 EUMI_AI_TOKEN과 같은 키(같은 값)다. backend가 받지 못하는 알림(INT-08은 AI-b 전)은
+      #   실패로만 남고, 저장된 행 · 보고서는 그대로다
       SETTINGS_BACKEND_URL: http://backend:8080
       SETTINGS_BACKEND_TOKEN: ${EUMI_AI_TOKEN:-}
       SETTINGS_OUTPUT_DIR: /app/outputs
+      # LLM 주소 · 모델 (비밀값 아님). 지금은 없어서 ai 기본값(OpenAI 주소, gpt-6-sol)으로 GMS 키를 보내 답변이 실패한다.
+      #   AI 담당이 GMS 주소 · 모델 이름과 Responses API 동작을 확인하면 아래 두 줄의 주석을 풀고 값을 넣는다 (http 전환 전).
+      #   빈 값으로 두면 ai가 시작되지 않으므로(주소 형식 검사) 값이 정해질 때까지 주석으로 둔다
+      # SETTINGS_BASE_URL: <GMS 주소>
+      # SETTINGS_MODEL: <GMS 모델 이름>
       LANGFUSE_ENABLED: "false"
       TZ: Asia/Seoul
     # 실행 기록(질문 · 모델 입출력 추적)은 디스크에 남기지 않는다. 메모리 512MB 안에서만 쓰고 컨테이너를 바꾸면 지워진다
