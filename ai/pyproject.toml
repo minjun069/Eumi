@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "eumi-ai"
+version = "0.1.0"
+description = "Shared agent execution runtime for the Eumi MVP"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "langgraph>=1.0,<2",
+    "langchain-core>=1.0,<2",
+    "pydantic>=2.10,<3",
+    "pydantic-settings>=2.7,<3",
+    "langchain-openai>=1.0,<2",
+    "typing-extensions>=4.12,<5",
+    "langfuse>=5.1,<6",
+    "httpx>=0.28,<1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3,<10",
+    "pytest-asyncio>=1.0,<2",
+    "ruff>=0.11,<1"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"] # 패키지 경로
+
+[tool.pytest.ini_options]
+testpaths = ["tests"] # 테스트 파일 경로
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+target-version = "py312" # 최소 요구 버전
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]

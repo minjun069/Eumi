@@ -20,7 +20,7 @@ npm run build
 로그인 상태 복원(`GET /api/auth/me`)이 backend를 부르므로, 화면을 확인하려면 API 서버가 하나 떠 있어야 한다.
 
 - **실제 API**: backend(8080)와 `infra/` 로컬 DB를 띄운 뒤 `npm run dev`.
-- **가짜 API**: 저장소 밖 `mock-api.mjs`를 8081에 띄우고(`node mock-api.mjs`), `/api` 프록시 대상을 `VITE_API_TARGET`으로 바꾼다. 로그인은 `http://localhost:5173/api/__dev-login`.
+- **가짜 API**: 저장소 밖 `mock-api.mjs`를 8081에 띄우고(`node mock-api.mjs`), `/api` 프록시 대상을 `VITE_API_TARGET`으로 바꾼다. 로그인은 `http://localhost:5173/api/__dev-login`. 데이터 파트의 Airflow 웹(`docker compose --profile data`)도 8081을 쓰므로 둘을 함께 켜지 않는다.
 
 ```bash
 VITE_API_TARGET=http://localhost:8081 npm run dev
@@ -38,7 +38,7 @@ $env:VITE_API_TARGET="http://localhost:8081"; npm run dev
 | `src/api/csrf.ts` | `GET /api/auth/csrf`로 `XSRF-TOKEN` 쿠키 준비, 변경 요청에 `X-XSRF-TOKEN` 헤더 |
 | `src/api/errors.ts` | `ApiError`, 통신 오류·프록시 HTML·429·413 처리 문구 |
 | `src/api/queryClient.ts` | TanStack Query 기본값 (4xx 재시도 안 함, 변경 요청 재시도 안 함) |
-| `src/api/schema.d.ts` | OpenAPI 2.3.0에서 자동 생성한 타입. 직접 고치지 않는다 |
+| `src/api/schema.d.ts` | `docs/api/openapi.json`에서 자동 생성한 타입(`npm run gen:api`). 직접 고치지 않는다 |
 | `src/api/types.ts` | 화면에서 쓰는 응답 타입 별칭 |
 | `src/api/*Api.ts` | API 묶음 (`authApi`: 로그인·로그인 상태 조회·로그아웃, `agentApi`: AI 패널 질문·조회·중단과 AI 대화 기록, `analysisApi`: 적재 월·읍면동 요약·보고서, `regionApi`: 시도·시군구·행정동 목록, `caseApi`: 사례자·상담, `resourceApi`: 복지자원, `memberApi`: 같은 기관 회원(담당자 선택), `myApi`: 마이페이지 내 정보·담당 자원) |
 | `src/session/` | 로그인 상태(`sessionStore`), 복원·로그아웃·401 처리(`sessionActions`) |
