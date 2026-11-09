@@ -277,6 +277,196 @@
         "stateFilter": { "firing": true, "pending": true, "noData": false, "normal": false, "error": true },
         "viewMode": "list"
       }
+    },
+    {
+      "id": 200,
+      "type": "row",
+      "title": "실행",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "panels": []
+    },
+    {
+      "id": 201,
+      "type": "table",
+      "title": "실행 이력",
+      "description": "기간 안의 eumi_monthly 실행. 기준월은 수동 실행이면 conf 의 months, 자동이면 스케줄 달. 건너뜀 = 원본이 없어 첫 단계에서 전부 skip",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 15, "w": 10, "x": 0, "y": 7 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT to_char(r.start_date AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') AS \"시작\",\n       coalesce(substring(encode(r.conf, 'escape') FROM '[0-9]{4}-[0-9]{2}'), to_char(r.data_interval_start AT TIME ZONE 'Asia/Seoul', 'YYYY-MM')) AS \"기준월\",\n       CASE r.run_type WHEN 'scheduled' THEN '자동' ELSE '수동' END AS \"방식\",\n       CASE WHEN r.state = 'success' AND t.ok = 0 AND t.skip > 0 THEN 'skipped' ELSE r.state END AS \"상태\",\n       round((extract(epoch FROM r.end_date - r.start_date) / 60)::numeric, 1) AS \"걸린 시간(분)\",\n       t.ok || ' / ' || t.total AS \"성공 단계\",\n       t.failed AS \"실패한 단계\"\nFROM dag_run r\nLEFT JOIN LATERAL (\n    SELECT count(*) FILTER (WHERE state = 'success') AS ok,\n           count(*) FILTER (WHERE state = 'skipped') AS skip,\n           count(*) AS total,\n           string_agg(task_id, ', ' ORDER BY start_date) FILTER (WHERE state = 'failed') AS failed\n    FROM task_instance ti WHERE ti.dag_id = r.dag_id AND ti.run_id = r.run_id) t ON true\nWHERE r.dag_id = 'eumi_monthly' AND $__timeFilter(r.start_date)\nORDER BY r.start_date DESC\nLIMIT 50"
+        }
+      ],
+      "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false, "reducer": ["sum"], "fields": "" } },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "filterable": false, "inspect": false },
+          "noValue": "-",
+          "mappings": []
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "상태" }, "properties": [
+            { "id": "custom.cellOptions", "value": { "type": "color-text" } },
+            { "id": "custom.width", "value": 80 },
+            { "id": "mappings", "value": [
+              { "type": "value", "options": {
+                "success": { "text": "성공", "color": "green", "index": 0 },
+                "failed": { "text": "실패", "color": "red", "index": 1 },
+                "running": { "text": "실행 중", "color": "blue", "index": 2 },
+                "queued": { "text": "대기", "color": "text", "index": 3 },
+                "skipped": { "text": "건너뜀", "color": "#8F939E", "index": 4 }
+              } } ] } ] },
+          { "matcher": { "id": "byName", "options": "시작" }, "properties": [ { "id": "custom.width", "value": 100 } ] },
+          { "matcher": { "id": "byName", "options": "기준월" }, "properties": [ { "id": "custom.width", "value": 80 } ] },
+          { "matcher": { "id": "byName", "options": "방식" }, "properties": [ { "id": "custom.width", "value": 60 } ] },
+          { "matcher": { "id": "byName", "options": "걸린 시간(분)" }, "properties": [ { "id": "custom.width", "value": 110 }, { "id": "decimals", "value": 1 } ] },
+          { "matcher": { "id": "byName", "options": "성공 단계" }, "properties": [ { "id": "custom.width", "value": 90 } ] }
+        ]
+      }
+    },
+    {
+      "id": 202,
+      "type": "barchart",
+      "title": "단계별 소요 시간 (최근 실행 3번)",
+      "description": "실제로 돈 최근 실행 3번의 단계별 소요 시간(분). 건너뛴 실행은 뺀다. 갑자기 길어진 단계를 찾는 용도",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 15, "w": 12, "x": 0, "y": 22 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH tasks(seq, task_id, name) AS (VALUES\n  (1,'check_inputs','원본 확인'), (2,'collect_apt_trade','실거래가 수집'), (3,'geocode_apt','실거래가 좌표'), (4,'re_apt_trade','실거래가 적재'),\n  (5,'synth_anchor','가상 유동 기준'), (6,'synth_generate','가상 유동 생성'), (7,'synth_validate','가상 유동 검증'), (8,'flow_detail','유동 상세'), (9,'verify_flow_detail','유동 상세 검증'),\n  (10,'bg_detail','배경 상세'), (11,'bg_indicators','배경 지표'), (12,'bh_region_indicators','읍면동 행동 지표'), (13,'bh_grid_indicators','격자 행동 지표'),\n  (14,'region_result','읍면동 결과'), (15,'bh_contribution','지표별 기여도'), (16,'grid_anomaly','격자 이상 점수'), (17,'verify_outputs','결과 검증')),\nruns AS (\n  SELECT r.run_id, r.start_date,\n         coalesce(substring(encode(r.conf, 'escape') FROM '[0-9]{4}-[0-9]{2}'), to_char(r.data_interval_start AT TIME ZONE 'Asia/Seoul', 'YYYY-MM')) AS month\n  FROM dag_run r\n  WHERE r.dag_id = 'eumi_monthly'\n    AND EXISTS (SELECT 1 FROM task_instance ti WHERE ti.dag_id = r.dag_id AND ti.run_id = r.run_id AND ti.state = 'success' AND ti.task_id <> 'check_inputs')\n  ORDER BY r.start_date DESC LIMIT 3)\nSELECT lpad(tk.seq::text, 2, '0') || ' ' || tk.name AS \"단계\",\n       to_char(runs.start_date AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') || ' (' || runs.month || ')' AS \"실행\",\n       round((ti.duration / 60.0)::numeric, 1) AS \"분\"\nFROM task_instance ti\nJOIN runs ON runs.run_id = ti.run_id\nJOIN tasks tk ON tk.task_id = ti.task_id\nWHERE ti.dag_id = 'eumi_monthly' AND ti.duration IS NOT NULL\nORDER BY tk.seq, runs.start_date"
+        }
+      ],
+      "transformations": [
+        { "id": "groupingToMatrix", "options": { "columnField": "실행", "rowField": "단계", "valueField": "분", "emptyValue": "null" } }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "never",
+        "stacking": "none",
+        "groupWidth": 0.7,
+        "barWidth": 0.8,
+        "barRadius": 0,
+        "fullHighlight": false,
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0,
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true, "calcs": [] },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "suffix: 분",
+          "decimals": 1,
+          "custom": { "lineWidth": 0, "fillOpacity": 85, "gradientMode": "none", "axisPlacement": "auto", "axisLabel": "", "axisBorderShow": false },
+          "mappings": []
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 203,
+      "type": "table",
+      "title": "실행 × 단계 상태판 (최근 6번)",
+      "description": "가로 = 실행, 세로 = 단계. 초록 성공 · 빨강 실패 · 주황 앞 단계 실패로 중단 · 회색 건너뜀. 빈 칸은 그 실행에 없던 단계",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 15, "w": 14, "x": 10, "y": 7 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH tasks(seq, task_id, name) AS (VALUES\n  (1,'check_inputs','원본 확인'), (2,'collect_apt_trade','실거래가 수집'), (3,'geocode_apt','실거래가 좌표'), (4,'re_apt_trade','실거래가 적재'),\n  (5,'synth_anchor','가상 유동 기준'), (6,'synth_generate','가상 유동 생성'), (7,'synth_validate','가상 유동 검증'), (8,'flow_detail','유동 상세'), (9,'verify_flow_detail','유동 상세 검증'),\n  (10,'bg_detail','배경 상세'), (11,'bg_indicators','배경 지표'), (12,'bh_region_indicators','읍면동 행동 지표'), (13,'bh_grid_indicators','격자 행동 지표'),\n  (14,'region_result','읍면동 결과'), (15,'bh_contribution','지표별 기여도'), (16,'grid_anomaly','격자 이상 점수'), (17,'verify_outputs','결과 검증')),\nruns AS (\n  SELECT run_id, start_date FROM dag_run WHERE dag_id = 'eumi_monthly' ORDER BY start_date DESC LIMIT 6)\nSELECT lpad(tk.seq::text, 2, '0') || ' ' || tk.name AS \"단계\",\n       to_char(runs.start_date AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') AS \"실행\",\n       ti.state AS \"상태\"\nFROM task_instance ti\nJOIN runs ON runs.run_id = ti.run_id\nJOIN tasks tk ON tk.task_id = ti.task_id\nWHERE ti.dag_id = 'eumi_monthly'\nORDER BY tk.seq, runs.start_date"
+        }
+      ],
+      "transformations": [
+        { "id": "groupingToMatrix", "options": { "columnField": "실행", "rowField": "단계", "valueField": "상태", "emptyValue": "empty" } },
+        { "id": "organize", "options": { "renameByName": { "단계\\실행": "단계" } } }
+      ],
+      "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false, "reducer": ["sum"], "fields": "" } },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "#23262b" },
+          "custom": { "align": "center", "cellOptions": { "type": "color-background", "mode": "basic" }, "filterable": false, "inspect": false },
+          "noValue": "",
+          "mappings": [
+            { "type": "value", "options": {
+              "success": { "text": "성공", "color": "green", "index": 0 },
+              "failed": { "text": "실패", "color": "red", "index": 1 },
+              "upstream_failed": { "text": "중단", "color": "orange", "index": 2 },
+              "skipped": { "text": "건너뜀", "color": "#3d4047", "index": 3 },
+              "running": { "text": "실행 중", "color": "blue", "index": 4 },
+              "queued": { "text": "대기", "color": "#3d4047", "index": 5 },
+              "scheduled": { "text": "대기", "color": "#3d4047", "index": 6 },
+              "": { "text": "", "color": "transparent", "index": 7 }
+            } }
+          ]
+        },
+        "overrides": [
+          { "matcher": { "id": "byRegexp", "options": "^단계" }, "properties": [
+            { "id": "custom.cellOptions", "value": { "type": "auto" } },
+            { "id": "custom.align", "value": "left" },
+            { "id": "custom.width", "value": 170 },
+            { "id": "displayName", "value": "단계" } ] }
+        ]
+      }
+    },
+    {
+      "id": 204,
+      "type": "barchart",
+      "title": "단계별 실패 · 재시도 (기간 안)",
+      "description": "기간 안 실행에서 단계마다 실패한 횟수, 재시도한 횟수(retries=1 이라 한 번 더 돈 것), 앞 단계가 실패해서 못 돈 횟수",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 15, "w": 12, "x": 12, "y": 22 },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH tasks(seq, task_id, name) AS (VALUES\n  (1,'check_inputs','원본 확인'), (2,'collect_apt_trade','실거래가 수집'), (3,'geocode_apt','실거래가 좌표'), (4,'re_apt_trade','실거래가 적재'),\n  (5,'synth_anchor','가상 유동 기준'), (6,'synth_generate','가상 유동 생성'), (7,'synth_validate','가상 유동 검증'), (8,'flow_detail','유동 상세'), (9,'verify_flow_detail','유동 상세 검증'),\n  (10,'bg_detail','배경 상세'), (11,'bg_indicators','배경 지표'), (12,'bh_region_indicators','읍면동 행동 지표'), (13,'bh_grid_indicators','격자 행동 지표'),\n  (14,'region_result','읍면동 결과'), (15,'bh_contribution','지표별 기여도'), (16,'grid_anomaly','격자 이상 점수'), (17,'verify_outputs','결과 검증'))\nSELECT lpad(tk.seq::text, 2, '0') || ' ' || tk.name AS \"단계\",\n       count(*) FILTER (WHERE ti.state = 'failed') AS \"실패\",\n       count(*) FILTER (WHERE ti.try_number > 1) AS \"재시도\",\n       count(*) FILTER (WHERE ti.state = 'upstream_failed') AS \"중단\"\nFROM tasks tk\nLEFT JOIN task_instance ti ON ti.task_id = tk.task_id AND ti.dag_id = 'eumi_monthly'\nLEFT JOIN dag_run r ON r.dag_id = ti.dag_id AND r.run_id = ti.run_id AND $__timeFilter(r.start_date)\nGROUP BY tk.seq, tk.name\nORDER BY tk.seq"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "never",
+        "stacking": "none",
+        "groupWidth": 0.7,
+        "barWidth": 0.8,
+        "barRadius": 0,
+        "fullHighlight": false,
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0,
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true, "calcs": [] },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "decimals": 0,
+          "min": 0,
+          "custom": { "lineWidth": 0, "fillOpacity": 85, "gradientMode": "none", "axisPlacement": "auto", "axisLabel": "", "axisBorderShow": false },
+          "mappings": []
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "실패" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
+          { "matcher": { "id": "byName", "options": "재시도" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } } ] },
+          { "matcher": { "id": "byName", "options": "중단" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "#8F939E" } } ] }
+        ]
+      }
     }
   ]
 }
