@@ -80,7 +80,12 @@ public class WithdrawalRepository {
     public void transferCase(WithdrawalDtos.Transfer transfer) {
         jdbc.update("INSERT INTO public.case_manager(case_id,member_id) VALUES (?,?) ON CONFLICT DO NOTHING",transfer.caseId(),transfer.newManagerMemberId());
     }
-    public void deleteCaseLinks(long member) { jdbc.update("DELETE FROM public.case_manager WHERE member_id=?",member); }
+    public void deleteCaseLinks(long member) {
+        // C4: 탈퇴 인계로 담당자가 바뀐 사례자도 이전 수정 화면에서 감지할 수 있어야 한다.
+        jdbc.update("UPDATE public.case_record c SET updated_at=now() WHERE EXISTS "+
+                "(SELECT 1 FROM public.case_manager cm WHERE cm.case_id=c.case_id AND cm.member_id=?)",member);
+        jdbc.update("DELETE FROM public.case_manager WHERE member_id=?",member);
+    }
     public int transferResource(long member, WithdrawalDtos.ResourceTransfer transfer) {
         return jdbc.update("UPDATE public.welfare_resource SET manager_member_id=?,updated_at=now() WHERE resource_id=? AND manager_member_id=? AND deleted_at IS NULL",
                 transfer.newManagerMemberId(),transfer.resourceId(),member);
