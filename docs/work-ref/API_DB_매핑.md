@@ -38,8 +38,8 @@
 | API-30 | GET /api/members/me | M1 | public.member, public.organization, public.v_sido, public.v_sigungu |
 | API-31 | PATCH /api/members/me | M1 | public.member |
 | API-32 | PUT /api/members/me/password | A3 | public.member, public.spring_session |
-| API-33 | GET /api/members/me/withdrawal | M3 | public.member, public.case_manager, public.v_resource_summary, public.ai_conversation |
-| API-34 | POST /api/members/me/withdrawal | M3 | public.member, public.case_record, public.case_manager, public.welfare_resource, public.ai_conversation, public.ai_conversation_turn, public.spring_session |
+| API-33 | GET /api/members/me/withdrawal | M3 | public.member, public.case_manager, public.v_case_summary, public.v_resource_summary, public.ai_conversation |
+| API-34 | POST /api/members/me/withdrawal | M3 | public.organization, public.member, public.case_record, public.case_manager, public.welfare_resource, public.v_resource_summary, public.ai_conversation, public.ai_message, public.spring_session |
 | API-35 | GET /api/members/me/resources | M2 | public.v_resource_summary |
 | API-36 | GET /api/members/me/conversations | AI2 | public.v_conversation_summary |
 | API-37 | GET /api/members/me/conversations/{conversationId} | AI2 | public.ai_conversation, public.ai_conversation_turn |

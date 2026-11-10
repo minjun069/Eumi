@@ -1,6 +1,6 @@
 # 이음이 API 명세
 
-- 판: 2.4.0 (2026-11-10, 11/6 초안 · 11/9 INT-06 · API-18 삭제 · 11/9 AI-a 반영 · 11/10 AI-b 반영: API-11 · 12 새 형식, INT-05 dongCodes, INT-08)
+- 판: 2.4.1 (2026-11-10, 11/6 초안 · 11/9 INT-06 · API-18 삭제 · 11/9 AI-a 반영 · 11/10 AI-b 반영: API-11 · 12 새 형식, INT-05 dongCodes, INT-08 · 11/10 A3 · M3 구현: API-09 · 33 · 34)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_API_명세표.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - API 형식의 기준은 `docs/api/openapi.json`, 내부 연동은 `docs/api/ai-agent-panel.md` · `docs/api/insight-report.md`다. 계약이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -10,8 +10,8 @@
 ## API 목록
 
 - 제목: 이음이 API 명세표
-- 요약: API 2.4.0  45개 작업 (구현 38 · 예정 7)  * 필수 입력  기본 경로 /api
-- 출처: eumi/docs/api/openapi.json 2.4.0 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장) · AI 대화 패널 연결(API-03 화면 문맥, INT-01 messageId, INT-07, INT-03 삭제)은 2026-11-09 openapi 2.3.4 · ai-agent-panel.md · 인사이트 보고서 연결(API-11 · 12 새 형식, INT-05 dongCodes · 202 본문 없음, INT-08)은 2026-11-10 openapi 2.4.0 · insight-report.md 확정
+- 요약: API 2.4.1  45개 작업 (구현 41 · 예정 4)  * 필수 입력  기본 경로 /api
+- 출처: eumi/docs/api/openapi.json 2.4.1 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장) · AI 대화 패널 연결(API-03 화면 문맥, INT-01 messageId, INT-07, INT-03 삭제)은 2026-11-09 openapi 2.3.4 · ai-agent-panel.md · 인사이트 보고서 연결(API-11 · 12 새 형식, INT-05 dongCodes · 202 본문 없음, INT-08)은 2026-11-10 openapi 2.4.0 · insight-report.md 확정
 
 ### API-01 로그인 상태와 메뉴 프로필 조회
 - 페이지 범위: /login·공통
@@ -88,7 +88,7 @@
 - 요청 경로: POST /api/auth/temp-password
 - 요청 형식: 인증 공개 · CSRF 필수<br><br>본문 application/json TempPasswordRequest<br>email*:string(email); name*:string
 - 응답 형식: 204 본문 없음
-- 구현 (11/6): 예정 11/9
+- 구현 (11/6): 구현 (11/10)
 
 ### API-10 적재된 월 목록 조회
 - 페이지 범위: /risk
@@ -249,14 +249,14 @@
 - 요청 경로: GET /api/members/me/withdrawal
 - 요청 형식: 인증 SESSION 쿠키<br><br>본문 없음
 - 응답 형식: 200 application/json myApi_getWithdrawalInfo_Success<br>soleCases*:SoleCaseItem[]; sharedCaseCount*:integer; successors*:MemberOption[]; resourceCount*:integer; conversationCount*:integer; ongoingResources*:OngoingResourceTransferItem[]; endedResourceCount*:integer
-- 구현 (11/6): 예정 11/9
+- 구현 (11/6): 구현 (11/10)
 
 ### API-34 회원 탈퇴
 - 페이지 범위: /my/withdraw·확인 모달
 - 요청 경로: POST /api/members/me/withdrawal
 - 요청 형식: 인증 SESSION 쿠키 · CSRF 필수<br><br>본문 application/json WithdrawalRequest<br>password*:string(password); transfers*:object[]; resourceTransfers*:object[]
 - 응답 형식: 204 본문 없음
-- 구현 (11/6): 예정 11/9
+- 구현 (11/6): 구현 (11/10)
 
 ### API-35 담당 복지자원 목록 조회
 - 페이지 범위: /my/resources
