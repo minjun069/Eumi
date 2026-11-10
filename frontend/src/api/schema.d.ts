@@ -189,7 +189,7 @@ export interface paths {
         };
         /**
          * 읍면동 인사이트 조회
-         * @description month를 해당 월 1일로 변환한다. bg_score/bg_grade는 background, bh_score/bh_grade는 behavior, risk_grade는 riskGrade에 매핑한다. 결과 없음은 404, 보고서 미생성은 insight=null이다.
+         * @description month를 해당 월 1일로 변환한다. bg_score/bg_grade는 background, bh_score/bh_grade는 behavior, risk_grade는 riskGrade에 매핑한다. insight.summary에는 최신 보고서(result_updated_at = 결과 행 updated_at)의 quick_insight 한 개를 담는다(줄바꿈으로 나누지 않음). 최신 보고서가 없거나 quick_insight가 없으면 insight=null. 결과 없음은 404.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -211,7 +211,7 @@ export interface paths {
         };
         /**
          * 인사이트 보고서 조회
-         * @description 저장된 report JSON을 조회하고 generated_at을 report.generatedAt으로 매핑한다. 결과 없음은 404, 분석 결과는 있으나 보고서가 없으면 report=null. 조회 요청이 AI 생성을 실행하지 않는다.
+         * @description region_insight_report의 quick_insight · graph_1~3 · desc_1~3 · generated_at을 report로 매핑한다(graphs는 graph_1~3 순서). 최신 보고서(result_updated_at = 결과 행 updated_at)만 보여 주고, 없거나 옛 보고서면 report=null. 그래프 시트가 허용 목록(EmbedDetailV01~V08) 밖인 보고서도 report=null로 보고 BE가 경고 로그를 남긴다. 결과 행이 없으면 404. 조회 요청이 AI 생성을 실행하지 않는다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -1084,11 +1084,11 @@ export interface components {
             background: components["schemas"]["RiskValue"];
             behavior: components["schemas"]["RiskValue"];
             insight: {
-                /** @description 저장된 요약 문장. 아직 없으면 상위 insight=null */
+                /** @description 최신 보고서의 quick_insight 한 개. 없으면 상위 insight=null */
                 summary: string[];
                 /**
                  * Format: date-time
-                 * @description 인사이트 생성 일시
+                 * @description 보고서 생성 일시 (generated_at)
                  * @example 2026-10-30T10:00:00+09:00
                  */
                 generatedAt: string;
@@ -1096,149 +1096,13 @@ export interface components {
             /** @description region_result.risk_grade 종합 위험 단계 */
             riskGrade: number;
         };
-        TrendPoint: {
-            /**
-             * @description 기준 월
-             * @example 2025-12
-             */
-            month: string;
-            /** @description 이 동 점수 */
-            score: number;
-            /** @description 위험 단계 */
-            stage: number;
-            /** @description 같은 시군구 행정동 중 순위 */
-            rank: number;
-            /** @description 시군구 중앙값 */
-            median: number;
-            /** @description 1사분위수 */
-            q1: number;
-            /** @description 3사분위수 */
-            q3: number;
-        };
-        TrendChart: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "trend";
-            /** @description 그래프 제목 */
-            heading: string;
-            /** @description 순위 산정 대상 행정동 수 */
-            total: number;
-            /** @description 월 오름차순, 같은 월 중복 없음. 최소 1개. rank<=total, q1<=median<=q3 */
-            points: components["schemas"]["TrendPoint"][];
-        };
-        FactorsChart: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "factors";
-            /** @description 그래프 제목 */
-            heading: string;
-            items: {
-                /** @description 요인명 */
-                label: string;
-                /** @description 점수 변화 기여량. 음수 가능 */
-                value: number;
-            }[];
-        };
-        /** @description 각 series.values와 changes의 길이는 days와 같아야 한다 */
-        WeekdayChart: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "weekday";
-            /** @description 그래프 제목 */
-            heading: string;
-            /** @description 설명 */
-            caption: string;
-            /** @description 값 단위 */
-            unit: string;
-            days: string[];
-            /** @description 전월·기준 월 순서의 두 계열 */
-            series: {
-                /** @description 비교 월 표시명 */
-                label: string;
-                values: number[];
-            }[];
-            changes: number[];
-        };
-        CompareChart: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "compare";
-            /** @description 그래프 제목 */
-            heading: string;
-            items: {
-                /** @description 항목명 */
-                label: string;
-                /** @description 비교값. 현재 비교 막대는 0 이상 값용 */
-                value: number;
-                /** @description 강조 여부 */
-                highlight: boolean;
-            }[];
-        };
-        /** @description count는 total 이하여야 한다 */
-        RatioChart: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "ratio";
-            /** @description 강조 인원 */
-            count: number;
-            /** @description 전체 인원 */
-            total: number;
-            /** @description 설명 */
-            caption: string;
-        };
-        ReportChart: components["schemas"]["TrendChart"] | components["schemas"]["FactorsChart"] | components["schemas"]["WeekdayChart"] | components["schemas"]["CompareChart"] | components["schemas"]["RatioChart"];
-        ParagraphBlock: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            kind: "paragraph";
-            /** @description 본문. HTML로 실행하지 않는다 */
-            text: string;
-        };
-        BulletsBlock: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            kind: "bullets";
-            items: {
-                /** @description 항목 제목 */
-                label: string;
-                /** @description 내용 */
-                text: string;
-            }[];
-        };
-        ChartBlock: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            kind: "chart";
-            chart: components["schemas"]["ReportChart"];
-        };
-        ReportBlock: components["schemas"]["ParagraphBlock"] | components["schemas"]["BulletsBlock"] | components["schemas"]["ChartBlock"];
-        ReportSection: {
-            /** @description 질문. 제목 바로 아래 내용은 null */
-            question: string | null;
-            blocks: components["schemas"]["ReportBlock"][];
-        };
         InsightReportData: {
-            /** @description region_insight_report가 없으면 null. 결과 행 자체가 없으면 404. 생성 시각은 report.generatedAt에 generated_at을 매핑한다. */
+            /** @description 최신 보고서(result_updated_at = 결과 행 updated_at)가 없거나 옛 보고서면 null. 결과 행 자체가 없으면 404. 생성 시각은 report.generatedAt에 generated_at을 매핑한다. */
             report: {
-                /** @description 보고서 제목 문장 */
-                headline: string;
-                sections: components["schemas"]["ReportSection"][];
+                /** @description 퀵 인사이트 (quick_insight). 일반 글(HTML 아님)이며 줄바꿈을 포함할 수 있다 */
+                quickInsight: string;
+                /** @description 그래프 3개. 순서 = 화면 순서(graph_1~3), 시트는 서로 다르다 */
+                graphs: components["schemas"]["InsightReportGraph"][];
                 /**
                  * Format: date-time
                  * @description 보고서 생성 일시
@@ -1246,6 +1110,16 @@ export interface components {
                  */
                 generatedAt: string;
             } | null;
+        };
+        /** @description 보고서 그래프 한 칸 (graph_n · desc_n) */
+        InsightReportGraph: {
+            /**
+             * @description Tableau 시트 이름 (insight-report.md 9절). 화면은 이 이름으로 상세 워크북의 시트를 임베딩한다
+             * @enum {string}
+             */
+            sheet: "EmbedDetailV01" | "EmbedDetailV02" | "EmbedDetailV03" | "EmbedDetailV04" | "EmbedDetailV05" | "EmbedDetailV06" | "EmbedDetailV07" | "EmbedDetailV08";
+            /** @description 그 그래프의 비교와 근거 설명 (desc_n). 일반 글(HTML 아님)이며 줄바꿈을 포함할 수 있다 */
+            description: string;
         };
         /** @description 등록 및 전체 수정 공통. FE가 선택 입력의 빈값을 null로 보낸다. 코드·정수 필드에 빈 문자열을 보내지 않는다. 선택 글은 trim 후 빈 문자열을 null로 정규화한다. PUT에서 선택 필드 생략도 null로 덮어쓴다 */
         ResourceInput: {
@@ -2992,16 +2866,19 @@ export interface operations {
                      *       "success": true,
                      *       "data": {
                      *         "report": {
-                     *           "headline": "예시",
-                     *           "sections": [
+                     *           "quickInsight": "예시 퀵 인사이트",
+                     *           "graphs": [
                      *             {
-                     *               "question": "현재 화면을 설명해 주세요.",
-                     *               "blocks": [
-                     *                 {
-                     *                   "kind": "paragraph",
-                     *                   "text": "예시"
-                     *                 }
-                     *               ]
+                     *               "sheet": "EmbedDetailV01",
+                     *               "description": "예시 설명"
+                     *             },
+                     *             {
+                     *               "sheet": "EmbedDetailV06",
+                     *               "description": "예시 설명"
+                     *             },
+                     *             {
+                     *               "sheet": "EmbedDetailV03",
+                     *               "description": "예시 설명"
                      *             }
                      *           ],
                      *           "generatedAt": "2026-10-30T10:00:00+09:00"

@@ -1,13 +1,11 @@
 import DOMPurify from "dompurify"
+import type { TableauFilterInput, TableauParameterInput } from "@/tableau/tableauTypes"
 
 // AI 패널 완료 행의 artifacts (docs/work-ref/내부_연동_변경_계획.md 2-7)
 // - ai_message.artifacts = [{type, data}, ...]. 완료 행만 그린다 (진행 행의 중간 산출물은 같은 그래프가 겹쳐 그리지 않는다)
 // - tableau: schema_version 1만 Tableau 카드로 그린다 (src · parameters · filters)
 // - table · chart · map: {mime_type: "text/html", content}를 DOMPurify로 정화해 그린다
 // - 모르는 type · schema_version, 형식이 다른 항목은 건너뛴다 (AI의 data 등)
-
-export type TableauParameterInput = { name: string; dataType: "date" | "string"; value: string }
-export type TableauFilterInput = { worksheet: string; field: string; operation: "replace" | "all"; values: string[] }
 
 export type TableauArtifact = {
   kind: "tableau"

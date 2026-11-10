@@ -115,16 +115,6 @@ export function formatMonth(month: string): string {
   return month.replace("-", ".")
 }
 
-/** 2026-08 → 8월 */
-export function shortMonth(month: string): string {
-  return `${Number(month.slice(5))}월`
-}
-
-/** 2026-10-30T10:00:00+09:00 → 2026-10-30 10:00 (서버가 보낸 서울 시각 그대로) */
-export function formatDateTime(value: string): string {
-  return value.slice(0, 16).replace("T", " ")
-}
-
 /** 기간 표시: 한 달이면 그 달만 */
 export function formatPeriod(period: { from: string; to: string }): string {
   return period.from === period.to ? formatMonth(period.from) : `${formatMonth(period.from)} ~ ${formatMonth(period.to)}`
