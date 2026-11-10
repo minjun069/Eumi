@@ -1,0 +1,32 @@
+# 알림을 보낼 곳 (컨테이너가 뜰 때 자동 등록, 화면에서 수정 불가)
+# Mattermost 수신 웹훅은 Slack 형식을 받으므로 Grafana 의 Slack 연동을 쓴다. 주소는 compose 가 MATTERMOST_WEBHOOK_URL 로 넘긴다 (.env, 커밋 금지).
+#   eumi-mattermost      : 문제 알림. 해결되면 "[해결]" 메시지도 보낸다
+#   eumi-mattermost-info : 알려만 주는 알림(월 배치 성공 · 원본 없어 건너뜀). 해결 메시지를 보내지 않는다
+# 제목 · 본문 틀은 templates.yml, 어느 알림이 어디로 · 몇 시간마다 가는지는 policies.yml
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: eumi-mattermost
+    receivers:
+      - uid: eumi-mattermost
+        type: slack
+        disableResolveMessage: false
+        settings:
+          url: ${MATTERMOST_WEBHOOK_URL}
+          username: Eumi 파이프라인
+          title: '{{ template "eumi.title" . }}'
+          text: '{{ template "eumi.text" . }}'
+
+  - orgId: 1
+    name: eumi-mattermost-info
+    receivers:
+      - uid: eumi-mattermost-info
+        type: slack
+        disableResolveMessage: true
+        settings:
+          url: ${MATTERMOST_WEBHOOK_URL}
+          username: Eumi 파이프라인
+          title: '{{ template "eumi.title" . }}'
+          text: '{{ template "eumi.text" . }}'
+          color: '{{ template "eumi.info_color" . }}'
