@@ -5,14 +5,18 @@ import java.net.http.*;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import com.eumi.backend.cases.CaseDtos;
 import com.eumi.backend.cases.CaseRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.session.jdbc.JdbcIndexedSessionRepository;
 import org.springframework.test.context.ActiveProfiles;
@@ -30,7 +34,7 @@ import static org.mockito.Mockito.*;
         properties="server.port=${EUMI_CASE_TEST_PORT:0}")
 class CaseIntegrationTests {
     @LocalServerPort int port;
-    @Autowired JdbcTemplate jdbc;
+    @MockitoSpyBean JdbcTemplate jdbc;
     @Autowired PasswordEncoder passwords;
     @Autowired JdbcIndexedSessionRepository sessions;
     @Autowired JsonMapper json;
@@ -65,7 +69,7 @@ class CaseIntegrationTests {
     }
     @AfterEach
     void cleanupOnlyOwnedRows() {
-        reset(repository);
+        reset(repository,jdbc);
         for(long id:orgs)jdbc.update("DELETE FROM case_record WHERE org_id=?",id);
         for(long id:emails.keySet()) {
             sessions.findByPrincipalName(Long.toString(id)).keySet().forEach(sessions::deleteById);
@@ -395,6 +399,45 @@ class CaseIntegrationTests {
         error(login(foreign).send("PUT",path(id),edit),404,"NOT_FOUND");
         noContent(browser.send("DELETE",path(id),null));
         error(browser.send("PUT",path(id),edit),404,"NOT_FOUND");
+    }
+    @ParameterizedTest @ValueSource(booleans={true,false})
+    void detailReadDuringManagerChangeKeepsOldVersionAndRejectsTheStaleSave(boolean addManager) throws Exception {
+        long id=create(browser,"Synthetic snapshot before",List.of(caller,colleague));
+        var before=data(browser.get(path(id)),200);var coworker=login(colleague);
+        var update=input("Synthetic snapshot writer",addManager ? List.of(caller,colleague,unassigned) : List.of(caller));
+        update.put("updatedAt",before.path("updatedAt").asText());
+        var managersRead=new CountDownLatch(1);var continueRead=new CountDownLatch(1);var paused=new AtomicBoolean();
+        // 실제 담당자 SELECT 직후만 멈추고 다음 상세·시각 SELECT 전에 다른 HTTP 수정의 커밋을 끝낸다.
+        doAnswer(call->{
+            Object result=call.callRealMethod();
+            if(paused.compareAndSet(false,true)) {
+                managersRead.countDown();
+                if(!continueRead.await(8,TimeUnit.SECONDS)) throw new IllegalStateException("Synthetic detail gate timeout");
+            }
+            return result;
+        }).when(jdbc).query(contains("FROM public.case_manager cm"),ArgumentMatchers.<RowMapper<CaseDtos.Manager>>any(),eq(id));
+        JsonNode detail;
+        try(var executor=Executors.newSingleThreadExecutor()) {
+            var reading=executor.submit(()->browser.get(path(id)));
+            try {
+                assertThat(managersRead.await(5,TimeUnit.SECONDS)).isTrue();
+                noContent(coworker.send("PUT",path(id),update));
+            } finally {continueRead.countDown();}
+            detail=data(reading.get(12,TimeUnit.SECONDS),200);
+        }
+        var saved=data(browser.get(path(id)),200);
+        assertThat(saved.path("updatedAt").asText()).isNotEqualTo(before.path("updatedAt").asText());
+        assertThat(detail.path("managers").valueStream().map(n->n.path("memberId").asLong()).toList())
+                .containsExactlyInAnyOrder(caller,colleague);
+        var stale=input("Synthetic snapshot stale overwrite",detail.path("managers").valueStream().map(n->n.path("memberId").asLong()).toList());
+        stale.put("updatedAt",detail.path("updatedAt").asText());
+        var response=browser.send("PUT",path(id),stale);var after=data(browser.get(path(id)),200);
+        Assertions.assertAll(
+                ()->assertThat(detail.path("updatedAt").asText().equals(before.path("updatedAt").asText()))
+                        .as("the returned version belongs to the same snapshot as the old managers").isTrue(),
+                ()->assertThat(response.statusCode()).as("saving the old snapshot must report a conflict").isEqualTo(409),
+                ()->assertThat(after.equals(saved)).as("the newer name and manager set must survive the stale save").isTrue());
+        error(response,409,"STATE_CONFLICT");
     }
     @Test void withdrawalAssignmentChangesInvalidateAnAlreadyOpenedCaseForm() throws Exception {
         long id=create(browser,"Synthetic withdrawal version",List.of(caller,colleague));var coworker=login(colleague);

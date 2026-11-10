@@ -8,6 +8,7 @@ import com.eumi.backend.auth.login.LoginUser;
 import com.eumi.backend.common.error.ApiException;
 import com.eumi.backend.common.error.ErrorCode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -39,6 +40,7 @@ public class CaseService {
         validateSearch(search);
         return repository.search(user.orgId(), user.memberId(), search);
     }
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public CaseDtos.Detail detail(long member, long caseId) {
         var user = requireUser(member); requireAccess(user, caseId, false); return repository.detail(caseId);
     }

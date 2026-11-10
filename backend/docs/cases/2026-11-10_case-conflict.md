@@ -2,6 +2,7 @@
 
 - 작업: C4, API-20·23. Jira: S15P31B201-271.
 - 브랜치: `feat/be-case-conflict`, 기준 develop `b5e9084cd303de93d8b2db3e12d196c0a51ad499`.
+- 초기 구현은 `d50a2b6`으로 커밋·리뷰됐다. 아래 초기 검사 기록과 마지막 절의 C4 리뷰 S1 후속 검사 기록을 구분한다.
 - 사용자 지시로 이번 BE MR에 `docs/api/openapi.json`과 지정된 `docs/spec` 문서·엑셀을 함께 변경한다. AGENTS.md의 평소 docs/api 담당 제한보다 이번 명시적 지시를 우선했다.
 
 ## 바꾼 파일
@@ -42,7 +43,7 @@ M3에서 C4로 넘긴 S1도 반영했다. `WithdrawalRepository.deleteCaseLinks`
 
 DB 스키마·마이그레이션·FE·infra·운영 설정·의존성 변경은 없다. API-22·삭제·상담 형식도 유지했다. git 쓰기와 docker compose, 실제 AI 호출은 실행하지 않았다.
 
-## 검사 기록
+## 초기 구현 검사 기록 (d50a2b6)
 
 실제 공용 PostgreSQL에 합성 기관·회원·사례자·상담을 만들고 실제 PBKDF2 로그인·세션·CSRF·HTTP를 사용한다. 생성한 기관·회원의 데이터와 세션만 정리한다. 날짜·담당·권한·동시성 검사는 실제 DB다. 기존 등록 롤백 검사는 Spy로 저장 실패를 주입한다. 동시 수정 검사는 두 요청이 모두 기관 잠금 직전까지 도착한 뒤 함께 풀어 204 한 개와 409 한 개를 확인한다. 실제 AI 대신 fake와 테스트 내부 HTTP stub만 사용한다.
 
@@ -67,7 +68,7 @@ CaseIntegrationTests는 기존 29개에 C4 13개를 더해 42개다. 추가 범�
 
 ## 남은 일·FE 인계
 
-- 사용자 커밋·Claude Code 리뷰·push·develop 대상 MR·병합은 아직 하지 않았다. 파트 간 API 형식 변경이므로 FE 확인이 필요한 MR이다.
+- 초기 구현 `d50a2b6`의 사용자 커밋·Claude Code 리뷰는 완료됐다. C4 리뷰 S1 후속 수정의 커밋·리뷰와 push·develop 대상 MR·병합은 남아 있다. 파트 간 API 형식 변경이므로 FE 확인이 필요한 MR이다.
 - FE는 병합 뒤 OpenAPI 2.5.0으로 `gen:api`를 실행하고 상세 updatedAt을 수정 폼에 보관해 그대로 전송한다. 409이면 변경 안내 후 상세를 다시 불러온다. FE 타입 파일은 이 MR에서 고치지 않았다.
 - API 계약 변경을 모르고 옛 요청을 보내는 FE는 400이 나므로 FE 연결과 배포 순서를 맞춰야 한다.
 - 브라우저·운영 배포·실제 AI 검사는 미실행이다.
@@ -76,3 +77,61 @@ CaseIntegrationTests는 기존 29개에 C4 13개를 더해 42개다. 추가 범�
 커밋 제목 제안: `feat: [BE] 사례자 수정 경합 409 (openapi 2.5.0)`
 
 커밋 본문 끝: `Jira: S15P31B201-271`
+
+## C4 리뷰 S1 후속 — 상세 조회 시점 일치
+
+- 기준 커밋: `d50a2b66266a992d8c7c89d18473e15b3870b9aa`. Jira는 S15P31B201-271을 유지한다.
+- 이번 후속 변경 파일은 `CaseService.java`, `CaseIntegrationTests.java`, 이 인계 문서 3개이며 모두 backend 안이다.
+- 이 절의 S1은 상세의 담당자 목록과 updatedAt이 다른 시점에서 읽히는 C4 리뷰 지적이다. 앞 절의 M3에서 이관했던 담당자 변경 시각 갱신 S1과 구분한다.
+
+### 문제와 수정
+
+기존 READ COMMITTED 상세 조회는 담당자 SELECT 다음, 사례자 정보·updatedAt SELECT 전에 다른 수정이 커밋되면 옛 담당자와 새 수정 시각을 함께 반환했다. 이 응답으로 저장하면 204로 통과해 상대방의 이름·담당자 변경이 되돌아갔다.
+
+`CaseService.detail`만 `@Transactional(readOnly=true, isolation=Isolation.REPEATABLE_READ)`로 묶었다. 회원·접근 확인, 담당자 목록, 사례자 정보·updatedAt을 같은 읽기 스냅샷에서 가져온다. 읽는 동안 다른 사용자의 수정은 커밋될 수 있으며, 옛 스냅샷으로 저장하면 기존 API-23 비교가 409로 거절한다.
+
+API-23의 접근 확인·입력 검증·기관 → 회원 → 사례자 잠금과 마이크로초 비교는 바꾸지 않았다. 새로운 쓰기 잠금이나 새 오류 코드는 없다. OpenAPI 2.5.0·DTO·DB 스키마·FE·명세·엑셀은 이번 후속에서 변경하지 않는다.
+
+### 재현·회귀 검사
+
+새 매개변수 검사 `detailReadDuringManagerChangeKeepsOldVersionAndRejectsTheStaleSave`는 담당자 추가와 제거 두 경우를 실행한다. JdbcTemplate을 Spy로 감싸 실제 담당자 SELECT가 끝난 뒤 해당 테스트 사례자만 한 번 멈춘다. 별도 사용자의 실제 HTTP PUT이 204로 커밋된 뒤 상세 조회를 계속한다. SQL 결과는 모사하지 않고 실제 DB에서 읽으며, 데이터 변경·버전 비교·HTTP 응답도 실제 구현을 사용한다.
+
+- 수정 전 운영 코드는 그대로 둔 채 새 검사 2개를 먼저 실행했다. 두 경우 모두 담당자는 옛 값·시각은 새 값이었고, 옛 화면 저장이 204로 통과하며 상대방의 저장값을 덮어써 3개 단정이 각각 실패했다.
+- REPEATABLE_READ 적용 뒤 같은 검사 2개가 통과했다. 옛 담당자와 옛 시각을 함께 반환하고, 그 값으로 저장하면 409 STATE_CONFLICT이며 새 이름·담당자 집합이 그대로다.
+- 대기에는 상한을 두고 finally에서 조회 재개 latch를 푼다. 검사 종료 시 JdbcTemplate·Repository Spy 설정을 초기화한 뒤 자체 기관·회원·사례자·세션만 정리한다.
+- 검사 코드의 제네릭 타입 표기 보완 중 컴파일 오류 1회는 import로 수정했다. 그 시도에서는 검사가 실행되지 않았으며 이후 8080 전체 검사가 통과했다.
+
+| 후속 실행 | 결과 |
+|---|---|
+| 수정 전 S1 재현 | 2개 모두 예상 실패: 잘못된 스냅샷·204 저장·덮어쓰기 실제 확인 (11/10 22:55~22:56 서울 시각) |
+| 수정 후 S1 선별 회귀 | 2개 통과 (11/10 22:56) |
+| Case 8080 실제 DB·HTTP | 44개 통과 (기존 42 + S1 2, 11/10 22:57~22:58) |
+| 관련 실제 DB·로컬 HTTP·Mailpit | 14개 클래스, 216개 통과 (11/10 22:58~23:00) |
+| 최종 전체 단위·mock | 26개 클래스, 194개 통과 (11/10 23:01) |
+| bootJar·공백 검사 | 통과 |
+
+최종 관련 통합의 클래스별 개수는 초기 기록에서 Case만 42 → 44로 늘고 나머지는 같다. 최종 단위·통합은 실패·오류·미실행 모두 0이다. 수정 전의 예상 실패 2개와 검사 코드 컴파일 실패 시도는 최종 통과 결과에 포함하지 않는다.
+
+기존 로컬 DB 환경과 JDK 21을 준비한 뒤 Git Bash에서 backend 폴더에서 재실행한다. 기본 포트는 0이고 8080은 비어 있을 때만 지정한다.
+
+```bash
+EUMI_AI_MODE=fake ./gradlew.bat integrationTest \
+  --tests '*CaseIntegrationTests.detailReadDuringManagerChangeKeepsOldVersionAndRejectsTheStaleSave*' --console=plain
+EUMI_AI_MODE=fake EUMI_CASE_TEST_PORT=8080 ./gradlew.bat integrationTest \
+  --tests '*CaseIntegrationTests' --console=plain
+./gradlew.bat test --console=plain
+```
+
+후속 실행별 클래스 수·시각·소스 해시는 ignored 파일 `backend/build/case-conflict-snapshot-verification.json`에 보존한다. 초기 `case-conflict-verification.json`과 구분한다.
+
+### 수정하지 않은 후속 인계
+
+- C4 리뷰 S2: M3 단독 담당 사례 인계의 수정 시각, 탈퇴 롤백 시 시각 복원, 부적합 담당자와 옛 버전이 함께 올 때의 400 우선순위 검사를 보강할 수 있다. 이번에는 추가하지 않았다.
+- C4 리뷰 S3: 다른 입력 검증이 먼저 실패하면 updatedAt 오류까지 한 번에 모으지 않는다. 요청은 400으로 거절되며 검증 집계 방식은 유지한다.
+- C4 리뷰 S4: 향후 v_case_summary에 updated_at이 추가될 때를 대비한 별칭 보강은 미뤘다. 현재 뷰에는 그 열이 없다.
+- C4 리뷰 S5: updatedAt 설명은 사용자가 지정한 계약 문구 그대로다. 필요하면 계약 담당과 문구 개선을 논의한다.
+- FE 연결·브라우저·운영 배포·실제 AI 검사는 미실행이다. git 쓰기와 docker compose, 실제 AI 호출은 하지 않았다.
+
+후속 커밋 제목 제안: `fix: [BE] 사례자 상세 조회 스냅샷 일치`
+
+후속 커밋 본문 끝: `Jira: S15P31B201-271`
