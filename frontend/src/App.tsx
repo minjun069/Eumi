@@ -7,14 +7,13 @@ import { RequireAuth } from "@/components/routing/RequireAuth"
 import { HOME_PATH, PATHS } from "@/routes/paths"
 import { LoginScreen } from "@/screens/auth/LoginScreen"
 import { PasswordFindScreen } from "@/screens/auth/PasswordFindScreen"
+import { SignupScreen } from "@/screens/auth/SignupScreen"
 import { CaseDetailScreen } from "@/screens/case/CaseDetailScreen"
 import { CaseFormScreen } from "@/screens/case/CaseFormScreen"
 import { CaseListScreen } from "@/screens/case/CaseListScreen"
 import { MyPageScreen } from "@/screens/my/MyPageScreen"
 import { PasswordChangeScreen } from "@/screens/my/PasswordChangeScreen"
 import { WithdrawScreen } from "@/screens/my/WithdrawScreen"
-import { PlaceholderScreen } from "@/screens/placeholder/PlaceholderScreen"
-import { PLACEHOLDERS } from "@/screens/placeholder/placeholders"
 import { ResourceDetailScreen } from "@/screens/resource/ResourceDetailScreen"
 import { ResourceFormScreen } from "@/screens/resource/ResourceFormScreen"
 import { ResourceListScreen } from "@/screens/resource/ResourceListScreen"
@@ -22,8 +21,7 @@ import { RiskScreen } from "@/screens/risk/RiskScreen"
 import { restoreSession } from "@/session/sessionActions"
 import { useSession } from "@/session/sessionStore"
 
-// 화면 주소 목록. 아직 만들지 않은 화면은 '준비 중'(PlaceholderScreen)으로 둔다.
-// 페이지를 옮겨 올 때 해당 줄의 element만 실제 화면으로 바꾼다.
+// 화면 주소 목록 (주소 문자열은 routes/paths.ts)
 
 export default function App() {
   const session = useSession()
@@ -41,7 +39,7 @@ export default function App() {
         <Routes>
           {/* 로그인하지 않아도 볼 수 있는 화면 */}
           <Route path={PATHS.login} element={<LoginScreen />} />
-          <Route path={PATHS.signup} element={<PlaceholderScreen spec={PLACEHOLDERS.signup} fullFrame />} />
+          <Route path={PATHS.signup} element={<SignupScreen />} />
           <Route path={PATHS.passwordFind} element={<PasswordFindScreen />} />
 
           {/* 로그인한 경우에만 볼 수 있는 화면 (헤더 + 메뉴바) */}
