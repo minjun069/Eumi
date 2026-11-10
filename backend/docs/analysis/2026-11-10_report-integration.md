@@ -1,6 +1,6 @@
 # AI-b 보고서 연결 · 구현과 MR 인계
 
-2026-11-10. 브랜치 `feat/be-insight-report`, 기준 origin/develop `de4dc12` (문서 2.4.0 병합 포함), HEAD `3f05963` 위의 리뷰 후속 수정. Jira: S15P31B201-237 (BE·AI 연결).
+2026-11-10. 브랜치 `feat/be-insight-report`, 기준 origin/develop `de4dc12` (문서 2.4.0 병합 포함), 리뷰 후속 작업 시작 `3f05963`, 코드 후속 커밋 `65290d0`. Jira: S15P31B201-237 (BE·AI 연결).
 
 ## 1. 작업 ID · API ID · 바뀐 파일
 
@@ -152,7 +152,7 @@ EUMI_REPORT_FIXTURES=true ./gradlew.bat integrationTest --tests '*ReportFakeInte
 
 ## 5. 남은 것 · MR 초안
 
-- 김민재: `de4dc12` 위로 rebase한 `3f05963`에서 리뷰 후속 작업을 수행했다. 이번 후속 변경의 커밋·push·MR 갱신을 진행한다. 에이전트는 git 쓰기를 실행하지 않았다. 현재 HEAD 본문에는 Jira 키가 없으므로 후속 커밋 본문 끝에 `Jira: S15P31B201-237`을 기재한다.
+- 김민재: `de4dc12` 위로 rebase한 `3f05963`에서 시작한 코드 후속 수정은 `65290d0`에 커밋됐다. `3f05963` 본문에도 이슈 키는 있었으나 `Jira:` 형식이 아니었고, `65290d0` 본문에는 `Jira: S15P31B201-237`이 기재돼 있다. 이번 문서 정정의 커밋·push·MR 갱신은 김민재가 진행한다. 에이전트는 git 쓰기를 실행하지 않았다.
 - 인프라: 이 BE MR 병합 뒤 2단계 V 파일·새 칸 seed를 별도 제공. summary_lines 등 칸을 지우기 전에 v_region_insight를 재생성해야 한다. quick_insight·insight_generated_at 칸 이름과 result_updated_at=region_result.updated_at 일치 조건을 유지한다. BE의 예전 칸 의존성은 제거했다. 2단계 적용 DB에서의 검사는 해당 시점에 한다.
 - 새 형식 seed가 들어오면 AnalysisIntegrationTests에 보고서가 있는 경로의 내용 비교를 보강한다. 현재 seed를 사용하는 검사는 옛 형식/null 경로를 확인하며, 새 칸의 정상 응답은 별도 ReportFakeIntegrationTests의 합성 보고서로 검사한다.
 - INT-08 requestId에는 길이 상한이 없다. 계약이 필수 문자열만 정하므로 제한을 도입하려면 계약 합의가 먼저다. 이번에는 바꾸지 않는다.
@@ -161,9 +161,9 @@ EUMI_REPORT_FIXTURES=true ./gradlew.bat integrationTest --tests '*ReportFakeInte
 
 MR 제목 제안: `feat: [BE] 인사이트 보고서 연결 (INT-04 · 05 · 08, API-11 · 12 새 형식)`.
 
-이번 후속 커밋 제목 제안: `fix: [BE] AI-b 조회 계약과 호출 경계 검사 보완`.
+코드 후속 커밋 완료: `65290d0` · `fix: [BE] AI-b 조회 계약과 호출 경계 검사 보완`.
 
-커밋 본문 끝: `Jira: S15P31B201-237`. 커밋은 김민재가 진행한다.
+추가 커밋도 본문 끝에 `Jira: S15P31B201-237`을 적는다. git 작업은 김민재가 진행한다.
 
 아래는 저장소 MR 템플릿에 넣을 초안이다.
 
@@ -254,11 +254,11 @@ CONTRIBUTING.md 3.3 표의 리뷰어를 Reviewers에 지정한다.
 - [ ] 대상 브랜치가 `develop`이다 (MR 생성 시 확인)
 - [x] 로컬에서 실행 · 테스트해 보았다
 - [x] `.env`, 비밀번호, API 키, 실제 개인정보가 포함되지 않았다
-- [ ] 커밋 본문에 Jira 키를 적었다 (HEAD 3f05963 본문에 없음. 후속 커밋에 Jira: S15P31B201-237 기재 필요)
+- [x] 커밋 본문에 Jira 키를 적었다 (코드 후속 커밋 65290d0의 Jira: S15P31B201-237 확인)
 - [ ] DB를 바꿨다면: 병합된 V 파일은 그대로이고, 새 파일 이름/ERD 변경 기록에 반영했다 (해당 없음)
 - [ ] 의존성을 바꿨다면 lock 파일도 함께 커밋했다 (해당 없음)
 - [x] 기능명세서와 다르게 구현한 부분이 있다면 아래에 적었다
 
 ### 기능명세서와 다른 점 · 참고 사항
 
-INT-04·08 month는 YYYY-MM만 적힌 보고서 계약보다 엄격하게 0000년을 VALIDATION_ERROR 400으로 거절하며, AI valid_month·ScreenContext와 같은 규칙을 유지한다. API-11·12는 계약 month 패턴으로 복원했다. 로그는 확정 문서의 저장 수/실패 동 기록 대신 11/10 2차 지시의 네 항목으로 제한했다. 2단계 V 파일·seed는 이 MR 병합 뒤 인프라 담당이 제공한다. fake는 생성 없이 접수만 하며, 긍정 보고서 조회는 테스트용 AI 계정 저장 fixture로 검증했다. 실제 AI/GMS 호출은 AI 수정 뒤 별도 진행한다. 이번 변경은 rebase된 3f05963 위의 후속 수정이며 커밋·push는 실행하지 않았다.
+INT-04·08 month는 YYYY-MM만 적힌 보고서 계약보다 엄격하게 0000년을 VALIDATION_ERROR 400으로 거절하며, AI valid_month·ScreenContext와 같은 규칙을 유지한다. API-11·12는 계약 month 패턴으로 복원했다. 로그는 확정 문서의 저장 수/실패 동 기록 대신 11/10 2차 지시의 네 항목으로 제한했다. 2단계 V 파일·seed는 이 MR 병합 뒤 인프라 담당이 제공한다. fake는 생성 없이 접수만 하며, 긍정 보고서 조회는 테스트용 AI 계정 저장 fixture로 검증했다. 실제 AI/GMS 호출은 AI 수정 뒤 별도 진행한다. 코드 후속 수정은 65290d0에 반영됐다. 에이전트는 git 쓰기를 실행하지 않았다.
