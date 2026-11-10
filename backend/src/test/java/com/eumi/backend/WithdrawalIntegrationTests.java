@@ -267,7 +267,8 @@ class WithdrawalIntegrationTests {
         doAnswer(caseFirst ? first : second).when(cases).lockOrganization(org);
         doAnswer(caseFirst ? second : first).when(repository).lockOrganization(org);
         Map<String,Object> edit=Map.of("name","Synthetic edited","birthDate","1980-01-01","gender","남","dongCode","1168066000",
-                "firstRegisteredAt","2020-01-01","managerMemberIds",scenario.equals("soleFirst") ? List.of(caller) : List.of(caller,colleague));
+                "firstRegisteredAt","2020-01-01","managerMemberIds",scenario.equals("soleFirst") ? List.of(caller) : List.of(caller,colleague),
+                "updatedAt",jdbc.queryForObject("SELECT updated_at FROM public.case_record WHERE case_id=?",OffsetDateTime.class,id).toString());
         try(var executor=Executors.newFixedThreadPool(2)) {
             var update=executor.submit(()->coworker.execute("PUT","/cases/"+id,edit,coworker.csrf()));
             var withdrawal=executor.submit(()->browser.post(PATH,emptyInput()));

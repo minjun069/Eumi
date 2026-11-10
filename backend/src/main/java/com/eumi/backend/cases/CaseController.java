@@ -38,7 +38,7 @@ public class CaseController {
     }
     @PutMapping("/{caseId}")
     public ResponseEntity<Void> update(@AuthenticationPrincipal SessionPrincipal principal,
-            @PathVariable @Min(1) @Max(MAX_ID) long caseId, @Valid @RequestBody CaseDtos.Input input) {
+            @PathVariable @Min(1) @Max(MAX_ID) long caseId, @Valid @RequestBody CaseDtos.UpdateInput input) {
         service.update(principal.memberId(), caseId, input); return ResponseEntity.noContent().build();
     }
     @DeleteMapping("/{caseId}")

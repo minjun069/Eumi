@@ -2,7 +2,7 @@ package com.eumi.backend.cases;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.time.*;
 import java.util.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -23,12 +23,12 @@ public class CaseRepository {
 
     public Optional<Access> access(long caseId, long orgId, long memberId, boolean lock) {
         return jdbc.query("""
-                SELECT c.org_id, EXISTS(SELECT 1 FROM public.case_manager m WHERE m.case_id=c.case_id AND m.member_id=?) AS assigned
+                SELECT c.org_id,c.updated_at, EXISTS(SELECT 1 FROM public.case_manager m WHERE m.case_id=c.case_id AND m.member_id=?) AS assigned
                 FROM public.case_record c WHERE c.case_id=? AND c.org_id=?
                 """ + (lock ? " FOR UPDATE OF c" : ""),
-                (rs, row) -> new Access(rs.getLong("org_id"), rs.getBoolean("assigned")), memberId, caseId, orgId).stream().findFirst();
+                (rs, row) -> new Access(rs.getLong("org_id"), rs.getBoolean("assigned"),rs.getObject("updated_at",OffsetDateTime.class).toInstant()), memberId, caseId, orgId).stream().findFirst();
     }
-    public record Access(long orgId, boolean assigned) { }
+    public record Access(long orgId, boolean assigned, Instant updatedAt) { }
 
     public void lockOrganization(long orgId) {
         jdbc.queryForObject("SELECT org_id FROM public.organization WHERE org_id=? FOR UPDATE", Long.class, orgId);
@@ -93,12 +93,12 @@ public class CaseRepository {
                 SELECT m.member_id, m.name, m.title FROM public.case_manager cm
                 JOIN public.member m ON m.member_id=cm.member_id WHERE cm.case_id=? ORDER BY m.name, m.member_id
                 """, (rs, row) -> new CaseDtos.Manager(rs.getLong(1), rs.getString(2), rs.getString(3)), caseId);
-        return jdbc.queryForObject("SELECT * FROM public.v_case_summary WHERE case_id=?", (rs, row) -> {
+        return jdbc.queryForObject("SELECT s.*,c.updated_at FROM public.v_case_summary s JOIN public.case_record c ON c.case_id=s.case_id WHERE s.case_id=?", (rs, row) -> {
             var item = listItem(rs, row);
             return new CaseDtos.Detail(item.caseId(), item.managementNo(), item.name(), item.age(), item.ageGroup(), item.gender(),
                     item.sidoName(), item.sigunguName(), item.dongName(), item.firstRegisteredAt(), item.lastRecordedAt(),
                     rs.getObject("birth_date", LocalDate.class), rs.getString("sido_code"), rs.getString("sigungu_code"),
-                    rs.getString("dong_code"), managers);
+                    rs.getString("dong_code"), managers,CaseDtos.formatUpdatedAt(rs.getObject("updated_at",OffsetDateTime.class).toInstant()));
         }, caseId);
     }
 

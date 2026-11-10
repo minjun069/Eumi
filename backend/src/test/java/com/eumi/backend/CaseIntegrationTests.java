@@ -26,7 +26,8 @@ import static org.mockito.Mockito.*;
 /** 실제 PostgreSQL·PBKDF2·HTTP. 기관별 합성 데이터만 만들고 지운다. */
 @Tag("local-integration")
 @ActiveProfiles("local")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
+        properties="server.port=${EUMI_CASE_TEST_PORT:0}")
 class CaseIntegrationTests {
     @LocalServerPort int port;
     @Autowired JdbcTemplate jdbc;
@@ -80,6 +81,11 @@ class CaseIntegrationTests {
     private long create(Browser b,String name,List<Long> managers) throws Exception {
         return data(b.send("POST","/cases",input(name,managers)),201).path("caseId").asLong();
     }
+    private Map<String,Object> edit(long caseId,String name,List<Long> managers) throws Exception {
+        var input=input(name,managers);
+        input.put("updatedAt",data(browser.get(path(caseId)),200).path("updatedAt").asText());
+        return input;
+    }
     private Map<String,Object> consultation(String date) {
         return new HashMap<>(Map.of("consultedAt",date,"purpose"," Synthetic purpose ","category","기타",
                 "categoryEtc"," Synthetic other ","content"," Synthetic content "));
@@ -91,14 +97,14 @@ class CaseIntegrationTests {
     void caseCrudAutoAssignsCallerDeduplicatesManagersAndKeepsNumberAfterChangingYear() throws Exception {
         long id=create(browser," Synthetic case ",List.of(colleague,colleague));
         var d=data(browser.get(path(id)),200);
-        assertThat(d.size()).isEqualTo(16);
+        assertThat(d.size()).isEqualTo(17);
         assertThat(d.path("name").asText()).isEqualTo("Synthetic case");
         assertThat(d.path("managementNo").asText()).isEqualTo("2020-0001");
         assertThat(d.path("managers").size()).isEqualTo(2);
         assertThat(d.path("managers").get(0).has("title")).isTrue();
         assertThat(d.path("managers").get(0).path("title").isNull()).isTrue();
         assertThat(d.has("lastRecordedAt") && d.path("lastRecordedAt").isNull()).isTrue();
-        var edit=input("Synthetic edited",List.of(caller,colleague)); edit.put("firstRegisteredAt","2021-01-01");
+        var edit=edit(id,"Synthetic edited",List.of(caller,colleague)); edit.put("firstRegisteredAt","2021-01-01");
         noContent(browser.send("PUT",path(id),edit));
         d=data(browser.get(path(id)),200);
         assertThat(d.path("managementNo").asText()).isEqualTo("2020-0001");
@@ -110,7 +116,7 @@ class CaseIntegrationTests {
     @Test
     void sharedManagerCanEditAndRemoveCallerWhoThenLosesAccess() throws Exception {
         long id=create(browser,"Synthetic shared",List.of(colleague));
-        noContent(browser.send("PUT",path(id),input("Synthetic reassigned",List.of(colleague))));
+        noContent(browser.send("PUT",path(id),edit(id,"Synthetic reassigned",List.of(colleague))));
         error(browser.get(path(id)),403,"FORBIDDEN");
         error(browser.send("DELETE",path(id),null),403,"FORBIDDEN");
         assertThat(data(login(colleague).get(path(id)),200).path("managers").size()).isEqualTo(1);
@@ -123,7 +129,7 @@ class CaseIntegrationTests {
         for(long member:List.of(unassigned,foreign)) {
             Browser denied=login(member);int status=member==foreign?404:403;String code=member==foreign?"NOT_FOUND":"FORBIDDEN";
             error(denied.get(path(id)),status,code);
-            error(denied.send("PUT",path(id),input("Synthetic denied",List.of(member))),status,code);
+            error(denied.send("PUT",path(id),edit(id,"Synthetic denied",List.of(member))),status,code);
             error(denied.send("DELETE",path(id),null),status,code);
             error(denied.get(consultations(id)),status,code);
             error(denied.get(consultations(id)+"/"+note),status,code);
@@ -241,7 +247,7 @@ class CaseIntegrationTests {
         for(long manager:List.of(foreign,withdrawn))error(browser.send("POST","/cases",input("Synthetic invalid",List.of(manager))),400,"VALIDATION_ERROR");
         long id=create(browser,"Synthetic original",List.of(caller));
         for(long manager:List.of(foreign,withdrawn)) {
-            error(browser.send("PUT",path(id),input("Synthetic changed",List.of(manager))),400,"VALIDATION_ERROR");
+            error(browser.send("PUT",path(id),edit(id,"Synthetic changed",List.of(manager))),400,"VALIDATION_ERROR");
         }
         assertThat(data(browser.get(path(id)),200).path("name").asText()).isEqualTo("Synthetic original");
     }
@@ -316,6 +322,88 @@ class CaseIntegrationTests {
         long id=create(browser,"Synthetic note validation",List.of(caller));
         var note=consultation("2020-01-01");note.put("categoryEtc"," ");error(browser.send("POST",consultations(id),note),400,"VALIDATION_ERROR");
         note=consultation(LocalDate.now(ZoneId.of("Asia/Seoul")).plusDays(1).toString());error(browser.send("POST",consultations(id),note),400,"VALIDATION_ERROR");
+    }
+
+    @Test void detailKeepsSixFractionDigitsAndAnOffsetAndRegistrationDoesNotRequireAVersion() throws Exception {
+        long id=create(browser,"Synthetic precise version",List.of(caller));
+        var time=OffsetDateTime.parse("2026-11-10T21:03:05.120300+09:00");
+        jdbc.update("UPDATE public.case_record SET updated_at=? WHERE case_id=?",time,id);
+        var value=data(browser.get(path(id)),200).path("updatedAt").asText();
+        assertThat(value).isEqualTo("2026-11-10T21:03:05.120300+09:00");
+        assertThat(OffsetDateTime.parse(value).toInstant()).isEqualTo(time.toInstant());
+    }
+    @Test void aStaleVersionReturns409WithoutChangingTheCaseOrManagers() throws Exception {
+        long id=create(browser,"Synthetic before version",List.of(caller,colleague));
+        var first=edit(id,"Synthetic first saved",List.of(caller,colleague));
+        String old=(String)first.get("updatedAt");noContent(browser.send("PUT",path(id),first));
+        var saved=data(browser.get(path(id)),200);assertThat(saved.path("updatedAt").asText()).isNotEqualTo(old);
+        var stale=input("Synthetic stale overwrite",List.of(colleague));stale.put("updatedAt",old);
+        error(browser.send("PUT",path(id),stale),409,"STATE_CONFLICT");
+        assertThat(data(browser.get(path(id)),200)).isEqualTo(saved);
+    }
+    @Test void changingOnlyManagersAlsoChangesTheVersion() throws Exception {
+        long id=create(browser,"Synthetic managers version",List.of(caller));
+        var edit=edit(id,"Synthetic managers version",List.of(caller,colleague));String old=(String)edit.get("updatedAt");
+        noContent(browser.send("PUT",path(id),edit));
+        var saved=data(browser.get(path(id)),200);assertThat(saved.path("updatedAt").asText()).isNotEqualTo(old);
+        assertThat(saved.path("managers").size()).isEqualTo(2);
+        error(browser.send("PUT",path(id),edit),409,"STATE_CONFLICT");
+        assertThat(data(browser.get(path(id)),200)).isEqualTo(saved);
+    }
+    @ParameterizedTest @ValueSource(strings={"missing","null","","not-a-timestamp","2026-11-10T21:03:05.120300","2026-02-30T21:03:05+09:00"})
+    void invalidUpdateVersionsHaveAFieldValidationError(String value) throws Exception {
+        long id=create(browser,"Synthetic invalid version",List.of(caller));
+        var before=data(browser.get(path(id)),200);var edit=input("Synthetic rejected version",List.of(caller));
+        if(!value.equals("missing")) edit.put("updatedAt",value.equals("null") ? null : value);
+        var response=browser.send("PUT",path(id),edit);error(response,400,"VALIDATION_ERROR");
+        assertThat(body(response).path("error").path("fieldErrors").valueStream().map(f->f.path("field").asText()).toList()).contains("updatedAt");
+        assertThat(data(browser.get(path(id)),200)).isEqualTo(before);
+    }
+    @Test void equivalentOffsetsAndSubMicrosecondDigitsCompareAsTheSameInstant() throws Exception {
+        long id=create(browser,"Synthetic equivalent offset",List.of(caller));
+        var edit=edit(id,"Synthetic UTC version",List.of(caller));
+        var expected=OffsetDateTime.parse((String)edit.get("updatedAt")).toInstant();
+        edit.put("updatedAt",expected.atOffset(ZoneOffset.UTC).toString());noContent(browser.send("PUT",path(id),edit));
+        edit=edit(id,"Synthetic microsecond version",List.of(caller));
+        expected=OffsetDateTime.parse((String)edit.get("updatedAt")).toInstant();
+        edit.put("updatedAt",expected.plusNanos(999).atOffset(ZoneOffset.UTC).toString());
+        noContent(browser.send("PUT",path(id),edit));
+    }
+    @Test void concurrentUpdatesWithTheSameVersionHaveExactlyOneWinner() throws Exception {
+        long id=create(browser,"Synthetic concurrent version",List.of(caller,colleague));var coworker=login(colleague);
+        String version=data(browser.get(path(id)),200).path("updatedAt").asText();
+        var first=input("Synthetic concurrent first",List.of(caller,colleague));first.put("updatedAt",version);
+        var second=input("Synthetic concurrent second",List.of(caller,colleague));second.put("updatedAt",version);
+        var ready=new CountDownLatch(2);var release=new CountDownLatch(1);
+        doAnswer(call->{ready.countDown();if(!release.await(5,TimeUnit.SECONDS)) throw new IllegalStateException("Synthetic update gate timeout");return call.callRealMethod();})
+                .when(repository).lockOrganization(org);
+        try(var executor=Executors.newFixedThreadPool(2)) {
+            var one=executor.submit(()->browser.send("PUT",path(id),first));
+            var two=executor.submit(()->coworker.send("PUT",path(id),second));
+            try {assertThat(ready.await(5,TimeUnit.SECONDS)).isTrue();}
+            finally {release.countDown();}
+            var a=one.get(12,TimeUnit.SECONDS);var b=two.get(12,TimeUnit.SECONDS);
+            assertThat(List.of(a.statusCode(),b.statusCode())).containsExactlyInAnyOrder(204,409);
+            noContent(a.statusCode()==204 ? a : b);error(a.statusCode()==409 ? a : b,409,"STATE_CONFLICT");
+            assertThat(data(browser.get(path(id)),200).path("name").asText()).isEqualTo(a.statusCode()==204 ? first.get("name") : second.get("name"));
+        }
+    }
+    @Test void permissionAndDeletedCaseChecksPrecedeAStaleVersionConflict() throws Exception {
+        long id=create(browser,"Synthetic access before conflict",List.of(caller));
+        var edit=edit(id,"Synthetic current save",List.of(caller));noContent(browser.send("PUT",path(id),edit));
+        error(login(unassigned).send("PUT",path(id),edit),403,"FORBIDDEN");
+        error(login(foreign).send("PUT",path(id),edit),404,"NOT_FOUND");
+        noContent(browser.send("DELETE",path(id),null));
+        error(browser.send("PUT",path(id),edit),404,"NOT_FOUND");
+    }
+    @Test void withdrawalAssignmentChangesInvalidateAnAlreadyOpenedCaseForm() throws Exception {
+        long id=create(browser,"Synthetic withdrawal version",List.of(caller,colleague));var coworker=login(colleague);
+        var edit=input("Synthetic stale after withdrawal",List.of(colleague));
+        String old=data(coworker.get(path(id)),200).path("updatedAt").asText();edit.put("updatedAt",old);
+        noContent(browser.send("POST","/members/me/withdrawal",Map.of("password",password,"transfers",List.of(),"resourceTransfers",List.of())));
+        var current=data(coworker.get(path(id)),200);assertThat(current.path("updatedAt").asText()).isNotEqualTo(old);
+        error(coworker.send("PUT",path(id),edit),409,"STATE_CONFLICT");
+        assertThat(data(coworker.get(path(id)),200)).isEqualTo(current);
     }
 
     @ParameterizedTest
