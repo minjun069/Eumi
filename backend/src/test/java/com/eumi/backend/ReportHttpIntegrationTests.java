@@ -6,6 +6,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
+import com.eumi.backend.analysis.ReportGenerationClient;
 import com.eumi.backend.support.ReportAiStub;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,8 +19,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tools.jackson.databind.json.JsonMapper;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /** 실제 PostgreSQL + 실제 BE HTTP + INT-05 loopback 가짜 AI. 실제 AI 호출 없음. */
 @Tag("local-integration")
@@ -33,7 +38,9 @@ class ReportHttpIntegrationTests {
     @LocalServerPort int port;
     @Autowired JdbcTemplate jdbc;
     @Autowired JsonMapper json;
+    @MockitoSpyBean ReportGenerationClient generationClient;
     private final HttpClient http = HttpClient.newHttpClient();
+    private record DatabaseBoundary(boolean transactionActive, boolean dataSourceBound) { }
 
     @DynamicPropertySource static void properties(DynamicPropertyRegistry p) {
         p.add("eumi.ai.mode", () -> "http"); p.add("eumi.ai.base-url", AI::baseUrl);
@@ -46,10 +53,20 @@ class ReportHttpIntegrationTests {
     @AfterAll static void stop() { AI.close(); }
 
     @Test void acceptedRequestContainsAllDistinctSortedTargetsAndSameResponseRequestId() throws Exception {
+        var boundary = new AtomicReference<DatabaseBoundary>();
+        doAnswer(call -> {
+            boundary.set(new DatabaseBoundary(TransactionSynchronizationManager.isActualTransactionActive(),
+                    TransactionSynchronizationManager.hasResource(jdbc.getDataSource())));
+            return call.callRealMethod();
+        }).when(generationClient).generate(any());
         var targets = jdbc.queryForList("SELECT DISTINCT adm_cd10 FROM public.region_result WHERE period_start=DATE '2025-12-01' ORDER BY adm_cd10", String.class);
         assertThat(targets).as("local analysis seed required").isNotEmpty();
         var response = send(PIPELINE, PIPELINE_TOKEN, "{\"month\":\"2025-12\",\"pipelineRunId\":\"synthetic-http\",\"reason\":\"RESULT_RELOAD\"}");
         assertThat(response.statusCode()).isEqualTo(202);
+        assertThat(boundary.get()).as("INT-05 generate must be observed").isNotNull();
+        assertThat(boundary.get().transactionActive()).as("INT-05 must run after the DB transaction").isFalse();
+        assertThat(boundary.get().dataSourceBound()).as("INT-05 must not retain the DB connection").isFalse();
+        verify(generationClient, times(1)).generate(any());
         var body = json.readTree(response.body());
         assertThat(body.path("data").path("targetCount").asInt()).isEqualTo(targets.size());
         assertThat(body.path("data").path("month").asText()).isEqualTo("2025-12");

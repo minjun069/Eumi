@@ -136,6 +136,8 @@ class AnalysisIntegrationTests {
         error(browser.get("/analysis/dongs/9999999999/report?month=2025-12"), 404, "NOT_FOUND");
         error(browser.get("/analysis/dongs/1168066000/insight?month=1900-01"), 404, "NOT_FOUND");
         error(browser.get("/analysis/dongs/1168066000/report?month=1900-01"), 404, "NOT_FOUND");
+        error(browser.get("/analysis/dongs/1168066000/insight?month=0000-01"), 404, "NOT_FOUND");
+        error(browser.get("/analysis/dongs/1168066000/report?month=0000-01"), 404, "NOT_FOUND");
     }
 
     @Test
