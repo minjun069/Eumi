@@ -12,7 +12,7 @@
   "version": 1,
   "templating": { "list": [] },
   "annotations": { "list": [] },
-  "links": [],
+  "links": [ { "type": "dashboards", "tags": ["eumi"], "title": "Eumi 대시보드", "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": false, "targetBlank": false } ],
   "panels": [
     { "id": 100, "type": "row", "title": "현재 상태","collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "panels": [] },
     {
