@@ -1,0 +1,28 @@
+# 어느 알림이 어디로 · 몇 시간마다 가는지 (알림 규칙의 labels 로 고른다)
+#   기본            : 문제 알림. 같은 이름의 알림은 한 메시지로 묶고, 해결될 때까지 24시간마다 다시 보낸다
+#   kind = info     : 알려만 주는 알림. 한 건마다 한 번만 보낸다 (규칙이 켜져 있는 시간이 짧아 다시 보낼 일이 없다)
+#   repeat = 4h     : 바로 손봐야 하는 시스템 알림(DB 접속 · 스케줄러). 4시간마다 다시 보낸다
+apiVersion: 1
+
+policies:
+  - orgId: 1
+    receiver: eumi-mattermost
+    group_by: ['alertname']
+    group_wait: 10s
+    group_interval: 1m
+    repeat_interval: 24h
+    routes:
+      - receiver: eumi-mattermost-info
+        object_matchers:
+          - ['kind', '=', 'info']
+        group_by: ['...']
+        group_wait: 10s
+        group_interval: 1m
+        repeat_interval: 720h
+      - receiver: eumi-mattermost
+        object_matchers:
+          - ['repeat', '=', '4h']
+        group_by: ['alertname']
+        group_wait: 10s
+        group_interval: 1m
+        repeat_interval: 4h

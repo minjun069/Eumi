@@ -1,0 +1,18 @@
+# 메시지 틀 (제목 · 본문). 알림 규칙의 annotations 를 읽는다
+#   summary  : 무슨 일인지 한 줄 (규칙마다 rules.yml 에 적는다)
+#   action   : 무엇을 하면 되는지 (해결 메시지에는 넣지 않는다)
+#   resolved : 해결 메시지에 summary 대신 쓸 한 줄 (없으면 summary 를 그대로 쓴다)
+# 본문은 Mattermost 마크다운으로 보인다. 색 막대는 Grafana 가 넣는다 (문제 빨강 · 해결 초록). 알려만 주는 알림은 tone 으로 고른다
+apiVersion: 1
+
+templates:
+  - orgId: 1
+    name: eumi
+    template: |
+      {{ define "eumi.title" }}{{ if eq .Status "resolved" }}[해결] {{ end }}{{ .CommonLabels.alertname }}{{ if gt (len .Alerts) 1 }} ({{ len .Alerts }}건){{ end }}{{ end }}
+
+      {{ define "eumi.text" }}{{ range .Alerts }}{{ if and (eq .Status "resolved") .Annotations.resolved }}{{ .Annotations.resolved }}{{ else }}{{ .Annotations.summary }}{{ end }}
+      {{ if and (eq .Status "firing") .Annotations.action }}**할 일** {{ .Annotations.action }}
+      {{ end }}{{ end }}[대시보드 열기]({{ .ExternalURL }}d/eumi-pipeline){{ end }}
+
+      {{ define "eumi.info_color" }}{{ if eq .CommonLabels.tone "good" }}#36a64f{{ else }}#8F939E{{ end }}{{ end }}
