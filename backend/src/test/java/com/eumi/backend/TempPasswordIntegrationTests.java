@@ -220,6 +220,71 @@ class TempPasswordIntegrationTests {
             assertThat(passwords.matches(temporary,snapshot().hash())).isTrue();
         } finally { executor.shutdownNow(); }
     }
+    @Test void waitsForAnotherTransactionAndRechecksCommittedTemporaryExpiry() throws Exception {
+        var before = snapshot(); long sessionsBefore = sessionCount(member);
+        var entered = new CountDownLatch(1);
+        var requestPid = new AtomicInteger();
+        doAnswer(call -> {
+            requestPid.set(jdbc.queryForObject("SELECT pg_backend_pid()",Integer.class));
+            entered.countDown();
+            return call.callRealMethod();
+        }).when(repository).lockMember(member);
+
+        var executor = Executors.newSingleThreadExecutor();
+        Future<HttpResponse<String>> pending = null;
+        try (var blocker = jdbc.getDataSource().getConnection()) {
+            blocker.setAutoCommit(false);
+            int blockerPid;
+            try (var statement = blocker.createStatement(); var row = statement.executeQuery("SELECT pg_backend_pid()")) {
+                row.next(); blockerPid = row.getInt(1);
+            }
+            try (var statement = blocker.prepareStatement("SELECT member_id FROM public.member WHERE member_id=? FOR UPDATE")) {
+                statement.setLong(1,member);
+                try (var row = statement.executeQuery()) { assertThat(row.next()).isTrue(); }
+            }
+            Instant committedExpiry;
+            try (var statement = blocker.prepareStatement("UPDATE public.member SET temp_password_expires_at=? WHERE member_id=? RETURNING temp_password_expires_at")) {
+                statement.setObject(1,clock.instant().plusSeconds(3600).atOffset(ZoneOffset.UTC)); statement.setLong(2,member);
+                try (var row = statement.executeQuery()) {
+                    assertThat(row.next()).isTrue(); committedExpiry = row.getObject(1,OffsetDateTime.class).toInstant();
+                }
+            }
+            // 별도 연결의 미커밋 값은 초기 조회에 보이지 않는다. 해시 뒤 잠금 진입을 기다린다.
+            pending = executor.submit(() -> issue(input()));
+            assertThat(entered.await(5,TimeUnit.SECONDS)).as("request reached the lock after initial lookup and hashing").isTrue();
+            assertThat(requestPid.get()).isNotEqualTo(blockerPid);
+            assertThat(awaitBlockedSelect(requestPid.get(),blockerPid)).as("SELECT FOR UPDATE waits for the other transaction").isTrue();
+            boolean completed = false;
+            try { pending.get(300,TimeUnit.MILLISECONDS); completed = true; }
+            catch (TimeoutException expected) { }
+            assertThat(completed).as("request must remain pending while the row lock is held").isFalse();
+
+            blocker.commit();
+            accepted(pending.get(10,TimeUnit.SECONDS));
+            assertThat(snapshot().equals(new Snapshot(before.hash(),committedExpiry,before.updated()))).isTrue();
+            assertThat(sessionCount(member)).isEqualTo(sessionsBefore);
+            assertThat(inbox.ids(mailRecipients).size()).isZero();
+        } finally {
+            // blocker가 닫히며 미커밋 변경을 롤백한 뒤 요청 종료를 기다리고 fixture를 정리한다.
+            if (pending != null) {
+                try { pending.get(10,TimeUnit.SECONDS); }
+                catch (InterruptedException ex) { Thread.currentThread().interrupt(); pending.cancel(true); }
+                catch (ExecutionException | TimeoutException ex) { pending.cancel(true); }
+            }
+            executor.shutdownNow();
+        }
+    }
+    private boolean awaitBlockedSelect(int requestPid,int blockerPid) throws Exception {
+        long deadline = System.nanoTime() + Duration.ofSeconds(3).toNanos();
+        do {
+            boolean blocked = Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM pg_stat_activity "
+                    + "WHERE pid=? AND wait_event_type='Lock' AND upper(query) LIKE '%FOR UPDATE%' "
+                    + "AND ?=ANY(pg_blocking_pids(pid)))",Boolean.class,requestPid,blockerPid));
+            if (blocked) return true;
+            Thread.sleep(10);
+        } while (System.nanoTime() < deadline);
+        return false;
+    }
     @Test void authenticatedRequesterAlsoLosesOwnSessionWithoutResurrection() throws Exception {
         accepted(browser.post("/auth/temp-password",input()));
         assertThat(sessionCount(member)).isZero();
@@ -233,6 +298,15 @@ class TempPasswordIntegrationTests {
         error(issue(Map.of("email",emails.get(member),"name",marker,"extra",true)),400,"INVALID_JSON");
         assertThat(snapshot().equals(before)).isTrue();
         assertThat(sessionCount(member)).isEqualTo(1);
+        assertThat(inbox.ids(mailRecipients).size()).isZero();
+    }
+    @Test void fullWidthSpaceIsRetainedLikeLoginAndDoesNotResetThePlainEmailAccount() throws Exception {
+        var before = snapshot(); long sessionsBefore = sessionCount(member);
+        String email = Character.toString(0x3000) + emails.get(member) + Character.toString(0x3000);
+        accepted(issue(Map.of("email",email,"name",marker)));
+        error(new Browser().post("/auth/login",Map.of("email",email,"password",original)),401,"INVALID_CREDENTIALS");
+        assertThat(snapshot().equals(before)).isTrue();
+        assertThat(sessionCount(member)).isEqualTo(sessionsBefore);
         assertThat(inbox.ids(mailRecipients).size()).isZero();
     }
     private JsonNode body(HttpResponse<String> response) { return json.readTree(response.body()); }

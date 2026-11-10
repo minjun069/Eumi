@@ -4,6 +4,7 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.eumi.backend.auth.password.*;
+import com.eumi.backend.auth.login.LoginRequest;
 import com.eumi.backend.common.error.*;
 import com.eumi.backend.common.mail.MailService;
 import jakarta.validation.Validation;
@@ -59,6 +60,24 @@ class TempPasswordTests {
         assertThat(value.email()).isEqualTo("member@eumi.test");
         assertThat(value.name()).isEqualTo("Synthetic Member");
         assertThat(value.toString()).isEqualTo("TempPasswordRequest[redacted]");
+    }
+    @ParameterizedTest @ValueSource(ints = {0x20,0x3000,0x01})
+    void identityWhitespaceRulesMatchLoginTrim(int codePoint) {
+        String padding = Character.toString(codePoint);
+        String email = padding + "MEMBER@EUMI.TEST" + padding;
+        var request = new TempPasswordRequest(email,padding + "Synthetic Member" + padding);
+        var login = new LoginRequest(email,UUID.randomUUID().toString());
+        String expectedEmail = codePoint == 0x3000 ? padding + "member@eumi.test" + padding : "member@eumi.test";
+        String expectedName = codePoint == 0x3000 ? padding + "Synthetic Member" + padding : "Synthetic Member";
+        assertThat(request.email()).isEqualTo(login.email()).isEqualTo(expectedEmail);
+        assertThat(request.name()).isEqualTo(expectedName);
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            boolean emailValid = factory.getValidator().validate(request).stream()
+                    .noneMatch(v -> v.getPropertyPath().toString().equals("email"));
+            boolean loginEmailValid = factory.getValidator().validate(login).stream()
+                    .noneMatch(v -> v.getPropertyPath().toString().equals("email"));
+            assertThat(emailValid).isEqualTo(loginEmailValid);
+        }
     }
     @ParameterizedTest @ValueSource(ints = {100,101})
     void nameLimitUsesCodePoints(int count) {

@@ -18,8 +18,8 @@ public record TempPasswordRequest(
         @JsonProperty(required = true) @NotBlank @CodePointLength(max = 100)
         @JsonDeserialize(using = StringValue.class) String name) {
     public TempPasswordRequest {
-        if (email != null) email = email.strip().toLowerCase(Locale.ROOT);
-        if (name != null) name = name.strip();
+        if (email != null) email = email.trim().toLowerCase(Locale.ROOT);
+        if (name != null) name = name.trim();
     }
     @JsonAnySetter public void unknown(String key, Object value) { throw new IllegalArgumentException("Unknown temporary-password field"); }
     @Override public String toString() { return "TempPasswordRequest[redacted]"; }
