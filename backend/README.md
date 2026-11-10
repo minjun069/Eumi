@@ -4,6 +4,7 @@ Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. 공통 기
 
 ## 먼저 읽을 기록
 
+- [11월 10일 AI-b 보고서 연결 · fake/HTTP 대역 검증 · MR 인계](docs/analysis/2026-11-10_report-integration.md): INT-04·05·08, API-11·12 새 칸, 호출자 권한과 실제 PostgreSQL/8080 검사. 실제 AI 생성은 검사하지 않았다.
 - [11월 9일 AI-a 대화 패널 HTTP 연결 · 검증 · MR 인계](docs/ai1/2026-11-09_http-integration.md): API-03 context, INT-01 전용 본문/1회 재요청, INT-07, 내부 토큰 설정과 실제 AI/8080 검사 결과. 병합 전 Claude Code 리뷰가 필요하다.
 
 아래는 작성 당시의 작업 · 인계 기록이다. 현재 기준은 [docs/spec](../docs/spec/README.md)(테이블 정의서 · API 명세 · 기능명세), [docs/api](../docs/api/)(연동 계약), [docs/decisions](../docs/decisions/)(결정 기록)이며, 기록의 내용이 이와 다르면 기준 문서를 따른다.
@@ -32,8 +33,8 @@ Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. 공통 기
 
 공용 PostgreSQL·Mailpit은 사용자가 `eumi-infra`에서 준비한다. 에이전트는 Docker Compose를 실행하지 않는다. backend 폴더에서 실행한다.
 
-```powershell
-.\gradlew.bat bootRun
+```bash
+./gradlew.bat bootRun
 ```
 
 BE는 eumi_app으로 접속하고 Hibernate는 validate, Session JDBC의 테이블 자동 생성은 never로 둔다. 호스트에서 띄운 BE는 infra의 `.env`를 자동으로 읽지 않는다.
@@ -52,10 +53,10 @@ BE는 eumi_app으로 접속하고 Hibernate는 validate, Session JDBC의 테이�
 
 ## 검사 명령
 
-```powershell
-.\gradlew.bat test
-.\gradlew.bat integrationTest
-.\gradlew.bat bootJar
+```bash
+./gradlew.bat test
+./gradlew.bat integrationTest
+./gradlew.bat bootJar
 ```
 
 fixture 없는 실제 서버를 실행한 뒤 PowerShell 7에서 `.\scripts\Verify-CommonHttp.ps1`을 실행하면 Health·401·CSRF 계약을 검사한다. 다른 로컬 포트는 `-BaseUrl http://localhost:8081/api`로 지정한다. 쿠키 원문은 출력하지 않는다.
@@ -97,8 +98,8 @@ AI1은 local에서 기본 `eumi.ai.mode=fake`다. prod는 `EUMI_AI_MODE`를 반�
 | DB_USERNAME | 앱 DB 계정 | eumi_app | 필수 |
 | DB_PASSWORD | 앱 DB 암호 | 저장소의 개발 전용 설정 | 필수 비밀값 |
 | EUMI_AUTH_HASH_KEY | 인증 코드·가입 증명 해시 키 | 공개된 개발 전용 값 | 필수 비밀값 |
-| EUMI_AI_TOKEN | INT-07 AI 호출자 인증 | fake 선택 / http 필수 | AI의 SETTINGS_BACKEND_TOKEN과 같은 값 |
-| EUMI_PIPELINE_TOKEN | 파이프라인 호출자 인증 준비 (INT-04는 AI-b) | fake 선택 / http 필수 | AI 토큰과 다른 값 |
+| EUMI_AI_TOKEN | INT-07·08 AI 호출자 인증 | fake 기동 시 선택 / 호출 시 필요 / http 필수 | AI의 SETTINGS_BACKEND_TOKEN과 같은 값 |
+| EUMI_PIPELINE_TOKEN | INT-04 파이프라인 호출자 인증 | fake 기동 시 선택 / 호출 시 필요 / http 필수 | AI 토큰과 다른 값 |
 | EUMI_MAIL_FROM | 발신 주소 | no-reply@eumi.test | 필수 |
 | SMTP_HOST | SMTP 주소 | localhost | 필수 |
 | SMTP_PORT | SMTP 포트 | 1025 | 필수 |

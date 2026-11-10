@@ -23,7 +23,7 @@ public class AnalysisController {
     @GetMapping("/dongs/{dongCode}/insight")
     public ApiResponse<AnalysisDtos.DongInsightData> insight(@AuthenticationPrincipal SessionPrincipal principal,
             @PathVariable @Pattern(regexp = "[0-9]{10}") String dongCode,
-            @RequestParam @Pattern(regexp = "[0-9]{4}-(0[1-9]|1[0-2])") String month,
+            @RequestParam @Pattern(regexp = "(?!0000)[0-9]{4}-(0[1-9]|1[0-2])") String month,
             HttpServletRequest request) {
         return ApiResponse.of(service.insight(principal.memberId(), dongCode, month), request);
     }
@@ -31,7 +31,7 @@ public class AnalysisController {
     @GetMapping("/dongs/{dongCode}/report")
     public ApiResponse<AnalysisDtos.InsightReportData> report(@AuthenticationPrincipal SessionPrincipal principal,
             @PathVariable @Pattern(regexp = "[0-9]{10}") String dongCode,
-            @RequestParam @Pattern(regexp = "[0-9]{4}-(0[1-9]|1[0-2])") String month,
+            @RequestParam @Pattern(regexp = "(?!0000)[0-9]{4}-(0[1-9]|1[0-2])") String month,
             HttpServletRequest request) {
         return ApiResponse.of(service.report(principal.memberId(), dongCode, month), request);
     }

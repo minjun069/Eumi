@@ -35,7 +35,7 @@ public class InternalSecurityConfiguration {
     SecurityFilterChain internalSecurityFilterChain(HttpSecurity http, InternalApiProperties properties, Environment environment,
             ApiErrorWriter writer, ApiAuthenticationEntryPoint entryPoint, ApiAccessDeniedHandler deniedHandler) throws Exception {
         if ("http".equals(environment.getProperty("eumi.ai.mode", "fake"))) properties.requireHttpTokens();
-        // /api는 servlet context path다. 브라우저 체인과 분리하고 AI-b 경로는 아직 열지 않는다.
+        // /api는 servlet context path다. 내부 서비스 권한은 브라우저 체인과 분리한다.
         http.securityMatcher("/internal/**")
                 .httpBasic(basic -> basic.disable()).formLogin(form -> form.disable()).logout(logout -> logout.disable())
                 .requestCache(cache -> cache.disable()).csrf(csrf -> csrf.disable())
@@ -44,6 +44,8 @@ public class InternalSecurityConfiguration {
                 .exceptionHandling(errors -> errors.authenticationEntryPoint(entryPoint).accessDeniedHandler(deniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/internal/agent/notifications").hasAuthority("AI")
+                        .requestMatchers(HttpMethod.POST, "/internal/analysis/pipeline-completions").hasAuthority("PIPELINE")
+                        .requestMatchers(HttpMethod.POST, "/internal/analysis/insight-report-completions").hasAuthority("AI")
                         .anyRequest().denyAll())
                 .addFilterBefore(new TokenFilter(properties, writer), AnonymousAuthenticationFilter.class);
         return http.build();
