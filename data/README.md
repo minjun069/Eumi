@@ -17,7 +17,7 @@ M3 지표  상세 → 읍면동 · 격자 지표                     M4 분석  
 | `m2_process/` | 배경 상세 · 격자 배경 · 실거래가 적재, 유동 상세 월 배치 · 스트리밍 · 검증 |
 | `m3_indicator/` | 읍면동 배경 지표, 격자 · 읍면동 행동 지표 |
 | `m4_analysis/` | 읍면동 점수 · 단계(`region_result`), 격자 이상 점수(`bh_grid_anomaly`) |
-| `ops/` | 월 배치 실행기(`run_month`), 원본 확인(`check_month_inputs`), 결과 검증(`verify_outputs`), 기준 테이블 초기 적재(`load_dim_region`, `load_dim_grid100`), 서버 seed 생성(`make_seed`), 인프라 연결 확인 |
+| `ops/` | 월 배치 실행기(`run_month`), 스트리밍 시연 실행기(`run_stream_demo`), 원본 확인(`check_month_inputs`), 결과 검증(`verify_outputs`), 기준 테이블 초기 적재(`load_dim_region`, `load_dim_grid100`), 서버 seed 생성(`make_seed`), 인프라 연결 확인 |
 | `demo_seed/` | 시연용 복지자원 · 사례자 seed 생성 (파이프라인과 별개, `demo_seed/README.md`) |
 | `legacy/` | 1차 완성본 · DA 결과 CSV 적재 스크립트. 지금은 M2~M4 가 대체하므로 참고용 (실행하면 2차 산출값을 덮어쓴다) |
 
@@ -118,7 +118,18 @@ docker compose --profile data exec pipeline spark-submit pipeline/<모듈>/<스�
 
 ## 스트리밍 시연
 
-모두 pipeline 컨테이너 안에서 한다 (`infra/` 에서). 스트리밍은 `flow_detail` 에 값을 **더하므로** 재생할 달을 먼저 비운다.
+**한 번에 돌리기** (저장소 루트에서): 아래 단계를 명령 하나로 실행한다. 체크포인트 삭제 → 스트리밍 시작 → 재생 → 종료 신호 → 재생한 날짜가 모두 적재될 때까지 대기 → 스트리밍 종료 → 그 달 `flow_detail` 을 월 배치로 되돌리고 검증.
+
+```bash
+data/.venv/Scripts/python data/pipeline/ops/run_stream_demo.py --days 01 02 --speed 2    # 12월 1~2일, 약 6분 (되돌리기 2분 포함)
+```
+
+- `--month`(기본 2025-12) · `--days`(없으면 그 달 전부) · `--speed`(1시간치 발행 간격 초, 기본 2).
+- `--keep`: 끝난 뒤 되돌리지 않는다. 시작할 때 그 달 `flow_detail` 을 비워 스트리밍한 값만 남기므로, 이어서 M3 · M4 를 돌려 지표 · 단계가 바뀌는 것을 보일 수 있다. 원래 값은 Airflow 에서 그 달을 수동 실행해 되돌린다.
+- 중간에 실패하거나 Ctrl+C 로 끊어도 스트리밍을 끝내고 그 달을 되돌린다. 이미 도는 스트리밍이 있으면 아무것도 건드리지 않고 멈춘다.
+- 확인(2026-11-10): `--days 01 --speed 2` 로 수신 710,713건 → 1일 적재(+1,095,681행), 되돌린 뒤 검증 통과 · 행 수와 합계가 시작 전과 같음, 총 202초.
+
+**단계별로 직접 하기**: 모두 pipeline 컨테이너 안에서 한다 (`infra/` 에서). 스트리밍은 `flow_detail` 에 값을 **더하므로** 재생할 달을 먼저 비운다.
 
 ```bash
 # 1) 준비: 재생할 달 비우기, 체크포인트 지우기 (같은 달을 두 번 재생하면 값이 두 배가 된다)
