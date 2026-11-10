@@ -1,9 +1,10 @@
 # 이음이 백엔드 실행과 공통 기반
 
-Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. 공통 기반, A1 로그인·최신 프로필·로그아웃, AI1 Fake AI 패널, 지역·기관 회원 조회 API-39~42, 대시보드 API-10~12, 사례자·상담 API-19~29, 복지자원 API-13~17, 마이페이지 API-30·31·35, AI 대화 기록 API-36~38, 비밀번호 변경 API-32, 비밀번호 찾기 API-09를 구현했다. 회원가입·탈퇴는 후속 작업이다.
+Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. 공통 기반, A1 로그인·최신 프로필·로그아웃, AI1 Fake AI 패널, 지역·기관 회원 조회 API-39~42, 대시보드 API-10~12, 사례자·상담 API-19~29, 복지자원 API-13~17, 마이페이지 API-30·31·35, AI 대화 기록 API-36~38, 비밀번호 변경 API-32, 비밀번호 찾기 API-09, 회원가입 API-04~07을 구현했다.
 
 ## 먼저 읽을 기록
 
+- [11월 11일 A2 회원가입 · 실제 DB/Mailpit/8080 검사 · MR 인계](docs/signup/2026-11-11_signup.md): API-04~07, 코드·증명 HMAC, 실패 횟수 커밋, 가입 전 증명 확인과 트랜잭션 밖 PBKDF2. 병합 전 Claude Code 리뷰가 필요하다.
 - [11월 10일 A3 비밀번호 찾기 · 실제 DB/Mailpit/8080 검사 · MR 인계](docs/password/2026-11-10_temp-password.md): API-09, 24시간 임시 비밀번호, 전체 세션 폐기와 메일 실패 롤백. A3 세션 폐기 범위는 병합 전 Claude Code 리뷰 대상이다.
 - [11월 10일 AI-b 보고서 연결 · fake/HTTP 대역 검증 · MR 인계](docs/analysis/2026-11-10_report-integration.md): INT-04·05·08, API-11·12 새 칸, 호출자 권한과 실제 PostgreSQL/8080 검사. 실제 AI 생성은 검사하지 않았다.
 - [11월 9일 AI-a 대화 패널 HTTP 연결 · 검증 · MR 인계](docs/ai1/2026-11-09_http-integration.md): API-03 context, INT-01 전용 본문/1회 재요청, INT-07, 내부 토큰 설정과 실제 AI/8080 검사 결과. 병합 전 Claude Code 리뷰가 필요하다.
