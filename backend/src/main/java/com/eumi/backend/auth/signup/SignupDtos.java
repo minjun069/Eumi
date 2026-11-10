@@ -42,7 +42,7 @@ public final class SignupDtos {
             @Pattern(regexp="^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}$") @JsonDeserialize(using=StringValue.class) String password,
             @CodePointLength(max=100) @JsonDeserialize(using=StringValue.class) String title,
             @Pattern(regexp="^01[016789]-[0-9]{3,4}-[0-9]{4}$") @JsonDeserialize(using=StringValue.class) String phone) {
-        public SignupRequest {email=SignupDtos.email(email);name=trim(name);title=optional(title);}
+        public SignupRequest {email=SignupDtos.email(email);name=trim(name);title=optional(title);phone=trim(phone);}
         @JsonAnySetter public void unknown(String key,Object value) {throw new IllegalArgumentException("Unknown signup field");}
         @Override public String toString() {return "SignupRequest[redacted]";}
     }

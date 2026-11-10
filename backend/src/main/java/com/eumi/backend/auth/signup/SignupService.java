@@ -44,7 +44,7 @@ public class SignupService {
                 do {code=secrets.code();hash=secrets.codeHash(input.email(),code);}
                 while(previous.isPresent() && MessageDigest.isEqual(previous.get().codeHash(),hash));
                 var expires=now.plus(CODE_VALIDITY);
-                repository.replaceVerification(input.orgId(),input.email(),hash,now,expires);
+                repository.replaceVerification(previous.map(SignupRepository.Verification::id).orElse(null),input.orgId(),input.email(),hash,now,expires);
                 mail.sendPlainText(input.email(),"[이음이] 가입 인증 코드","인증 코드: "+code+"\n10분 동안 유효합니다.\n만료 시각: "+SEOUL_TIME.format(expires)+" (서울)");
                 return new SignupDtos.VerificationSent(SEOUL_TIME.format(expires));
             });

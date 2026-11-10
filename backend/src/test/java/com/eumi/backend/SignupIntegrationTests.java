@@ -33,6 +33,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 /** 실제 PostgreSQL·Mailpit·HTTP. 코드·증명·암호·수신자는 메모리에만 두고 자체 fixture만 지운다. */
@@ -181,7 +182,8 @@ class SignupIntegrationTests {
     @ParameterizedTest @ValueSource(booleans={false,true})
     void activeAndWithdrawnEmailsCannotReceiveSignupMail(boolean withdrawn) throws Exception {
         String email=email();existingMember(email,withdrawn);
-        error(browser.post(SEND,Map.of("orgId",org,"email",email)),409,"EMAIL_ALREADY_EXISTS");
+        var response=browser.post(SEND,Map.of("orgId",org,"email",email));error(response,409,"EMAIL_ALREADY_EXISTS");
+        assertThat(body(response).path("error").path("message").asText()).isEqualTo("이미 가입된 이메일입니다.");
         assertThat(inbox.ids(Set.of(email)).isEmpty()).isTrue();
     }
     @Test void missingOrganizationHasA400OrgIdFieldError() throws Exception {
@@ -191,7 +193,7 @@ class SignupIntegrationTests {
     @Test void resendWaits60SecondsRotatesTheCodeAndInvalidatesProof() throws Exception {
         String email=email();var old=issue(email);String oldProof=proof(email,old.code());int count=inbox.ids(Set.of(email)).size();
         var limited=browser.post(SEND,Map.of("orgId",org,"email",email));error(limited,429,"RATE_LIMITED");
-        assertThat(body(limited).path("error").path("message").asText()).isEqualTo("요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.");
+        assertThat(body(limited).path("error").path("message").asText()).isEqualTo("요청을 처리하지 못했습니다.");
         assertThat(inbox.ids(Set.of(email)).size()).isEqualTo(count);age(email);var next=issue(email);
         assertThat(next.code().equals(old.code())).isFalse();
         error(browser.post(VERIFY,Map.of("email",email,"code",old.code())),400,"VERIFICATION_INVALID");
@@ -242,7 +244,8 @@ class SignupIntegrationTests {
     @Test void duplicateMemberAppearingAfterPrecheckIsRejectedUnderTheVerificationLock() throws Exception {
         String email=email();String token=proof(email,issue(email).code());var once=new AtomicBoolean();
         doAnswer(call->{Object hash=call.callRealMethod();if(once.compareAndSet(false,true)) existingMember(email,false);return hash;}).when(passwords).encode(any());
-        error(browser.post("/members",signup(email,token)),409,"EMAIL_ALREADY_EXISTS");
+        var response=browser.post("/members",signup(email,token));error(response,409,"EMAIL_ALREADY_EXISTS");
+        assertThat(body(response).path("error").path("message").asText()).isEqualTo("이미 가입된 이메일입니다.");
         assertThat(memberCount(email)).isEqualTo(1);assertThat(repository.verification(email,false).isPresent()).isTrue();
     }
     @Test void theMemberEmailUniqueViolationAlsoReturns409AndKeepsTheProof() throws Exception {
@@ -287,6 +290,58 @@ class SignupIntegrationTests {
         }
         assertThat(inbox.ids(Set.of(email)).size()).isEqualTo(1);assertThat(row(email).failedAttempts()).isZero();
     }
+    @Test void simultaneousResendsWithAnExistingRowReturnOne201AndOne429AndOnlyOneNewMail() throws Exception {
+        String email=email();issue(email);age(email);var previous=row(email);
+        var oldMailIds=new HashSet<>(inbox.ids(Set.of(email)));
+        var mailReady=new CountDownLatch(1);var secondReady=new CountDownLatch(1);var releaseMail=new CountDownLatch(1);
+        var firstPid=new AtomicInteger();var secondPid=new AtomicInteger();var reads=new AtomicInteger();
+        var pauseFirstMail=new AtomicBoolean();var secondSawMissingRow=new AtomicBoolean();
+        doAnswer(call->{
+            if(pauseFirstMail.compareAndSet(false,true)) {
+                firstPid.set(jdbc.queryForObject("SELECT pg_backend_pid()",Integer.class));mailReady.countDown();
+                if(!releaseMail.await(10,TimeUnit.SECONDS)) throw new IllegalStateException("Synthetic resend mail gate timeout");
+            }
+            return call.callRealMethod();
+        }).when(sender).send(any(SimpleMailMessage.class));
+        doAnswer(call->{
+            int order=reads.incrementAndGet();
+            if(order==2) {secondPid.set(jdbc.queryForObject("SELECT pg_backend_pid()",Integer.class));secondReady.countDown();}
+            Object result=call.callRealMethod();
+            if(order==2) secondSawMissingRow.set(((Optional<?>)result).isEmpty());
+            return result;
+        }).when(repository).verification(eq(email),eq(true));
+        try(var executor=Executors.newFixedThreadPool(2)) {
+            var first=executor.submit(()->new Browser().post(SEND,Map.of("orgId",org,"email",email)));
+            Future<HttpResponse<String>> second;
+            try {
+                assertThat(mailReady.await(5,TimeUnit.SECONDS)).as("first resend holds its transaction before SMTP").isTrue();
+                second=executor.submit(()->new Browser().post(SEND,Map.of("orgId",org,"email",email)));
+                assertThat(secondReady.await(3,TimeUnit.SECONDS)).isTrue();
+                assertThat(awaitBlockedVerificationSelect(secondPid.get(),firstPid.get())).as("second resend waits for the first verification row").isTrue();
+            } finally {releaseMail.countDown();}
+            var a=first.get(15,TimeUnit.SECONDS);var b=second.get(15,TimeUnit.SECONDS);
+            assertThat(secondSawMissingRow.get()).as("deleted row is absent after the waiting SELECT FOR UPDATE").isTrue();
+            var fresh=inbox.ids(Set.of(email)).stream().filter(id->!oldMailIds.contains(id)).toList();
+            assertSoftly(check->{
+                check.assertThat(List.of(a.statusCode(),b.statusCode())).containsExactlyInAnyOrder(201,429);
+                check.assertThat(fresh.size()).as("new Mailpit messages after concurrent resends").isEqualTo(1);
+            });
+            data(a,201);error(b,429,"RATE_LIMITED");
+            var after=row(email);assertThat(after.id()).isNotEqualTo(previous.id());assertThat(after.createdAt()).isEqualTo(clock.instant());
+            assertThat(after.failedAttempts()).isZero();assertThat(after.verifiedAt()==null && after.proofHash()==null && after.proofExpiresAt()==null).isTrue();
+            var match=Pattern.compile("(?m)^인증 코드: ([0-9]{6})\\r?$").matcher(inbox.message(fresh.getFirst()).path("Text").asText());
+            assertThat(match.find()).isTrue();proof(email,match.group(1));
+        }
+    }
+    private boolean awaitBlockedVerificationSelect(int requestPid,int blockerPid) throws InterruptedException {
+        long deadline=System.nanoTime()+Duration.ofSeconds(3).toNanos();
+        do {
+            if(Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE pid=? AND wait_event_type='Lock' "
+                    +"AND upper(query) LIKE '%FOR UPDATE%' AND ?=ANY(pg_blocking_pids(pid)))",Boolean.class,requestPid,blockerPid))) return true;
+            Thread.sleep(20);
+        } while(System.nanoTime()<deadline);
+        return false;
+    }
     @ParameterizedTest @ValueSource(booleans={false,true})
     void mailFailureRollsBackANewOrReplacedVerification(boolean resend) throws Exception {
         String email=email();SignupRepository.Verification previous=null;
@@ -310,14 +365,14 @@ class SignupIntegrationTests {
         assertThat(memberCount(email)).isZero();assertThat(repository.verification(email,false).isPresent()).isTrue();reset(repository);
         data(browser.post("/members",signup(email,token)),201);
     }
-    @Test void signupAcceptsTrimmedOptionalTitleAndAValidPhone() throws Exception {
+    @Test void signupTrimsOptionalTitleAndPhoneBeforeSaving() throws Exception {
         String email=email();String token=proof(email,issue(email).code());var input=signup(email,token);
         String phone=String.format(Locale.ROOT,"010-%04d-%04d",new java.security.SecureRandom().nextInt(10000),new java.security.SecureRandom().nextInt(10000));
-        input.put("title","  Synthetic title  ");input.put("phone",phone);long id=data(browser.post("/members",input),201).path("memberId").asLong();
+        input.put("title","  Synthetic title  ");input.put("phone"," \t"+phone+" \t");long id=data(browser.post("/members",input),201).path("memberId").asLong();
         assertThat(jdbc.queryForObject("SELECT title='Synthetic title' AND phone=? FROM public.member WHERE member_id=?",Boolean.class,phone,id)).isTrue();
     }
     @ParameterizedTest @ValueSource(strings={"sendUnknown","sendNumericEmail","sendStringOrg","sendDecimalOrg","sendZeroOrg","sendBadEmail","verifyUnknown","verifyNumericCode","verifyBadCode",
-            "signupUnknown","signupNumericPassword","signupBlankToken","signupLongToken","signupBadPassword","signupLongName","signupLongTitle","signupBlankPhone","signupBadPhone"})
+            "signupUnknown","signupNumericPassword","signupBlankToken","signupLongToken","signupBadPassword","signupLongName","signupLongTitle","signupBlankPhone","signupWhitespacePhone","signupBadPhone"})
     void invalidJsonAndValuesAreRejectedWithoutWriting(String scenario) throws Exception {
         String email=email();String path;Map<String,Object> input;String expected="VALIDATION_ERROR";
         if(scenario.startsWith("send")) {path=SEND;input=new HashMap<>(Map.of("orgId",org,"email",email));}
@@ -339,6 +394,7 @@ class SignupIntegrationTests {
             case "signupLongName" -> input.put("name","😀".repeat(101));
             case "signupLongTitle" -> input.put("title","😀".repeat(101));
             case "signupBlankPhone" -> input.put("phone","");
+            case "signupWhitespacePhone" -> input.put("phone"," \t ");
             case "signupBadPhone" -> input.put("phone",UUID.randomUUID().toString());
             default -> throw new IllegalStateException("Synthetic validation scenario missing");
         }

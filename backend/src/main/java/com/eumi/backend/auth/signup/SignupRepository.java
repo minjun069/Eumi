@@ -42,8 +42,9 @@ public class SignupRepository {
             Instant verifiedAt,byte[] proofHash,Instant proofExpiresAt,Instant createdAt) {
         @Override public String toString() {return "Verification[redacted]";}
     }
-    public void replaceVerification(long org,String email,byte[] hash,Instant now,Instant expires) {
-        jdbc.update("DELETE FROM public.email_verification WHERE email_normalized=?",email);
+    public void replaceVerification(UUID previousId,long org,String email,byte[] hash,Instant now,Instant expires) {
+        // 잠금 대기 중 삭제된 행 대신 생긴 새 인증 행은 지우지 않는다.
+        if(previousId!=null) jdbc.update("DELETE FROM public.email_verification WHERE verification_id=?",previousId);
         jdbc.update("INSERT INTO public.email_verification(org_id,email_normalized,code_hash,created_at,expires_at,failed_attempt_count) VALUES (?,?,?,?,?,0)",
                 org,email,hash,offset(now),offset(expires));
     }

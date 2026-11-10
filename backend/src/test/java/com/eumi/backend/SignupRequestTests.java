@@ -15,12 +15,14 @@ class SignupRequestTests {
     @BeforeAll static void setup() {factory=Validation.buildDefaultValidatorFactory();}
     @AfterAll static void close() {factory.close();}
     private SignupRequest request(String name,String rawPassword,String title,String phone) {return new SignupRequest(proof,1L,email,name,rawPassword,title,phone);}
-    @Test void emailAndNameNormalizeButPasswordAndPhoneDoNot() {
-        var input=new SignupRequest(proof,1L,"  "+email.toUpperCase(Locale.ROOT)+"  ","  Synthetic  "," "+password+" ","  ",null);
+    @Test void emailNameAndPhoneNormalizeButPasswordDoesNot() {
+        var random=new java.security.SecureRandom();String phone=String.format(Locale.ROOT,"010-%04d-%04d",random.nextInt(10000),random.nextInt(10000));
+        var input=new SignupRequest(proof,1L,"  "+email.toUpperCase(Locale.ROOT)+"  ","  Synthetic  "," "+password+" ","  "," \t"+phone+" \t");
         assertThat(input.email().equals(email)).isTrue();assertThat(input.name()).isEqualTo("Synthetic");
         assertThat(input.password().equals(" "+password+" ")).isTrue();assertThat(input.title()).isNull();
+        assertThat(input.phone().equals(phone)).isTrue();
         assertThat(factory.getValidator().validate(input)).isEmpty();
-        assertThat(factory.getValidator().validate(request("Synthetic",password,null,""))).isNotEmpty();
+        for(String blank:List.of(""," \t ")) assertThat(factory.getValidator().validate(request("Synthetic",password,null,blank))).isNotEmpty();
     }
     @Test void unicodeLimitsAndPasswordRulesMatchTheContract() {
         assertThat(factory.getValidator().validate(request("😀".repeat(100),password,"😀".repeat(100),null))).isEmpty();
