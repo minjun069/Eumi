@@ -124,7 +124,7 @@ docker compose --profile data exec pipeline spark-submit pipeline/<모듈>/<스�
 # 1) 준비: 재생할 달 비우기, 체크포인트 지우기 (같은 달을 두 번 재생하면 값이 두 배가 된다)
 docker compose exec postgres psql -U postgres -d eumi -c "DELETE FROM analysis.flow_detail WHERE period_start = '2025-12-01'"
 docker compose --profile data exec pipeline rm -rf /opt/eumi/checkpoint/flow_detail
-# 2) 스트리밍 시작 (터미널 하나를 차지한다. 새 메시지만 읽도록 latest)
+# 2) 스트리밍 시작 (터미널 하나를 차지한다. 새 메시지만 읽도록 latest). 진행 상황은 http://localhost:3000/d/eumi-streaming
 docker compose --profile data exec pipeline spark-submit pipeline/m2_process/stream_flow_detail.py --starting latest
 # 3) 다른 터미널에서 재생: 1시간치를 10초 간격으로 (--speed 0 이면 쉬지 않고, --days 01 02 로 날짜 제한)
 docker compose --profile data exec pipeline python3 pipeline/m1_collect/run_synth.py replay --months 2025-12 --speed 10
@@ -137,6 +137,9 @@ docker compose --profile data exec pipeline airflow dags trigger eumi_monthly --
 
 - 하루 윈도는 다음 날 01:00 이후 메시지가 와야 닫힌다. 날짜마다 `[stream] batch N: 닫힌 날짜 [...] → flow_detail …행 누적` 이 찍히면, 그 시점에 M3 · M4 를 돌려 지표 · 단계가 갱신되는 것을 보여 줄 수 있다.
 - 확인(2026-11-04): 12월 1~2일 재생 1,421,424건 → 2분 50초, 날짜당 1,095,681행 적재, 적재 합계 = 재생 원본 합계(상대오차 1.2e-8), 요일 MON · TUE 각 1일. 이어서 DAG 로 12월을 되돌린 값이 리허설 전과 같았다(행 수 · 합계 4자리까지).
+- 진행 상황은 Grafana "Eumi 스트리밍"(http://localhost:3000/d/eumi-streaming, 패널 설명은 `infra/README.md`)에서 본다: 스트림 상태(처리 중 · 적재 중 · 대기 중 · 멈춤), 밀린 메시지, 받은 데이터 시각, 닫힌 날짜. 스트리밍 잡이 배치가 끝날 때마다(메시지가 없으면 약 10초마다) `analysis.stream_progress` 에 한 행을 남기고, 시작할 때 7일 지난 행을 지운다.
+- 확인(2026-11-10): 12월 1~2일을 `--speed 2` 로 재생 → 첫 수신부터 둘째 날이 닫힐 때까지 3분 38초 (하루를 `flow_detail` 에 더하는 데 약 50초). 진행 기록의 수신 합계 1,421,425건 = 재생 1,421,424건 + 종료 신호 1건, 날짜당 1,095,681행. 시험 뒤 `batch_flow_detail.py --months 2025-12` 로 되돌린 12월의 행 수 · 합계가 시험 전과 같았다.
+- 체크포인트를 지우지 않고 다시 시작하면 스트림이 이전 마감 시각(워터마크)을 이어받아, 그보다 이른 날짜를 다시 재생해도 전부 버려진다 (수신은 되는데 닫힌 날짜가 0). 같은 날짜를 다시 재생할 때는 1)의 체크포인트 삭제를 꼭 한다.
 - 예전 Spark 이미지로 만든 체크포인트는 소유자가 달라 지워지지 않는다. 한 번만 `docker compose --profile data exec -u root pipeline sh -c "rm -rf /opt/eumi/checkpoint/flow_detail && chown -R pipeline:pipeline /opt/eumi/checkpoint"`.
 
 ## 통합 테스트
