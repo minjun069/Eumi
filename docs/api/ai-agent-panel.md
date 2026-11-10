@@ -196,7 +196,7 @@ DB가 막는 것: 같은 question_id에 끝 행 두 개(부분 UNIQUE), 이미 �
 
 BE는 질문 시각부터 벽시계로 재고, AI는 작업 시간 예산으로 멈춘다. 두 기준을 맞추려고 BE 값은 AI 설정에서 공식으로 정한다.
 
-| BE 설정 (환경변수) | 뜻 | 공식 | 운영 제안 (AI `runtime_timeout` 300초 기준, http 전환 때 확정) |
+| BE 설정 (환경변수) | 뜻 | 공식 | 운영 값 (AI `runtime_timeout` 300초 · `llm_timeout` 30초 기준, 11/9 AI 확인) |
 |---|---|---|---|
 | `eumi.ai.execution-limit` (`EUMI_AI_EXECUTION_LIMIT`) | 질문 시각부터의 AI 실행 제한 | `runtime_timeout` + 마무리 시간 | 330초 |
 | `eumi.ai.grace-period` (`EUMI_AI_GRACE_PERIOD`) | 실행 제한 뒤 AI의 실패 행을 기다리는 여유 | AI가 한도에 걸린 뒤 실패 행을 커밋하는 시간 | 5초 |
@@ -210,7 +210,9 @@ BE는 질문 시각부터 벽시계로 재고, AI는 작업 시간 예산으로 
   - INT-02를 받으면 취소 대기 안에 취소 행을 커밋한다.
   - AI 설정을 바꾸면 같은 공식으로 계산한 BE 값을 함께 알려 준다.
 - **벽시계 상한의 기준:** INT-01을 받을 때마다 새로 잰다. 되묻기 뒤의 대기 시간은 포함하지 않는다.
-- **아직 정할 것 (김민준):** 운영 시간 값 4개 확정, artifacts 상한, GMS 주소 · 모델에서 Responses API 동작. 정해지기 전에는 운영을 fake 모드로 둔다.
+- **운영 값의 근거:** AI 문서 `ai/docs/ai-runtime-api-20261029.md` 4절(실행 제한 = `runtime_timeout` + 30초, 응답 없음 기준 = `llm_timeout` + 10초). AI 설정을 바꾸면 같은 공식으로 BE 값을 다시 정한다.
+- **모델 (GMS):** 주소는 `SETTINGS_BASE_URL`(GMS의 OpenAI 경로), Responses API · JSON 형식 출력은 11/9 운영 ai 컨테이너에서 확인했다. gpt-5-nano는 호출 한 번이 30초를 넘어 제외했고, 운영 모델은 AI 수정 뒤 비교해 정한다(11/10).
+- **아직 정할 것 (김민준):** artifacts 상한, 운영 모델. 정해지기 전에는 운영을 fake 모드로 둔다.
 
 ## 6. 질문 마스킹 범위
 

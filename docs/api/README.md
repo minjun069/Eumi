@@ -6,8 +6,8 @@
 |---|---|---|
 | [openapi.json](openapi.json) | 화면 API의 요청 · 응답 · 오류 형식. FE 타입은 이 파일에서 만든다(`npm run gen:api`). 내부 연동 목록은 `x-internal-api`에 있다 (2.3.4부터, 그 전은 `x-internal-ai-api`) | 버전은 파일의 `info.version` |
 | [공통_응답_및_세션_규칙.md](공통_응답_및_세션_규칙.md) | API 전체 공통 규칙: 응답 형식, 오류 코드, 세션 · CSRF, 입력값, 검색 · 페이지, 권한. openapi.json의 작업 설명이 이 문서를 가리킨다 | 확정 (11/7 정리) |
-| [ai-agent-panel.md](ai-agent-panel.md) | AI 패널: `ai_message` 행 형식 · artifacts, 질문 · 조회 · 취소, 화면 문맥, BE ↔ AI 실행 요청 · 알림(INT-01 · 02 · 07), 복구 규칙, 시간 값, 질문 마스킹 범위 | 확정 (11/2, 11/9 AI-a 연결 반영) |
-| [insight-report.md](insight-report.md) | 인사이트 보고서: 파이프라인 → BE → AI 흐름, AI의 보고서 저장(DB 직접), 허용 시트 | 초안 (11/6, 11/9 저장 주체 반영). [변경 계획](../work-ref/내부_연동_변경_계획.md)의 구현이 끝나면 확정본으로 바꾼다 |
+| [ai-agent-panel.md](ai-agent-panel.md) | AI 패널: `ai_message` 행 형식 · artifacts, 질문 · 조회 · 취소, 화면 문맥, BE ↔ AI 실행 요청 · 알림(INT-01 · 02 · 07), 복구 규칙, 시간 값, 질문 마스킹 범위 | 확정 (11/2, 11/9 AI-a 연결 반영, 11/10 시간 값 확정) |
+| [insight-report.md](insight-report.md) | 인사이트 보고서: 파이프라인 → BE → AI 흐름(INT-04 · 05 · 08), AI의 보고서 저장(DB 직접), 화면 조회(API-11 · 12), 허용 시트 | 확정 (11/10, AI 구현에 맞춤. AI 구현이 아직 다른 곳은 0절) |
 
 ## 규칙
 

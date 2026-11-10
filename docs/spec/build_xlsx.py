@@ -102,7 +102,7 @@ DOCS = {
                 cols=["ID", "페이지 범위", "기능", "요청 경로", "요청 형식", "응답 형식", "구현 (11/6)"],
                 widths=[13.2, 31.2, 28.8, 56.2, 76.2, 81.2, 24.0],
                 head=LIGHT, tab="FF23475C", freeze="C7"),
-            "내부 AI API": dict(layout="items", id="ID", title="기능",
+            "내부 연동 API": dict(layout="items", id="ID", title="기능",
                 cols=["ID", "구간", "기능", "요청 경로", "요청 형식", "응답 형식"],
                 widths=[13.2, 31.2, 28.8, 56.2, 76.2, 81.2],
                 head=LIGHT, tab="FF23475C", freeze="C7"),
