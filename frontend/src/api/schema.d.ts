@@ -337,6 +337,8 @@ export interface paths {
          * @description 현재 담당자 확인 후 수정한다. 담당자는 같은 기관 활성 회원 최소 1명이다. 본인 제외 시 수정 후 상세 접근이 없어질 수 있어 목록으로 이동한다. 최초 등록일은 수정 가능하나 management_no는 변경하지 않는다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
+         *
+         *     요청의 updatedAt이 잠근 사례자 행의 updated_at과 다르면(마이크로초까지 비교) 409 STATE_CONFLICT다. 담당자만 바꿔도 updated_at이 바뀐다.
          */
         put: operations["caseApi_updateCase"];
         post?: never;
@@ -503,7 +505,7 @@ export interface paths {
         put?: never;
         /**
          * 회원 탈퇴
-         * @description 비밀번호를 재검증하고 틀리면 WITHDRAW_PASSWORD_MISMATCH 400을 반환한다. 회원·대상 사례자·자원을 정해진 순서로 잠근다. 유일 담당 사례자 집합과 진행 중 자원 집합이 각각 transfers·resourceTransfers와 정확히 일치하는지 재검사한다. 인계·공동 담당 연결 제거·soft delete·전체 대화 삭제를 한 트랜잭션으로 수행하고 전체 세션을 폐기한다. 종료 자원 담당 FK와 상담 기록자 FK는 유지한다. 변경 경합은 409다.
+         * @description 비밀번호를 재검증하고 틀리면 WITHDRAW_PASSWORD_MISMATCH 400을 반환한다. 회원·대상 사례자·자원을 정해진 순서로 잠근다. 유일 담당 사례자 집합과 진행 중 자원 집합이 각각 transfers·resourceTransfers와 정확히 일치하는지 재검사한다. 인계·공동 담당 연결 제거·soft delete·전체 대화 삭제를 한 트랜잭션으로 수행하고 전체 세션을 폐기한다. 종료 자원 담당 FK와 상담 기록자 FK는 유지한다. 변경 경합은 409다. 같은 caseId · resourceId가 두 번 나오거나 후임이 본인이면 400 VALIDATION_ERROR, 후임이 없거나 다른 기관 · 탈퇴 회원이면 409 STATE_CONFLICT, 본인이 이미 탈퇴했으면 404 NOT_FOUND다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -1363,6 +1365,39 @@ export interface components {
             /** @description 최소 한 명. 서버가 중복을 제거한다. 등록 시 본인을 서버가 자동 추가하며, 수정 시 본인 제외 가능 */
             managerMemberIds: number[];
         };
+        CaseUpdateInput: {
+            /** @description 사례자명. trim 후 필수 */
+            name: string;
+            /**
+             * Format: date
+             * @description 생년월일. 미래 날짜 불가
+             * @example 2026-10-30
+             */
+            birthDate: string;
+            /**
+             * @description 성별
+             * @enum {string}
+             */
+            gender: "남" | "여";
+            /**
+             * @description 행정동 코드 10자리. 법정동 코드와 구분
+             * @example 1168066000
+             */
+            dongCode: string;
+            /**
+             * Format: date
+             * @description 최초 등록일. 미래 날짜 불가
+             * @example 2026-10-30
+             */
+            firstRegisteredAt: string;
+            /** @description 최소 한 명. 서버가 중복을 제거한다. 등록 시 본인을 서버가 자동 추가하며, 수정 시 본인 제외 가능 */
+            managerMemberIds: number[];
+            /**
+             * Format: date-time
+             * @description 사례자 정보 마지막 수정 일시 (소수 6자리 · 오프셋 포함). 수정(API-23) 때 받은 문자열을 그대로 돌려보낸다
+             */
+            updatedAt: string;
+        };
         CaseListItem: {
             /**
              * Format: int64
@@ -1485,6 +1520,11 @@ export interface components {
             dongCode: string;
             /** @description 사례자의 담당자 목록 */
             managers: components["schemas"]["MemberOption"][];
+            /**
+             * Format: date-time
+             * @description 사례자 정보 마지막 수정 일시 (소수 6자리 · 오프셋 포함). 수정(API-23) 때 받은 문자열을 그대로 돌려보낸다
+             */
+            updatedAt: string;
         };
         DuplicateCheckRequest: {
             /** @description 비교할 사례자명 */
@@ -1690,17 +1730,17 @@ export interface components {
             lastRecordedAt: string | null;
         };
         WithdrawalInfo: {
-            /** @description 본인이 유일 담당자여서 인계해야 하는 사례자 */
+            /** @description 본인이 담당이고 본인 말고 활성 담당자가 없어 인계해야 하는 사례자. 관리번호 순 */
             soleCases: components["schemas"]["SoleCaseItem"][];
-            /** @description 공동 담당 사례자 수 */
+            /** @description 본인 말고 활성 담당자가 1명 이상인 사례자 수. 탈퇴하면 본인 담당만 빠진다 */
             sharedCaseCount: number;
-            /** @description 같은 기관의 활성 회원 중 본인 제외 */
+            /** @description 같은 기관의 활성 회원 중 본인 제외. 이름 · 회원 ID 순 */
             successors: components["schemas"]["MemberOption"][];
             /** @description 미삭제 담당 자원 전체 수. ongoingResources 수와 endedResourceCount의 합. */
             resourceCount: number;
             /** @description BE DB에 저장된 본인 대화 중 유효 보관 기간 내 건수. AI 추론 서비스 호출 없이 조회 */
             conversationCount: number;
-            /** @description v_resource_summary.status=진행 중인 현재 담당 자원. 전부 인계해야 한다. */
+            /** @description v_resource_summary.status=진행 중인 현재 담당 자원. 전부 인계해야 한다. 자원 ID 순 */
             ongoingResources: components["schemas"]["OngoingResourceTransferItem"][];
             /** @description 종료 자원 수. 담당 FK를 유지하고 탈퇴 후 퇴사자로 표시한다. */
             endedResourceCount: number;
@@ -3695,7 +3735,8 @@ export interface operations {
                      *         "sidoCode": "11",
                      *         "sigunguCode": "11680",
                      *         "dongCode": "1168066000",
-                     *         "managers": []
+                     *         "managers": [],
+                     *         "updatedAt": "2026-11-10T21:03:05.120300+09:00"
                      *       },
                      *       "meta": {
                      *         "requestId": "c9814a56-22d4-45f9-a203-e8492ac44e73",
@@ -3777,10 +3818,11 @@ export interface operations {
                  *       "firstRegisteredAt": "2026-10-30",
                  *       "managerMemberIds": [
                  *         1
-                 *       ]
+                 *       ],
+                 *       "updatedAt": "2026-11-10T21:03:05.120300+09:00"
                  *     }
                  */
-                "application/json": components["schemas"]["CaseInput"];
+                "application/json": components["schemas"]["CaseUpdateInput"];
             };
         };
         responses: {

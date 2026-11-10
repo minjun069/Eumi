@@ -5,7 +5,7 @@ import "@/styles/case.css"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState, type FormEvent, type ReactNode } from "react"
 import { useLocation, useNavigate, useParams } from "react-router"
-import { caseApi, caseKeys, type CaseInput, type Gender } from "@/api/caseApi"
+import { caseApi, caseKeys, type CaseInput, type CaseUpdateInput, type Gender } from "@/api/caseApi"
 import { errorMessage, isApiError } from "@/api/errors"
 import { memberApi, memberKeys, type MemberOption } from "@/api/memberApi"
 import { FieldError } from "@/components/common/FieldError"
@@ -38,6 +38,7 @@ import { isValidDateString, todayString } from "@/utils/datetime"
  * - 수정: 관리번호는 바꿀 수 없음(D9-A), 본인도 담당자에서 뺄 수 있음(D6-B, 확인 창 → 저장 후 목록)
  * - 저장 전 같은 이름·생년월일 중복 확인 (API-21, 내 담당 사례자 안에서, 확인 창 후 계속 가능)
  * - 바뀐 내용이 있으면 화면을 떠날 때 경고. 저장에 실패하면 입력값을 그대로 둔다
+ * - 수정 경합(C4): 입력칸을 채운 상세의 updatedAt(baseVersion)을 함께 보낸다. 그사이 다른 곳에서 바뀌었으면 409
  */
 export function CaseFormScreen({ mode }: { mode: "new" | "edit" }) {
   const params = useParams()
@@ -51,10 +52,12 @@ export function CaseFormScreen({ mode }: { mode: "new" | "edit" }) {
   const myMemberId = profile?.memberId ?? 0
   const queryClient = useQueryClient()
 
+  // 수정 화면에 들어올 때마다 상세를 새로 받는다 (캐시로 입력칸을 채웠다가 저장 때 409가 나지 않게)
   const detailQuery = useQuery({
     queryKey: caseKeys.detail(caseId ?? 0),
     queryFn: () => caseApi.getCase(caseId ?? 0),
     enabled: caseId !== null,
+    refetchOnMount: "always",
   })
   const membersQuery = useQuery({ queryKey: memberKeys.orgMembers, queryFn: memberApi.getOrgMembers })
   const detail = detailQuery.data ?? null
@@ -63,23 +66,30 @@ export function CaseFormScreen({ mode }: { mode: "new" | "edit" }) {
     mode === "new" && profile ? emptyCaseForm(profile) : null,
   )
   const [form, setForm] = useState<CaseForm | null>(baseline)
+  // 수정: 입력칸(baseline·form)을 채운 바로 그 상세의 updatedAt. 저장 때 받은 문자열 그대로 보낸다.
+  // 제출 순간의 detailQuery.data.updatedAt은 쓰지 않는다 — 입력칸은 한 번만 채우고 data는 다시 받을 때마다 바뀌므로,
+  // 새 값을 보내면 옛 입력값으로 다른 사람의 수정을 덮어쓴다. 처음 채울 때와 409 뒤 다시 채울 때(reloadDetail)만 정한다
+  const [baseVersion, setBaseVersion] = useState<string | null>(null)
   const [showErrors, setShowErrors] = useState(false)
   const [serverErrors, setServerErrors] = useState<CaseFormErrors>({})
   const [accessError, setAccessError] = useState<CaseAccessError | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  // 수정: 사례자 정보를 처음 받았을 때 한 번만 입력칸을 채운다 (다시 받아도 입력 중인 값을 덮지 않는다)
+  // 수정: 이 화면에 들어온 뒤 새로 받은 상세로 한 번만 입력칸을 채운다 (그전에는 '불러오는 중'.
+  // 다시 받아도 입력 중인 값을 덮지 않는다). 새로 받다가 실패하면 캐시 값으로 채우지 않고 오류 화면을 보인다
+  const freshDetail = detailQuery.isSuccess && detailQuery.isFetchedAfterMount ? detailQuery.data : null
   useEffect(() => {
-    if (mode !== "edit" || !detail || baseline !== null) return
-    const loaded = formFromDetail(detail)
+    if (mode !== "edit" || !freshDetail || baseline !== null) return
+    const loaded = formFromDetail(freshDetail)
     setBaseline(loaded)
     setForm(loaded)
-  }, [mode, detail, baseline])
+    setBaseVersion(freshDetail.updatedAt)
+  }, [mode, freshDetail, baseline])
 
   const duplicateCheck = useMutation({ mutationFn: caseApi.checkDuplicate })
   const createCase = useMutation({ mutationFn: caseApi.createCase })
-  const updateCase = useMutation({ mutationFn: (input: CaseInput) => caseApi.updateCase(caseId ?? 0, input) })
+  const updateCase = useMutation({ mutationFn: (input: CaseUpdateInput) => caseApi.updateCase(caseId ?? 0, input) })
 
   const access: CaseAccessError | null =
     accessError ?? caseAccessErrorOf(detailQuery.error) ?? (mode === "edit" && caseId === null ? "NOT_FOUND" : null)
@@ -187,6 +197,7 @@ export function CaseFormScreen({ mode }: { mode: "new" | "edit" }) {
     const loaded = formFromDetail(result.data)
     setBaseline(loaded)
     setForm(loaded)
+    setBaseVersion(result.data.updatedAt)
     setShowErrors(false)
   }
 
@@ -235,6 +246,8 @@ export function CaseFormScreen({ mode }: { mode: "new" | "edit" }) {
       return
     }
 
+    // 수정 입력칸은 baseVersion과 함께 채우므로 여기서 비어 있을 수 없다 (그전에는 '불러오는 중'이라 저장 버튼이 없다)
+    if (baseVersion === null) return
     const removingMe = !input.managerMemberIds.includes(myMemberId)
     if (removingMe) {
       const ok = await confirmDialog({
@@ -245,7 +258,7 @@ export function CaseFormScreen({ mode }: { mode: "new" | "edit" }) {
       if (!ok) return
     }
     try {
-      await updateCase.mutateAsync(input)
+      await updateCase.mutateAsync({ ...input, updatedAt: baseVersion })
     } catch (error) {
       fail(error)
       return
