@@ -1,9 +1,9 @@
 # 인사이트 보고서 내부 연동 계약 (A 방식, 11/10 확정)
 
 파이프라인이 월 분석을 끝내면 BE가 그 달 동 목록을 AI(FastAPI)에 넘기고, AI는 동마다 보고서를 만들어 `region_insight_report`에 **직접 저장**한다. 화면은 API-11 · 12로 읽는다. 생성 상태(실행 기록)는 저장하지 않는다(A 방식).
-API 형식은 `openapi.json` 2.4.0의 `x-internal-api` INT-04 · 05 · 08과 API-11 · 12, DB는 `db/migration/V20261106_01__insight_report_slots.sql`(1단계)과 2단계 V 파일이 기준이다. 11/10에 AI 구현(`ai/api.py`)에 맞춰 확정했고, AI 구현이 아직 계약과 다른 곳은 0절에 적었다.
+API 형식은 `openapi.json` 2.4.0의 `x-internal-api` INT-04 · 05 · 08과 API-11 · 12, DB는 `db/migration/V20261106_01__insight_report_slots.sql`(1단계)과 `V20261110_02__insight_report.sql`(2단계 · 시연용 보고서)이 기준이다. 11/10에 AI 구현(`ai/api.py`)에 맞춰 확정했고, AI 구현이 아직 계약과 다른 곳은 0절에 적었다.
 
-- **저장 주체 (11/6 결정, [decisions/internal-integration.md](../decisions/internal-integration.md) 1번):** BE가 받아 저장하던 INT-06은 없앴다. 권한은 `afterMigrate.sql`로 바꿔 11/9 운영에 반영했다. 1단계 V 파일의 머리 주석과 표 설명(COMMENT)에 남은 "백엔드가 저장"은 2단계 V 파일에서 고친다.
+- **저장 주체 (11/6 결정, [decisions/internal-integration.md](../decisions/internal-integration.md) 1번):** BE가 받아 저장하던 INT-06은 없앴다. 권한은 `afterMigrate.sql`로 바꿔 11/9 운영에 반영했다. 표 설명(COMMENT)의 "백엔드가 저장"은 V20261110_02에서 고쳤다. 병합된 1단계 V 파일의 머리 주석은 그대로 둔다.
 - **11/10에 바뀐 것 (결정 2 · 10번):** INT-05는 `{requestId, month, dongCodes}`, 202 본문 없음(꼬리표는 AI가 직접 읽음). 생성 완료 알림 INT-08을 더했다. API-11 · 12는 새 형식(8절)으로 바뀐다.
 
 ## 0. AI 구현과 아직 다른 곳 (김민준 확인 대기)
@@ -14,6 +14,7 @@ API 형식은 `openapi.json` 2.4.0의 `x-internal-api` INT-04 · 05 · 08과 API
 | 저장 조건 | 결과 행 `updated_at` = 읽어 둔 꼬리표일 때만 반영(4절) | 조건 없이 UPSERT | 생성 중 결과가 다시 적재되면 옛 결과로 만든 보고서가 최신 보고서를 덮을 수 있다. 꼬리표가 달라 조회에서는 숨겨진다 |
 | 같은 달 요청이 겹침 | 하던 작업을 멈추고 새 요청으로 다시 만든다(4절 INT-05) | 두 요청이 함께 돈다 | 늦게 끝난 쪽이 덮는다(7절) |
 | 저장 재시도 | 일시 실패만 3번, 1초 · 5초 · 30초(6절) | 오류 종류와 상관없이 간격 없이 최대 3번 | 제약 위반도 다시 시도하고, DB 장애가 길면 실패로 끝난다 |
+| 예전 칸 이름 | 2단계(V20261110_02)에서 `summary_lines` · `report`를 지웠다 | 저장 문장이 덮어쓸 때 `summary_lines=NULL, report=NULL`을 적는다 | 칸이 없어 저장이 모두 실패한다. http 전환 전에 고쳐야 한다 (운영은 fake라 AI가 저장하지 않음) |
 
 - 11/9 로컬 시험에서 자료 조회 도구를 고르지 않는 문제(대화 패널과 같은 작업 선택 단계)가 확인됐다. 고쳐질 때까지 실제 AI로 보고서를 만들지 않는다.
 
@@ -197,7 +198,8 @@ WHERE r.period_start = DATE '2025-12-01' AND i.adm_cd10 IS NULL;
 
 ## 8. 화면 조회 (API-11 · 12, OpenAPI 2.4.0)
 
-- **배포 순서:** BE MR → 2단계 V 파일 · 새 형식 seed MR → FE MR 순서로 develop에 넣고, 운영에는 한 배포로 함께 내보낸다. 지금 운영 BE는 새 형식 행(`summary_lines` · `report`가 NULL)을 읽으면 API-11 · 12에서 500을 내므로, 새 형식 seed와 AI의 보고서 저장은 이 배포 전에 운영에 넣지 않는다.
+- **배포 순서:** BE MR → DB MR(V20261110_02: 2단계 + 시연용 보고서) → FE MR 순서로 develop에 넣고, 운영에는 한 배포로 함께 내보낸다. 지금 운영 BE는 새 형식 행(`summary_lines` · `report`가 NULL)을 읽으면 API-11 · 12에서 500을 내므로, 새 형식 seed와 AI의 보고서 저장은 이 배포 전에 운영에 넣지 않는다.
+- **시연용 보고서:** V20261110_02가 결과가 있는 모든 동 · 월에 `[시연용 예시]` 보고서(퀵 인사이트 + V01 · V06 · V03 + 설명, 수치는 그 동 결과 행의 점수 · 단계)를 넣는다. AI가 만든 최신 보고서는 덮지 않고, AI가 그 동을 저장하면 시연용 보고서를 덮어쓴다. 결과가 다시 적재되면 꼬리표가 달라 숨겨진다.
 - **API-11:** 응답 모양 그대로. `insight.summary`는 최신 보고서(`result_updated_at` = 결과 행 `updated_at`)의 `quick_insight` 한 개를 담은 배열이다. 줄바꿈으로 나눠 배열을 만들지 않는다. 최신 보고서가 없거나 `quick_insight`가 NULL이면 `insight: null`이다.
 - **API-12:** `report = {quickInsight, graphs: [{sheet, description}] 3개, generatedAt}` 또는 null. `graphs`는 `graph_1~3` 순서다. 결과 행이 없으면 404, 보고서가 없거나 옛 보고서면 `{report: null}`이다. 시트가 허용 목록(9절) 밖이면 그 보고서도 `{report: null}`로 보고 BE가 경고 로그를 남긴다.
 - **FE:** `npm run gen:api`로 `frontend/src/api/schema.d.ts`를 다시 만든 뒤 보고서 화면을 바꾼다(FE MR에서). 퀵 인사이트와 설명은 일반 글(HTML 아님)이며 줄바꿈을 유지해 보여 준다. GET은 생성을 실행하지 않는다.

@@ -2,7 +2,7 @@
 
 | 문서 | 파일 | 상태 |
 |---|---|---|
-| 기준 문서: 테이블 정의서 · API 명세 · 기능명세 | [spec/](spec/README.md) (md 원본 + 엑셀) | 테이블 정의서 2.4.0 · API 명세 2.4.0 · 기능명세 2.4.0 (11/10 AI-b 인사이트 보고서 반영). DB 기준은 `db/migration` |
+| 기준 문서: 테이블 정의서 · API 명세 · 기능명세 | [spec/](spec/README.md) (md 원본 + 엑셀) | 테이블 정의서 2.4.1 · API 명세 2.4.0 · 기능명세 2.4.0 (11/10 AI-b 인사이트 보고서 반영, 보고서 2단계 V20261110_02). DB 기준은 `db/migration` |
 | ERD | [spec/table-definition.md](spec/table-definition.md) | 최종 구조는 테이블 정의서에 있음. 그림은 저장소 밖 ERDCloud |
 | 확정 계약 목록 | [api/README.md](api/README.md) | 확정된 계약만 둠 |
 | API 공통 규칙 (응답 · 오류 · 세션 · 입력값 · 페이지) | [api/공통_응답_및_세션_규칙.md](api/공통_응답_및_세션_규칙.md) | 확정 (11/7 정리) |

@@ -1,6 +1,6 @@
 # 이음이 테이블 정의서
 
-- 판: 2.4.0 (2026-11-06, 11/9 보고서 저장 주체 설명 수정)
+- 판: 2.4.1 (2026-11-10, 인사이트 보고서 2단계 V20261110_02 반영 · analysis.pipeline_check(V20261109_01) · analysis.stream_progress(V20261110_01) 추가)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_테이블_정의서.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - DB의 실제 구조는 `db/migration`의 V 파일이 기준이다. V 파일이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -10,8 +10,8 @@
 ## 테이블 목록
 
 - 제목: 이음이 테이블 목록
-- 요약: PostgreSQL 17  24개 테이블  206개 컬럼  26개 FK
-- 출처: eumi/db/migration/V1~V6·V20261102_01~02·V20261106_01 원문 사본 + 인사이트 보고서 2단계(예정)
+- 요약: PostgreSQL 17  26개 테이블  226개 컬럼  26개 FK
+- 출처: eumi/db/migration/V1~V6·V20261102_01~02·V20261106_01·V20261109_01·V20261110_01~02 원문 사본
 
 ### public
 
@@ -30,7 +30,7 @@
 | public.ai_conversation | AI 대화 | 5 | conversation_id | AI 대화 | V4__ai_conversation.sql<br>V20261102_02__ai_message.sql |
 | public.ai_message | AI 대화 메시지 | 9 | message_id | AI 대화 메시지 (질문·진행 단계·끝 행을 한 행씩) | V20261102_02__ai_message.sql |
 | public.region_result | 읍면동 월별 결과 (데이터 분석 정의, 파이프라인 적재) | 8 | period_start, adm_cd10 | 읍면동 월별 결과 (데이터 분석 정의, 파이프라인 적재) | V5__dashboard.sql |
-| public.region_insight_report | 읍면동 인사이트 보고서 (AI가 만들어 저장, 동·월마다 하나) | 11 | period_start, adm_cd10 | 퀵 인사이트와 그래프 3개 · 그래프별 설명 (AI가 eumi_ai 계정으로 직접 저장, 백엔드는 조회만) | V5__dashboard.sql<br>V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
+| public.region_insight_report | 읍면동 인사이트 보고서 (AI가 만들어 저장, 동·월마다 하나) | 11 | period_start, adm_cd10 | 퀵 인사이트와 그래프 3개 · 그래프별 설명 (AI가 eumi_ai 계정으로 직접 저장, 백엔드는 조회만) | V5__dashboard.sql<br>V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
 
 ### analysis
 
@@ -46,12 +46,14 @@
 | analysis.bh_grid_anomaly | 격자 행동 이상 점수 | 4 | period_start, grid_cd | 파이프라인·AI 분석 근거 | V6__analysis.sql |
 | analysis.flow_detail | 유동 상세 | 7 | period_start, grid_cd, dim_type, dim_value | 파이프라인·AI 분석 근거 | V6__analysis.sql |
 | analysis.bg_grid_indicator | 격자 배경 지표 | 10 | ref_year, grid_cd | 파이프라인·AI 분석 근거 | V6__analysis.sql |
+| analysis.pipeline_check | 파이프라인 검사 결과 | 6 | period_start, check_name | 월 배치 마지막 단계의 검사 결과 (Grafana가 읽음, 화면·AI는 쓰지 않음) | V20261109_01__pipeline_check.sql |
+| analysis.stream_progress | 스트리밍 진행 기록 | 14 | progress_id | 유동 상세 스트리밍의 마이크로배치마다 한 행 (Grafana가 읽음, 화면·AI는 쓰지 않음, 7일 지난 행은 스트림 시작 때 삭제) | V20261110_01__stream_progress.sql |
 
 ## 컬럼 정의
 
 - 제목: 테이블 컬럼 정의
 - 요약: PK의 NOT NULL 및 IDENTITY를 반영  분석 측정값의 NULL 허용 구분
-- 출처: eumi/db/migration/V1~V6·V20261102_01~02·V20261106_01 및 COMMENT · ai_message.content 설명은 질문 마스킹 범위(docs/api/ai-agent-panel.md 6절, 11/3) 반영 · region_insight_report는 11/6 변경의 최종 구조 (2단계 적용 후)
+- 출처: eumi/db/migration/V1~V6·V20261102_01~02·V20261106_01·V20261109_01·V20261110_01~02 및 COMMENT · ai_message.content 설명은 질문 마스킹 범위(docs/api/ai-agent-panel.md 6절, 11/3) 반영 · region_insight_report는 11/6 변경의 최종 구조 (V20261110_01 2단계 적용 후)
 
 ### public.organization
 
@@ -231,14 +233,14 @@
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | period_start | 기준월 | DATE | 필수 | PK | public.region_result |  | DATE NOT NULL | V5__dashboard.sql |
 | 2 | adm_cd10 | 행정동코드 | VARCHAR(10) | 필수 | PK | public.region_result |  | VARCHAR(10) NOT NULL | V5__dashboard.sql |
-| 3 | quick_insight | 퀵 인사이트 (읍면동 화면 위쪽 위험 설명 2~3줄) | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
-| 4 | graph_1 | 그래프 1 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01) | VARCHAR(100) | 필수 |  |  |  | VARCHAR(100) NOT NULL | V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
-| 5 | desc_1 | 그래프 1 설명 | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
-| 6 | graph_2 | 그래프 2 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01) | VARCHAR(100) | 필수 |  |  |  | VARCHAR(100) NOT NULL | V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
-| 7 | desc_2 | 그래프 2 설명 | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
-| 8 | graph_3 | 그래프 3 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01) | VARCHAR(100) | 필수 |  |  |  | VARCHAR(100) NOT NULL | V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
-| 9 | desc_3 | 그래프 3 설명 | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
-| 10 | result_updated_at | 기준 결과 수정 시각 (보고서를 만들 때 읽은 region_result.updated_at, 다르면 옛 보고서로 보고 조회·저장 제외) | TIMESTAMP | 필수 |  |  |  | TIMESTAMP NOT NULL | V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
+| 3 | quick_insight | 퀵 인사이트 (읍면동 화면 위쪽 위험 설명 2~3줄) | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
+| 4 | graph_1 | 그래프 1 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01) | VARCHAR(100) | 필수 |  |  |  | VARCHAR(100) NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
+| 5 | desc_1 | 그래프 1 설명 | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
+| 6 | graph_2 | 그래프 2 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01) | VARCHAR(100) | 필수 |  |  |  | VARCHAR(100) NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
+| 7 | desc_2 | 그래프 2 설명 | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
+| 8 | graph_3 | 그래프 3 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01) | VARCHAR(100) | 필수 |  |  |  | VARCHAR(100) NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
+| 9 | desc_3 | 그래프 3 설명 | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
+| 10 | result_updated_at | 기준 결과 수정 시각 (보고서를 만들 때 읽은 region_result.updated_at, 다르면 옛 보고서로 보고 조회·저장 제외) | TIMESTAMP | 필수 |  |  |  | TIMESTAMP NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
 | 11 | generated_at | AI 생성 일시 | TIMESTAMPTZ | 필수 |  |  |  | TIMESTAMPTZ NOT NULL | V5__dashboard.sql |
 
 ### analysis.dim_grid100
@@ -379,6 +381,36 @@
 | 9 | employees | 총종사자수 | INT | 선택 |  |  |  | INT | V6__analysis.sql |
 | 10 | updated_at | 수정 시각 | TIMESTAMP | 필수 |  |  | now() | TIMESTAMP NOT NULL DEFAULT now() | V6__analysis.sql |
 
+### analysis.pipeline_check
+
+| 순번 | 컬럼 | 논리명 | 타입 | 필수 | PK | FK 대상 | 기본값 | 정의 원문 | 기준 파일 |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | period_start | 기준월 | DATE | 필수 | PK |  |  | DATE NOT NULL | V20261109_01__pipeline_check.sql |
+| 2 | check_name | 검사 이름 | VARCHAR(60) | 필수 | PK |  |  | VARCHAR(60) NOT NULL | V20261109_01__pipeline_check.sql |
+| 3 | seq | 검사 순서 (파이프라인 순서대로 보이게) | SMALLINT | 필수 |  |  |  | SMALLINT NOT NULL | V20261109_01__pipeline_check.sql |
+| 4 | passed | 통과 여부 | BOOLEAN | 필수 |  |  |  | BOOLEAN NOT NULL | V20261109_01__pipeline_check.sql |
+| 5 | detail | 검사 수치 (로그의 [OK]/[FAIL] 뒤 수치 그대로) | TEXT | 선택 |  |  |  | TEXT | V20261109_01__pipeline_check.sql |
+| 6 | checked_at | 검사 시각 | TIMESTAMP | 필수 |  |  | now() | TIMESTAMP NOT NULL DEFAULT now() | V20261109_01__pipeline_check.sql |
+
+### analysis.stream_progress
+
+| 순번 | 컬럼 | 논리명 | 타입 | 필수 | PK | FK 대상 | 기본값 | 정의 원문 | 기준 파일 |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | progress_id | 진행 기록 ID | BIGINT | 필수 | PK |  | BY DEFAULT IDENTITY | BIGINT GENERATED BY DEFAULT AS IDENTITY | V20261110_01__stream_progress.sql |
+| 2 | recorded_at | 기록 시각 | TIMESTAMPTZ | 필수 |  |  | now() | TIMESTAMPTZ NOT NULL DEFAULT now() | V20261110_01__stream_progress.sql |
+| 3 | run_id | 스트림 실행 ID (Spark가 시작할 때마다 새로 줌) | VARCHAR(36) | 필수 |  |  |  | VARCHAR(36) NOT NULL | V20261110_01__stream_progress.sql |
+| 4 | batch_id | 배치 번호 (쉬는 동안 같은 번호 반복) | BIGINT | 필수 |  |  |  | BIGINT NOT NULL | V20261110_01__stream_progress.sql |
+| 5 | input_rows | 입력 행 수 | BIGINT | 필수 |  |  |  | BIGINT NOT NULL | V20261110_01__stream_progress.sql |
+| 6 | input_rps | 수신 속도 (행/초) | NUMERIC(12,1) | 선택 |  |  |  | NUMERIC(12,1) | V20261110_01__stream_progress.sql |
+| 7 | processed_rps | 처리 속도 (행/초) | NUMERIC(12,1) | 선택 |  |  |  | NUMERIC(12,1) | V20261110_01__stream_progress.sql |
+| 8 | lag_rows | 밀린 메시지 (Kafka 최신 위치 − Spark가 읽은 위치, 파티션 합) | BIGINT | 선택 |  |  |  | BIGINT | V20261110_01__stream_progress.sql |
+| 9 | event_time_max | 그 배치에서 본 가장 늦은 데이터 시각 | TIMESTAMPTZ | 선택 |  |  |  | TIMESTAMPTZ | V20261110_01__stream_progress.sql |
+| 10 | watermark | 마감 기준 시각 (event_time_max − 1시간) | TIMESTAMPTZ | 선택 |  |  |  | TIMESTAMPTZ | V20261110_01__stream_progress.sql |
+| 11 | duration_ms | 배치 소요 시간 (ms) | INTEGER | 선택 |  |  |  | INTEGER | V20261110_01__stream_progress.sql |
+| 12 | state_rows | 집계 중인 행 수 (메모리 상태) | BIGINT | 선택 |  |  |  | BIGINT | V20261110_01__stream_progress.sql |
+| 13 | closed_days | 그 배치에서 닫혀 flow_detail에 더한 날짜 | DATE[] | 선택 |  |  |  | DATE[] | V20261110_01__stream_progress.sql |
+| 14 | loaded_rows | 더한 행 수 (적재 중 표시 행은 NULL) | INTEGER | 선택 |  |  |  | INTEGER | V20261110_01__stream_progress.sql |
+
 ## 관계
 
 - 제목: 외래키 관계
@@ -417,8 +449,8 @@
 ## 제약조건
 
 - 제목: 기본키 고유키 검사 제약
-- 요약: 88개 테이블 제약  FOREIGN KEY 포함  명시적 INDEX는 인덱스 시트
-- 출처: eumi/db/migration/V1~V6·V20261102_02·V20261106_01 + 인사이트 보고서 2단계(예정)
+- 요약: 91개 테이블 제약  FOREIGN KEY 포함  명시적 INDEX는 인덱스 시트
+- 출처: eumi/db/migration/V1~V6·V20261102_02·V20261106_01·V20261109_01·V20261110_01~02
 
 ### public.organization
 
@@ -628,11 +660,24 @@
 | PRIMARY KEY | pk_bg_grid_indicator | PRIMARY KEY (ref_year, grid_cd) | V6__analysis.sql |
 | FOREIGN KEY | fk_bg_grid_indicator_grid | FOREIGN KEY (grid_cd) REFERENCES analysis.dim_grid100 (grid_cd) | V6__analysis.sql |
 
+### analysis.pipeline_check
+
+| 종류 | 제약명 | 정의 | 기준 파일 |
+|---|---|---|---|
+| PRIMARY KEY | pk_pipeline_check | PRIMARY KEY (period_start, check_name) | V20261109_01__pipeline_check.sql |
+| CHECK | ck_pipeline_check_month | CHECK (period_start = date_trunc('month', period_start)::date) | V20261109_01__pipeline_check.sql |
+
+### analysis.stream_progress
+
+| 종류 | 제약명 | 정의 | 기준 파일 |
+|---|---|---|---|
+| PRIMARY KEY | pk_stream_progress | PRIMARY KEY (progress_id) | V20261110_01__stream_progress.sql |
+
 ## 인덱스
 
 - 제목: 명시적 인덱스 정의
-- 요약: 13개 CREATE INDEX  PK·UNIQUE의 자동 인덱스는 제외
-- 출처: eumi/db/migration/V1~V6·V20261102_02
+- 요약: 14개 CREATE INDEX  PK·UNIQUE의 자동 인덱스는 제외
+- 출처: eumi/db/migration/V1~V6·V20261102_02·V20261110_01
 
 ### public.member
 
@@ -692,11 +737,17 @@
 |---|---|---|
 | ix_re_apt_trade_region | (adm_cd10, contract_date) | V6__analysis.sql |
 
+### analysis.stream_progress
+
+| 인덱스명 | 정의 | 기준 파일 |
+|---|---|---|
+| ix_stream_progress_recorded_at | (recorded_at) | V20261110_01__stream_progress.sql |
+
 ## 뷰
 
 - 제목: 조회용 뷰
 - 요약: 6개 VIEW  API의 회원·담당·소유권 조건은 별도 적용
-- 출처: eumi/db/migration/V2~V5·V20261102_02·V20261106_01 + 인사이트 보고서 2단계(예정)
+- 출처: eumi/db/migration/V2~V5·V20261102_02·V20261106_01·V20261110_02
 
 | 뷰 | 용도 | 기준 파일 |
 |---|---|---|
@@ -705,7 +756,7 @@
 | public.v_case_summary | 만 나이·18/39/64세 경계 연령대·지역·최근 상담일 | V2__cases.sql |
 | public.v_resource_summary | 미삭제 자원·자동 종료·담당자·기관·지역 | V3__resources.sql |
 | public.v_conversation_summary | 본인 대화 조회에 쓰는 보관 중 대화 요약 (ai_message 기준, 첫 질문은 등록 당시 마스킹 처리 결과, 질문 수는 실패·취소 포함) | V4__ai_conversation.sql<br>V20261102_02__ai_message.sql |
-| public.v_region_insight | 동·월 점수 · 등급 · 퀵 인사이트 (최신 보고서만 붙임: result_updated_at = 결과 updated_at, 없으면 퀵 인사이트 · 생성 일시 NULL) | V5__dashboard.sql<br>V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
+| public.v_region_insight | 동·월 점수 · 등급 · 퀵 인사이트 (최신 보고서만 붙임: result_updated_at = 결과 updated_at, 없으면 퀵 인사이트 · 생성 일시 NULL) | V5__dashboard.sql<br>V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
 
 ## 뷰 컬럼
 
@@ -810,8 +861,8 @@
 | bh_score | r.bh_score | LEFT JOIN·CASE·원본 nullable 적용 | V5__dashboard.sql |
 | bh_grade | r.bh_grade | LEFT JOIN·CASE·원본 nullable 적용 | V5__dashboard.sql |
 | risk_grade | r.risk_grade | LEFT JOIN·CASE·원본 nullable 적용 | V5__dashboard.sql |
-| quick_insight | i.quick_insight (LEFT JOIN 조건에 i.result_updated_at = r.updated_at) | LEFT JOIN·CASE·원본 nullable 적용 | V20261106_01__insight_report_slots.sql<br>2단계 (예정) |
-| insight_generated_at | i.generated_at AS insight_generated_at (최신 보고서만, 위와 같은 조건) | LEFT JOIN·CASE·원본 nullable 적용 | V5__dashboard.sql<br>2단계 (예정) |
+| quick_insight | i.quick_insight (LEFT JOIN 조건에 i.result_updated_at = r.updated_at) | LEFT JOIN·CASE·원본 nullable 적용 | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
+| insight_generated_at | i.generated_at AS insight_generated_at (최신 보고서만, 위와 같은 조건) | LEFT JOIN·CASE·원본 nullable 적용 | V5__dashboard.sql<br>V20261110_02__insight_report.sql |
 
 ## 함수
 
@@ -856,74 +907,14 @@
 ## SQL 원문
 
 - 제목: PostgreSQL 최신 스키마 원문
-- 요약: V1~V6·V20261102_01~02·V20261106_01 연결 스냅샷 + 인사이트 보고서 2단계 초안  적용은 원본 마이그레이션과 Flyway 컨테이너 사용
+- 요약: V1~V6·V20261102_01~02·V20261106_01·V20261109_01·V20261110_01~02 연결 스냅샷  적용은 원본 마이그레이션과 Flyway 컨테이너 사용
 - 출처: db/migration의 V 파일 + 이 절의 sql 블록
 
 엑셀의 이 시트는 아래 sql 블록을 줄마다 옮겨 만든다. `-- @MIGRATIONS` 줄 자리에는 `db/migration`의 V 파일을 버전 순서로 넣는다(파일마다 `-- SOURCE 파일명`). V 파일 내용은 여기에 다시 적지 않는다.
 
 ```sql
--- PostgreSQL 17 최신 구조 스냅샷 2026-11-06
--- 원본 V1~V6·V20261102_01~02·V20261106_01 연결본 + 인사이트 보고서 2단계 초안. 적용은 db/migration 원본과 Flyway 컨테이너 사용. 기존 DB에 이 파일을 중복 실행하지 않음.
+-- PostgreSQL 17 최신 구조 스냅샷 2026-11-10
+-- 원본 V1~V6·V20261102_01~02·V20261106_01·V20261109_01·V20261110_01~02 연결본. 적용은 db/migration 원본과 Flyway 컨테이너 사용. 기존 DB에 이 파일을 중복 실행하지 않음.
 
 -- @MIGRATIONS
--- SOURCE 2단계 초안 (다음 주 백엔드 MR과 함께 병합, 파일 이름 날짜는 병합일)
--- 인사이트 보고서 구조 변경 2단계: 예전 형식 컬럼 삭제 / PostgreSQL 17
--- 1단계: V20261106_01__insight_report_slots.sql
---   * 백엔드(API-11 · API-12 조회)가 새 컬럼을 쓰도록 바뀐 MR에 함께 넣는다. 보고서 저장은 AI가 한다 (2026-11-06 결정).
---   * 파일 이름의 날짜는 병합하는 날로 바꾼다 (1단계 파일보다 뒤 버전이면 된다).
---   * summary_lines · report를 지우고, 새 형식 8칸을 NOT NULL로 바꾼다.
---   * v_region_insight는 컬럼을 빼야 하므로 지우고 다시 만든다.
---     최신 보고서(result_updated_at = 결과 행 updated_at)만 붙이므로 옛 보고서는 퀵 인사이트 · 생성 일시가 NULL이다.
-
--- 예전 형식만 있는 행은 새 칸으로 옮길 수 없다 (JSON 보고서 → 그래프 3칸 변환 규칙 없음)
-DO $$
-BEGIN
-    IF EXISTS (SELECT 1 FROM region_insight_report WHERE quick_insight IS NULL) THEN
-        RAISE EXCEPTION '예전 형식(summary_lines · report)만 있는 인사이트 보고서가 있어 컬럼을 지울 수 없습니다. 그 동·월 보고서를 새 형식으로 다시 만들거나 지운 뒤 다시 실행하세요.';
-    END IF;
-END $$;
-
-
-DROP VIEW v_region_insight;
-
-ALTER TABLE region_insight_report
-    DROP CONSTRAINT ck_region_insight_report_format,
-    DROP CONSTRAINT ck_region_insight_report_summary,
-    DROP CONSTRAINT ck_region_insight_report_report,
-    DROP COLUMN summary_lines,
-    DROP COLUMN report,
-    ALTER COLUMN quick_insight     SET NOT NULL,
-    ALTER COLUMN graph_1           SET NOT NULL,
-    ALTER COLUMN desc_1            SET NOT NULL,
-    ALTER COLUMN graph_2           SET NOT NULL,
-    ALTER COLUMN desc_2            SET NOT NULL,
-    ALTER COLUMN graph_3           SET NOT NULL,
-    ALTER COLUMN desc_3            SET NOT NULL,
-    ALTER COLUMN result_updated_at SET NOT NULL;
-
-
--- 읍면동 화면 위쪽 (지역 이름, 점수·단계, 퀵 인사이트). 최신 보고서가 없으면 quick_insight · insight_generated_at이 NULL
-CREATE VIEW v_region_insight AS
-SELECT
-    r.period_start,
-    r.adm_cd10,
-    d.adm_nm AS dong_name,
-    left(r.adm_cd10, 5) AS sigungu_code,
-    d.sgg_nm AS sigungu_name,
-    r.bg_score,
-    r.bg_grade,
-    r.bh_score,
-    r.bh_grade,
-    r.risk_grade,
-    i.quick_insight,
-    i.generated_at AS insight_generated_at
-FROM region_result r
-JOIN dim_region d ON d.adm_cd10 = r.adm_cd10
-LEFT JOIN region_insight_report i
-       ON i.period_start = r.period_start AND i.adm_cd10 = r.adm_cd10
-      AND i.result_updated_at = r.updated_at;
-
-
--- 저장 주체 설명을 고친다 (1단계 COMMENT는 '백엔드가 저장'으로 남아 있음)
-COMMENT ON TABLE region_insight_report IS '읍면동 인사이트 보고서 (동·월마다 하나, AI가 만들어 저장)';
 ```
