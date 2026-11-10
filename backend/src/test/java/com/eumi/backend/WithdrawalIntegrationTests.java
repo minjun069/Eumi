@@ -295,28 +295,113 @@ class WithdrawalIntegrationTests {
         }
         assertThat(isWithdrawn()).isTrue();assertThat(sessionCount(caller)).isZero();
     }
-    @Test void questionAuthenticatedBeforeWithdrawalCanStillCommitAfterwardsAndIsReportedAsExistingRace() throws Exception {
+    @ParameterizedTest @ValueSource(booleans={false,true})
+    void questionAuthenticatedBeforeWithdrawalIsRejectedBeforeAnyWritesOrAiStart(boolean existing) throws Exception {
+        UUID id=completedConversationForQuestion(existing);
+        clearInvocations(agent,lifecycle);
         var reached=new CountDownLatch(1);var resume=new CountDownLatch(1);
-        doAnswer(call->{reached.countDown();await(resume);return call.callRealMethod();}).when(agent).createConversation(any(UUID.class),eq(caller));
+        doAnswer(call->{reached.countDown();await(resume);return call.callRealMethod();}).when(agent).lockActiveMember(caller);
         try(var executor=Executors.newSingleThreadExecutor()) {
-            var pending=executor.submit(()->browser.post("/agent/questions",new AgentDtos.QuestionRequest(null,"Synthetic race question")));
+            var pending=executor.submit(()->browser.post("/agent/questions",new AgentDtos.QuestionRequest(id,"Synthetic race question")));
             try {assertThat(reached.await(8,TimeUnit.SECONDS)).isTrue();noContent(login(caller).post(PATH,emptyInput()));}
             finally {resume.countDown();}
-            var created=data(pending.get(12,TimeUnit.SECONDS),202);UUID id=UUID.fromString(created.path("conversationId").asText());conversations.add(id);
-            // 기존 AgentService의 인증/신규 대화 INSERT 사이 경합이다. 지시대로 재현·보고만 하고 다른 API는 바꾸지 않는다.
-            assertThat(isWithdrawn()).isTrue();assertThat(count("SELECT count(*) FROM public.ai_conversation WHERE member_id=?",caller)).isEqualTo(1);
-            assertThat(count("SELECT count(*) FROM public.ai_message WHERE conversation_id=?",id)).isEqualTo(1);
-            assertThat(writer.append(id,created.path("questionId").asLong(),"완료","Synthetic late answer",null)).isFalse();
+            error(pending.get(12,TimeUnit.SECONDS),401,"UNAUTHENTICATED");
         }
+        assertThat(isWithdrawn()).isTrue();assertNoConversationsOrMessages();verifyNoQuestionWritesOrAiStart();
+    }
+    @ParameterizedTest @ValueSource(booleans={false,true})
+    void questionShareLockWaitsForWithdrawalAndRejectsTheCommittedWithdrawnMember(boolean existing) throws Exception {
+        UUID id=completedConversationForQuestion(existing);var asking=login(caller);
+        clearInvocations(agent,lifecycle);
+        var held=new CountDownLatch(1);var release=new CountDownLatch(1);var askingAtLock=new CountDownLatch(1);
+        var withdrawalPid=new AtomicInteger();var questionPid=new AtomicInteger();
+        doAnswer(call->{
+            Object result=call.callRealMethod();withdrawalPid.set(jdbc.queryForObject("SELECT pg_backend_pid()",Integer.class));
+            held.countDown();await(release);return result;
+        }).when(repository).lockMembers(any());
+        doAnswer(call->{
+            questionPid.set(jdbc.queryForObject("SELECT pg_backend_pid()",Integer.class));askingAtLock.countDown();return call.callRealMethod();
+        }).when(agent).lockActiveMember(caller);
+        try(var executor=Executors.newFixedThreadPool(2)) {
+            var withdrawal=executor.submit(()->browser.post(PATH,emptyInput()));
+            Future<HttpResponse<String>> question=null;
+            try {
+                assertThat(held.await(8,TimeUnit.SECONDS)).isTrue();
+                question=executor.submit(()->asking.post("/agent/questions",new AgentDtos.QuestionRequest(id,"Synthetic waiting question")));
+                assertThat(askingAtLock.await(5,TimeUnit.SECONDS)).isTrue();
+                assertThat(awaitBlockedSelect(questionPid,withdrawalPid,"FOR SHARE")).as("question member lock waits for withdrawal").isTrue();
+            } finally {release.countDown();}
+            noContent(withdrawal.get(12,TimeUnit.SECONDS));error(question.get(12,TimeUnit.SECONDS),401,"UNAUTHENTICATED");
+        }
+        assertThat(isWithdrawn()).isTrue();assertNoConversationsOrMessages();verifyNoQuestionWritesOrAiStart();
+    }
+    @ParameterizedTest @ValueSource(booleans={false,true})
+    void withdrawalWaitsForQuestionMemberShareLockThenDeletesTheCommittedQuestion(boolean existing) throws Exception {
+        UUID id=completedConversationForQuestion(existing);var withdrawing=login(caller);
+        var held=new CountDownLatch(1);var release=new CountDownLatch(1);var withdrawalAtLock=new CountDownLatch(1);
+        var questionPid=new AtomicInteger();var withdrawalPid=new AtomicInteger();
+        doAnswer(call->{
+            Object result=call.callRealMethod();questionPid.set(jdbc.queryForObject("SELECT pg_backend_pid()",Integer.class));
+            held.countDown();await(release);return result;
+        }).when(agent).lockActiveMember(caller);
+        doAnswer(call->{
+            withdrawalPid.set(jdbc.queryForObject("SELECT pg_backend_pid()",Integer.class));withdrawalAtLock.countDown();return call.callRealMethod();
+        }).when(repository).lockMembers(any());
+        try(var executor=Executors.newFixedThreadPool(2)) {
+            var question=executor.submit(()->browser.post("/agent/questions",new AgentDtos.QuestionRequest(id,"Synthetic earlier question")));
+            Future<HttpResponse<String>> withdrawal=null;
+            try {
+                assertThat(held.await(8,TimeUnit.SECONDS)).isTrue();
+                withdrawal=executor.submit(()->withdrawing.post(PATH,emptyInput()));
+                assertThat(withdrawalAtLock.await(5,TimeUnit.SECONDS)).isTrue();
+                assertThat(awaitBlockedSelect(withdrawalPid,questionPid)).as("withdrawal waits for question member lock").isTrue();
+            } finally {release.countDown();}
+            var created=data(question.get(12,TimeUnit.SECONDS),202);
+            UUID saved=UUID.fromString(created.path("conversationId").asText());if(!conversations.contains(saved)) conversations.add(saved);
+            noContent(withdrawal.get(12,TimeUnit.SECONDS));
+            assertThat(writer.append(saved,created.path("questionId").asLong(),"완료","Synthetic late answer",null)).isFalse();
+        }
+        assertThat(isWithdrawn()).isTrue();assertNoConversationsOrMessages();
+    }
+    @ParameterizedTest @ValueSource(booleans={false,true})
+    void temporaryPasswordStateChangedAfterPreflightRejectsQuestionWithoutWrites(boolean expired) throws Exception {
+        var reached=new CountDownLatch(1);var resume=new CountDownLatch(1);
+        doAnswer(call->{reached.countDown();await(resume);return call.callRealMethod();}).when(agent).lockActiveMember(caller);
+        try(var executor=Executors.newSingleThreadExecutor()) {
+            var question=executor.submit(()->browser.post("/agent/questions",new AgentDtos.QuestionRequest(null,"Synthetic limited question")));
+            try {
+                assertThat(reached.await(8,TimeUnit.SECONDS)).isTrue();
+                jdbc.update("UPDATE public.member SET temp_password_expires_at=now() + (? * interval '1 hour') WHERE member_id=?",expired ? -1 : 1,caller);
+            } finally {resume.countDown();}
+            error(question.get(12,TimeUnit.SECONDS),expired ? 401 : 403,expired ? "UNAUTHENTICATED" : "PASSWORD_CHANGE_REQUIRED");
+        }
+        assertNoConversationsOrMessages();verifyNoQuestionWritesOrAiStart();
+    }
+    private UUID completedConversationForQuestion(boolean existing) {
+        if(!existing) return null;
+        UUID id=conversation(caller,1);long question=agent.insertQuestion(id,"Synthetic earlier completed question");
+        assertThat(writer.append(id,question,"완료","Synthetic earlier answer",null)).isTrue();return id;
+    }
+    private void assertNoConversationsOrMessages() {
+        assertThat(count("SELECT count(*) FROM public.ai_conversation WHERE member_id=?",caller)).isZero();
+        for(UUID id:conversations) assertThat(count("SELECT count(*) FROM public.ai_message WHERE conversation_id=?",id)).isZero();
+    }
+    private void verifyNoQuestionWritesOrAiStart() {
+        verify(agent,never()).createConversation(any(UUID.class),eq(caller));
+        verify(agent,never()).insertQuestion(any(UUID.class),anyString());
+        verify(lifecycle,never()).start(any(UUID.class),anyLong(),any());
     }
     private static void await(CountDownLatch latch) throws InterruptedException {
         if(!latch.await(10,TimeUnit.SECONDS)) throw new IllegalStateException("Synthetic concurrency gate timed out");
     }
     private boolean awaitBlockedSelect(AtomicInteger requestPid,AtomicInteger blockerPid) throws InterruptedException {
+        return awaitBlockedSelect(requestPid,blockerPid,"FOR UPDATE");
+    }
+    private boolean awaitBlockedSelect(AtomicInteger requestPid,AtomicInteger blockerPid,String lock) throws InterruptedException {
         long deadline=System.nanoTime()+Duration.ofSeconds(4).toNanos();
         do {
             if(requestPid.get()!=0 && Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE pid=? "
-                    +"AND wait_event_type='Lock' AND upper(query) LIKE '%FOR UPDATE%' AND ?=ANY(pg_blocking_pids(pid)))",Boolean.class,requestPid.get(),blockerPid.get()))) return true;
+                    +"AND wait_event_type='Lock' AND upper(query) LIKE ? AND ?=ANY(pg_blocking_pids(pid)))",Boolean.class,requestPid.get(),"%"+lock+"%",blockerPid.get()))) return true;
             Thread.sleep(10);
         } while(System.nanoTime()<deadline);
         return false;

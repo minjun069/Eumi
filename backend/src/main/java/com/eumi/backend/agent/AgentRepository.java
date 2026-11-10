@@ -21,6 +21,11 @@ public class AgentRepository {
 
     public AgentRepository(JdbcTemplate jdbc, JsonMapper json) { this.jdbc = jdbc; this.json = json; }
 
+    public void lockActiveMember(long memberId) {
+        var rows = jdbc.queryForList("SELECT member_id FROM member WHERE member_id = ? AND withdrawn_at IS NULL FOR SHARE", memberId);
+        if (rows.isEmpty()) throw new ApiException(ErrorCode.UNAUTHENTICATED);
+    }
+
     public void createConversation(UUID id, long memberId) {
         jdbc.update("INSERT INTO ai_conversation(conversation_id, member_id) VALUES (?, ?)", id, memberId);
     }
