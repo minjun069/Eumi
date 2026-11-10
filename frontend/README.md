@@ -40,10 +40,10 @@ $env:VITE_API_TARGET="http://localhost:8081"; npm run dev
 | `src/api/queryClient.ts` | TanStack Query 기본값 (4xx 재시도 안 함, 변경 요청 재시도 안 함) |
 | `src/api/schema.d.ts` | `docs/api/openapi.json`에서 자동 생성한 타입(`npm run gen:api`). 직접 고치지 않는다 |
 | `src/api/types.ts` | 화면에서 쓰는 응답 타입 별칭 |
-| `src/api/*Api.ts` | API 묶음 (`authApi`: 로그인·로그인 상태 조회·로그아웃·임시 비밀번호 발급, `agentApi`: AI 패널 질문·조회·중단과 AI 대화 기록, `analysisApi`: 적재 월·읍면동 요약·보고서, `regionApi`: 시도·시군구·행정동 목록, `caseApi`: 사례자·상담, `resourceApi`: 복지자원, `memberApi`: 같은 기관 회원(담당자 선택), `myApi`: 마이페이지 내 정보·담당 자원) |
+| `src/api/*Api.ts` | API 묶음 (`authApi`: 로그인·로그인 상태 조회·로그아웃·임시 비밀번호 발급, `agentApi`: AI 패널 질문·조회·중단과 AI 대화 기록, `analysisApi`: 적재 월·읍면동 요약·보고서, `regionApi`: 시도·시군구·행정동 목록, `caseApi`: 사례자·상담, `resourceApi`: 복지자원, `memberApi`: 같은 기관 회원(담당자 선택), `myApi`: 마이페이지 내 정보·담당 자원·비밀번호 변경·탈퇴 안내와 탈퇴) |
 | `src/session/` | 로그인 상태(`sessionStore`), 복원·로그아웃·401 처리(`sessionActions`) |
 | `src/components/` | 레이아웃(헤더·메뉴), 로그인 필요 화면 보호, 확인 창·알림·빈 상태·입력·정렬 버튼·페이지 번호 부품 |
-| `src/screens/` | 화면 (`auth/` 로그인·비밀번호 찾기, `risk/` 고립 위험 탐색, `case/` 사례자 목록·상세·등록·수정·상담 창, `resource/` 복지자원 목록·상세·등록·수정, `my/` 마이페이지 탭·내 정보·담당 자원·AI 대화 기록·비밀번호 변경), `placeholder/` '준비 중' 화면과 화면별 예정 내용 |
+| `src/screens/` | 화면 (`auth/` 로그인·비밀번호 찾기, `risk/` 고립 위험 탐색, `case/` 사례자 목록·상세·등록·수정·상담 창, `resource/` 복지자원 목록·상세·등록·수정, `my/` 마이페이지 탭·내 정보·담당 자원·AI 대화 기록·비밀번호 변경·회원 탈퇴와 인계), `placeholder/` '준비 중' 화면과 화면별 예정 내용 |
 | `src/tableau/` | Tableau Public 대시보드 띄우기(Embedding API v3)와 게시본 설정. 워크북 하나에서 자리마다 임베드용 대시보드를 띄운다. 새 뷰가 게시되면 `tableauConfig.ts`에 대시보드·워크시트 이름과 크기를 채운다. 시트 하나를 틀 폭에 맞춰 띄우는 틀(`TableauSheetFrame`: 보일 때 불러오기·크기 맞춤·매개변수/필터 확인·다시 시도)을 AI 패널 완료 행의 Tableau 카드(`TableauArtifactCard`, AI가 준 게시 뷰 주소·매개변수·필터)와 인사이트 보고서 그래프(상세 시트 EmbedDetailV01~V08, `TABLEAU_REPORT_SHEETS`)가 함께 쓴다 (정화한 표·SVG는 `components/agent/AgentArtifacts`) |
 | `src/routes/paths.ts` | 화면 주소 |
 
