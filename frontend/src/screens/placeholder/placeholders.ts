@@ -25,12 +25,6 @@ export const PLACEHOLDERS = {
     stage: EXTRA,
     features: ["소속기관 검색 (API-04)", "인증 메일 발송·코드 확인 (API-05·06)", "가입 (API-07)"],
   },
-  passwordFind: {
-    title: "비밀번호 찾기",
-    stage: EXTRA,
-    features: ["임시 비밀번호 발급 (API-09)"],
-  },
-
   myWithdraw: {
     title: "회원 탈퇴",
     stage: EXTRA,
