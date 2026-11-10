@@ -12,6 +12,7 @@ import { CaseFormScreen } from "@/screens/case/CaseFormScreen"
 import { CaseListScreen } from "@/screens/case/CaseListScreen"
 import { MyPageScreen } from "@/screens/my/MyPageScreen"
 import { PasswordChangeScreen } from "@/screens/my/PasswordChangeScreen"
+import { WithdrawScreen } from "@/screens/my/WithdrawScreen"
 import { PlaceholderScreen } from "@/screens/placeholder/PlaceholderScreen"
 import { PLACEHOLDERS } from "@/screens/placeholder/placeholders"
 import { ResourceDetailScreen } from "@/screens/resource/ResourceDetailScreen"
@@ -64,7 +65,7 @@ export default function App() {
             <Route path={PATHS.myResources} element={<MyPageScreen tab="resources" />} />
             <Route path={PATHS.myConversations} element={<MyPageScreen tab="conversations" />} />
             <Route path={PATHS.myPassword} element={<PasswordChangeScreen />} />
-            <Route path={PATHS.myWithdraw} element={<PlaceholderScreen spec={PLACEHOLDERS.myWithdraw} />} />
+            <Route path={PATHS.myWithdraw} element={<WithdrawScreen />} />
           </Route>
 
           {/* 첫 접근(/)과 없는 주소: 첫 화면으로 (로그인 안 했으면 로그인 화면으로 이어짐) */}

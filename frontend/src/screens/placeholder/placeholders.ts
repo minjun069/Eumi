@@ -25,9 +25,4 @@ export const PLACEHOLDERS = {
     stage: EXTRA,
     features: ["소속기관 검색 (API-04)", "인증 메일 발송·코드 확인 (API-05·06)", "가입 (API-07)"],
   },
-  myWithdraw: {
-    title: "회원 탈퇴",
-    stage: EXTRA,
-    features: ["탈퇴 안내·업무 인계 (API-33·34)"],
-  },
 } satisfies Record<string, PlaceholderSpec>
