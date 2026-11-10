@@ -5,6 +5,7 @@
 #   읽는 곳은 대시보드와 같다: airflow-db(실행 이력) · eumi-db(결과 테이블 · pg_stat). 계정은 읽기 전용 eumi_monitor.
 # 쿼리가 실패하면(DB 가 안 닿음) 직전 상태를 유지한다 (execErrState: KeepLast). 그래서 DB 가 내려가 있는 동안에는 알림이 오지 않는다.
 # 단계 이름 · 기준월 계산은 대시보드(eumi_pipeline.json)의 실행 이력 쿼리와 같은 식이다.
+# 문구에는 로컬 · 운영에서 달라지는 주소를 적지 않는다. 환경 이름과 Airflow 링크는 contact-points.yml 이 환경변수로 붙인다.
 apiVersion: 1
 
 groups:
@@ -61,7 +62,7 @@ groups:
         annotations:
           summary: '{{ $labels.month }} 월 배치가 실패했습니다 · 실패한 단계: {{ $labels.failed_tasks }} · 시작 {{ $labels.started }}'
           resolved: '{{ $labels.month }} 월 배치 실패({{ $labels.started }} 시작)가 해결됐습니다. 그 뒤에 끝난 실행은 실패가 아닙니다.'
-          action: 'Airflow(http://localhost:8081)에서 실패한 단계의 로그를 보고 원인을 고친 뒤, 그 단계를 Clear 하면 거기서부터 다시 돕니다.'
+          action: 'Airflow 화면에서 실패한 단계의 로그를 보고 원인을 고친 뒤, 그 단계를 Clear 하면 거기서부터 다시 돕니다.'
 
       - uid: eumi-batch-missing
         title: 월 배치가 돌지 않음
@@ -111,7 +112,7 @@ groups:
         annotations:
           summary: '{{ $labels.month }} 월 배치 실행 기록이 없습니다 (매월 5일 03:00 에 돌아야 합니다)'
           resolved: '{{ $labels.month }} 월 배치 실행 기록이 생겼습니다.'
-          action: 'Airflow(http://localhost:8081)에서 eumi_monthly 가 켜져 있는지 보고, 5일 03:00 에 도커가 떠 있었는지 확인합니다. 그 달을 수동 실행하면 해결됩니다 (Trigger DAG w/ config 에 {"months": ["{{ $labels.month }}"]}).'
+          action: 'Airflow 화면에서 eumi_monthly 가 켜져 있는지 보고, 5일 03:00 에 도커(서버)가 떠 있었는지 확인합니다. 그 달을 수동 실행하면 해결됩니다 (Trigger DAG w/ config 에 {"months": ["{{ $labels.month }}"]}).'
 
       - uid: eumi-batch-skipped
         title: 원본이 없어 월 배치를 건너뜀
@@ -418,4 +419,4 @@ groups:
         annotations:
           summary: 'Airflow 스케줄러 신호가 {{ $values.A.Value }}초째 없습니다 (2분 넘게 멈춤). 이 상태면 5일 03:00 월 배치가 돌지 않습니다.'
           resolved: 'Airflow 스케줄러가 다시 신호를 보냅니다.'
-          action: 'infra/ 에서 docker compose --profile data ps 로 pipeline 컨테이너를 보고, 내려가 있으면 docker compose --profile data up -d pipeline 으로 다시 띄웁니다.'
+          action: 'pipeline 컨테이너가 떠 있는지 보고, 내려가 있으면 다시 띄웁니다. 로컬은 infra/ 에서 docker compose --profile data up -d pipeline, 운영 서버는 인프라 담당에게 요청합니다.'

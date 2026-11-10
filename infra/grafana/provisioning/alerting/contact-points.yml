@@ -3,6 +3,9 @@
 #   eumi-mattermost      : 문제 알림. 해결되면 "[해결]" 메시지도 보낸다
 #   eumi-mattermost-info : 알려만 주는 알림(월 배치 성공 · 원본 없어 건너뜀). 해결 메시지를 보내지 않는다
 # 제목 · 본문 틀은 templates.yml, 어느 알림이 어디로 · 몇 시간마다 가는지는 policies.yml
+# 로컬 · 운영에서 달라지는 것은 compose 가 환경변수로 넘긴다 (같은 채널에 두 환경의 알림이 와도 구분되도록):
+#   EUMI_ALERT_ENV   : 제목 맨 앞의 환경 이름 (로컬 / 운영)
+#   EUMI_AIRFLOW_URL : 본문 끝 "Airflow 열기" 링크
 apiVersion: 1
 
 contactPoints:
@@ -15,8 +18,8 @@ contactPoints:
         settings:
           url: ${MATTERMOST_WEBHOOK_URL}
           username: Eumi 파이프라인
-          title: '{{ template "eumi.title" . }}'
-          text: '{{ template "eumi.text" . }}'
+          title: '[${EUMI_ALERT_ENV}] {{ template "eumi.title" . }}'
+          text: '{{ template "eumi.text" . }} · [Airflow 열기](${EUMI_AIRFLOW_URL})'
 
   - orgId: 1
     name: eumi-mattermost-info
@@ -27,6 +30,6 @@ contactPoints:
         settings:
           url: ${MATTERMOST_WEBHOOK_URL}
           username: Eumi 파이프라인
-          title: '{{ template "eumi.title" . }}'
-          text: '{{ template "eumi.text" . }}'
+          title: '[${EUMI_ALERT_ENV}] {{ template "eumi.title" . }}'
+          text: '{{ template "eumi.text" . }} · [Airflow 열기](${EUMI_AIRFLOW_URL})'
           color: '{{ template "eumi.info_color" . }}'
