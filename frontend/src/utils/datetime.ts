@@ -7,6 +7,12 @@ export function formatDate(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
+/** 남은 시간 mm:ss (인증 코드 남은 시간). 0 아래는 00:00 */
+export function formatRemaining(milliseconds: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000))
+  return `${pad(Math.floor(totalSeconds / 60))}:${pad(totalSeconds % 60)}`
+}
+
 /** 오늘 날짜 2026-10-27 (날짜 입력칸의 기본값·미래 날짜 확인에 쓴다) */
 export function todayString(): string {
   return formatDate(new Date())
