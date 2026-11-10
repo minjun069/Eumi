@@ -28,12 +28,16 @@ public class ConversationCleanupJob {
         this.repository=repository;this.messages=messages;this.lifecycle=lifecycle;this.clock=clock;
         transaction=new TransactionTemplate(manager);
         transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        transaction.setTimeout(5);
     }
     public record Result(UUID runId,LocalDate today,long deleted,long skipped,long failed,long elapsedMs) { }
 
     /** 겹친 호출은 실행하지 않는다. 취소는 DB 연결 밖, 삭제와 만료일 복원은 각각 짧은 트랜잭션이다. */
     public Optional<Result> run() {
-        if(!running.compareAndSet(false,true)) return Optional.empty();
+        if(!running.compareAndSet(false,true)) {
+            log.info("Conversation cleanup skipped runId={} reason=already-running",UUID.randomUUID());
+            return Optional.empty();
+        }
         try {
             UUID runId=UUID.randomUUID();LocalDate today=LocalDate.now(clock.withZone(SEOUL));
             long started=System.nanoTime(),deleted=0,skipped=0,failed=0,elapsed;

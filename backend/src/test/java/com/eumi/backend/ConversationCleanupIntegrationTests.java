@@ -3,6 +3,7 @@ package com.eumi.backend;
 import java.sql.*;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.eumi.backend.agent.*;
 import com.eumi.backend.history.*;
@@ -93,6 +94,18 @@ class ConversationCleanupIntegrationTests {
     private long count(String table,UUID id) {return jdbc.queryForObject("SELECT count(*) FROM public."+table+" WHERE conversation_id=?",Long.class,id);}
     private LocalDate expiry(UUID id) {return jdbc.queryForObject("SELECT delete_scheduled_at FROM public.ai_conversation WHERE conversation_id=?",LocalDate.class,id);}
     private long question(UUID id) {return jdbc.queryForObject("SELECT message_id FROM public.ai_message WHERE conversation_id=? AND status='질문'",Long.class,id);}
+    private void saveAiCancellation(UUID id,long question) {
+        // fake의 쓰기 허용 여부는 DB current_date를 쓴다. AI 직접 저장을 모사해 고정 Clock 검사와 분리한다.
+        // fake가 이미 끝 행을 썼으면 그대로 두며, 실제 AI 서버는 호출하지 않는다.
+        jdbc.update("INSERT INTO public.ai_message(conversation_id,question_id,role,status,created_at) "+
+                "SELECT ?,?,'AI','취소',? WHERE NOT EXISTS "+
+                "(SELECT 1 FROM public.ai_message WHERE question_id=? AND status IN ('완료','실패','취소')) ON CONFLICT DO NOTHING",
+                id,question,NOW.atOffset(ZoneOffset.UTC),question);
+    }
+    private void cancelAndSave(UUID id) {
+        long question=question(id);
+        doAnswer(call->{call.callRealMethod();saveAiCancellation(id,question);return null;}).when(lifecycle).cancel(id);
+    }
     private ConversationCleanupJob.Result run() {return job.run().orElseThrow();}
     private void deleted(UUID id) {assertThat(count("ai_conversation",id)).isZero();assertThat(count("ai_message",id)).isZero();}
 
@@ -113,7 +126,7 @@ class ConversationCleanupIntegrationTests {
         var cancelInTransaction=new AtomicBoolean();var extended=new AtomicBoolean();var deletionInTransaction=new AtomicBoolean();
         doAnswer(call->{
             cancelInTransaction.set(TransactionSynchronizationManager.isActualTransactionActive() || TransactionSynchronizationManager.hasResource(jdbc.getDataSource()));
-            return call.callRealMethod();
+            call.callRealMethod();saveAiCancellation(id,question);return null;
         }).when(lifecycle).cancel(id);
         doAnswer(call->{
             extended.set(expiry(id).isAfter(TODAY));
@@ -130,20 +143,22 @@ class ConversationCleanupIntegrationTests {
     }
     @Test void aRealRowLockFailsOnlyThatConversationAndTheNextRunRetriesItAfterUnlock() throws Exception {
         UUID locked=conversation(member,TODAY,false),later=conversation(member,TODAY,false);
-        doAnswer(call->{jdbc.execute("SET LOCAL lock_timeout = '150ms'");return call.callRealMethod();}).when(repository).deleteExpired(eq(locked),any());
-        try(var blocker=jdbc.getDataSource().getConnection()) {
+        try(var blocker=jdbc.getDataSource().getConnection();var executor=Executors.newSingleThreadExecutor()) {
             blocker.setAutoCommit(false);
             try(var statement=blocker.prepareStatement("SELECT conversation_id FROM public.ai_conversation WHERE conversation_id=? FOR UPDATE")) {
                 statement.setObject(1,locked);statement.executeQuery().close();
             }
-            var result=run();assertThat(result.deleted()).isEqualTo(1);assertThat(result.failed()).isEqualTo(1);assertThat(result.skipped()).isZero();
-            assertThat(count("ai_conversation",locked)).isEqualTo(1);deleted(later);verify(repository,times(1)).deleteExpired(locked,TODAY);
-            blocker.rollback();
+            try {
+                var result=executor.submit(this::run).get(12,TimeUnit.SECONDS);
+                assertThat(result.deleted()).isEqualTo(1);assertThat(result.failed()).isEqualTo(1);assertThat(result.skipped()).isZero();
+                assertThat(count("ai_conversation",locked)).isEqualTo(1);deleted(later);verify(repository,times(1)).deleteExpired(locked,TODAY);
+            } finally {blocker.rollback();}
         }
         var retry=run();assertThat(retry.deleted()).isEqualTo(1);assertThat(retry.failed()).isZero();deleted(locked);
     }
     @Test void cancelledDeleteFailureRestoresOriginalExpirySoTheNextRunCanRetry(CapturedOutput output) {
         UUID id=conversation(member,TODAY,true);var restoredInTransaction=new AtomicBoolean();
+        cancelAndSave(id);
         doThrow(new CannotAcquireLockException("Synthetic private failure "+privateQuestion)).when(repository).deleteCancelled(id);
         doAnswer(call->{restoredInTransaction.set(TransactionSynchronizationManager.isActualTransactionActive());return call.callRealMethod();})
                 .when(repository).restoreExpiry(any());
@@ -155,11 +170,32 @@ class ConversationCleanupIntegrationTests {
         assertThat(output.getAll().contains("Conversation cleanup failed runId="+failed.runId()+" conversationId="+id+" error=CannotAcquireLockException")).isTrue();
     }
     @Test void partialCancellationFailureRestoresExpiryAndCanBeRetried() {
-        UUID id=conversation(member,TODAY,true);
-        doAnswer(call->{call.callRealMethod();throw new IllegalStateException("Synthetic cancellation result lost");}).when(lifecycle).cancel(id);
+        UUID id=conversation(member,TODAY,true);long question=question(id);
+        doAnswer(call->{call.callRealMethod();saveAiCancellation(id,question);throw new IllegalStateException("Synthetic cancellation result lost");}).when(lifecycle).cancel(id);
         assertThat(run().failed()).isEqualTo(1);assertThat(expiry(id)).isEqualTo(TODAY);
         verify(repository,never()).deleteCancelled(id);
         assertThat(run().deleted()).isEqualTo(1);deleted(id);
+    }
+    @Test void expiryRestorationAlsoTimesOutAndTheJobContinuesWithTheNextConversation() throws Exception {
+        UUID locked=conversation(member,TODAY,true),later=conversation(member,TODAY,false);
+        cancelAndSave(locked);
+        try(var blocker=jdbc.getDataSource().getConnection();var executor=Executors.newSingleThreadExecutor()) {
+            blocker.setAutoCommit(false);
+            doAnswer(call->{
+                // 취소 저장 뒤 다른 트랜잭션이 잠금을 잡는 상황을 만든다. 복원 UPDATE는 실제로 대기한다.
+                try(var statement=blocker.prepareStatement("SELECT conversation_id FROM public.ai_conversation WHERE conversation_id=? FOR UPDATE")) {
+                    statement.setObject(1,locked);statement.executeQuery().close();
+                }
+                throw new CannotAcquireLockException("Synthetic delete failure before restoration");
+            }).when(repository).deleteCancelled(locked);
+            try {
+                var result=executor.submit(this::run).get(12,TimeUnit.SECONDS);
+                assertThat(result.failed()).isEqualTo(1);assertThat(result.deleted()).isEqualTo(1);
+                assertThat(result.skipped()).isZero();deleted(later);
+                verify(repository).restoreExpiry(new ConversationCleanupRepository.Candidate(locked,TODAY));
+                assertThat(expiry(locked).isAfter(TODAY)).isTrue();
+            } finally {blocker.rollback();}
+        }
     }
     @Test void aCompletedQuestionThatExtendsExpiryAfterSelectionIsSkipped() {
         UUID id=conversation(member,TODAY,false);

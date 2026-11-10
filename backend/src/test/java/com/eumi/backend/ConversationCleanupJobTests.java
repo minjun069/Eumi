@@ -82,7 +82,7 @@ class ConversationCleanupJobTests {
         assertThat(output.getAll().contains("Conversation cleanup scan failed runId=")).isTrue();
         assertThat(output.getAll().contains("Synthetic scan detail")).isFalse();
     }
-    @Test void overlappingInvocationIsSkippedAndACompletedRunCanBeStartedAgain() throws Exception {
+    @Test void overlappingInvocationIsSkippedAndACompletedRunCanBeStartedAgain(CapturedOutput output) throws Exception {
         var entered=new CountDownLatch(1);var release=new CountDownLatch(1);
         when(repository.findExpired(today,null)).thenAnswer(call->{
             entered.countDown();if(!release.await(5,TimeUnit.SECONDS)) throw new IllegalStateException("Synthetic gate timeout");return List.of();
@@ -93,6 +93,7 @@ class ConversationCleanupJobTests {
             finally {release.countDown();}
             assertThat(first.get(5,TimeUnit.SECONDS)).isPresent();assertThat(job.run()).isPresent();
         }
+        assertThat(output.getAll().lines().filter(line->line.matches(".*Conversation cleanup skipped runId=[0-9a-f-]{36} reason=already-running")).count()).isEqualTo(1);
     }
     private ConversationCleanupRepository.Candidate candidate(UUID id) {return new ConversationCleanupRepository.Candidate(id,today);}
 }
