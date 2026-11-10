@@ -90,7 +90,8 @@ class AnalysisIntegrationTests {
 
     @Test
     void insightMatchesPersistedScoresAndExplicitNullWhenGenerationIsPending() throws Exception {
-        var expected = jdbc.queryForMap("SELECT * FROM public.v_region_insight WHERE adm_cd10='1168066000' "
+        var expected = jdbc.queryForMap("SELECT dong_name,sigungu_name,bg_score,bg_grade,bh_score,bh_grade,risk_grade,quick_insight "
+                + "FROM public.v_region_insight WHERE adm_cd10='1168066000' "
                 + "AND period_start=DATE '2025-12-01'");
         var data = success(browser.get(INSIGHT));
         assertThat(data.size()).isEqualTo(9);
@@ -105,9 +106,9 @@ class AnalysisIntegrationTests {
         assertThat(data.path("behavior").path("stage").asInt()).isEqualTo(((Number) expected.get("bh_grade")).intValue());
         assertThat(data.path("riskGrade").asInt()).isEqualTo(((Number) expected.get("risk_grade")).intValue());
         assertThat(data.has("insight")).isTrue();
-        if (expected.get("summary_lines") == null) assertThat(data.path("insight").isNull()).isTrue();
+        if (expected.get("quick_insight") == null) assertThat(data.path("insight").isNull()).isTrue();
         else {
-            assertThat(data.path("insight").path("summary").isArray()).isTrue();
+            assertThat(data.path("insight").path("summary")).isEqualTo(json.valueToTree(List.of(expected.get("quick_insight"))));
             Instant.parse(data.path("insight").path("generatedAt").asText());
         }
     }
@@ -118,8 +119,11 @@ class AnalysisIntegrationTests {
         var data = success(browser.get(REPORT));
         assertThat(data.size()).isEqualTo(1);
         assertThat(data.has("report")).isTrue();
-        boolean generated = Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM public.region_insight_report "
-                + "WHERE adm_cd10='1168066000' AND period_start=DATE '2025-12-01')", Boolean.class));
+        boolean generated = Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM public.region_insight_report i "
+                + "JOIN public.region_result r USING(adm_cd10,period_start) WHERE i.adm_cd10='1168066000' AND i.period_start=DATE '2025-12-01' "
+                + "AND i.result_updated_at=r.updated_at AND i.graph_1 IN ('EmbedDetailV01','EmbedDetailV02','EmbedDetailV03','EmbedDetailV04','EmbedDetailV05','EmbedDetailV06','EmbedDetailV07','EmbedDetailV08') "
+                + "AND i.graph_2 IN ('EmbedDetailV01','EmbedDetailV02','EmbedDetailV03','EmbedDetailV04','EmbedDetailV05','EmbedDetailV06','EmbedDetailV07','EmbedDetailV08') "
+                + "AND i.graph_3 IN ('EmbedDetailV01','EmbedDetailV02','EmbedDetailV03','EmbedDetailV04','EmbedDetailV05','EmbedDetailV06','EmbedDetailV07','EmbedDetailV08'))", Boolean.class));
         if (!generated) assertThat(data.path("report").isNull()).isTrue();
         else Instant.parse(data.path("report").path("generatedAt").asText());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM public.region_insight_report", Long.class)).isEqualTo(before);
@@ -132,6 +136,8 @@ class AnalysisIntegrationTests {
         error(browser.get("/analysis/dongs/9999999999/report?month=2025-12"), 404, "NOT_FOUND");
         error(browser.get("/analysis/dongs/1168066000/insight?month=1900-01"), 404, "NOT_FOUND");
         error(browser.get("/analysis/dongs/1168066000/report?month=1900-01"), 404, "NOT_FOUND");
+        error(browser.get("/analysis/dongs/1168066000/insight?month=0000-01"), 404, "NOT_FOUND");
+        error(browser.get("/analysis/dongs/1168066000/report?month=0000-01"), 404, "NOT_FOUND");
     }
 
     @Test

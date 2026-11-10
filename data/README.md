@@ -17,7 +17,7 @@ M3 지표  상세 → 읍면동 · 격자 지표                     M4 분석  
 | `m2_process/` | 배경 상세 · 격자 배경 · 실거래가 적재, 유동 상세 월 배치 · 스트리밍 · 검증 |
 | `m3_indicator/` | 읍면동 배경 지표, 격자 · 읍면동 행동 지표 |
 | `m4_analysis/` | 읍면동 점수 · 단계(`region_result`), 격자 이상 점수(`bh_grid_anomaly`) |
-| `ops/` | 월 배치 실행기(`run_month`), 원본 확인(`check_month_inputs`), 결과 검증(`verify_outputs`), 기준 테이블 초기 적재(`load_dim_region`, `load_dim_grid100`), 서버 seed 생성(`make_seed`), 인프라 연결 확인 |
+| `ops/` | 월 배치 실행기(`run_month`), 스트리밍 시연 실행기(`run_stream_demo`), 원본 확인(`check_month_inputs`), 결과 검증(`verify_outputs`), 기준 테이블 초기 적재(`load_dim_region`, `load_dim_grid100`), 서버 seed 생성(`make_seed`), 인프라 연결 확인 |
 | `demo_seed/` | 시연용 복지자원 · 사례자 seed 생성 (파이프라인과 별개, `demo_seed/README.md`) |
 | `legacy/` | 1차 완성본 · DA 결과 CSV 적재 스크립트. 지금은 M2~M4 가 대체하므로 참고용 (실행하면 2차 산출값을 덮어쓴다) |
 
@@ -118,13 +118,24 @@ docker compose --profile data exec pipeline spark-submit pipeline/<모듈>/<스�
 
 ## 스트리밍 시연
 
-모두 pipeline 컨테이너 안에서 한다 (`infra/` 에서). 스트리밍은 `flow_detail` 에 값을 **더하므로** 재생할 달을 먼저 비운다.
+**한 번에 돌리기** (저장소 루트에서): 아래 단계를 명령 하나로 실행한다. 체크포인트 삭제 → 스트리밍 시작 → 재생 → 종료 신호 → 재생한 날짜가 모두 적재될 때까지 대기 → 스트리밍 종료 → 그 달 `flow_detail` 을 월 배치로 되돌리고 검증.
+
+```bash
+data/.venv/Scripts/python data/pipeline/ops/run_stream_demo.py --days 01 02 --speed 2    # 12월 1~2일, 약 6분 (되돌리기 2분 포함)
+```
+
+- `--month`(기본 2025-12) · `--days`(없으면 그 달 전부) · `--speed`(1시간치 발행 간격 초, 기본 2).
+- `--keep`: 끝난 뒤 되돌리지 않는다. 시작할 때 그 달 `flow_detail` 을 비워 스트리밍한 값만 남기므로, 이어서 M3 · M4 를 돌려 지표 · 단계가 바뀌는 것을 보일 수 있다. 원래 값은 Airflow 에서 그 달을 수동 실행해 되돌린다.
+- 중간에 실패하거나 Ctrl+C 로 끊어도 스트리밍을 끝내고 그 달을 되돌린다. 이미 도는 스트리밍이 있으면 아무것도 건드리지 않고 멈춘다.
+- 확인(2026-11-10): `--days 01 --speed 2` 로 수신 710,713건 → 1일 적재(+1,095,681행), 되돌린 뒤 검증 통과 · 행 수와 합계가 시작 전과 같음, 총 202초.
+
+**단계별로 직접 하기**: 모두 pipeline 컨테이너 안에서 한다 (`infra/` 에서). 스트리밍은 `flow_detail` 에 값을 **더하므로** 재생할 달을 먼저 비운다.
 
 ```bash
 # 1) 준비: 재생할 달 비우기, 체크포인트 지우기 (같은 달을 두 번 재생하면 값이 두 배가 된다)
 docker compose exec postgres psql -U postgres -d eumi -c "DELETE FROM analysis.flow_detail WHERE period_start = '2025-12-01'"
 docker compose --profile data exec pipeline rm -rf /opt/eumi/checkpoint/flow_detail
-# 2) 스트리밍 시작 (터미널 하나를 차지한다. 새 메시지만 읽도록 latest)
+# 2) 스트리밍 시작 (터미널 하나를 차지한다. 새 메시지만 읽도록 latest). 진행 상황은 http://localhost:3000/d/eumi-streaming
 docker compose --profile data exec pipeline spark-submit pipeline/m2_process/stream_flow_detail.py --starting latest
 # 3) 다른 터미널에서 재생: 1시간치를 10초 간격으로 (--speed 0 이면 쉬지 않고, --days 01 02 로 날짜 제한)
 docker compose --profile data exec pipeline python3 pipeline/m1_collect/run_synth.py replay --months 2025-12 --speed 10
@@ -137,6 +148,9 @@ docker compose --profile data exec pipeline airflow dags trigger eumi_monthly --
 
 - 하루 윈도는 다음 날 01:00 이후 메시지가 와야 닫힌다. 날짜마다 `[stream] batch N: 닫힌 날짜 [...] → flow_detail …행 누적` 이 찍히면, 그 시점에 M3 · M4 를 돌려 지표 · 단계가 갱신되는 것을 보여 줄 수 있다.
 - 확인(2026-11-04): 12월 1~2일 재생 1,421,424건 → 2분 50초, 날짜당 1,095,681행 적재, 적재 합계 = 재생 원본 합계(상대오차 1.2e-8), 요일 MON · TUE 각 1일. 이어서 DAG 로 12월을 되돌린 값이 리허설 전과 같았다(행 수 · 합계 4자리까지).
+- 진행 상황은 Grafana "Eumi 스트리밍"(http://localhost:3000/d/eumi-streaming, 패널 설명은 `infra/README.md`)에서 본다: 스트림 상태(처리 중 · 적재 중 · 대기 중 · 멈춤), 밀린 메시지, 받은 데이터 시각, 닫힌 날짜. 스트리밍 잡이 배치가 끝날 때마다(메시지가 없으면 약 10초마다) `analysis.stream_progress` 에 한 행을 남기고, 시작할 때 7일 지난 행을 지운다.
+- 확인(2026-11-10): 12월 1~2일을 `--speed 2` 로 재생 → 첫 수신부터 둘째 날이 닫힐 때까지 3분 38초 (하루를 `flow_detail` 에 더하는 데 약 50초). 진행 기록의 수신 합계 1,421,425건 = 재생 1,421,424건 + 종료 신호 1건, 날짜당 1,095,681행. 시험 뒤 `batch_flow_detail.py --months 2025-12` 로 되돌린 12월의 행 수 · 합계가 시험 전과 같았다.
+- 체크포인트를 지우지 않고 다시 시작하면 스트림이 이전 마감 시각(워터마크)을 이어받아, 그보다 이른 날짜를 다시 재생해도 전부 버려진다 (수신은 되는데 닫힌 날짜가 0). 같은 날짜를 다시 재생할 때는 1)의 체크포인트 삭제를 꼭 한다.
 - 예전 Spark 이미지로 만든 체크포인트는 소유자가 달라 지워지지 않는다. 한 번만 `docker compose --profile data exec -u root pipeline sh -c "rm -rf /opt/eumi/checkpoint/flow_detail && chown -R pipeline:pipeline /opt/eumi/checkpoint"`.
 
 ## 통합 테스트

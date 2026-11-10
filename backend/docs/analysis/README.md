@@ -1,5 +1,7 @@
 # 대시보드 분석 API 구현·검증·인계
 
+이 문서는 11/3 구현 당시 기록이다. API-11·12의 현재 보고서 형식과 검사는 [11/10 AI-b 인계](2026-11-10_report-integration.md)를 따른다. 아래의 summary_lines·저장 JSON·SavedReportReader 설명과 검사 수는 과거 기록이다.
+
 2026-11-03. 브랜치 `feat/be-analysis`, 시작 커밋 `6dc13fb`(지역 API develop 병합). Jira: S15P31B201-160.
 
 ## 1. 작업 ID·API ID

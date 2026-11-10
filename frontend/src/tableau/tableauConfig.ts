@@ -6,6 +6,7 @@
 // 기준 문서: docs/work-ref의 대시보드_구현_확정안.md(11/3 개정), tableau_views.json 3.0.0. 11/5 결정으로 메인 화면은 ①②③⑤만 띄운다.
 
 import type { RiskIndex } from "@/screens/risk/riskQuery"
+import type { TableauParameterInput } from "@/tableau/tableauTypes"
 
 export const TABLEAU_MODULE_URL = "https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js"
 
@@ -115,6 +116,37 @@ export function tableauDetailParameters(
   period: { from: string; to: string },
 ): Record<string, string> {
   return { ...tableauParameters(sigunguCode, period), p_detail_adm: dongCode }
+}
+
+/** 시트 틀(TableauSheetFrame)에 넘길 꼴로 바꾼다. YYYY-MM-DD 값은 날짜 매개변수다 */
+export function tableauParameterInputs(parameters: Record<string, string>): TableauParameterInput[] {
+  return Object.entries(parameters).map(([name, value]) => ({
+    name,
+    value,
+    dataType: /^\d{4}-\d{2}-\d{2}$/.test(value) ? "date" : "string",
+  }))
+}
+
+/**
+ * 인사이트 보고서 그래프로 쓸 수 있는 상세 워크북 시트 (docs/api/insight-report.md 9절, tableau_views.json reportViews).
+ * 크기는 설계 크기(도구 모음 제외)다. 폭 상한이 없게 게시된 시트도 이 폭으로 펼친 뒤 틀 폭에 맞춰 줄인다.
+ * 매개변수는 ⑥ 격자 지도와 같다 (tableauDetailParameters)
+ */
+export const TABLEAU_REPORT_SHEETS: Record<string, { title: string; width: number; height: number }> = {
+  EmbedDetailV01: { title: "행동 이상 추이", width: 720, height: 420 },
+  EmbedDetailV02: { title: "주요 행동 지표", width: 720, height: 560 },
+  EmbedDetailV03: { title: "시간대 활동", width: 720, height: 420 },
+  EmbedDetailV04: { title: "요일별 활동", width: 720, height: 420 },
+  EmbedDetailV05: { title: "성 · 연령 활동 변화", width: 720, height: 440 },
+  EmbedDetailV06: { title: "취약성 요인", width: 900, height: 440 },
+  EmbedDetailV07: { title: "월별 활동 추이", width: 720, height: 420 },
+  EmbedDetailV08: { title: "격자 점수 분포", width: 720, height: 440 },
+}
+
+/** 보고서 그래프 시트의 설정과 게시 뷰 주소. 목록에 없는 시트면 null (띄우지 않는다) */
+export function reportSheet(sheet: string) {
+  if (!Object.prototype.hasOwnProperty.call(TABLEAU_REPORT_SHEETS, sheet)) return null
+  return { ...TABLEAU_REPORT_SHEETS[sheet], src: tableauViewUrl(sheet, DETAIL_WORKBOOK) }
 }
 
 /**

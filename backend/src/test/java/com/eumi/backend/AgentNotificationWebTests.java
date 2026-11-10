@@ -52,7 +52,7 @@ class AgentNotificationWebTests {
         mvc.perform(post(PATH).header("Authorization", "Bearer invalid")).andExpect(status().isUnauthorized());
         mvc.perform(post(PATH).header("Authorization", "Bearer " + PIPELINE)).andExpect(status().isForbidden());
         mvc.perform(post(PATH).header("Authorization", "Bearer " + AI, "Bearer " + PIPELINE)).andExpect(status().isUnauthorized());
-        mvc.perform(post("/internal/analysis/pipeline-completions").header("Authorization", "Bearer " + PIPELINE))
+        mvc.perform(post("/internal/analysis/unknown").header("Authorization", "Bearer " + PIPELINE))
                 .andExpect(status().isForbidden());
         mvc.perform(post("/agent/questions").header("Authorization", "Bearer " + AI)).andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error.code").value("CSRF_INVALID"));

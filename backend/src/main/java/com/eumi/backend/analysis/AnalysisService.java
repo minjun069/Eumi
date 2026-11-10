@@ -1,11 +1,14 @@
 package com.eumi.backend.analysis;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 import com.eumi.backend.auth.login.AuthService;
 import com.eumi.backend.common.error.ApiException;
 import com.eumi.backend.common.error.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,14 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AnalysisService {
     private static final Logger log = LoggerFactory.getLogger(AnalysisService.class);
+    private static final Set<String> REPORT_SHEETS = Set.of("EmbedDetailV01", "EmbedDetailV02", "EmbedDetailV03", "EmbedDetailV04",
+            "EmbedDetailV05", "EmbedDetailV06", "EmbedDetailV07", "EmbedDetailV08");
     private final AnalysisRepository repository;
     private final AuthService auth;
-    private final SavedReportReader reports;
 
-    public AnalysisService(AnalysisRepository repository, AuthService auth, SavedReportReader reports) {
+    public AnalysisService(AnalysisRepository repository, AuthService auth) {
         this.repository = repository;
         this.auth = auth;
-        this.reports = reports;
     }
 
     public AnalysisDtos.LoadedMonths months(long memberId, String sigunguCode) {
@@ -37,12 +40,12 @@ public class AnalysisService {
             throw invalidSavedData(dongCode, month);
         }
         AnalysisDtos.Insight insight = null;
-        if (row.summary() != null || row.generatedAt() != null) {
-            if (row.summary() == null || row.summary().isEmpty() || row.generatedAt() == null
-                    || row.summary().stream().anyMatch(s -> s == null || s.isEmpty())) {
+        // 1단계 view에는 옛 generated_at이 남아 있어도 quick_insight가 NULL일 수 있다.
+        if (row.quickInsight() != null) {
+            if (row.generatedAt() == null) {
                 throw invalidSavedData(dongCode, month);
             }
-            insight = new AnalysisDtos.Insight(row.summary(), row.generatedAt());
+            insight = new AnalysisDtos.Insight(List.of(row.quickInsight()), row.generatedAt());
         }
         return new AnalysisDtos.DongInsightData(row.dongCode(), row.dongName(), row.sigunguCode(), row.sigunguName(), month,
                 new AnalysisDtos.RiskValue(row.bgScore(), row.bgGrade()),
@@ -52,12 +55,13 @@ public class AnalysisService {
     public AnalysisDtos.InsightReportData report(long memberId, String dongCode, String month) {
         requireUser(memberId);
         var row = repository.report(dongCode, firstDay(month)).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
-        if (row.content() == null && row.generatedAt() == null) return new AnalysisDtos.InsightReportData(null);
-        try {
-            return new AnalysisDtos.InsightReportData(reports.read(row.content(), row.generatedAt()));
-        } catch (IllegalArgumentException ex) {
-            throw invalidSavedData(dongCode, month);
+        if (!row.present()) return new AnalysisDtos.InsightReportData(null);
+        if (row.graphs().stream().anyMatch(graph -> graph.sheet() == null || !REPORT_SHEETS.contains(graph.sheet()))) {
+            // 보고서 본문/임의 sheet 값은 로그에 남기지 않는다. 점수/퀵 인사이트 조회는 유지한다.
+            log.warn("Saved report hidden: unsupported sheet requestId={} month={} status=200", MDC.get("requestId"), month);
+            return new AnalysisDtos.InsightReportData(null);
         }
+        return new AnalysisDtos.InsightReportData(new AnalysisDtos.Report(row.quickInsight(), row.graphs(), row.generatedAt()));
     }
 
     private void requireUser(long memberId) {
@@ -69,7 +73,7 @@ public class AnalysisService {
     private boolean grade(Integer value) { return value != null && value >= 1 && value <= 5; }
 
     private ApiException invalidSavedData(String dong, String month) {
-        log.warn("Invalid saved analysis data dongCode={} month={}", dong, month);
+        log.warn("Invalid saved analysis data requestId={} month={} status=500", MDC.get("requestId"), month);
         return new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 }

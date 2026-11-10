@@ -1,6 +1,6 @@
 # 이음이 API 명세
 
-- 판: 2.4.0 초안 (2026-11-06, 11/9 INT-06 · API-18 삭제, 11/9 AI-a 반영: API-03 화면 문맥 · INT-01 · INT-07, INT-03 삭제)
+- 판: 2.4.0 (2026-11-10, 11/6 초안 · 11/9 INT-06 · API-18 삭제 · 11/9 AI-a 반영 · 11/10 AI-b 반영: API-11 · 12 새 형식, INT-05 dongCodes, INT-08)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_API_명세표.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - API 형식의 기준은 `docs/api/openapi.json`, 내부 연동은 `docs/api/ai-agent-panel.md` · `docs/api/insight-report.md`다. 계약이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -10,8 +10,8 @@
 ## API 목록
 
 - 제목: 이음이 API 명세표
-- 요약: API 2.4.0 초안  45개 작업 (구현 38 · 예정 7)  * 필수 입력  기본 경로 /api
-- 출처: eumi/docs/api/openapi.json 2.3.0 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장) · AI 대화 패널 연결(API-03 화면 문맥, INT-01 messageId, INT-07, INT-03 삭제)은 2026-11-09 openapi 2.3.4 · ai-agent-panel.md
+- 요약: API 2.4.0  45개 작업 (구현 38 · 예정 7)  * 필수 입력  기본 경로 /api
+- 출처: eumi/docs/api/openapi.json 2.4.0 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장) · AI 대화 패널 연결(API-03 화면 문맥, INT-01 messageId, INT-07, INT-03 삭제)은 2026-11-09 openapi 2.3.4 · ai-agent-panel.md · 인사이트 보고서 연결(API-11 · 12 새 형식, INT-05 dongCodes · 202 본문 없음, INT-08)은 2026-11-10 openapi 2.4.0 · insight-report.md 확정
 
 ### API-01 로그인 상태와 메뉴 프로필 조회
 - 페이지 범위: /login·공통
@@ -101,15 +101,15 @@
 - 페이지 범위: /risk?dong=…
 - 요청 경로: GET /api/analysis/dongs/{dongCode}/insight
 - 요청 형식: 인증 SESSION 쿠키<br>path dongCode*:string; query month*:string<br>본문 없음
-- 응답 형식: 200 application/json analysisApi_getDongInsight_Success<br>dongCode*:string; dongName*:string; sigunguCode*:string; sigunguName*:string; month*:string; background*:RiskValue; behavior*:RiskValue; insight*:object 또는 null; riskGrade*:integer<br>변경 예정 (2.4.0, 2단계 V 파일 · FE와 같은 배포): insight = {summary*:string[] (quick_insight 한 개), generatedAt*} 또는 null · 최신 보고서(result_updated_at = 결과 updated_at)만 · quick_insight가 NULL이면 생성 시각이 남아 있어도 insight null · 줄바꿈으로 나누지 않음
-- 구현 (11/6): 구현 · 읽는 컬럼 변경 예정 (응답 모양 유지)
+- 응답 형식: 200 application/json analysisApi_getDongInsight_Success<br>dongCode*:string; dongName*:string; sigunguCode*:string; sigunguName*:string; month*:string; background*:RiskValue; behavior*:RiskValue; insight*:object 또는 null; riskGrade*:integer<br>insight = {summary*:string[] (최신 보고서의 quick_insight 한 개, 줄바꿈으로 나누지 않음); generatedAt*:string(date-time)} 또는 null · 최신 보고서(result_updated_at = 결과 updated_at)만 · quick_insight가 없으면 insight null · 결과 없음 404
+- 구현 (11/6): 구현 · 새 칸을 읽는 변경은 AI-b BE MR (응답 모양 유지, 2단계 V 파일 · FE와 같은 배포)
 
 ### API-12 인사이트 보고서 조회
 - 페이지 범위: /risk?dong=…
 - 요청 경로: GET /api/analysis/dongs/{dongCode}/report
 - 요청 형식: 인증 SESSION 쿠키<br>path dongCode*:string; query month*:string<br>본문 없음
-- 응답 형식: 200 application/json analysisApi_getInsightReport_Success<br>report*:object 또는 null<br>변경 예정 (2.4.0, 2단계 V 파일 · FE와 같은 배포): report = {quickInsight*:string; graphs*:[{sheet*:string(EmbedDetailV01~V08); description*:string}] 정확히 3개; generatedAt*:string(date-time)} 또는 null · headline·sections 삭제 · 옛 보고서(결과 시각 불일치)는 null · 결과 없음 404
-- 구현 (11/6): 구현 · 응답 변경 예정 (2단계와 같은 배포)
+- 응답 형식: 200 application/json analysisApi_getInsightReport_Success<br>report*:object 또는 null<br>report = {quickInsight*:string(1~500자); graphs*:[{sheet*:string(EmbedDetailV01~V08); description*:string(1~1000자)}] 정확히 3개(graph_1~3 순서); generatedAt*:string(date-time)} 또는 null · 옛 보고서(결과 시각 불일치) · 허용 밖 시트는 null · 결과 없음 404 · 조회가 생성을 실행하지 않음
+- 구현 (11/6): 구현 · 새 형식은 AI-b BE MR (2단계 V 파일 · FE와 같은 배포)
 
 ### API-13 복지자원 목록 조회
 - 페이지 범위: /resources
@@ -328,11 +328,11 @@
 - 응답 형식: 200 application/json HealthData<br>status*:string
 - 구현 (11/6): 구현
 
-## 내부 AI API
+## 내부 연동 API
 
 - 제목: 내부 연동 API
-- 요약: 5개 작업  BE ↔ AI · 파이프라인 → BE  AI 서버(/internal/)는 인증 없음 · BE 내부 경로(/api/internal/)는 호출자별 서비스 토큰(INT-07 AI 토큰, INT-04 파이프라인 토큰)  둘 다 Nginx에 열지 않음 (Nginx는 /api/internal/을 404로 막음) · BE 내부 경로는 세션 · CSRF 없는 별도 보안 체인 · 인사이트 보고서는 AI가 DB에 직접 저장
-- 출처: AI 에이전트 패널 동작 흐름 (A 방식) 2026-11-02 · 응답 필드와 시간 값은 AI 담당자와 확정 · 인사이트 보고서 INT-04 · 05는 2026-11-06 초안 (A 방식: 생성 세대를 저장하지 않음, 결과 시각 resultUpdatedAt으로 옛 보고서 판단) · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 region_insight_report에 직접 저장, insight-report.md 4절) · INT-01 messageId · 화면 문맥, INT-07 추가, INT-03 삭제는 2026-11-09 (ai-agent-panel.md 3절, openapi 2.3.4 x-internal-api)
+- 요약: 6개 작업  BE ↔ AI · 파이프라인 → BE  AI 서버(/internal/)는 인증 없음 · BE 내부 경로(/api/internal/)는 호출자별 서비스 토큰(INT-07 · 08 AI 토큰, INT-04 파이프라인 토큰)  둘 다 Nginx에 열지 않음 (Nginx는 /api/internal/을 404로 막음) · BE 내부 경로는 세션 · CSRF 없는 별도 보안 체인 · 인사이트 보고서는 AI가 DB에 직접 저장
+- 출처: AI 에이전트 패널 동작 흐름 (A 방식) 2026-11-02 · 응답 필드와 시간 값은 AI 담당자와 확정 · 인사이트 보고서 INT-04 · 05는 2026-11-06 초안 (A 방식: 생성 세대를 저장하지 않음, 결과 시각 resultUpdatedAt으로 옛 보고서 판단) · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 region_insight_report에 직접 저장, insight-report.md 4절) · INT-01 messageId · 화면 문맥, INT-07 추가, INT-03 삭제는 2026-11-09 (ai-agent-panel.md 3절, openapi 2.3.4 x-internal-api) · INT-05 dongCodes · 202 본문 없음(꼬리표는 AI가 직접 읽음), INT-08 추가는 2026-11-10 (insight-report.md 4절, openapi 2.4.0)
 
 ### INT-01 AI 실행 시작<br>신규 설계
 - 구간: BE → AI
@@ -346,23 +346,29 @@
 - 요청 형식: 인증 없음 (내부 네트워크)<br>path conversationId*:string(uuid)<br>본문 없음
 - 응답 형식: 202 실행을 멈추고 취소 행 저장<br>BE는 http-timeout과 취소 대기 중 짧은 시간까지 응답을 기다리고, 취소 대기 안에 끝 행이 없으면 취소 행을 대신 저장
 
-### INT-04 파이프라인 완료 알림<br>신규 초안
+### INT-04 파이프라인 완료 알림<br>신규 설계
 - 구간: 파이프라인 → BE
 - 요청 경로: POST /api/internal/analysis/pipeline-completions
 - 요청 형식: Authorization: Bearer <파이프라인 토큰><br><br>본문 application/json<br>month*:string(YYYY-MM); pipelineRunId:string(1~200자, 로그용); reason:string(FULL · RESULT_RELOAD · ANALYSIS_RELOAD, 기본 FULL, 로그용)
-- 응답 형식: 202 application/json<br>month*:string; targetCount*:integer<br>BE가 그 달 region_result 전체(동 코드 · updated_at)를 읽어 INT-05를 보내고, AI가 접수하면 202<br>400 VALIDATION_ERROR · 401 UNAUTHENTICATED · 403 FORBIDDEN · 404 NOT_FOUND(그 달 결과 없음) · 503 AI_UNAVAILABLE(AI 접수 실패 → 파이프라인이 재시도)<br>14단계(결과 검증) 성공 뒤 Airflow 마지막 작업이 보냄. 12·13단계만 다시 돌려도 보냄 · INT-04 구현 후 fake 모드는 INT-05 없이 202
+- 응답 형식: 202 application/json<br>month*:string; targetCount*:integer<br>BE가 그 달 region_result의 동 코드를 모두 읽어 INT-05를 보내고, AI가 http-timeout(기본 3초) 안에 202로 접수하면 202 · targetCount는 보낸 동 수<br>400 VALIDATION_ERROR · 401 UNAUTHENTICATED · 403 FORBIDDEN · 404 NOT_FOUND(그 달 결과 없음) · 503 AI_UNAVAILABLE(AI 접수 실패 → 파이프라인이 재시도)<br>14단계(결과 검증) 성공 뒤 Airflow 마지막 작업이 보냄. 12·13단계만 다시 돌려도 보냄 · fake 모드는 INT-05 없이 202(targetCount는 그 달 동 수)
 
-### INT-05 인사이트 보고서 생성 요청<br>신규 초안
+### INT-05 인사이트 보고서 생성 요청<br>신규 설계
 - 구간: BE → AI
 - 요청 경로: POST /internal/insight-reports/runs
-- 요청 형식: 인증 없음 (내부 네트워크)<br><br>본문 application/json<br>requestId*:string(uuid, INT-04를 처리하며 BE가 만든 값 = INT-04 응답의 X-Request-Id · meta.requestId); month*:string(YYYY-MM); targets*:[{dongCode*:string(10자리); resultUpdatedAt*:string(YYYY-MM-DDTHH:mm:ss.SSSSSS)}] 동 중복 없음
-- 응답 형식: 202 application/json<br>accepted*:integer<br>400 본문 오류<br>접수만 바로 돌려주고 뒤에서 동별로 생성 · AI가 동마다 region_insight_report에 직접 저장(eumi_ai INSERT · UPDATE, 결과 행 updated_at = resultUpdatedAt일 때만 반영, 같은 동 · 월 덮어씀, 0행이면 버림)<br>같은 달 요청이 겹치면 진행 중 작업을 멈추고 새 요청으로 다시 시작 권장 (저장 문장이 옛 보고서를 거르는 것은 결과 시각이 바뀐 경우뿐. 12·13단계만 재실행해 시각이 같으면 늦게 끝난 쪽이 새 보고서를 덮을 수 있음)
+- 요청 형식: 인증 없음 (내부 네트워크)<br><br>본문 application/json<br>requestId*:string(uuid, INT-04를 처리하며 BE가 만든 값 = INT-04 응답의 X-Request-Id · meta.requestId); month*:string(YYYY-MM); dongCodes*:string[](10자리, 그 달 결과가 있는 모든 동, 1개 이상, 중복 없음)
+- 응답 형식: 202 본문 없음<br>400 본문 오류(모르는 필드 · 형식 · 중복 동)<br>접수만 바로 돌려주고 뒤에서 동별로 생성 · AI가 동마다 꼬리표(결과 행 updated_at)를 먼저 읽고 region_insight_report에 직접 저장(eumi_ai INSERT · UPDATE, 결과 행 updated_at = 꼬리표일 때만 반영, 같은 동 · 월 덮어씀, 0행이면 버림, 8칸을 다 채우지 못한 동은 저장하지 않음)<br>생성 중 오류가 난 동은 요청 끝에 한 번 더 · 모든 동을 처리한 뒤 INT-08 한 번 · 같은 달 요청이 겹치면 진행 중 작업을 멈추고 새 요청으로 다시 시작 · BE는 다시 보내지 않음
 
 ### INT-07 AI 행 저장 알림<br>신규 설계
 - 구간: AI → BE
 - 요청 경로: POST /api/internal/agent/notifications
 - 요청 형식: Authorization: Bearer <AI 토큰><br><br>본문 application/json<br>conversationId*:string(uuid); messageId*:integer(int64, 양수, 방금 커밋한 AI 행 ID)
 - 응답 형식: 204 본문 없음<br>400 INVALID_JSON(모르는 필드 · 정수 아님) · 400 VALIDATION_ERROR · 401 UNAUTHENTICATED · 403 FORBIDDEN(AI 토큰 아님) · 404 NOT_FOUND(그 대화에 그 AI 행 없음)<br>AI 행 커밋 직후 보냄 · 최대 2번(5xx · 연결 오류 · 시간 초과일 때만 한 번 더, 4xx는 다시 안 보냄), 실패해도 실행 계속 · BE는 중복 · 순서에 기대지 않고, 끝 행이면 그 질문의 메모리 추적 상태를 정리 · 화면에는 밀지 않음(1초 조회 유지)
+
+### INT-08 보고서 생성 완료 알림<br>신규 설계
+- 구간: AI → BE
+- 요청 경로: POST /api/internal/analysis/insight-report-completions
+- 요청 형식: Authorization: Bearer <AI 토큰><br><br>본문 application/json<br>requestId*:string(INT-05에서 받은 값); month*:string(YYYY-MM); savedCount*:integer(0 이상, 저장된 동 수); failedDongCodes*:string[](10자리, 저장하지 못한 동, 없으면 빈 배열)
+- 응답 형식: 204 본문 없음<br>400 INVALID_JSON(모르는 필드 · 타입 오류) · 400 VALIDATION_ERROR · 401 UNAUTHENTICATED · 403 FORBIDDEN(AI 토큰 아님)<br>INT-05 요청 하나의 모든 동을 처리한 뒤 한 번 보냄 · 최대 2번(5xx · 연결 오류 · 시간 초과일 때만 한 번 더, 4xx는 다시 안 보냄) · BE는 requestId · 월 · 저장 수 · 실패한 동을 로그에만 남기고 저장하지 않음, 두 번 받아도 결과가 같음
 
 ## 별도 범위
 
@@ -378,10 +384,10 @@
 - 검증: 동 선택·매개변수(시군구·기간)·로딩·게시 오류
 
 ### FastAPI 내부
-- 대상: AI 실행 · 취소(INT-01 · 02) · 행 저장 알림(INT-07) · 인사이트 보고서 생성 요청 INT-05 (내부 AI API 시트). PDF 추출(API-18)은 2026-11-09 범위 제외
+- 대상: AI 실행 · 취소(INT-01 · 02) · 행 저장 알림(INT-07) · 인사이트 보고서 생성 요청 INT-05 · 생성 완료 알림 INT-08 (내부 연동 API 시트). PDF 추출(API-18)은 2026-11-09 범위 제외
 - 현재 근거: AI: 2026-11-02 A 방식 결정
 - 경계: 브라우저는 Spring만 호출 · 대화 패널: AI가 ai_message에 직접 저장 · 인사이트 보고서: AI가 region_insight_report에 직접 저장 (BE는 생성 요청 · 조회만)
-- 선행 조건: 운영 시간 값 확정 · GMS 주소 · 모델 (artifacts 형식은 11/9 ai-agent-panel.md 2-1, 이전 대화 범위는 11/2 '전체'로 결정, eumi_ai의 ai_message 읽기·추가 권한은 11/2 적용)
+- 선행 조건: 운영 모델(GMS) 확정 · AI 작업 선택 수정 (운영 시간 값은 11/10 확정 330 · 5 · 40 · 3초, artifacts 형식은 11/9 ai-agent-panel.md 2-1, 이전 대화 범위는 11/2 '전체'로 결정, eumi_ai의 ai_message 읽기·추가 권한은 11/2 적용)
 - 검증: 행 단위 커밋·끝 행 하나·늦은 행 거부·취소 경합·질문 마스킹·시간 초과·부족 정보 되묻기·응답 없음 재요청 1회·INT-07 토큰과 행 소속
 
 ### 파이프라인

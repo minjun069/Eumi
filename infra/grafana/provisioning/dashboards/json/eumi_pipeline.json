@@ -1,0 +1,319 @@
+{
+  "__comment": "Eumi 파이프라인 대시보드. 이 파일이 원본이다 (화면에서 고친 내용은 저장되지 않음). 고치려면 파일을 바꾸고 커밋한다. 30초 안에 Grafana 가 다시 읽는다. 한 화면 11개: 현재 상태 → 실행 현황 → 데이터 현황 → 시스템 상태. 상세 정보는 접힌 줄. 숫자 칸은 canvas 패널: 이름(13px 회색) → 값(30px, 상태 색) → 부가 정보(12px 회색). 패널 설명은 infra/README.md",
+  "uid": "eumi-pipeline",
+  "title": "Eumi 파이프라인",
+  "tags": ["eumi", "pipeline"],
+  "timezone": "Asia/Seoul",
+  "editable": false,
+  "graphTooltip": 1,
+  "refresh": "1m",
+  "time": { "from": "now-6M", "to": "now" },
+  "schemaVersion": 39,
+  "version": 1,
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "links": [ { "type": "dashboards", "tags": ["eumi"], "title": "Eumi 대시보드", "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": false, "targetBlank": false } ],
+  "panels": [
+    { "id": 100, "type": "row", "title": "현재 상태","collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "panels": [] },
+    {
+      "id": 101, "type": "canvas", "title": "",
+      "description": "Airflow 의 eumi_monthly 가장 최근 실행. 끝난 시각은 한국 시간. 실패면 아래 상태판에서 어느 단계인지 본다",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 5, "w": 5, "x": 0, "y": 1 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT state AS status,\n       CASE WHEN end_date IS NULL THEN '시작 ' || to_char(start_date AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI')\n            ELSE '끝남 ' || to_char(end_date AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') || ' · ' || floor(extract(epoch FROM end_date - start_date) / 60) || '분 걸림' END AS sub\nFROM dag_run\nWHERE dag_id = 'eumi_monthly'\nORDER BY start_date DESC NULLS LAST\nLIMIT 1" } ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "noValue": "실행 없음", "mappings": [] },
+        "overrides": [ { "matcher": { "id": "byName", "options": "status" }, "properties": [ { "id": "mappings", "value": [ { "type": "value", "options": {
+          "success": { "text": "성공", "color": "green", "index": 0 }, "failed": { "text": "실패", "color": "red", "index": 1 },
+          "running": { "text": "실행 중", "color": "blue", "index": 2 }, "queued": { "text": "대기", "color": "text", "index": 3 } } } ] } ] } ] },
+      "options": { "inlineEditing": false, "showAdvancedTypes": true, "panZoom": false, "infinitePan": false,
+        "root": { "type": "frame", "name": "root", "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "마지막 실행" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 280, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "status" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 280, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 280, "height": 22 } } ] } }
+    },
+    {
+      "id": 102, "type": "canvas", "title": "",
+      "description": "스케줄상 다음 실행 (매월 5일 03:00, 전월 처리). DAG 가 멈춰 있으면 '일시정지'",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 5, "w": 5, "x": 5, "y": 1 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT CASE WHEN is_paused THEN 'paused'\n            ELSE greatest((next_dagrun_create_after AT TIME ZONE 'Asia/Seoul')::date - (now() AT TIME ZONE 'Asia/Seoul')::date, 0) || '일 뒤' END AS status,\n       CASE WHEN is_paused THEN 'Airflow 에서 DAG 를 켜야 돈다'\n            ELSE to_char(next_dagrun_create_after AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') || ' · 매월 5일 03:00' END AS sub\nFROM dag\nWHERE dag_id = 'eumi_monthly'" } ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "noValue": "DAG 없음", "mappings": [] },
+        "overrides": [ { "matcher": { "id": "byName", "options": "status" }, "properties": [ { "id": "mappings", "value": [ { "type": "value", "options": { "paused": { "text": "일시정지", "color": "orange", "index": 0 } } } ] } ] } ] },
+      "options": { "inlineEditing": false, "showAdvancedTypes": true, "panZoom": false, "infinitePan": false,
+        "root": { "type": "frame", "name": "root", "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "다음 실행" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 280, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "status" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 280, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 280, "height": 22 } } ] } }
+    },
+    {
+      "id": 103, "type": "canvas", "title": "",
+      "description": "region_result 에 있는 가장 최근 기준월과 그 달을 마지막으로 적재한 시각",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 5, "w": 5, "x": 10, "y": 1 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT to_char(max(period_start), 'YYYY-MM') AS status,\n       to_char(max(updated_at), 'MM/DD HH24:MI') || ' 적재 · 동 ' || count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM public.region_result)) || '개' AS sub\nFROM public.region_result" } ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "noValue": "결과 없음", "mappings": [] }, "overrides": [] },
+      "options": { "inlineEditing": false, "showAdvancedTypes": true, "panZoom": false, "infinitePan": false,
+        "root": { "type": "frame", "name": "root", "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "적재된 최신 달" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 280, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "status" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 280, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 280, "height": 22 } } ] } }
+    },
+    {
+      "id": 104, "type": "canvas", "title": "",
+      "description": "pipeline_check 의 가장 최근 달에서 통과한 검사 수 / 전체. 하나라도 실패면 빨강 → 아래 '실패한 검사' 표",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 5, "w": 5, "x": 15, "y": 1 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "WITH m AS (SELECT max(period_start) AS p FROM analysis.pipeline_check)\nSELECT CASE WHEN count(*) FILTER (WHERE NOT passed) = 0 THEN 'pass' ELSE 'fail' END AS status,\n       count(*) FILTER (WHERE passed) || ' / ' || count(*) || ' 통과' AS value_text,\n       to_char(m.p, 'YYYY-MM') || ' · ' || to_char(max(checked_at), 'MM/DD HH24:MI') || ' 검사' AS sub\nFROM analysis.pipeline_check c JOIN m ON c.period_start = m.p\nGROUP BY m.p" } ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "noValue": "기록 없음", "mappings": [] },
+        "overrides": [ { "matcher": { "id": "byName", "options": "status" }, "properties": [ { "id": "mappings", "value": [ { "type": "value", "options": { "pass": { "text": "통과", "color": "green", "index": 0 }, "fail": { "text": "실패 있음", "color": "red", "index": 1 } } } ] } ] } ] },
+      "options": { "inlineEditing": false, "showAdvancedTypes": true, "panZoom": false, "infinitePan": false,
+        "root": { "type": "frame", "name": "root", "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "검사 결과 (최신 달)" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 280, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "value_text" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 280, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 280, "height": 22 } } ] } }
+    },
+    {
+      "id": 105, "type": "alertlist", "title": "울린 알림",
+      "description": "지금 켜져 있는 알림. 알림 규칙은 다음 작업에서 넣는다",
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 1 },
+      "options": { "alertName": "", "dashboardAlerts": false, "groupBy": [], "groupMode": "default", "maxItems": 10, "sortOrder": 1, "stateFilter": { "firing": true, "pending": true, "noData": false, "normal": false, "error": true }, "viewMode": "list" }
+    },
+
+    { "id": 200, "type": "row", "title": "실행 현황","collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 }, "panels": [] },
+    {
+      "id": 203, "type": "table", "title": "실행 × 단계 상태판 (최근 6번)",
+      "description": "가로 = 실행 (왼쪽이 최신), 세로 = 단계. 초록 성공 / 빨강 실패 → Airflow 에서 로그 보고 Clear 로 재실행 / 주황 중단 → 앞 단계가 실패해 시작 못 함, 실패한 단계만 고치면 같이 돔 / 회색 건너뜀 → 그 달 원본이 없어 할 일이 없었음 (실패 아님) / 빈 칸 → 그때는 DAG 에 없던 단계",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 12, "w": 12, "x": 0, "y": 7 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "WITH tasks(seq, task_id, name) AS (VALUES\n  (1,'check_inputs','원본 확인'), (2,'collect_apt_trade','실거래가 수집'), (3,'geocode_apt','실거래가 좌표'), (4,'re_apt_trade','실거래가 적재'),\n  (5,'synth_anchor','가상 유동 기준'), (6,'synth_generate','가상 유동 생성'), (7,'synth_validate','가상 유동 검증'), (8,'flow_detail','유동 상세'), (9,'verify_flow_detail','유동 상세 검증'),\n  (10,'bg_detail','배경 상세'), (11,'bg_indicators','배경 지표'), (12,'bh_region_indicators','읍면동 행동 지표'), (13,'bh_grid_indicators','격자 행동 지표'),\n  (14,'region_result','읍면동 결과'), (15,'bh_contribution','지표별 기여도'), (16,'grid_anomaly','격자 이상 점수'), (17,'verify_outputs','결과 검증')),\nruns AS (\n  SELECT run_id, start_date FROM dag_run WHERE dag_id = 'eumi_monthly' ORDER BY start_date DESC LIMIT 6)\nSELECT lpad(tk.seq::text, 2, '0') || ' ' || tk.name AS \"단계\",\n       to_char(runs.start_date AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') AS \"실행\",\n       CASE WHEN ti.task_id IS NULL THEN '' ELSE ti.state END AS \"상태\"\nFROM tasks tk\nCROSS JOIN runs\nLEFT JOIN task_instance ti ON ti.dag_id = 'eumi_monthly' AND ti.run_id = runs.run_id AND ti.task_id = tk.task_id\nORDER BY tk.seq, runs.start_date DESC" } ],
+      "transformations": [
+        { "id": "groupingToMatrix", "options": { "columnField": "실행", "rowField": "단계", "valueField": "상태", "emptyValue": "empty" } },
+        { "id": "organize", "options": { "renameByName": { "단계\\실행": "단계" } } } ],
+      "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false, "reducer": ["sum"], "fields": "" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#23262b" },
+          "custom": { "align": "center", "cellOptions": { "type": "color-background", "mode": "basic" }, "filterable": false, "inspect": false }, "noValue": "",
+          "mappings": [ { "type": "value", "options": {
+            "success": { "text": "성공", "color": "green", "index": 0 }, "failed": { "text": "실패", "color": "red", "index": 1 },
+            "upstream_failed": { "text": "중단", "color": "orange", "index": 2 }, "skipped": { "text": "건너뜀", "color": "#3d4047", "index": 3 },
+            "running": { "text": "실행 중", "color": "blue", "index": 4 }, "queued": { "text": "대기", "color": "#3d4047", "index": 5 },
+            "scheduled": { "text": "대기", "color": "#3d4047", "index": 6 }, "": { "text": "", "color": "#181b1f", "index": 7 } } } ] },
+        "overrides": [ { "matcher": { "id": "byName", "options": "단계" }, "properties": [ { "id": "custom.cellOptions", "value": { "type": "auto" } }, { "id": "custom.align", "value": "left" }, { "id": "custom.width", "value": 170 } ] } ] }
+    },
+    {
+      "id": 206, "type": "barchart", "title": "실행 시간 추이 (구간별 합산 분)",
+      "description": "실제로 돈 최근 실행 8번. 단계 소요 시간을 구간(실거래가 · 가상 유동 · 유동 상세 · 지표 · 결과 · 검증)별로 더해 쌓았다. 가지가 병렬로 돌아 실제 걸린 시간보다 길다. 한 구간이 달마다 길어지면 그 구간의 단계를 본다 (상세 줄의 단계별 소요 시간)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 12, "w": 12, "x": 12, "y": 7 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "WITH tasks(task_id, grp) AS (VALUES\n  ('check_inputs','1 원본 확인'),\n  ('collect_apt_trade','2 실거래가'), ('geocode_apt','2 실거래가'), ('re_apt_trade','2 실거래가'),\n  ('synth_anchor','3 가상 유동'), ('synth_generate','3 가상 유동'), ('synth_validate','3 가상 유동'),\n  ('flow_detail','4 유동 상세'), ('verify_flow_detail','4 유동 상세'),\n  ('bg_detail','5 지표'), ('bg_indicators','5 지표'), ('bh_region_indicators','5 지표'), ('bh_grid_indicators','5 지표'),\n  ('region_result','6 결과 · 검증'), ('bh_contribution','6 결과 · 검증'), ('grid_anomaly','6 결과 · 검증'), ('verify_outputs','6 결과 · 검증')),\nruns AS (\n  SELECT r.run_id, r.start_date,\n         coalesce(substring(encode(r.conf, 'escape') FROM '[0-9]{4}-[0-9]{2}'), to_char(r.data_interval_start AT TIME ZONE 'Asia/Seoul', 'YYYY-MM')) AS month\n  FROM dag_run r\n  WHERE r.dag_id = 'eumi_monthly'\n    AND EXISTS (SELECT 1 FROM task_instance ti WHERE ti.dag_id = r.dag_id AND ti.run_id = r.run_id AND ti.state = 'success' AND ti.task_id <> 'check_inputs')\n  ORDER BY r.start_date DESC LIMIT 8)\nSELECT to_char(runs.start_date AT TIME ZONE 'Asia/Seoul', 'MM/DD') || ' (' || runs.month || ')' AS \"실행\",\n       tk.grp AS \"구간\",\n       coalesce(round((sum(ti.duration) / 60.0)::numeric, 1), 0) AS \"분\"\nFROM runs\nCROSS JOIN tasks tk\nLEFT JOIN task_instance ti ON ti.dag_id = 'eumi_monthly' AND ti.run_id = runs.run_id AND ti.task_id = tk.task_id\nGROUP BY runs.start_date, runs.month, tk.grp\nORDER BY runs.start_date, tk.grp" } ],
+      "transformations": [
+        { "id": "groupingToMatrix", "options": { "columnField": "구간", "rowField": "실행", "valueField": "분", "emptyValue": "zero" } },
+        { "id": "organize", "options": { "renameByName": { "실행\\구간": "실행" } } } ],
+      "options": { "orientation": "vertical", "showValue": "never", "stacking": "normal", "groupWidth": 0.7, "barWidth": 0.6, "barRadius": 0, "fullHighlight": false, "xTickLabelRotation": 0, "xTickLabelSpacing": 0,
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true, "calcs": [] }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "suffix: 분", "decimals": 1, "min": 0,
+          "custom": { "lineWidth": 0, "fillOpacity": 85, "gradientMode": "none", "axisPlacement": "auto", "axisLabel": "", "axisBorderShow": false }, "mappings": [] }, "overrides": [] }
+    },
+
+    { "id": 300, "type": "row", "title": "데이터 현황","collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 19 }, "panels": [] },
+    {
+      "id": 301, "type": "table", "title": "테이블 최신성",
+      "description": "결과 테이블마다 가장 최근 기준월, 그 달의 행 수, 전월 대비 행 수 변화, 마지막 적재 시각. 전월 대비가 ±30% 를 넘으면 빨강 (원본이 바뀌었거나 적재가 빠졌을 가능성). 기준 테이블(행정동 · 격자)과 연 단위 표는 '-'",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 10, "w": 9, "x": 0, "y": 20 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT \"테이블\", \"최신 달\", cur AS \"그 달 행 수\", round(100.0 * (cur - prev) / nullif(prev, 0), 1) AS \"전월 대비\", \"마지막 적재\" FROM (\n  SELECT 1 AS seq, '행정동 (dim_region)' AS \"테이블\", '-' AS \"최신 달\", count(*) AS cur, NULL::bigint AS prev, to_char(max(updated_at), 'MM/DD HH24:MI') AS \"마지막 적재\" FROM public.dim_region\n  UNION ALL SELECT 2, '100m 격자 (dim_grid100)', '-', count(*), NULL, to_char(max(updated_at), 'MM/DD HH24:MI') FROM analysis.dim_grid100\n  UNION ALL SELECT 3, '배경 상세 (bg_region_detail)', to_char(max(period_start), 'YYYY-MM'), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bg_region_detail)), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bg_region_detail) - interval '1 month'), to_char(max(updated_at), 'MM/DD HH24:MI') FROM analysis.bg_region_detail\n  UNION ALL SELECT 4, '배경 지표 (bg_region_indicator)', to_char(max(period_start), 'YYYY-MM'), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bg_region_indicator)), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bg_region_indicator) - interval '1 month'), to_char(max(updated_at), 'MM/DD HH24:MI') FROM analysis.bg_region_indicator\n  UNION ALL SELECT 5, '격자 배경 (bg_grid_indicator, 연)', max(ref_year)::text, count(*) FILTER (WHERE ref_year = (SELECT max(ref_year) FROM analysis.bg_grid_indicator)), NULL, to_char(max(updated_at), 'MM/DD HH24:MI') FROM analysis.bg_grid_indicator\n  UNION ALL SELECT 6, '유동 상세 (flow_detail)', to_char(max(period_start), 'YYYY-MM'), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.flow_detail)), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.flow_detail) - interval '1 month'), to_char(max(updated_at), 'MM/DD HH24:MI') FROM analysis.flow_detail\n  UNION ALL SELECT 7, '격자 행동 지표 (bh_grid_indicator)', to_char(max(period_start), 'YYYY-MM'), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bh_grid_indicator)), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bh_grid_indicator) - interval '1 month'), to_char(max(updated_at), 'MM/DD HH24:MI') FROM analysis.bh_grid_indicator\n  UNION ALL SELECT 8, '읍면동 행동 지표 (bh_region_indicator)', to_char(max(period_start), 'YYYY-MM'), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bh_region_indicator)), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bh_region_indicator) - interval '1 month'), to_char(max(updated_at), 'MM/DD HH24:MI') FROM analysis.bh_region_indicator\n  UNION ALL SELECT 9, '읍면동 결과 (region_result)', to_char(max(period_start), 'YYYY-MM'), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM public.region_result)), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM public.region_result) - interval '1 month'), to_char(max(updated_at), 'MM/DD HH24:MI') FROM public.region_result\n  UNION ALL SELECT 10, '지표별 기여도 (bh_region_contribution)', to_char(max(period_start), 'YYYY-MM'), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bh_region_contribution)), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bh_region_contribution) - interval '1 month'), to_char(max(updated_at), 'MM/DD HH24:MI') FROM analysis.bh_region_contribution\n  UNION ALL SELECT 11, '격자 이상 점수 (bh_grid_anomaly)', to_char(max(period_start), 'YYYY-MM'), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bh_grid_anomaly)), count(*) FILTER (WHERE period_start = (SELECT max(period_start) FROM analysis.bh_grid_anomaly) - interval '1 month'), to_char(max(updated_at), 'MM/DD HH24:MI') FROM analysis.bh_grid_anomaly\n  UNION ALL SELECT 12, '실거래가 (re_apt_trade, 계약월)', to_char(max(contract_date), 'YYYY-MM'), count(*) FILTER (WHERE date_trunc('month', contract_date) = (SELECT date_trunc('month', max(contract_date)) FROM analysis.re_apt_trade)), count(*) FILTER (WHERE date_trunc('month', contract_date) = (SELECT date_trunc('month', max(contract_date)) FROM analysis.re_apt_trade) - interval '1 month'), to_char(max(updated_at), 'MM/DD HH24:MI') FROM analysis.re_apt_trade\n) x ORDER BY seq" } ],
+      "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false, "reducer": ["sum"], "fields": "" } },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "filterable": false, "inspect": false }, "noValue": "-", "mappings": [] },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "그 달 행 수" }, "properties": [ { "id": "unit", "value": "locale" }, { "id": "decimals", "value": 0 }, { "id": "custom.width", "value": 95 }, { "id": "custom.align", "value": "right" } ] },
+          { "matcher": { "id": "byName", "options": "전월 대비" }, "properties": [ { "id": "unit", "value": "percent" }, { "id": "decimals", "value": 1 }, { "id": "custom.width", "value": 85 }, { "id": "custom.align", "value": "right" },
+            { "id": "custom.cellOptions", "value": { "type": "color-text" } }, { "id": "color", "value": { "mode": "fixed", "fixedColor": "text" } },
+            { "id": "mappings", "value": [ { "type": "range", "options": { "from": 30, "to": 1000000, "result": { "color": "red", "index": 0 } } }, { "type": "range", "options": { "from": -1000000, "to": -30, "result": { "color": "red", "index": 1 } } } ] } ] },
+          { "matcher": { "id": "byName", "options": "최신 달" }, "properties": [ { "id": "custom.width", "value": 75 } ] },
+          { "matcher": { "id": "byName", "options": "마지막 적재" }, "properties": [ { "id": "custom.width", "value": 100 } ] } ] }
+    },
+    {
+      "id": 307, "type": "table", "title": "실패한 검사",
+      "description": "pipeline_check 에서 실패한 검사만. 비어 있으면(초록 한 줄) 정상. 내용 열이 검사 수치라 어디가 틀렸는지 바로 보인다. 전체 격자는 상세 줄의 '달별 검사 결과'",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 10, "w": 6, "x": 9, "y": 20 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT to_char(period_start, 'YYYY-MM') AS \"달\", check_name AS \"검사\", detail AS \"내용\"\nFROM analysis.pipeline_check\nWHERE NOT passed\nUNION ALL\nSELECT '-', '실패한 검사 없음', (SELECT count(*) FROM analysis.pipeline_check) || '건 모두 통과'\nWHERE NOT EXISTS (SELECT 1 FROM analysis.pipeline_check WHERE NOT passed)\nORDER BY 1 DESC, 2" } ],
+      "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false, "reducer": ["sum"], "fields": "" } },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "filterable": false, "inspect": false }, "noValue": "-", "mappings": [] },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "달" }, "properties": [ { "id": "custom.width", "value": 70 } ] },
+          { "matcher": { "id": "byName", "options": "검사" }, "properties": [ { "id": "custom.width", "value": 130 }, { "id": "custom.cellOptions", "value": { "type": "color-text" } }, { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } },
+            { "id": "mappings", "value": [ { "type": "value", "options": { "실패한 검사 없음": { "color": "green", "index": 0 } } } ] } ] } ] }
+    },
+    {
+      "id": 305, "type": "barchart", "title": "위험 단계 분포 추이 (동 수)",
+      "description": "달마다 region_result 의 위험 단계(1 낮음 ~ 5 최우선)별 동 수. 매달 47개 합. 분포가 갑자기 한 단계로 쏠리거나 비면 점수 계산 · 원본을 의심",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 10, "w": 5, "x": 15, "y": 20 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT to_char(period_start, 'YY-MM') AS \"달\", risk_grade || '단계' AS \"단계\", count(*) AS \"동 수\"\nFROM public.region_result\nGROUP BY 1, 2\nORDER BY 1, 2" } ],
+      "transformations": [
+        { "id": "groupingToMatrix", "options": { "columnField": "단계", "rowField": "달", "valueField": "동 수", "emptyValue": "zero" } },
+        { "id": "organize", "options": { "renameByName": { "달\\단계": "달" } } } ],
+      "options": { "orientation": "vertical", "showValue": "never", "stacking": "normal", "groupWidth": 0.7, "barWidth": 0.6, "barRadius": 0, "fullHighlight": false, "xTickLabelRotation": 0, "xTickLabelSpacing": -40,
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true, "calcs": [] }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "decimals": 0, "min": 0,
+          "custom": { "lineWidth": 0, "fillOpacity": 85, "gradientMode": "none", "axisPlacement": "auto", "axisLabel": "", "axisBorderShow": false }, "mappings": [] },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "1단계" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } } ] },
+          { "matcher": { "id": "byName", "options": "2단계" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "#9BC53D" } } ] },
+          { "matcher": { "id": "byName", "options": "3단계" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "yellow" } } ] },
+          { "matcher": { "id": "byName", "options": "4단계" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } } ] },
+          { "matcher": { "id": "byName", "options": "5단계" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] } ] }
+    },
+    {
+      "id": 306, "type": "barchart", "title": "실거래가 수집 (계약월별 건수)",
+      "description": "re_apt_trade 를 계약월별로 매매 · 전세 · 월세 건수로 쌓음. 한 달이 뚝 떨어지면 API 수집이 빠진 것. '좌표 없음'(빨강)이 보이면 지오코딩이 빠진 것",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 10, "w": 4, "x": 20, "y": 20 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT to_char(contract_date, 'YY-MM') AS \"계약월\",\n       count(*) FILTER (WHERE deal_type = '매매') AS \"매매\",\n       count(*) FILTER (WHERE deal_type = '전세') AS \"전세\",\n       count(*) FILTER (WHERE deal_type = '월세') AS \"월세\",\n       count(*) FILTER (WHERE lat IS NULL OR lon IS NULL) AS \"좌표 없음\"\nFROM analysis.re_apt_trade\nGROUP BY 1\nORDER BY 1" } ],
+      "options": { "orientation": "vertical", "showValue": "never", "stacking": "normal", "groupWidth": 0.7, "barWidth": 0.6, "barRadius": 0, "fullHighlight": false, "xTickLabelRotation": 0, "xTickLabelSpacing": -40,
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true, "calcs": [] }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "decimals": 0, "min": 0, "unit": "locale",
+          "custom": { "lineWidth": 0, "fillOpacity": 85, "gradientMode": "none", "axisPlacement": "auto", "axisLabel": "", "axisBorderShow": false }, "mappings": [] },
+        "overrides": [ { "matcher": { "id": "byName", "options": "좌표 없음" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] } ] }
+    },
+
+    { "id": 400, "type": "row", "title": "시스템 상태","collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 30 }, "panels": [] },
+    {
+      "id": 401, "type": "canvas", "title": "",
+      "description": "Airflow 스케줄러가 살아 있는지. airflow DB job 표의 마지막 심장박동이 60초 안이면 정상. 멈추면 매월 5일 배치가 시작되지 않는다 → pipeline 컨테이너 재시작",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 31 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT CASE WHEN max(latest_heartbeat) > now() - interval '60 seconds' THEN 'ok' ELSE 'down' END AS status,\n       coalesce('마지막 신호 ' || round(extract(epoch FROM now() - max(latest_heartbeat))) || '초 전 · ' || max(hostname), '스케줄러 기록 없음') AS sub\nFROM job\nWHERE job_type = 'SchedulerJob' AND state = 'running'" } ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "noValue": "기록 없음", "mappings": [] },
+        "overrides": [ { "matcher": { "id": "byName", "options": "status" }, "properties": [ { "id": "mappings", "value": [ { "type": "value", "options": { "ok": { "text": "정상", "color": "green", "index": 0 }, "down": { "text": "멈춤", "color": "red", "index": 1 } } } ] } ] } ] },
+      "options": { "inlineEditing": false, "showAdvancedTypes": true, "panZoom": false, "infinitePan": false,
+        "root": { "type": "frame", "name": "root", "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "Airflow 스케줄러" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 340, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "status" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 340, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 340, "height": 22 } } ] } }
+    },
+    {
+      "id": 402, "type": "bargauge", "title": "DB 접속 수 (최대 100)",
+      "description": "pg_stat_activity 의 계정별 접속 수 (지금 이 순간). PostgreSQL max_connections 가 100 이라 전체가 80 을 넘으면 주황, 90 이면 빨강. 한 계정이 새로고침마다 늘기만 하면 그 프로그램이 연결을 안 닫는 것. 전에 접속을 다 써서 멈춘 적이 있다",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 5, "w": 9, "x": 6, "y": 31 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT \"계정\", \"접속\" FROM (\n  SELECT 0 AS seq, '전체 (최대 ' || current_setting('max_connections') || ')' AS \"계정\", count(*) AS \"접속\"\n  FROM pg_stat_activity WHERE backend_type = 'client backend'\n  UNION ALL\n  SELECT 1, coalesce(usename, '(없음)'), count(*)\n  FROM pg_stat_activity WHERE backend_type = 'client backend' GROUP BY usename\n) x ORDER BY seq, \"접속\" DESC" } ],
+      "options": { "orientation": "horizontal", "displayMode": "basic", "valueMode": "color", "namePlacement": "left", "showUnfilled": true, "sizing": "auto", "minVizWidth": 8, "minVizHeight": 10, "maxVizHeight": 24,
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true }, "text": { "titleSize": 12, "valueSize": 14 } },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "min": 0, "max": 100, "decimals": 0,
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "orange", "value": 80 }, { "color": "red", "value": 90 } ] }, "mappings": [] }, "overrides": [] }
+    },
+    {
+      "id": 406, "type": "canvas", "title": "",
+      "description": "eumi DB 전체 크기와 한 달에 얼마나 느는지 (전체 크기 ÷ 적재된 달 수). 유동 상세가 대부분이라 달마다 그만큼 디스크가 필요하다. 서버 디스크 여유와 비교해 몇 달 남았는지 가늠",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 5, "w": 9, "x": 15, "y": 31 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "WITH m AS (SELECT count(DISTINCT period_start) AS n FROM analysis.bg_region_indicator),\n     s AS (SELECT pg_database_size(current_database()) AS db,\n                  (SELECT pg_total_relation_size(c.oid) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'analysis' AND c.relname = 'flow_detail') AS fd)\nSELECT pg_size_pretty(s.db) AS status,\n       '월 +' || pg_size_pretty((s.db / greatest(m.n, 1))::bigint) || ' 씩 (데이터 ' || m.n || '개월, 유동 상세 ' || pg_size_pretty(s.fd) || ')' AS sub\nFROM s, m" } ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "noValue": "-", "mappings": [] }, "overrides": [] },
+      "options": { "inlineEditing": false, "showAdvancedTypes": true, "panZoom": false, "infinitePan": false,
+        "root": { "type": "frame", "name": "root", "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "eumi DB 크기 · 증가" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 540, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "status" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 540, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 540, "height": 22 } } ] } }
+    },
+
+    {
+      "id": 500, "type": "row", "title": "상세 정보","collapsed": true, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 36 },
+      "panels": [
+        {
+          "id": 201, "type": "table", "title": "실행 이력",
+          "description": "기간 안의 eumi_monthly 실행. 기준월은 수동 실행이면 conf 의 months, 자동이면 스케줄 달. 건너뜀 = 원본이 없어 첫 단계에서 전부 skip. 걸린 시간은 실제 경과 시간",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+          "gridPos": { "h": 9, "w": 12, "x": 0, "y": 37 },
+          "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+            "rawSql": "SELECT to_char(r.start_date AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') AS \"시작\",\n       coalesce(substring(encode(r.conf, 'escape') FROM '[0-9]{4}-[0-9]{2}'), to_char(r.data_interval_start AT TIME ZONE 'Asia/Seoul', 'YYYY-MM')) AS \"기준월\",\n       CASE r.run_type WHEN 'scheduled' THEN '자동' ELSE '수동' END AS \"방식\",\n       CASE WHEN r.state = 'success' AND t.ok = 0 AND t.skip > 0 THEN 'skipped' ELSE r.state END AS \"상태\",\n       round((extract(epoch FROM r.end_date - r.start_date) / 60)::numeric, 1) AS \"걸린 시간(분)\",\n       t.ok || ' / ' || t.total AS \"성공 단계\",\n       t.failed AS \"실패한 단계\"\nFROM dag_run r\nLEFT JOIN LATERAL (\n    SELECT count(*) FILTER (WHERE state = 'success') AS ok,\n           count(*) FILTER (WHERE state = 'skipped') AS skip,\n           count(*) AS total,\n           string_agg(task_id, ', ' ORDER BY start_date) FILTER (WHERE state = 'failed') AS failed\n    FROM task_instance ti WHERE ti.dag_id = r.dag_id AND ti.run_id = r.run_id) t ON true\nWHERE r.dag_id = 'eumi_monthly' AND $__timeFilter(r.start_date)\nORDER BY r.start_date DESC\nLIMIT 50" } ],
+          "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false, "reducer": ["sum"], "fields": "" } },
+          "fieldConfig": { "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "filterable": false, "inspect": false }, "noValue": "-", "mappings": [] },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "상태" }, "properties": [ { "id": "custom.cellOptions", "value": { "type": "color-text" } }, { "id": "custom.width", "value": 80 },
+                { "id": "mappings", "value": [ { "type": "value", "options": { "success": { "text": "성공", "color": "green", "index": 0 }, "failed": { "text": "실패", "color": "red", "index": 1 }, "running": { "text": "실행 중", "color": "blue", "index": 2 }, "queued": { "text": "대기", "color": "text", "index": 3 }, "skipped": { "text": "건너뜀", "color": "#8F939E", "index": 4 } } } ] } ] },
+              { "matcher": { "id": "byName", "options": "시작" }, "properties": [ { "id": "custom.width", "value": 100 } ] },
+              { "matcher": { "id": "byName", "options": "기준월" }, "properties": [ { "id": "custom.width", "value": 80 } ] },
+              { "matcher": { "id": "byName", "options": "방식" }, "properties": [ { "id": "custom.width", "value": 60 } ] },
+              { "matcher": { "id": "byName", "options": "걸린 시간(분)" }, "properties": [ { "id": "custom.width", "value": 110 }, { "id": "decimals", "value": 1 } ] },
+              { "matcher": { "id": "byName", "options": "성공 단계" }, "properties": [ { "id": "custom.width", "value": 90 } ] } ] }
+        },
+        {
+          "id": 304, "type": "table", "title": "달별 검사 결과",
+          "description": "pipeline_check. 가로 = 기준월, 세로 = 검사 11개. 초록 통과 · 빨강 실패. 빈 칸은 그 달에 없던 검사 (첫 달은 전월이 없어 재계산 검사가 없음)",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+          "gridPos": { "h": 9, "w": 12, "x": 12, "y": 37 },
+          "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+            "rawSql": "WITH names AS (SELECT * FROM unnest(ARRAY['기준 테이블','배경 상세','배경 지표','유동 상세','격자 행동 지표','읍면동 행동 지표','읍면동 결과','결과 = 지금 지표로 재계산','지표별 기여도','격자 이상 점수','실거래가']) WITH ORDINALITY AS n(check_name, pos))\nSELECT lpad(coalesce(n.pos, 99)::text, 2, '0') || ' ' || c.check_name AS \"검사\",\n       to_char(c.period_start, 'YYYY-MM') AS \"달\",\n       CASE WHEN c.passed THEN 'pass' ELSE 'fail' END AS \"결과\"\nFROM analysis.pipeline_check c\nLEFT JOIN names n ON n.check_name = c.check_name\nORDER BY coalesce(n.pos, 99), c.check_name, c.period_start" } ],
+          "transformations": [
+            { "id": "groupingToMatrix", "options": { "columnField": "달", "rowField": "검사", "valueField": "결과", "emptyValue": "empty" } },
+            { "id": "organize", "options": { "renameByName": { "검사\\달": "검사" } } } ],
+          "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false, "reducer": ["sum"], "fields": "" } },
+          "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#23262b" },
+              "custom": { "align": "center", "cellOptions": { "type": "color-background", "mode": "basic" }, "filterable": false, "inspect": false }, "noValue": "",
+              "mappings": [ { "type": "value", "options": { "pass": { "text": "통과", "color": "green", "index": 0 }, "fail": { "text": "실패", "color": "red", "index": 1 }, "": { "text": "", "color": "#181b1f", "index": 2 } } } ] },
+            "overrides": [ { "matcher": { "id": "byName", "options": "검사" }, "properties": [ { "id": "custom.cellOptions", "value": { "type": "auto" } }, { "id": "custom.align", "value": "left" }, { "id": "custom.width", "value": 210 } ] } ] }
+        },
+        {
+          "id": 202, "type": "barchart", "title": "단계별 소요 시간 (최근 실행 3번)",
+          "description": "실제로 돈 최근 실행 3번(최신 먼저)의 단계별 소요 시간(분). 건너뛴 실행은 뺀다. 실행 시간 추이에서 길어진 구간이 보이면 여기서 어느 단계인지 찾는다",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" },
+          "gridPos": { "h": 15, "w": 12, "x": 0, "y": 46 },
+          "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "airflow-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+            "rawSql": "WITH tasks(seq, task_id, name) AS (VALUES\n  (1,'check_inputs','원본 확인'), (2,'collect_apt_trade','실거래가 수집'), (3,'geocode_apt','실거래가 좌표'), (4,'re_apt_trade','실거래가 적재'),\n  (5,'synth_anchor','가상 유동 기준'), (6,'synth_generate','가상 유동 생성'), (7,'synth_validate','가상 유동 검증'), (8,'flow_detail','유동 상세'), (9,'verify_flow_detail','유동 상세 검증'),\n  (10,'bg_detail','배경 상세'), (11,'bg_indicators','배경 지표'), (12,'bh_region_indicators','읍면동 행동 지표'), (13,'bh_grid_indicators','격자 행동 지표'),\n  (14,'region_result','읍면동 결과'), (15,'bh_contribution','지표별 기여도'), (16,'grid_anomaly','격자 이상 점수'), (17,'verify_outputs','결과 검증')),\nruns AS (\n  SELECT r.run_id, r.start_date,\n         coalesce(substring(encode(r.conf, 'escape') FROM '[0-9]{4}-[0-9]{2}'), to_char(r.data_interval_start AT TIME ZONE 'Asia/Seoul', 'YYYY-MM')) AS month\n  FROM dag_run r\n  WHERE r.dag_id = 'eumi_monthly'\n    AND EXISTS (SELECT 1 FROM task_instance ti WHERE ti.dag_id = r.dag_id AND ti.run_id = r.run_id AND ti.state = 'success' AND ti.task_id <> 'check_inputs')\n  ORDER BY r.start_date DESC LIMIT 3)\nSELECT lpad(tk.seq::text, 2, '0') || ' ' || tk.name AS \"단계\",\n       to_char(runs.start_date AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') || ' (' || runs.month || ')' AS \"실행\",\n       round((ti.duration / 60.0)::numeric, 1) AS \"분\"\nFROM tasks tk\nCROSS JOIN runs\nLEFT JOIN task_instance ti ON ti.dag_id = 'eumi_monthly' AND ti.run_id = runs.run_id AND ti.task_id = tk.task_id\nORDER BY tk.seq, runs.start_date DESC" } ],
+          "transformations": [ { "id": "groupingToMatrix", "options": { "columnField": "실행", "rowField": "단계", "valueField": "분", "emptyValue": "null" } } ],
+          "options": { "orientation": "horizontal", "showValue": "never", "stacking": "none", "groupWidth": 0.7, "barWidth": 0.8, "barRadius": 0, "fullHighlight": false, "xTickLabelRotation": 0, "xTickLabelSpacing": 0,
+            "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true, "calcs": [] }, "tooltip": { "mode": "multi", "sort": "none" } },
+          "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "suffix: 분", "decimals": 1,
+              "custom": { "lineWidth": 0, "fillOpacity": 85, "gradientMode": "none", "axisPlacement": "auto", "axisLabel": "", "axisBorderShow": false }, "mappings": [] }, "overrides": [] }
+        },
+        {
+          "id": 403, "type": "bargauge", "title": "테이블 크기 (큰 순서)",
+          "description": "analysis · public 스키마 표의 디스크 크기 (인덱스 포함)",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 46 },
+          "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+            "rawSql": "SELECT n.nspname || '.' || c.relname AS \"테이블\", pg_total_relation_size(c.oid) AS \"크기\"\nFROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace\nWHERE c.relkind IN ('r', 'p') AND n.nspname IN ('analysis', 'public')\nORDER BY 2 DESC\nLIMIT 12" } ],
+          "options": { "orientation": "horizontal", "displayMode": "basic", "valueMode": "color", "namePlacement": "auto", "showUnfilled": true, "sizing": "auto", "minVizWidth": 8, "minVizHeight": 10, "maxVizHeight": 24,
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true }, "text": { "titleSize": 12, "valueSize": 14 } },
+          "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "#5794F2" }, "unit": "bytes", "decimals": 1, "min": 0, "mappings": [] }, "overrides": [] }
+        },
+        {
+          "id": 404, "type": "table", "title": "오래 도는 쿼리 (10초 이상)",
+          "description": "지금 10초 넘게 돌고 있는 문장. 평소에는 비어 있어야 한다 (No data). 배치 중에는 유동 상세 적재 · 검증이 잠깐 보일 수 있다",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+          "gridPos": { "h": 7, "w": 12, "x": 12, "y": 54 },
+          "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+            "rawSql": "SELECT usename AS \"계정\", datname AS \"DB\", state AS \"상태\",\n       round(extract(epoch FROM now() - query_start)) AS \"경과(초)\",\n       coalesce(wait_event_type || ': ' || wait_event, '-') AS \"대기\",\n       left(regexp_replace(query, '\\s+', ' ', 'g'), 160) AS \"쿼리\"\nFROM pg_stat_activity\nWHERE backend_type = 'client backend' AND state <> 'idle' AND pid <> pg_backend_pid()\n  AND query_start < now() - interval '10 seconds'\nORDER BY query_start" } ],
+          "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false, "reducer": ["sum"], "fields": "" } },
+          "fieldConfig": { "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "filterable": false, "inspect": false }, "noValue": "-", "mappings": [] },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "계정" }, "properties": [ { "id": "custom.width", "value": 110 } ] },
+              { "matcher": { "id": "byName", "options": "DB" }, "properties": [ { "id": "custom.width", "value": 70 } ] },
+              { "matcher": { "id": "byName", "options": "상태" }, "properties": [ { "id": "custom.width", "value": 100 } ] },
+              { "matcher": { "id": "byName", "options": "경과(초)" }, "properties": [ { "id": "custom.width", "value": 90 }, { "id": "unit", "value": "s" } ] },
+              { "matcher": { "id": "byName", "options": "대기" }, "properties": [ { "id": "custom.width", "value": 150 } ] } ] }
+        }
+      ]
+    }
+  ]
+}

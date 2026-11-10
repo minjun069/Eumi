@@ -12,6 +12,11 @@ export type Conditions = {
   parameters: Record<string, string>
 }
 
+/** 시트 카드(TableauSheetFrame)에 넘기는 매개변수. 날짜는 YYYY-MM-DD */
+export type TableauParameterInput = { name: string; dataType: "date" | "string"; value: string }
+/** 시트 카드에 넘기는 필터. all이면 필터를 푼다 */
+export type TableauFilterInput = { worksheet: string; field: string; operation: "replace" | "all"; values: string[] }
+
 export type Filter = {
   fieldName: string
   isAllSelected?: boolean

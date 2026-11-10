@@ -1,0 +1,149 @@
+{
+  "__comment": "Eumi 스트리밍 대시보드. 이 파일이 원본이다 (화면에서 고친 내용은 저장되지 않음). 유동 상세 스트리밍(stream_flow_detail.py)이 배치마다 analysis.stream_progress 에 남기는 행을 5초마다 읽는다. 스트리밍은 시연 때만 돌리므로 평소에는 '멈춤'이 정상이다. 숫자 칸은 Eumi 파이프라인 대시보드와 같은 canvas 3단(이름 → 값 → 부가 정보). 패널 설명은 infra/README.md",
+  "uid": "eumi-streaming",
+  "title": "Eumi 스트리밍",
+  "tags": ["eumi", "streaming"],
+  "timezone": "Asia/Seoul",
+  "editable": false,
+  "graphTooltip": 1,
+  "refresh": "5s",
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": { "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"] },
+  "schemaVersion": 39,
+  "version": 1,
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "links": [ { "type": "dashboards", "tags": ["eumi"], "title": "Eumi 대시보드", "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": false, "targetBlank": false } ],
+  "panels": [
+    { "id": 100, "type": "row", "title": "현재 상태", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }, "panels": [] },
+    {
+      "id": 101, "type": "canvas", "title": "",
+      "description": "마지막 진행 기록이 30초 안이면 살아 있다. 처리 중 = 방금 배치에서 메시지를 읽음 / 적재 중 = 하루 윈도가 닫혀 flow_detail 에 더하는 중 (날짜마다 1분쯤, 그동안은 다른 기록이 없다) / 대기 중 = 살아 있지만 새 메시지가 없음 / 멈춤 = 30초 넘게 기록이 없음 (시연 때만 돌리므로 평소에는 정상). 시작 · 종료 명령은 data/README.md 의 '스트리밍 시연'",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 1 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "WITH last AS (SELECT recorded_at, input_rows, closed_days, loaded_rows FROM analysis.stream_progress ORDER BY progress_id DESC LIMIT 1),\ns AS (SELECT l.*, floor(extract(epoch FROM now() - l.recorded_at)) AS age,\n             coalesce(l.closed_days IS NOT NULL AND l.loaded_rows IS NULL AND now() - l.recorded_at <= interval '10 minutes', false) AS loading\n      FROM (SELECT 1) one LEFT JOIN last l ON true)\nSELECT CASE WHEN recorded_at IS NULL THEN 'none'\n            WHEN loading THEN 'loading'\n            WHEN age > 30 THEN 'stopped'\n            WHEN input_rows > 0 THEN 'running' ELSE 'idle' END AS status,\n       CASE WHEN recorded_at IS NULL THEN '아직 돌린 적이 없음'\n            WHEN loading THEN array_to_string(closed_days, ', ') || ' 을 flow_detail 에 더하는 중 · ' || age || '초째'\n            WHEN age > 30 THEN '마지막 기록 ' || to_char(recorded_at AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI:SS')\n            ELSE '마지막 기록 ' || age || '초 전' END AS sub\nFROM s" } ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "noValue": "기록 없음", "mappings": [] },
+        "overrides": [ { "matcher": { "id": "byName", "options": "status" }, "properties": [ { "id": "mappings", "value": [ { "type": "value", "options": {
+          "running": { "text": "처리 중", "color": "green", "index": 0 }, "loading": { "text": "적재 중", "color": "green", "index": 1 }, "idle": { "text": "대기 중", "color": "blue", "index": 2 },
+          "stopped": { "text": "멈춤", "color": "text", "index": 3 }, "none": { "text": "기록 없음", "color": "text", "index": 4 } } } ] } ] } ] },
+      "options": { "inlineEditing": false, "showAdvancedTypes": true, "panZoom": false, "infinitePan": false,
+        "root": { "type": "frame", "name": "root", "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "스트림 상태" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 320, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "status" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 320, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 320, "height": 22 } } ] } }
+    },
+    {
+      "id": 102, "type": "canvas", "title": "",
+      "description": "Kafka 에 들어와 있지만 Spark 가 아직 읽지 않은 메시지 수 (파티션 합, 배치가 끝난 시점에 Kafka 에 물어본 값). 재생 중에는 배치가 도는 사이 들어온 만큼이 보이고 재생이 끝나면 0 이 된다. 계속 늘면 들어오는 속도를 처리가 못 따라가는 것 → 아래 '수신 · 처리 속도'와 '배치 소요 시간'을 본다. 적재 중에는 적재를 시작할 때의 값이 그대로 보인다",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 1 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "WITH last AS (SELECT recorded_at, lag_rows, closed_days, loaded_rows FROM analysis.stream_progress ORDER BY progress_id DESC LIMIT 1),\nalive AS (SELECT l.lag_rows, coalesce(now() - l.recorded_at <= interval '30 seconds'\n                 OR (l.closed_days IS NOT NULL AND l.loaded_rows IS NULL AND now() - l.recorded_at <= interval '10 minutes'), false) AS on_air\n          FROM (SELECT 1) one LEFT JOIN last l ON true)\nSELECT CASE WHEN NOT on_air THEN 'off' WHEN coalesce(lag_rows, 0) = 0 THEN 'ok' ELSE 'behind' END AS status,\n       CASE WHEN NOT on_air THEN '-' ELSE to_char(coalesce(lag_rows, 0), 'FM999,999,999,990') || '건' END AS value_text,\n       CASE WHEN NOT on_air THEN '스트림이 멈춰 있음' ELSE 'Kafka 최신 위치 − 읽은 위치' END AS sub\nFROM alive" } ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "noValue": "기록 없음", "mappings": [] },
+        "overrides": [ { "matcher": { "id": "byName", "options": "status" }, "properties": [ { "id": "mappings", "value": [ { "type": "value", "options": {
+          "ok": { "text": "밀림 없음", "color": "green", "index": 0 }, "behind": { "text": "밀림", "color": "orange", "index": 1 }, "off": { "text": "멈춤", "color": "text", "index": 2 } } } ] } ] } ] },
+      "options": { "inlineEditing": false, "showAdvancedTypes": true, "panZoom": false, "infinitePan": false,
+        "root": { "type": "frame", "name": "root", "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "밀린 메시지" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 320, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "value_text" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 320, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 320, "height": 22 } } ] } }
+    },
+    {
+      "id": 103, "type": "canvas", "title": "",
+      "description": "이번 실행에서 받은 메시지 중 가장 늦은 데이터 시각(한국 시간). 재생 중이면 이 시각이 앞으로 간다. 마감(워터마크)은 그보다 1시간 뒤를 따라가며, 이 시각보다 이른 데이터는 더 받지 않는다. 하루 윈도는 마감이 다음 날 00:00 을 넘어야 닫힌다 (메시지로는 다음 날 01:00 이후)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 1 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "WITH run AS (SELECT run_id FROM analysis.stream_progress ORDER BY progress_id DESC LIMIT 1)\nSELECT to_char(max(p.event_time_max) AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') AS status,\n       coalesce('마감(워터마크) ' || to_char(max(p.watermark) AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI'), '아직 받은 메시지 없음') AS sub\nFROM analysis.stream_progress p JOIN run USING (run_id)" } ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "noValue": "-", "mappings": [] }, "overrides": [] },
+      "options": { "inlineEditing": false, "showAdvancedTypes": true, "panZoom": false, "infinitePan": false,
+        "root": { "type": "frame", "name": "root", "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "받은 데이터 시각 (이번 실행)" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 320, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "status" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 320, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 320, "height": 22 } } ] } }
+    },
+    {
+      "id": 104, "type": "canvas", "title": "",
+      "description": "이번 실행(스트림을 시작한 뒤)에 하루 윈도가 닫혀 flow_detail 에 더해진 날짜 수와 행 수, 그리고 받은 메시지 수. 스트리밍은 값을 더하므로 같은 날을 두 번 재생하면 두 배가 된다 → 그 달은 월 배치로 되돌린다",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 1 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "WITH run AS (SELECT run_id FROM analysis.stream_progress ORDER BY progress_id DESC LIMIT 1)\nSELECT coalesce(sum(cardinality(p.closed_days)) FILTER (WHERE p.loaded_rows IS NOT NULL), 0) || '일 적재 완료' AS status,\n       'flow_detail +' || to_char(coalesce(sum(p.loaded_rows), 0), 'FM999,999,999,990') || '행 · 수신 ' || to_char(coalesce(sum(p.input_rows), 0), 'FM999,999,999,990') || '건' AS sub\nFROM analysis.stream_progress p JOIN run USING (run_id)" } ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "text" }, "noValue": "-", "mappings": [] }, "overrides": [] },
+      "options": { "inlineEditing": false, "showAdvancedTypes": true, "panZoom": false, "infinitePan": false,
+        "root": { "type": "frame", "name": "root", "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 0, "left": 0, "width": 100, "height": 100 },
+          "elements": [
+            { "type": "text", "name": "label", "config": { "text": { "mode": "fixed", "fixed": "적재 (이번 실행)" }, "color": { "fixed": "#8F939E" }, "size": 13, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 4, "left": 12, "width": 320, "height": 22 } },
+            { "type": "text", "name": "value", "config": { "text": { "mode": "field", "field": "status" }, "color": { "field": "status" }, "size": 30, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 30, "left": 12, "width": 320, "height": 44 } },
+            { "type": "text", "name": "sub", "config": { "text": { "mode": "field", "field": "sub" }, "color": { "fixed": "#8F939E" }, "size": 12, "align": "left", "valign": "middle" }, "background": { "color": { "fixed": "transparent" } }, "border": { "color": { "fixed": "transparent" } }, "constraint": { "horizontal": "left", "vertical": "top" }, "placement": { "top": 80, "left": 12, "width": 320, "height": 22 } } ] } }
+    },
+
+    { "id": 200, "type": "row", "title": "처리 흐름", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 }, "panels": [] },
+    {
+      "id": 201, "type": "timeseries", "title": "수신 · 처리 속도 (건/초)",
+      "description": "수신 = 직전 배치 이후 Kafka 에서 읽어 온 속도. 처리 = 그 배치를 처리하는 동안의 속도(처리 능력). 처리가 수신보다 계속 낮으면 밀린다. 쉬는 동안은 0. 선이 끊긴 곳은 스트림이 멈춰 있던 시간(2분 넘게 기록 없음)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 7 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT recorded_at AS \"time\", input_rps AS \"수신\", processed_rps AS \"처리\"\nFROM analysis.stream_progress\nWHERE $__timeFilter(recorded_at)\nORDER BY recorded_at" } ],
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true, "calcs": [] }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "locale", "decimals": 0, "min": 0,
+          "custom": { "drawStyle": "line", "lineInterpolation": "linear", "lineWidth": 2, "fillOpacity": 10, "gradientMode": "none", "showPoints": "never", "pointSize": 4, "spanNulls": false, "insertNulls": 120000,
+            "axisPlacement": "auto", "axisLabel": "", "axisBorderShow": false, "stacking": { "mode": "none", "group": "A" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [] }, "overrides": [] }
+    },
+    {
+      "id": 202, "type": "timeseries", "title": "밀린 메시지 추이 (건)",
+      "description": "Kafka 최신 위치 − Spark 가 읽은 위치. 재생을 빠르게 하면 잠깐 올랐다가 0 으로 내려와야 한다. 내려오지 않고 쌓이면 재생 속도를 늦추거나(--speed 를 크게) 드라이버 메모리 · 배치 소요 시간을 본다",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 7 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT recorded_at AS \"time\", lag_rows AS \"밀린 메시지\"\nFROM analysis.stream_progress\nWHERE $__timeFilter(recorded_at)\nORDER BY recorded_at" } ],
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false, "calcs": [] }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "orange" }, "unit": "locale", "decimals": 0, "min": 0,
+          "custom": { "drawStyle": "line", "lineInterpolation": "linear", "lineWidth": 2, "fillOpacity": 15, "gradientMode": "none", "showPoints": "never", "pointSize": 4, "spanNulls": false, "insertNulls": 120000,
+            "axisPlacement": "auto", "axisLabel": "", "axisBorderShow": false, "stacking": { "mode": "none", "group": "A" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [] }, "overrides": [] }
+    },
+    {
+      "id": 203, "type": "timeseries", "title": "배치 소요 시간 (초)",
+      "description": "마이크로배치 하나를 끝내는 데 걸린 시간. 점선은 배치 간격 5초(--trigger 기본값): 이보다 오래 걸리면 다음 배치가 그만큼 늦게 시작한다. 하루 윈도가 닫히는 배치는 flow_detail 에 110만 행을 더하느라 길다",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 9, "w": 8, "x": 0, "y": 16 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT recorded_at AS \"time\", round(duration_ms / 1000.0, 1) AS \"배치 소요\"\nFROM analysis.stream_progress\nWHERE $__timeFilter(recorded_at) AND duration_ms IS NOT NULL\nORDER BY recorded_at" } ],
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false, "calcs": [] }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "blue" }, "unit": "suffix: 초", "decimals": 1, "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "transparent", "value": null }, { "color": "orange", "value": 5 } ] },
+          "custom": { "drawStyle": "bars", "lineInterpolation": "linear", "lineWidth": 1, "fillOpacity": 60, "gradientMode": "none", "showPoints": "never", "pointSize": 4, "spanNulls": false,
+            "axisPlacement": "auto", "axisLabel": "", "axisBorderShow": false, "stacking": { "mode": "none", "group": "A" }, "thresholdsStyle": { "mode": "dashed" } }, "mappings": [] }, "overrides": [] }
+    },
+    {
+      "id": 204, "type": "timeseries", "title": "집계 중인 행 (메모리)",
+      "description": "Spark 가 아직 닫지 않은 하루 윈도와 중복 제거를 위해 메모리에 들고 있는 행 수. 하루치가 쌓였다가 그 날이 닫히면 줄어든다. 계속 늘기만 하면 윈도가 닫히지 않는 것(종료 신호 send_eos.py 를 안 보냈거나 워터마크가 멈춤)이고, 드라이버 메모리가 모자랄 수 있다",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 9, "w": 8, "x": 8, "y": 16 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT recorded_at AS \"time\", state_rows AS \"집계 중인 행\"\nFROM analysis.stream_progress\nWHERE $__timeFilter(recorded_at)\nORDER BY recorded_at" } ],
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false, "calcs": [] }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "purple" }, "unit": "locale", "decimals": 0, "min": 0,
+          "custom": { "drawStyle": "line", "lineInterpolation": "stepAfter", "lineWidth": 2, "fillOpacity": 10, "gradientMode": "none", "showPoints": "never", "pointSize": 4, "spanNulls": false, "insertNulls": 120000,
+            "axisPlacement": "auto", "axisLabel": "", "axisBorderShow": false, "stacking": { "mode": "none", "group": "A" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [] }, "overrides": [] }
+    },
+    {
+      "id": 205, "type": "table", "title": "닫힌 날짜 (flow_detail 에 더해진 것)",
+      "description": "하루 윈도가 닫힐 때마다 한 줄. 날짜마다 약 110만 행이 flow_detail 에 더해진다. 재생한 날짜가 모두 여기 나와야 끝난 것이다 (마지막 날은 send_eos.py 를 보내야 닫힌다)",
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" },
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 16 },
+      "targets": [ { "refId": "A", "datasource": { "type": "grafana-postgresql-datasource", "uid": "eumi-db" }, "editorMode": "code", "format": "table", "rawQuery": true,
+        "rawSql": "SELECT to_char(recorded_at AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI:SS') AS \"기록 시각\",\n       array_to_string(closed_days, ', ') AS \"닫힌 날짜\",\n       loaded_rows AS \"더한 행\",\n       round(duration_ms / 1000.0, 1) AS \"배치 소요(초)\"\nFROM analysis.stream_progress\nWHERE loaded_rows IS NOT NULL AND $__timeFilter(recorded_at)\nORDER BY progress_id DESC\nLIMIT 50" } ],
+      "options": { "showHeader": true, "cellHeight": "sm", "footer": { "show": false, "reducer": ["sum"], "fields": "" } },
+      "fieldConfig": { "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" }, "filterable": false, "inspect": false }, "noValue": "-", "mappings": [] },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "더한 행" }, "properties": [ { "id": "unit", "value": "locale" } ] },
+          { "matcher": { "id": "byName", "options": "기록 시각" }, "properties": [ { "id": "custom.width", "value": 130 } ] } ] }
+    }
+  ]
+}
