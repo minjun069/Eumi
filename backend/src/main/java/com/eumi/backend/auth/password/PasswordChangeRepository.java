@@ -35,4 +35,7 @@ public class PasswordChangeRepository {
         // SessionRepository 개별 삭제 대신 같은 업무 트랜잭션에 참여하는 SQL로 폐기한다.
         jdbc.update("DELETE FROM public.spring_session WHERE principal_name=? AND session_id<>?",Long.toString(member),currentSession);
     }
+    public void deleteAllSessions(long member) {
+        jdbc.update("DELETE FROM public.spring_session WHERE principal_name=?",Long.toString(member));
+    }
 }
