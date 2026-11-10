@@ -242,47 +242,6 @@
   font-size: 13.5px;
 }
 
-.agent-tableau-frame {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  border-radius: 6px;
-  background: #fff;
-}
-
-/* Tableau는 대시보드 고정 크기로 띄우고 틀 폭에 맞춰 줄인다 (줄여도 클릭·툴팁 위치는 맞는다) */
-.agent-tableau-host {
-  transform-origin: 0 0;
-}
-
-/* tableau-viz는 inline 요소라 height 100%가 iframe 기본 높이(150px)로 남는다 */
-.agent-tableau-host tableau-viz {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.agent-tableau-cover {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: var(--text-muted);
-  background: rgb(255 255 255 / 92%);
-  font-size: 13px;
-}
-
-.agent-tableau-cover p {
-  margin: 0;
-}
-
-.agent-tableau-cover[role="alert"] {
-  color: var(--danger);
-}
-
 .agent-artifacts-repeated {
   margin: 0;
   color: var(--text-muted);

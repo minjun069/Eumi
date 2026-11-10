@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router"
 import { analysisApi, analysisKeys, type DongInsight, type InsightReportData } from "@/api/analysisApi"
 import { errorMessage, isApiError } from "@/api/errors"
 import type { MenuProfile } from "@/api/types"
-import { Emphasized } from "@/components/common/Emphasized"
 import { EmptyState } from "@/components/common/EmptyState"
 import { FieldError } from "@/components/common/FieldError"
 import { PATHS } from "@/routes/paths"
@@ -14,7 +13,6 @@ import {
   compactPeriod,
   DONG_PATTERN,
   effectivePeriod,
-  formatDateTime,
   formatMonth,
   isLoadedPeriod,
   riskUrl,
@@ -23,6 +21,7 @@ import {
 } from "@/screens/risk/riskQuery"
 import { stageStyle } from "@/screens/risk/riskStyle"
 import { isPublished, TABLEAU_GRID_LEGEND, TABLEAU_VIEWS, tableauDetailParameters } from "@/tableau/tableauConfig"
+import { formatDateTime } from "@/utils/datetime"
 
 const NOT_FOUND_DONG = {
   title: "행정동을 찾을 수 없습니다.",
@@ -255,15 +254,10 @@ function DongBody({
               퀵 인사이트
             </h2>
           </header>
-          {dong.insight ? (
+          {/* 2.4.0: summary는 퀵 인사이트 한 개를 담은 배열이다. 일반 글로 줄바꿈을 살려 보인다 (insight-report.md 8절) */}
+          {dong.insight && dong.insight.summary[0]?.trim() ? (
             <>
-              <ul className="quick-insight-list">
-                {dong.insight.summary.map((sentence, index) => (
-                  <li key={index}>
-                    <Emphasized text={sentence} />
-                  </li>
-                ))}
-              </ul>
+              <p className="quick-insight-text">{dong.insight.summary[0].trim()}</p>
               <p className="quick-insight-meta">AI 생성 · {formatDateTime(dong.insight.generatedAt)}</p>
             </>
           ) : (
@@ -303,7 +297,12 @@ function DongBody({
             <LoadError message={errorMessage(report.error)} onRetry={() => void report.refetch()} />
           )
         ) : report.data?.report ? (
-          <InsightReportView report={report.data.report} />
+          <InsightReportView
+            report={report.data.report}
+            dongCode={dong.dongCode}
+            sigunguCode={dong.sigunguCode}
+            period={period}
+          />
         ) : (
           <p className="risk-empty-text">이 달의 인사이트 보고서를 준비 중입니다.</p>
         )}
