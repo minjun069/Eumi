@@ -215,21 +215,25 @@ Grafana 가 대시보드와 같은 쿼리로 1분마다(행 수는 10분마다) 
 사용자 ─ https ─> Nginx(443) ─┬─ /api/      → backend   127.0.0.1:8080 ─> postgres (내부망, 포트 없음)
                               │                 └─ http://ai:8000 → ai (내부망, 포트 없음) ─> postgres · LLM API
                               ├─ /jenkins/  → Jenkins   127.0.0.1:9090
+                              ├─ /airflow/  → pipeline-web (Airflow 화면) 127.0.0.1:8081 ─> postgres(airflow DB)
+                              ├─ /grafana/  → grafana   127.0.0.1:3001 ─> postgres(eumi · airflow DB, 읽기 전용)
                               └─ /          → web       127.0.0.1:3000
-master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migrate(백업 → Flyway) → Deploy(헬스체크 · 실패 시 되돌림) → Cleanup
+내부망만: pipeline(Airflow 스케줄러 + Spark) ─> minio · kafka · postgres(eumi_pipeline)
+master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migrate(백업 → Flyway) → Deploy(헬스체크 · 실패 시 되돌림) → Pipeline → Monitoring → Cleanup
 ```
 
 | 파일 | 서버 위치 | 용도 |
 |---|---|---|
-| `deploy/docker-compose.prod.yml` | `/srv/eumi/` | 운영 서비스 (postgres · ai · backend · web · mailpit, flyway는 실행할 때만) |
+| `deploy/docker-compose.prod.yml` | `/srv/eumi/` | 운영 서비스 (postgres · ai · backend · web · mailpit, flyway는 실행할 때만) + 데이터 파이프라인(minio · kafka · pipeline · pipeline-web) · grafana |
 | `deploy/.env.config.example` | `/srv/eumi/.env.config` | 운영 비밀값 키 목록. 값은 서버에서 무작위로 만들고 git에 두지 않는다 |
 | `deploy/nginx/eumi.conf` | `/etc/nginx/sites-available/eumi` | HTTPS · 경로 연결. 인프라 담당이 손으로 반영 (Jenkins는 다르면 경고만) |
 | `deploy/nginx/eumi-bootstrap.conf` | (인증서 첫 발급 때만) | |
 | `deploy/jenkins/override.conf` | `/etc/systemd/system/jenkins.service.d/` | Jenkins를 127.0.0.1:9090, `/jenkins` 경로로 |
 | `deploy/cron/eumi-backup` | `/etc/cron.d/` | 매일 04:30 DB 백업 |
-| `scripts/sync.sh` | `/srv/eumi/scripts/` | 저장소 → `/srv/eumi` 복사 (비밀값 · 태그 · 백업은 건드리지 않음) |
+| `scripts/sync.sh` | `/srv/eumi/scripts/` | 저장소 → `/srv/eumi` 복사 (비밀값 · 태그 · 백업 · `data/raw` · `data/processed`는 건드리지 않음). `data/pipeline` · `data/airflow` · Grafana 설정도 복사한다 |
 | `scripts/migrate.sh` | 〃 | DB 기동 → 백업 → Flyway |
-| `scripts/deploy.sh` | 〃 | 서비스 하나 교체 + 헬스체크, 실패하면 이전 태그로 |
+| `scripts/deploy.sh` | 〃 | 서비스 하나 교체 + 헬스체크, 실패하면 이전 태그로 (`pipeline`은 minio · kafka · 초기화 · 스케줄러 · 화면을 순서대로) |
+| `scripts/grafana.sh` | 〃 | Grafana 띄우기 · 설정 다시 읽기 (`--restart`). 공식 이미지라 태그가 없다 |
 | `scripts/backup.sh` · `restore-test.sh` | 〃 | 백업 (deploy 10개 · daily 7개 보관) · 복원 시험 (운영 DB는 건드리지 않음) |
 | `scripts/cleanup-images.sh` | 〃 | 서비스별 최근 이미지 3개만 보관 (= 롤백 가능한 버전) |
 | `scripts/dc.sh` | 〃 | 상태 보기 (`ps`, `logs`) |
@@ -264,3 +268,71 @@ scripts/dc.sh --profile ai exec -T ai /app/.venv/bin/python -c "import os, psyco
 #   200 · 401 · 404가 나오면 나가는 길은 열려 있다 (연결 오류 · 시간 초과면 막힘). 주소가 아직 없으면 OpenAI 주소로 확인한다
 scripts/dc.sh --profile ai exec -T ai /app/.venv/bin/python -c "import os, httpx; u = os.environ.get('SETTINGS_BASE_URL', 'https://api.openai.com/v1').rstrip('/'); print(u, httpx.get(u + '/models', timeout=5).status_code)"
 ```
+
+### 데이터 파이프라인 · Grafana (운영)
+
+compose의 profile `pipeline` 서비스다: `minio`(원본 저장소) · `kafka`(스트리밍 시연용) · `pipeline`(Airflow 스케줄러 + Spark) · `pipeline-web`(Airflow 화면) · `grafana`(대시보드 2개 + 알림 8종), 한 번 돌고 끝나는 `kafka-init` · `pipeline-init`.
+
+- **배포 조건:** `infra/pipeline/`(이미지 정의)이 바뀌었거나 아직 한 번도 배포하지 않았으면 Jenkins가 `eumi-pipeline` 이미지를 빌드해(처음 10~20분) `deploy.sh pipeline`으로 띄운다. 운영 compose만 바뀌면 빌드 없이 지금 태그로 다시 적용한다. `data/`(스크립트 · DAG)만 바뀌면 Sync가 복사할 뿐 컨테이너는 그대로다.
+- **실패:** 앱(ai · backend · web)을 먼저 배포하고 pipeline · Grafana는 맨 뒤다. 실패하면 이전 태그로 되돌리고 빌드를 노란색(UNSTABLE)으로 표시한다. 앱과 `eumi` DB에는 영향이 없다.
+- **Grafana:** 배포마다 `grafana.sh --skip-if-unconfigured`가 돈다. 비밀값 · DB 계정이 없으면 건너뛰고, `infra/grafana/`가 바뀐 배포에서는 다시 띄운다(알림 설정 반영). 다시 띄운 직후 약 1분은 이전 알림 설정이 쓰인다.
+- **자원:** `pipeline` 6 GB(Spark 드라이버 4 GB 포함, 월 배치가 돌 때만 쓴다) · `kafka` 1.5 GB · `minio` 1 GB · `pipeline-web` 1 GB · `grafana` 512 MB. 디스크는 MinIO 원본 약 2 GB + 가상 유동 월 약 1 GB + Kafka 보관 7일.
+- **백업:** 매일 · 배포 전 백업은 `eumi` DB만 한다. `airflow` DB(실행 이력)와 MinIO 볼륨은 백업하지 않는다 (원본 파일은 데이터 파트가 따로 보관).
+
+**지킬 것**
+
+- **과거 달 월 배치를 서버에서 다시 돌리지 않는다.** 서버 DB에는 유동 상세(`analysis.flow_detail`)가 없어서, 2025-07~12를 다시 돌리면 행동 지표의 변화 항목이 NULL로 덮이고 격자 이상 점수가 지워진다. Airflow 화면에서 `{"months": [...]}`로 수동 실행하지 않는다. 필요하면 데이터 파트가 먼저 유동 상세를 적재한다.
+- 기준 테이블 적재(`load_dim_region.py` · `load_dim_grid100.py`)도 서버에서 돌리지 않는다. 같은 내용이 `db/seed`(R__01 · R__10)로 이미 들어가 있다.
+- Grafana · MinIO · Kafka를 `dc.sh up`으로 직접 띄우지 않는다. 비밀값이 비면 Grafana가 기본 비밀번호(admin)로 뜬다. `deploy.sh pipeline` · `grafana.sh`가 값을 확인하고 띄운다.
+
+**처음 한 번 (인프라 담당, 서버에서. 첫 배포 전)**
+
+1. **비밀값:** `/srv/eumi/.env.config`에 `.env.config.example`의 "데이터 파이프라인" 9개(`EUMI_PIPELINE_PASSWORD` 포함)와 "Grafana" 2개(`GRAFANA_ADMIN_PASSWORD` · `EUMI_MONITOR_PASSWORD`)를 넣는다. `MATTERMOST_WEBHOOK_URL`은 없어도 된다(알림만 가지 않는다).
+2. **DB 계정 · DB:** 서버 DB 볼륨은 이미 있어서 `postgres-init/`이 돌지 않는다. `.env.config`의 값을 읽어 직접 만든다 (값을 화면에 출력하지 않는다).
+   ```bash
+   sudo -u jenkins bash <<'EOF'
+   set -e
+   cd /srv/eumi
+   get() { grep -E "^$1=" .env.config | head -1 | cut -d= -f2-; }
+   AF=$(get AIRFLOW_DB_PASSWORD); MON=$(get EUMI_MONITOR_PASSWORD)
+   [ -n "$AF" ] && [ -n "$MON" ] || { echo "키 값이 없습니다"; exit 1; }
+   printf "CREATE ROLE airflow LOGIN PASSWORD '%s';\nCREATE ROLE eumi_monitor LOGIN PASSWORD '%s' CONNECTION LIMIT 10;\nALTER ROLE eumi_monitor SET statement_timeout = '30s';\nGRANT pg_read_all_stats TO eumi_monitor;\n" "$AF" "$MON" \
+     | scripts/dc.sh exec -T postgres psql -U postgres -v ON_ERROR_STOP=1 -q
+   scripts/dc.sh exec -T postgres psql -U postgres -q -c "CREATE DATABASE airflow OWNER airflow" </dev/null
+   EOF
+   ```
+   테이블 권한은 따로 주지 않는다. `eumi` DB는 다음 Flyway 실행의 `afterMigrate.sql`이, `airflow` DB는 `pipeline-init`의 `grant_monitor.py`가 준다. DB 볼륨을 새로 만들었을 때(복구)는 `postgres-init/`이 계정을 기본 비밀번호로 만들므로, `ALTER ROLE airflow PASSWORD …` · `ALTER ROLE eumi_monitor PASSWORD …`로 `.env.config` 값과 맞춘다.
+3. **MinIO 볼륨:** `docker volume create eumi-miniodata` (pgdata처럼 external — `down -v`에도 남는다).
+4. **Nginx:** `eumi.conf`의 `/airflow/` · `/grafana/` 블록을 반영한다 (`/etc/nginx/sites-available/eumi`에 복사 → `sudo nginx -t` → `sudo systemctl reload nginx`). 컨테이너가 뜨기 전에는 두 경로만 502다.
+
+**배포 뒤 (서버, jenkins 계정)**
+
+```bash
+cd /srv/eumi
+scripts/dc.sh --profile pipeline ps        # minio · kafka · pipeline · pipeline-web · grafana: Up … (healthy)
+scripts/dc.sh --profile pipeline logs --tail=50 pipeline
+```
+
+1. **원본 업로드** (약 2 GB. 데이터 파트의 `data/raw` 폴더를 서버 `/srv/eumi/data/raw`에 두고, 컨테이너 계정이 읽을 수 있게 `chmod -R go+rX`):
+   ```bash
+   scripts/dc.sh --profile pipeline exec -T pipeline python3 pipeline/m1_collect/upload_raw.py     # raw/ → MinIO sgi/raw (DB는 건드리지 않는다)
+   ```
+2. **Airflow:** `https://k15b201.p.ssafy.io/airflow/`에 `AIRFLOW_ADMIN_*`로 로그인 → **원본 업로드 뒤에** DAG `eumi_monthly`를 unpause 한다. 켜면 가장 최근 스케줄 1건(전월 대상)이 바로 도는데, 그 달 원본이 없으므로 `check_inputs`가 전체를 skip 하고 끝난다 (원본을 올리기 전에 켜면 skip이 아니라 실패한다). 정기 실행은 매월 5일 03:00(전월 대상)이다.
+3. **Grafana:** `https://k15b201.p.ssafy.io/grafana/`에 `admin` / `GRAFANA_ADMIN_PASSWORD`로 로그인 →
+   - Connections → Data sources의 `eumi` · `airflow`를 각각 Test → 둘 다 OK
+   - Dashboards → Eumi 폴더의 "Eumi 파이프라인" · "Eumi 스트리밍"이 열린다
+   - Alerting → Alert rules의 Eumi 폴더에 규칙 8개. DAG를 unpause 하기 전에는 "월 배치가 돌지 않음"이 울릴 수 있다
+   - 웹훅을 넣었다면 Alerting → Contact points → `eumi-mattermost` → Test로 채널에 "[운영] …"이 오는지 본다
+4. **웹훅을 나중에 넣을 때:** `.env.config`에 `MATTERMOST_WEBHOOK_URL`을 넣고 `scripts/grafana.sh`를 실행한다 (컨테이너가 새 값으로 다시 만들어진다).
+
+**서버에서 로컬과 다른 점**
+
+- 유동 상세가 없어 대시보드 "테이블 최신성"의 유동 상세가 비어 보이고, `analysis.pipeline_check`가 비어 "검사 결과"가 "기록 없음"이다. 서버에서 월 배치가 처음 실제로 돌면 채워진다.
+- 스트리밍은 시연 때만 수동으로 돌리므로 스트리밍 대시보드는 평소 "멈춤"이 정상이다.
+- 월 배치가 끝난 뒤 backend에 알리는 호출(INT-04)은 아직 DAG에 없다. 보고서 생성은 서버에서 INT-04를 직접 호출한다.
+
+**문제가 생기면**
+
+- 파이프라인만 멈추기: `scripts/dc.sh --profile pipeline stop pipeline pipeline-web kafka minio grafana` (앱은 그대로 돈다). 다시 띄울 때는 `scripts/deploy.sh pipeline <태그>` · `scripts/grafana.sh`.
+- 이전 버전으로: `docker images eumi-pipeline`에서 태그를 골라 `scripts/deploy.sh pipeline <이전 태그>`.
+- 태스크가 실패하면 Airflow 화면의 태스크 로그를 데이터 파트에 전달한다.

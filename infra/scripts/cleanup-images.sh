@@ -13,7 +13,7 @@ set -euo pipefail
 
 KEEP="${KEEP:-3}"
 
-for svc in ai backend web; do
+for svc in ai backend web pipeline; do
   repo="eumi-$svc"
   # docker images는 최신순이다 → 앞의 KEEP개를 건너뛰고 나머지를 지운다
   docker images "$repo" --format '{{.Tag}}' \
