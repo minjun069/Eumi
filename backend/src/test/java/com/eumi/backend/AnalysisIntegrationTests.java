@@ -121,9 +121,10 @@ class AnalysisIntegrationTests {
         assertThat(data.has("report")).isTrue();
         boolean generated = Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM public.region_insight_report i "
                 + "JOIN public.region_result r USING(adm_cd10,period_start) WHERE i.adm_cd10='1168066000' AND i.period_start=DATE '2025-12-01' "
-                + "AND i.result_updated_at=r.updated_at AND i.graph_1 IN ('EmbedDetailV01','EmbedDetailV02','EmbedDetailV03','EmbedDetailV04','EmbedDetailV05','EmbedDetailV06','EmbedDetailV07','EmbedDetailV08') "
-                + "AND i.graph_2 IN ('EmbedDetailV01','EmbedDetailV02','EmbedDetailV03','EmbedDetailV04','EmbedDetailV05','EmbedDetailV06','EmbedDetailV07','EmbedDetailV08') "
-                + "AND i.graph_3 IN ('EmbedDetailV01','EmbedDetailV02','EmbedDetailV03','EmbedDetailV04','EmbedDetailV05','EmbedDetailV06','EmbedDetailV07','EmbedDetailV08'))", Boolean.class));
+                + "AND i.result_updated_at=r.updated_at AND (i.quick_insight IS NOT NULL "
+                + "OR i.graph_1 IN ('EmbedDetailV01','EmbedDetailV02','EmbedDetailV03','EmbedDetailV04','EmbedDetailV05','EmbedDetailV06','EmbedDetailV07','EmbedDetailV08') "
+                + "OR i.graph_2 IN ('EmbedDetailV01','EmbedDetailV02','EmbedDetailV03','EmbedDetailV04','EmbedDetailV05','EmbedDetailV06','EmbedDetailV07','EmbedDetailV08') "
+                + "OR i.graph_3 IN ('EmbedDetailV01','EmbedDetailV02','EmbedDetailV03','EmbedDetailV04','EmbedDetailV05','EmbedDetailV06','EmbedDetailV07','EmbedDetailV08')))", Boolean.class));
         if (!generated) assertThat(data.path("report").isNull()).isTrue();
         else Instant.parse(data.path("report").path("generatedAt").asText());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM public.region_insight_report", Long.class)).isEqualTo(before);

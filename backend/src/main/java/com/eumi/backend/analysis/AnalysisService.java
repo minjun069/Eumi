@@ -1,6 +1,7 @@
 package com.eumi.backend.analysis;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import com.eumi.backend.auth.login.AuthService;
@@ -56,12 +57,20 @@ public class AnalysisService {
         requireUser(memberId);
         var row = repository.report(dongCode, firstDay(month)).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         if (!row.present()) return new AnalysisDtos.InsightReportData(null);
-        if (row.graphs().stream().anyMatch(graph -> graph.sheet() == null || !REPORT_SHEETS.contains(graph.sheet()))) {
-            // 보고서 본문/임의 sheet 값은 로그에 남기지 않는다. 점수/퀵 인사이트 조회는 유지한다.
-            log.warn("Saved report hidden: unsupported sheet requestId={} month={} status=200", MDC.get("requestId"), month);
-            return new AnalysisDtos.InsightReportData(null);
+        var graphs = new ArrayList<AnalysisDtos.ReportGraph>();
+        for (int slot = 0; slot < row.graphs().size(); slot++) {
+            var graph = row.graphs().get(slot);
+            if (graph.sheet() == null) continue;
+            if (!REPORT_SHEETS.contains(graph.sheet())) {
+                // 보고서 본문/임의 sheet 값은 로그에 남기지 않는다.
+                log.warn("Saved report graph skipped: unsupported sheet requestId={} month={} slot={}",
+                        MDC.get("requestId"), month, slot + 1);
+                continue;
+            }
+            graphs.add(new AnalysisDtos.ReportGraph(graph.sheet(), graph.description()));
         }
-        return new AnalysisDtos.InsightReportData(new AnalysisDtos.Report(row.quickInsight(), row.graphs(), row.generatedAt()));
+        if (graphs.isEmpty() && row.quickInsight() == null) return new AnalysisDtos.InsightReportData(null);
+        return new AnalysisDtos.InsightReportData(new AnalysisDtos.Report(row.quickInsight(), List.copyOf(graphs), row.generatedAt()));
     }
 
     private void requireUser(long memberId) {
