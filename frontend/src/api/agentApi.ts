@@ -5,6 +5,8 @@ import type { Schemas, SuccessData } from "@/api/types"
 // 질문을 보내면(202) 1초마다 마지막으로 받은 행 이후를 조회해 붙이고, 끝 행(완료·실패·취소)을 받으면 멈춘다 (stores/agentStore.ts).
 
 export type AgentQuestionRequest = Schemas["AgentQuestionRequest"]
+/** 질문과 함께 보내는 화면 문맥 (ai-agent-panel.md 3-1). 저장하지 않는다 */
+export type ScreenContext = Schemas["ScreenContext"]
 export type AgentQuestionCreated = SuccessData<"AgentQuestionCreated_Success">
 export type AgentMessageList = SuccessData<"AgentMessages_Success">
 /** ai_message 한 행 (질문·진행·완료·실패·취소) */

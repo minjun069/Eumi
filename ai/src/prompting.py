@@ -86,8 +86,8 @@ NODE_INSTRUCTIONS = {
     ),
     "Selection": (
         "작업 선택 단계다. 제공된 도구 명세는 실행기가 호출할 수 있는 작업 목록이다. "
-        "모델은 직접 도구를 호출하지 않고 name과 arguments_json에 작업을 작성한다. "
-        "직접 함수 호출이 비활성이어도 실행기가 이 선택을 읽어 호출한다. "
+        "[도구 명세]에서 작업을 골라 name, arguments_json, reason에 작성한다. "
+        "실행기가 선택 결과의 입력을 검사하고 해당 작업을 호출한다. "
         "request 역할은 전문 Agent를 "
         "호출하고, 전문 역할은 필요한 도구를 사용한다. "
         "interpretation·report 역할은 query_data/process_data만 호출한다. "
@@ -216,7 +216,7 @@ def _analysis_instructions() -> str:
     )
 
 
-def _messages(state, role, node, sections, *, guide=""):
+def _messages(state, role, node, sections, *, guide="", system_sections=()):
     instruction = NODE_INSTRUCTIONS[node]
     if guide:
         instruction += "\n\n" + guide
@@ -230,6 +230,7 @@ def _messages(state, role, node, sections, *, guide=""):
                 + ("\n" + REPORT_EVIDENCE if role == "report" else ""),
             ),
             _section("이번 노드의 작업 지침", instruction),
+            *system_sections,
         )
     )
     # 전송용 메시지는 지역값이며 State.messages나 다른 실행 저장소에 추가하지 않는다.
@@ -261,7 +262,7 @@ def interpret_messages(state: State, role: Role):
     return _messages(state, role, "Interpretation", sections, guide=guide)
 
 
-def selection_messages(state: State, role: Role, catalog):
+def selection_messages(state: State, role: Role, catalog, *, definitions):
     sections = [
         _execution(state),
         _section("작업 결과와 검증 이력", _json(_records(state["results"]))),
@@ -297,7 +298,14 @@ def selection_messages(state: State, role: Role, catalog):
                 _json(visualization_context(state, include_inputs=True)),
             )
         )
-    return _messages(state, role, "Selection", sections, guide=guide)
+    return _messages(
+        state,
+        role,
+        "Selection",
+        sections,
+        guide=guide,
+        system_sections=[_section("도구 명세", _json(definitions))],
+    )
 
 
 def decide_messages(state: State, role: Role, catalog=None):

@@ -139,17 +139,22 @@ services:
       EUMI_AUTH_HASH_KEY: ${EUMI_AUTH_HASH_KEY:?.env.config에 EUMI_AUTH_HASH_KEY가 필요합니다}
       # 내부 연동 토큰 (비밀값, 호출자마다 다른 값. BE 설정 eumi.internal.ai-token · pipeline-token)
       #   EUMI_AI_TOKEN: AI → backend 알림(INT-07 · 08). ai의 SETTINGS_BACKEND_TOKEN과 같은 값이다 (아래 ai environment)
-      #   EUMI_PIPELINE_TOKEN: 파이프라인 → backend 월 분석 완료 알림(INT-04). Airflow에도 같은 값을 넘긴다
+      #   EUMI_PIPELINE_TOKEN: 파이프라인 → backend 월 분석 완료 알림(INT-04). 지금 DAG는 INT-04를 부르지 않아 Airflow에는 넘기지 않는다
       #   두 값이 같거나 공백 · 제어 문자 · "${"가 들어 있으면 backend가 뜨지 않는다.
-      #   fake인 동안은 비어 있어도 뜬다(그때 INT-07은 401). http로 바꾸는 커밋에서 둘 다 :?로 바꾼다 (http는 둘 다 있어야 뜬다)
-      EUMI_AI_TOKEN: ${EUMI_AI_TOKEN:-}
-      EUMI_PIPELINE_TOKEN: ${EUMI_PIPELINE_TOKEN:-}
-      # AI 실행 방식: fake(가짜 AI가 진행·완료 행을 씀) / http(ai 서비스 호출). 비밀값이 아니라 여기 둔다.
+      #   http 모드는 둘 다 있어야 backend가 뜬다. 값이 없으면 compose가 여기서 멈춘다
+      EUMI_AI_TOKEN: ${EUMI_AI_TOKEN:?.env.config에 EUMI_AI_TOKEN이 필요합니다}
+      EUMI_PIPELINE_TOKEN: ${EUMI_PIPELINE_TOKEN:?.env.config에 EUMI_PIPELINE_TOKEN이 필요합니다}
+      # AI 실행 방식: http(ai 서비스 호출, 11/11 전환) / fake(가짜 AI가 진행·완료 행을 씀). 비밀값이 아니라 여기 둔다.
       #   application-prod.yml이 기본값 없이 읽으므로 빠지면 backend가 뜨지 않는다.
-      #   http로 바꾸는 때: ai의 GMS 주소 · 모델(SETTINGS_BASE_URL · SETTINGS_MODEL)이 들어가 답변이 되고, 시간 값 4개
-      #   (EUMI_AI_EXECUTION_LIMIT · GRACE_PERIOD · UNRESPONSIVE_AFTER · CANCEL_WAIT, docs/api/ai-agent-panel.md 5절)를 여기에 넣고, 위 토큰 두 줄을 :?로 바꿀 때
-      EUMI_AI_MODE: fake
-      # ai 서비스 주소 (같은 compose 내부망). fake 모드에서는 쓰지 않는다
+      #   fake로 되돌릴 때: 이 줄만 fake로 바꾸는 커밋을 master에 넣는다 (시간 값 · 토큰은 그대로 둬도 뜬다). infra/README "AI 서버 (ai)"
+      EUMI_AI_MODE: http
+      # AI 시간 값 4개 (docs/api/ai-agent-panel.md 5절). ai의 runtime_timeout 300초 · llm_timeout 30초 기준
+      #   실행 제한 = 300초 + 마무리, 여유 = 실패 행 커밋 대기, 무응답 = llm_timeout + 여유(넘으면 INT-01을 한 번 다시 보냄), 취소 대기 = 취소 행 커밋 대기
+      EUMI_AI_EXECUTION_LIMIT: 330s
+      EUMI_AI_GRACE_PERIOD: 5s
+      EUMI_AI_UNRESPONSIVE_AFTER: 40s
+      EUMI_AI_CANCEL_WAIT: 3s
+      # ai 서비스 주소 (같은 compose 내부망)
       AI_BASE_URL: http://ai:8000
     volumes:
       - uploads:/data/uploads
@@ -202,11 +207,11 @@ services:
       SETTINGS_BACKEND_URL: http://backend:8080
       SETTINGS_BACKEND_TOKEN: ${EUMI_AI_TOKEN:-}
       SETTINGS_OUTPUT_DIR: /app/outputs
-      # LLM 주소 · 모델 (비밀값 아님). 지금은 없어서 ai 기본값(OpenAI 주소, gpt-6-sol)으로 GMS 키를 보내 답변이 실패한다.
-      #   AI 담당이 GMS 주소 · 모델 이름과 Responses API 동작을 확인하면 아래 두 줄의 주석을 풀고 값을 넣는다 (http 전환 전).
-      #   빈 값으로 두면 ai가 시작되지 않으므로(주소 형식 검사) 값이 정해질 때까지 주석으로 둔다
-      # SETTINGS_BASE_URL: <GMS 주소>
-      # SETTINGS_MODEL: <GMS 모델 이름>
+      # LLM 주소 · 모델 (비밀값 아님). SSAFY GMS의 OpenAI 호환 주소다 (ai가 뒤에 /responses를 붙여 Responses API로 부른다).
+      #   11/11 로컬에서 gpt-6-luna로 패널 질문 · 도구 선택(strict JSON) · 화면 문맥 · 중단을 확인했다.
+      #   빈 값이면 ai가 시작되지 않는다(주소 형식 검사)
+      SETTINGS_BASE_URL: https://gms.ssafy.io/gmsapi/api.openai.com/v1
+      SETTINGS_MODEL: gpt-6-luna
       LANGFUSE_ENABLED: "false"
       TZ: Asia/Seoul
     # 실행 기록(질문 · 모델 입출력 추적)은 디스크에 남기지 않는다. 메모리 512MB 안에서만 쓰고 컨테이너를 바꾸면 지워진다
