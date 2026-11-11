@@ -1,6 +1,6 @@
 # 행정동 분석 보고서 생성 계획
 
-작성일: 2026-11-06. 수정일: 2026-11-09. 사용자 확인 사항과 현재 구현 범위를 기록한다. 실제 DB·화면 연동은 미검증이다.
+작성일: 2026-11-06. 수정일: 2026-11-11. 사용자 확인 사항과 현재 구현 범위를 기록한다. 실제 DB·화면 연동은 미검증이다.
 
 ## 1. 목적과 적용 범위
 
@@ -99,11 +99,11 @@ AI가 `region_insight_report`에 직접 저장한다. 백엔드에 보고서를 
 
 | 연결 | 상태 |
 | --- | --- |
-| DB 직접 저장·NULL | INSERT·UPDATE 권한은 BE 측 부여 예정. 부분 NULL은 기존 DB 제약과 충돌하여 실제 연동 미완료. DB 스키마·권한은 AI에서 변경하지 않음 |
+| DB 직접 저장·NULL | 삭제된 `summary_lines`·`report` 참조 없이 UPSERT. `eumi_ai` 쓰기 권한은 배포 스크립트에 반영. 실제 DB 저장·권한은 미검증이며, 부분 NULL과 현행 NOT NULL 제약의 충돌은 [연동 대조](../ai-runtime-api-20261029.md#5-배포와-남은-연결)에 기록. DB 스키마·업무 계약은 변경하지 않음 |
 | 상세 근거 조회 | `region_result`, `bh_region_contribution`, 동·월·구분별로 합산한 `flow_detail` 일평균, 동 코드와 연결한 `bh_grid_anomaly` 조회 연결 |
 | V06 요인별 기여도 | DB 저장 자료가 없어 실제 자료원 확인 대기. 원지표나 점수를 기여도로 바꾸지 않음 |
 | V01 도시 중앙 50% 범위 | 계산 근거 공급 미연결. 현재는 해당 동의 월별 점수 조회가 가능하며 중앙 범위 수치는 만들지 않음 |
 | Tableau 화면 | 그래프명과 설명을 저장. 실제 화면에 동일한 6개월 기간이 적용되는지는 미검증 |
 | 실행 검증 | 모의 모델 회귀와 실제 모델·합성 자료·파일 DB로 로컬 HTTP 접수·생성·저장·INT-08 왕복 검증. 검증 결과는 [실행 안내](../../README.md)에 기록. 실제 PostgreSQL·운영 BE 왕복은 미검증 |
 
-기준 문서: [공통 실행 흐름](../ieumi-agent-workflow-design.md), [Tableau 시각화](../TABLEAU.md), [보고서 DB 제약](../../../db/migration/V20261106_01__insight_report_slots.sql), [DB 권한](../../../db/migration/afterMigrate.sql).
+기준 문서: [공통 실행 흐름](../ieumi-agent-workflow-design.md), [Tableau 시각화](../TABLEAU.md), [보고서 DB 제약](../../../db/migration/V20261110_02__insight_report.sql), [DB 권한](../../../db/migration/afterMigrate.sql).
