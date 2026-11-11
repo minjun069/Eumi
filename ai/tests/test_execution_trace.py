@@ -140,6 +140,8 @@ async def test_real_adapter_http_payload_and_failure_trace(monkeypatch, bad_resp
         await model.http_async_client.aclose()
     assert requests[0]["input"][1]["content"] == messages[1].content
     assert requests[0]["text"]["format"]["type"] == "json_schema"
+    assert requests[0]["text"]["format"]["strict"] is False
+    assert "tools" not in requests[0] and "tool_choice" not in requests[0]
     span = trace.spans[0]
     assert span["http_request"]["body"] == requests[0]
     assert span["output"]["sdk_response"]["content"][0]["text"] == content

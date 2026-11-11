@@ -104,7 +104,6 @@ def selection_tools(
                 "name": name,
                 "description": description,
                 "parameters": parameters,
-                "strict": False,
             },
         }
         for name, description, parameters in definitions

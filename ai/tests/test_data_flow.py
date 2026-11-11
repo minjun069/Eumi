@@ -124,7 +124,8 @@ def test_processing_choices_come_only_from_usable_state_results(tmp_path):
         functions["query_data"]["parameters"]["properties"]["target"]["enum"]
     ) == set(providers)
     shown = section(
-        selection_messages(state, "report", catalog), "가공 가능한 결과 ID와 열"
+        selection_messages(state, "report", catalog, definitions=definitions),
+        "가공 가능한 결과 ID와 열",
     )
     assert set(shown) == set(ids)
     assert shown[usable["id"]] == output["data"]["columns"]

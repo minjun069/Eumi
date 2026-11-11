@@ -47,6 +47,8 @@ docker run --rm --env-file .env -p 8000:8000 --memory=2g eumi-ai
 OpenAI 직접 연결이 기본이며 GMS를 사용하면 `SETTINGS_BASE_URL`을 지정한다.
 GMS의 Responses API·모델 호환성은 실제 키로 검증해야 한다.
 
+작업 선택은 도구 명세를 시스템 프롬프트에 제공하고 선택 결과를 엄격한 JSON 형식으로 받는다. 입력 구성·응답 검증·실행 연결은 [컨텍스트 구성](docs/context-composition.md#api-설정과-응답-검증)을 따른다.
+
 보고서 작성·검토는 [보고서 생성 흐름](docs/temp/analysis-report-workflow.md)을 따른다.
 동별 기본 병렬 수는 2다. 실제 PostgreSQL 권한·NULL 제약과 BE 왕복은 미검증이다.
 V06 기여도와 V01 중앙 50% 범위 자료원은 기존 미연결 상태다.
@@ -68,6 +70,10 @@ uv run pytest tests/test_api_roundtrip.py tests/test_database.py tests/test_repo
 V01·V02·V04의 설명과 퀵 인사이트를 작성·검토·저장했다. 전월 기여도 차이(1·0),
 요일별 활동량 차이(-2), 도시 비교를 제외한 V01 설명 범위를 확인했다.
 실제 PostgreSQL·운영 BE·Tableau 화면 검증은 포함하지 않는다.
+
+2026-11-11: 도구 명세를 시스템 프롬프트에 제공하고 선택 응답에 `strict=True`를 적용한 독립 브랜치에서 프롬프트·선택 HTTP·업무 노드·자료 전달·추적·보고서·그래프·State·런타임 회귀 97개와 변경 Python 파일 9개의 Ruff·포맷 검사를 통과했다.
+
+브랜치 분리 전 개발 작업트리에서는 OpenAI 직접 연결의 `gpt-6-sol`·`gpt-6-luna`로 역삼1동의 2025년 12월 위험 단계·이유 질문을 각 1회 실행해 최초 해석 에이전트 선택·실제 서비스 DB의 읽기 전용 조회·선택 응답 해석을 확인했다. 모든 선택 요청은 `tools`·`tool_choice` 없이 `strict=True`를 사용했고 조회 결과는 DB 값과 일치했지만, 동명·코드 대응과 산정 근거 부족으로 모두 부분 완료(`partial / incomplete`)였으며 sol은 요청에 없는 시각화 설정도 선택했다. 실제 모델 결과는 이 독립 브랜치의 재실행이나 전체 도구 선택의 적절성, GMS·보고서 생성·BE 알림 검증을 뜻하지 않는다.
 
 ## 로컬 데모·리포트
 

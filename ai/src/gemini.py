@@ -32,7 +32,7 @@ def create_model(settings: Settings):
     )
 
 
-async def structured_call(model, schema, messages, config, *, tools=None):
+async def structured_call(model, schema, messages, config, *, strict=False):
     """Validate external JSON at the model boundary; never log credentials."""
     adapter = TypeAdapter(schema)
     started = monotonic()
@@ -44,20 +44,11 @@ async def structured_call(model, schema, messages, config, *, tools=None):
             "response_schema": adapter.json_schema(),
         },
     ) as span:
-        # RunnableBinding에 with_structured_output을 바로 호출하면 도구 설정이
-        # 사라진다. 바인딩한 전송 설정을 출력 설정과 같은 호출에 적용한다.
-        # 도구 실행은 선택 JSON을 기록한 뒤 기존 업무 노드가 수행한다.
-        bindings = (
-            model.bind_tools(tools, tool_choice="none", strict=False).kwargs
-            if tools
-            else {}
-        )
         structured = model.with_structured_output(
             adapter.json_schema(),
             method="json_schema",
-            strict=False,
+            strict=strict,
             include_raw=True,
-            **bindings,
         )
         result = await structured.ainvoke(messages, config)
         response = result["raw"]
