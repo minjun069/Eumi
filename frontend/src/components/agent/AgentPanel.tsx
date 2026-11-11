@@ -6,16 +6,19 @@ import { type AnswerArtifacts, artifactsByAnswer } from "@/components/agent/arti
 import { EXAMPLE_QUESTIONS } from "@/components/agent/agentExamples"
 import { Emphasized } from "@/components/common/Emphasized"
 import { AGENT_MESSAGES, agentStore, isEndRow, useAgentState } from "@/stores/agentStore"
+import { useScreenContextValue } from "@/stores/screenContextStore"
 import { formatDateTime } from "@/utils/datetime"
 
 /**
  * AI Agent 패널 (FR-071~079): 헤더의 AI 아이콘으로 열고, 본문 오른쪽 위를 덮는다.
  * - 질문 행 → 진행 행(단계 이름, 상세는 펼쳐 보기) → 끝 행(완료 답변 / 실패 + 다시 질문 / 중단)
- * - 실행 중에는 보내기를 막고 중단 버튼을 보인다. 화면 문맥은 AI에 보내지 않는다 (ai-agent-panel.md 1장)
+ * - 실행 중에는 보내기를 막고 중단 버튼을 보인다
+ * - 위험 탐색 · 읍면동 화면에서는 질문에 화면 문맥(동 · 기준 월)을 붙이고, 입력칸 바로 위에 함께 가는 값을 보인다 (ai-agent-panel.md 3-1)
  * - 완료 행의 artifacts(Tableau 카드, 정화한 표·SVG)를 답변 아래에 그린다 (AgentArtifacts, 내부_연동_변경_계획.md 2-7)
  */
 export function AgentPanel() {
   const { open, messages, running, sending, cancelling, notice, loadedFrom } = useAgentState()
+  const screen = useScreenContextValue()
   const busy = running || sending
   const [draft, setDraft] = useState("")
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -107,6 +110,11 @@ export function AgentPanel() {
             </button>
           ))}
         </div>
+        {screen && (
+          <p className="agent-context" title="질문과 함께 보내는 화면 정보예요. 질문에 다른 동이나 기간을 적으면 질문을 따라요.">
+            {screen.label}
+          </p>
+        )}
         <div className="agent-compose">
           <textarea
             className="input"

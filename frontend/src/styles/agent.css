@@ -341,6 +341,26 @@
   font-size: 12.5px;
 }
 
+/* 입력칸 바로 위: 질문과 함께 가는 화면 문맥 (ai-agent-panel.md 3-1). 안내(notice)보다 옅게 */
+.agent-context {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #3d5a8f;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.agent-context::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3b5bdb;
+}
+
 .agent-input {
   flex: none;
   display: grid;
