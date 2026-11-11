@@ -1,6 +1,6 @@
 # 이음이 API 명세
 
-- 판: 2.5.0 (2026-11-10, 11/6 초안 · 11/9 INT-06 · API-18 삭제 · 11/9 AI-a 반영 · 11/10 AI-b 반영: API-11 · 12 새 형식, INT-05 dongCodes, INT-08 · 11/10 A3 · M3 구현: API-09 · 33 · 34 · 11/10 C4: API-20 updatedAt, API-23 CaseUpdateInput)
+- 판: 2.5.1 (2026-11-11, 11/6 초안 · 11/9 INT-06 · API-18 삭제 · 11/9 AI-a 반영 · 11/10 AI-b 반영: API-11 · 12 새 형식, INT-05 dongCodes, INT-08 · 11/10 A3 · M3 구현: API-09 · 33 · 34 · 11/10 C4: API-20 updatedAt, API-23 CaseUpdateInput · 11/11 A2 구현: API-04~07)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_API_명세표.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - API 형식의 기준은 `docs/api/openapi.json`, 내부 연동은 `docs/api/ai-agent-panel.md` · `docs/api/insight-report.md`다. 계약이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -10,8 +10,8 @@
 ## API 목록
 
 - 제목: 이음이 API 명세표
-- 요약: API 2.5.0  45개 작업 (구현 41 · 예정 4)  * 필수 입력  기본 경로 /api
-- 출처: eumi/docs/api/openapi.json 2.5.0 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장) · AI 대화 패널 연결(API-03 화면 문맥, INT-01 messageId, INT-07, INT-03 삭제)은 2026-11-09 openapi 2.3.4 · ai-agent-panel.md · 인사이트 보고서 연결(API-11 · 12 새 형식, INT-05 dongCodes · 202 본문 없음, INT-08)은 2026-11-10 openapi 2.4.0 · insight-report.md 확정
+- 요약: API 2.5.1  45개 작업 (구현 45 · 예정 0)  * 필수 입력  기본 경로 /api
+- 출처: eumi/docs/api/openapi.json 2.5.1 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장) · AI 대화 패널 연결(API-03 화면 문맥, INT-01 messageId, INT-07, INT-03 삭제)은 2026-11-09 openapi 2.3.4 · ai-agent-panel.md · 인사이트 보고서 연결(API-11 · 12 새 형식, INT-05 dongCodes · 202 본문 없음, INT-08)은 2026-11-10 openapi 2.4.0 · insight-report.md 확정
 
 ### API-01 로그인 상태와 메뉴 프로필 조회
 - 페이지 범위: /login·공통
@@ -53,28 +53,28 @@
 - 요청 경로: GET /api/organizations
 - 요청 형식: 인증 공개<br>query keyword:string<br>본문 없음
 - 응답 형식: 200 application/json signupApi_searchOrganizations_Success
-- 구현 (11/6): 예정 11/10
+- 구현 (11/6): 구현 (11/11)
 
 ### API-05 인증 메일 발송
 - 페이지 범위: /signup
 - 요청 경로: POST /api/signup/email-verifications
 - 요청 형식: 인증 공개 · CSRF 필수<br><br>본문 application/json SendVerificationRequest<br>orgId*:integer(int64); email*:string(email)
 - 응답 형식: 201 application/json signupApi_sendVerificationEmail_Success<br>expiresAt*:string(date-time)
-- 구현 (11/6): 예정 11/10
+- 구현 (11/6): 구현 (11/11)
 
 ### API-06 인증 코드 확인
 - 페이지 범위: /signup
 - 요청 경로: POST /api/signup/email-verifications/verify
 - 요청 형식: 인증 공개 · CSRF 필수<br><br>본문 application/json VerifyCodeRequest<br>email*:string(email); code*:string
 - 응답 형식: 200 application/json signupApi_verifyCode_Success<br>verificationToken*:string
-- 구현 (11/6): 예정 11/10
+- 구현 (11/6): 구현 (11/11)
 
 ### API-07 회원가입
 - 페이지 범위: /signup
 - 요청 경로: POST /api/members
 - 요청 형식: 인증 공개 · CSRF 필수<br><br>본문 application/json SignupRequest<br>verificationToken*:string; orgId*:integer(int64); email*:string(email); name*:string; password*:string(password); title:string 또는 null; phone:string 또는 null
 - 응답 형식: 201 application/json signupApi_signup_Success<br>memberId*:integer(int64)
-- 구현 (11/6): 예정 11/10
+- 구현 (11/6): 구현 (11/11)
 
 ### API-08 로그인
 - 페이지 범위: /login·공통

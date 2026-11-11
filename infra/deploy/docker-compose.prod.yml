@@ -5,6 +5,7 @@
 # 직접 up/down 하지 않고 스크립트로만 실행한다 (모두 jenkins 계정으로):
 #   scripts/migrate.sh               → postgres · mailpit 기동, 백업, Flyway
 #   scripts/deploy.sh <서비스> <태그> → 서비스 하나 교체 + 헬스체크 (실패하면 이전 태그로 되돌림)
+#   scripts/grafana.sh               → Grafana 띄우기 · 설정 다시 읽기 (공식 이미지라 태그가 없다)
 #   scripts/dc.sh <compose 명령>      → 상태 보기 (ps, logs 등)
 #
 # 값을 읽는 곳
@@ -12,9 +13,9 @@
 #   .env.tags    서비스별 배포 태그 (deploy.sh가 갱신)
 #
 # 지키는 규칙
-#   - 인터넷에 열리는 포트는 없다. 호스트 Nginx가 받는 web · backend와 mailpit 화면만 127.0.0.1에 묶는다.
+#   - 인터넷에 열리는 포트는 없다. 호스트 Nginx가 받는 web · backend · pipeline-web(Airflow) · grafana와 mailpit 화면만 127.0.0.1에 묶는다.
 #     Docker는 UFW를 거치지 않으므로 "8080:8080"이나 "0.0.0.0:..." 형태는 절대 쓰지 않는다.
-#   - DB 데이터 볼륨(eumi-pgdata)은 external이다. "docker compose down -v"를 실행해도 지워지지 않는다.
+#   - DB 데이터 볼륨(eumi-pgdata)과 원본 저장소 볼륨(eumi-miniodata)은 external이다. "docker compose down -v"를 실행해도 지워지지 않는다.
 #   - 서비스마다 컨테이너가 쓸 메모리 상한(mem_limit)과 로그 크기 상한을 둔다.
 # ==========================================================================
 name: eumi
@@ -24,6 +25,48 @@ x-logging: &logging
   options:
     max-size: "10m"
     max-file: "3"
+
+# 데이터 파이프라인 컨테이너 3개(pipeline-init · pipeline · pipeline-web)가 함께 쓰는 환경.
+#   변수에 :?를 쓰지 않는다 (ai와 같은 이유: profile 서비스라도 :? 값이 비면 backend 배포까지 모든 compose 명령이 멈춘다).
+#   빈 값 검사는 deploy.sh pipeline이 한다.
+x-pipeline-env: &pipeline-env
+  # MinIO (S3A · s3fs). 루트 계정을 그대로 접근 키로 쓴다
+  AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-}
+  AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-}
+  MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-}
+  MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-}
+  MINIO_ENDPOINT: http://minio:9000
+  MINIO_BUCKET: sgi
+  KAFKA_BOOTSTRAP: kafka:19092
+  KAFKA_TOPIC_FLOW: flow_hourly
+  # 결과 DB (eumi_pipeline 계정)
+  PIPELINE_DB_URL: jdbc:postgresql://postgres:5432/eumi
+  PIPELINE_DB_USER: eumi_pipeline
+  PIPELINE_DB_PASSWORD: ${EUMI_PIPELINE_PASSWORD:-}
+  PIPELINE_DB_DSN: postgresql://eumi_pipeline:${EUMI_PIPELINE_PASSWORD:-}@postgres:5432/eumi
+  # 수집 API 키 · 모델 버전
+  DATA_GO_KR_SERVICE_KEY: ${DATA_GO_KR_SERVICE_KEY:-}
+  KAKAO_REST_KEY: ${KAKAO_REST_KEY:-}
+  MODEL_VERSION: v20261102
+  TZ: Asia/Seoul
+  # Airflow (메타 DB는 postgres의 airflow DB, 태스크는 pipeline 컨테이너 안에서 LocalExecutor로)
+  AIRFLOW__CORE__EXECUTOR: LocalExecutor
+  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD:-}@postgres:5432/airflow
+  AIRFLOW__CORE__DAGS_FOLDER: /opt/eumi/data/airflow/dags
+  AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+  AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Seoul
+  AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY:-}
+  AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "false"
+  AIRFLOW__WEBSERVER__BASE_URL: https://k15b201.p.ssafy.io/airflow
+  AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX: "true"
+  AIRFLOW__WEBSERVER__WORKERS: "2"     # 화면을 보는 사람이 적다. 기본 4개면 pipeline-web 메모리 상한(1g)에 가깝다
+  AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "60"
+  AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+
+x-pipeline-volumes: &pipeline-volumes
+  - ./data:/opt/eumi/data
+  - sparkcheckpoint:/opt/eumi/checkpoint
+  - airflowlogs:/opt/airflow/logs
 
 services:
   postgres:
@@ -108,7 +151,6 @@ services:
       EUMI_AI_MODE: fake
       # ai 서비스 주소 (같은 compose 내부망). fake 모드에서는 쓰지 않는다
       AI_BASE_URL: http://ai:8000
-      # PIPELINE_BASE_URL: http://pipeline:8100 (pipeline 서비스를 추가할 때)
     volumes:
       - uploads:/data/uploads
     ports:
@@ -176,9 +218,209 @@ services:
     mem_limit: 2g
     logging: *logging
 
+  # ========== 데이터 파이프라인 (MinIO · Kafka · pipeline = Spark + Airflow) + 모니터링 (Grafana) ==========
+  # 로컬 infra/docker-compose.yml의 data 프로필과 같은 구성이다. 모든 배치 · 스트리밍 스크립트는 pipeline 컨테이너 안에서 돈다.
+  #   - profile "pipeline": 첫 배포 전에는 뜨지 않는다. deploy.sh pipeline <태그>와 grafana.sh가 이름으로 띄운다.
+  #   - 저장소 data/pipeline · data/airflow는 sync.sh가 /srv/eumi/data로 복사해 마운트한다 (이미지를 다시 빌드하지 않고 스크립트 · DAG 갱신).
+  #   - 원본 파일 · 가상 유동 · 모델 자산은 MinIO 볼륨(eumi-miniodata)에 있다.
+  #   - 서버 구성 절차와 지킬 것(과거 달 배치를 다시 돌리지 않는다)은 infra/README.md "데이터 파이프라인 · Grafana (운영)".
+
+  # 원본 저장소 (S3 호환). 버킷 sgi. 포트를 열지 않는다 — 컨테이너 사이 주소 minio:9000만 쓴다
+  minio:
+    image: bitnamilegacy/minio:2025.7.23-debian-12-r5
+    profiles: ["pipeline"]
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-}
+      MINIO_DEFAULT_BUCKETS: sgi
+    volumes:
+      - miniodata:/bitnami/minio/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+    mem_limit: 1g
+    logging: *logging
+
+  # 메시지 큐 (KRaft 단일 노드). 스트리밍 시연용. 컨테이너 사이 주소 kafka:19092, 보관 7일
+  kafka:
+    image: apache/kafka:3.9.2
+    profiles: ["pipeline"]
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"   # 토픽은 kafka-init이 만든다
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_HEAP_OPTS: "-Xmx1g -Xms512m"
+    volumes:
+      - kafkadata:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:19092 --list >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    mem_limit: 1536m
+    logging: *logging
+
+  # 토픽 flow_hourly를 만들고 끝난다 (deploy.sh pipeline이 배포마다 한 번 실행, 이미 있으면 넘어감)
+  kafka-init:
+    image: apache/kafka:3.9.2
+    profiles: ["pipeline"]
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:19092 --create --if-not-exists --topic flow_hourly --partitions 6 --replication-factor 1
+    logging: *logging
+
+  # Airflow 메타 DB 마이그레이션 + 관리자 계정 + Grafana 계정 읽기 권한 (deploy.sh pipeline이 배포마다 한 번 실행. 다시 실행해도 안전)
+  #   관리자 비밀번호는 명령줄에 펼치지 않고 컨테이너 환경변수로 넘긴다 ($$ = compose가 아니라 컨테이너 셸이 읽는다)
+  pipeline-init:
+    image: eumi-pipeline:${PIPELINE_TAG:-none}
+    profiles: ["pipeline"]
+    environment:
+      <<: *pipeline-env
+      EUMI_AIRFLOW_ADMIN_USER: ${AIRFLOW_ADMIN_USER:-}
+      EUMI_AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:-}
+    volumes: *pipeline-volumes
+    working_dir: /opt/eumi/data
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        airflow db migrate
+        airflow users create --username "$$EUMI_AIRFLOW_ADMIN_USER" --password "$$EUMI_AIRFLOW_ADMIN_PASSWORD" --firstname Eumi --lastname Admin --role Admin --email admin@eumi.local || true
+        python3 airflow/grant_monitor.py
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+  # Airflow 스케줄러 = 월 배치 실행기. Spark 드라이버(4g)가 이 안에서 뜬다
+  #   헬스체크는 airflow 명령을 새로 띄워 CPU를 쓰므로 60초에 한 번만 본다
+  pipeline:
+    image: eumi-pipeline:${PIPELINE_TAG:-none}
+    profiles: ["pipeline"]
+    restart: unless-stopped
+    environment: *pipeline-env
+    volumes: *pipeline-volumes
+    working_dir: /opt/eumi/data
+    command: ["airflow", "scheduler"]
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --local >/dev/null 2>&1 || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    mem_limit: 6g
+    logging: *logging
+
+  # Airflow 웹 화면 → Nginx /airflow/ (로그인 필요). 127.0.0.1에만 연다
+  #   BASE_URL에 /airflow가 있어 헬스 주소도 /airflow/health다 (경로 없는 /health는 404)
+  pipeline-web:
+    image: eumi-pipeline:${PIPELINE_TAG:-none}
+    profiles: ["pipeline"]
+    restart: unless-stopped
+    environment: *pipeline-env
+    volumes: *pipeline-volumes
+    ports:
+      - "127.0.0.1:8081:8080"
+    command: ["airflow", "webserver"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/airflow/health >/dev/null || curl -fsS http://localhost:8080/health >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 1g
+    logging: *logging
+
+  # 파이프라인 모니터링: 대시보드 2개 + Mattermost 알림 8종. 설정은 전부 ./grafana/provisioning의 파일이다 (sync.sh가 복사)
+  #   - 호스트 3000은 web이 쓰므로 3001에 묶는다. 밖에서는 Nginx /grafana/로만 들어온다 (로그인 필요)
+  #   - DB는 읽기 전용 계정 eumi_monitor로 읽는다 (eumi DB 결과 테이블 + airflow DB 실행 이력)
+  #   - 관리자 비밀번호가 비면 Grafana 기본값(admin)으로 뜬다. 그래서 grafana.sh가 값이 있을 때만 띄운다 (직접 up 하지 않는다)
+  #   - 웹훅(MATTERMOST_WEBHOOK_URL)은 없어도 된다. 없으면 닿지 않는 주소로 보내다 실패하고 끝난다 (알림만 안 감)
+  grafana:
+    image: grafana/grafana-oss:12.4.3
+    profiles: ["pipeline"]
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      GF_DATE_FORMATS_DEFAULT_TIMEZONE: Asia/Seoul
+      # Nginx 하위 경로. 알림 메시지의 "대시보드 열기" 링크도 이 주소로 만들어진다
+      GF_SERVER_ROOT_URL: https://k15b201.p.ssafy.io/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      # provisioning/datasources/eumi.yml이 읽는 값
+      EUMI_MONITOR_PASSWORD: ${EUMI_MONITOR_PASSWORD:-}
+      # provisioning/alerting/contact-points.yml이 읽는 값
+      MATTERMOST_WEBHOOK_URL: ${MATTERMOST_WEBHOOK_URL:-http://127.0.0.1:9/eumi-alert-webhook-not-set}
+      EUMI_ALERT_ENV: 운영
+      EUMI_AIRFLOW_URL: https://k15b201.p.ssafy.io/airflow/
+      TZ: Asia/Seoul
+    ports:
+      - "127.0.0.1:3001:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafanadata:/var/lib/grafana
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/grafana/api/health >/dev/null 2>&1 || wget -qO- http://localhost:3000/api/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 512m
+    logging: *logging
+
 volumes:
   pgdata:
     external: true      # 04 문서에서 "docker volume create eumi-pgdata"로 직접 만든다
     name: eumi-pgdata
   uploads:
     name: eumi-uploads
+  miniodata:
+    external: true      # 원본 · 가상 유동 · 모델 자산. "docker volume create eumi-miniodata"로 직접 만든다 (down -v에도 남게)
+    name: eumi-miniodata
+  kafkadata:
+    name: eumi-kafkadata
+  sparkcheckpoint:
+    name: eumi-sparkcheckpoint
+  airflowlogs:
+    name: eumi-airflowlogs
+  grafanadata:
+    name: eumi-grafanadata      # 알림 상태 · 보낸 기록. 지워져도 설정은 파일에서 다시 만들어진다

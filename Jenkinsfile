@@ -3,7 +3,7 @@
 //
 // 트리거: GitLab master 브랜치 push (= develop → master MR 병합)
 // 실행:   서버에 직접 설치된 Jenkins(jenkins 계정, docker 그룹)가 같은 서버에서 실행한다. ssh를 쓰지 않는다.
-// 단계:   Plan → Sync → Build → Migrate → Deploy → Cleanup
+// 단계:   Plan → Sync → Build → Migrate → Deploy → Pipeline → Monitoring → Cleanup
 //
 // 사람이 손으로 배포 · 롤백할 때도 같은 스크립트(infra/scripts/*.sh)를 쓴다 (04 · 06 문서).
 // 운영 비밀값은 서버 /srv/eumi/.env.config 에만 있다. 이 파일과 Jenkins에는 비밀값이 없다.
@@ -16,7 +16,7 @@ pipeline {
     options {
         disableConcurrentBuilds()          // 배포 중에 다른 배포를 시작하지 않는다
         timestamps()
-        timeout(time: 40, unit: 'MINUTES')
+        timeout(time: 60, unit: 'MINUTES')   // pipeline 이미지를 처음 빌드할 때(Spark · Airflow 내려받기) 10~20분이 더 든다
         buildDiscarder(logRotator(numToKeepStr: '20'))
     }
 
@@ -33,19 +33,22 @@ pipeline {
                     def sha = sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()
                     env.TAG = "master-${sha}"
 
-                    // 배포 순서: 의존받는 쪽 먼저 (pipeline이 생기면 backend 앞에 추가)
+                    // 앱 서비스 배포 순서: 의존받는 쪽 먼저. 데이터 파이프라인은 아래에서 따로 정한다 (앱 배포를 막지 않게 맨 뒤에)
                     def order = ['ai', 'backend', 'web']
                     def dirs  = [ai: 'ai/', backend: 'backend/', web: 'frontend/']
                     def services = order
                     def base = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
+                    def files = null            // null = 비교 기준 없음(전체 배포)
+                    def composeChanged = false
 
                     // ai/ 바로 아래 .md와 ai/docs/는 설명 문서라 ai를 다시 빌드하지 않는다
                     // (ai/src/instructions/*.md는 실행 중에 읽는 파일이라 바뀌면 빌드한다)
                     def isDoc = { String f -> f.matches('ai/[^/]+\\.md') || f.startsWith('ai/docs/') }
 
                     if (base && sh(returnStatus: true, script: "git cat-file -e ${base}^{commit}") == 0) {
-                        def files = sh(returnStdout: true, script: "git diff --name-only ${base} HEAD").trim().readLines()
-                        if (files.any { it.startsWith('infra/deploy/docker-compose.prod.yml') }) {
+                        files = sh(returnStdout: true, script: "git diff --name-only ${base} HEAD").trim().readLines()
+                        composeChanged = files.any { it.startsWith('infra/deploy/docker-compose.prod.yml') }
+                        if (composeChanged) {
                             echo '운영 compose가 바뀌었다 — 모든 서비스를 다시 배포'
                         } else {
                             services = order.findAll { s -> files.any { f -> f.startsWith(dirs[s]) && !isDoc(f) } }
@@ -64,8 +67,21 @@ pipeline {
                     }
 
                     env.SERVICES = services.join(' ')
-                    currentBuild.description = "${env.TAG} → [${env.SERVICES ?: '앱 변경 없음'}]"
-                    echo "배포 계획: 태그 ${env.TAG}, 서비스 [${env.SERVICES}]"
+
+                    // 데이터 파이프라인 (minio · kafka · Airflow). data/(스크립트 · DAG)는 Sync가 복사해 마운트하므로 이미지를 다시 만들지 않는다
+                    //   build   : infra/pipeline/(이미지 정의)이 바뀌었거나 아직 한 번도 배포하지 않았다 → 새 태그로 빌드 · 배포
+                    //   reapply : compose만 바뀌었다 → 빌드 없이 지금 태그로 다시 적용 (바뀐 컨테이너만 다시 만들어진다)
+                    def pipeTag = sh(returnStdout: true, script: 'grep -E "^PIPELINE_TAG=" "$APP_DIR/.env.tags" 2>/dev/null | cut -d= -f2- || true').trim()
+                    def pipeDeployed = pipeTag.matches('(master|manual)-.+')
+                    def pipeChanged = files == null || files.any { it.startsWith('infra/pipeline/') }
+                    env.PIPELINE_CURRENT = pipeTag
+                    env.PIPELINE = (!pipeDeployed || pipeChanged) ? 'build' : (composeChanged ? 'reapply' : '')
+
+                    // Grafana 설정 파일이 바뀌었으면 다시 띄워야 알림 설정이 반영된다
+                    env.GRAFANA_RESTART = (files != null && files.any { it.startsWith('infra/grafana/') }) ? 'yes' : ''
+
+                    currentBuild.description = "${env.TAG} → [${env.SERVICES ?: '앱 변경 없음'}]" + (env.PIPELINE ? " + pipeline(${env.PIPELINE})" : '')
+                    echo "배포 계획: 태그 ${env.TAG}, 서비스 [${env.SERVICES}], pipeline [${env.PIPELINE ?: '변경 없음'}]"
                 }
             }
         }
@@ -86,12 +102,21 @@ pipeline {
 
         // ---------- 3. 바뀐 서비스만 이미지 빌드 (서버 Docker에 저장 = 롤백 지점) ----------
         stage('Build') {
-            when { expression { return env.SERVICES?.trim() ? true : false } }
+            when { expression { return (env.SERVICES?.trim() || env.PIPELINE == 'build') ? true : false } }
             steps {
                 script {
                     def ctx = [ai: 'ai', backend: 'backend', web: 'frontend']
-                    env.SERVICES.tokenize(' ').each { s ->
+                    (env.SERVICES ?: '').tokenize(' ').each { s ->
                         sh "docker build -t eumi-${s}:${env.TAG} ${ctx[s]}"
+                    }
+                    // pipeline 이미지 빌드가 실패해도(내려받기 실패 등) 앱 배포는 계속한다. 빌드를 노란색으로 표시하고 이번에는 pipeline을 건너뛴다
+                    if (env.PIPELINE == 'build') {
+                        def built = false
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: 'pipeline 이미지 빌드 실패 — 이번 배포에서 pipeline을 건너뜁니다') {
+                            sh "docker build -t eumi-pipeline:${env.TAG} infra/pipeline"
+                            built = true
+                        }
+                        if (!built) { env.PIPELINE = '' }
                     }
                 }
             }
@@ -123,7 +148,32 @@ pipeline {
             }
         }
 
-        // ---------- 6. 오래된 이미지 정리 (실패해도 배포 결과에는 영향 없음) ----------
+        // ---------- 6. 데이터 파이프라인 (실패하면 deploy.sh가 이전 태그로 되돌리고 빌드를 노란색으로 표시. 앱은 이미 배포됐다) ----------
+        stage('Pipeline') {
+            when { expression { return env.PIPELINE?.trim() ? true : false } }
+            steps {
+                script {
+                    def tag = (env.PIPELINE == 'build') ? env.TAG : env.PIPELINE_CURRENT
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: 'pipeline 배포 실패 — [deploy] 줄을 확인하세요') {
+                        sh "\"\$APP_DIR/scripts/deploy.sh\" pipeline ${tag}"
+                    }
+                }
+            }
+        }
+
+        // ---------- 7. Grafana (공식 이미지라 태그가 없다. 비밀값 · DB 계정이 아직 없으면 건너뛴다. 바뀐 게 없으면 그대로 둔다) ----------
+        stage('Monitoring') {
+            steps {
+                script {
+                    def opt = env.GRAFANA_RESTART ? ' --restart' : ''
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: 'Grafana가 정상으로 뜨지 않았습니다 — [grafana] 줄을 확인하세요') {
+                        sh "\"\$APP_DIR/scripts/grafana.sh\" --skip-if-unconfigured${opt}"
+                    }
+                }
+            }
+        }
+
+        // ---------- 8. 오래된 이미지 정리 (실패해도 배포 결과에는 영향 없음) ----------
         stage('Cleanup') {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
