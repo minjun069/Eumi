@@ -4,8 +4,8 @@
 
 | 문서 | 원본 (여기를 고친다) | 엑셀 | 판 | 함께 맞출 곳 |
 |---|---|---|---|---|
-| 테이블 정의서 | [table-definition.md](table-definition.md) | `이음이_테이블_정의서.xlsx` | 2.4.1 (11/10) | 실제 DB 구조는 `db/migration`이 기준이다. V 파일이 바뀌는 MR에서 함께 고친다 |
-| API 명세 | [api-spec.md](api-spec.md) | `이음이_API_명세표.xlsx` | 2.5.1 (11/11) | 형식은 `docs/api/openapi.json`, 내부 연동은 `docs/api/*.md`가 기준이다. 계약이 바뀌는 MR에서 함께 고친다 |
+| 테이블 정의서 | [table-definition.md](table-definition.md) | `이음이_테이블_정의서.xlsx` | 2.4.2 (11/11) | 실제 DB 구조는 `db/migration`이 기준이다. V 파일이 바뀌는 MR에서 함께 고친다 |
+| API 명세 | [api-spec.md](api-spec.md) | `이음이_API_명세표.xlsx` | 2.6.0 (11/11) | 형식은 `docs/api/openapi.json`, 내부 연동은 `docs/api/*.md`가 기준이다. 계약이 바뀌는 MR에서 함께 고친다 |
 | 기능명세 | [requirements.md](requirements.md) | `이음이_기능명세표.xlsx` | 2.4.0 (11/10) | 기능이 바뀌는 MR에서 함께 고친다 |
 
 ERD의 최종 구조는 테이블 정의서에 들어 있다. 그림은 저장소 밖 ERDCloud에 둔다.
