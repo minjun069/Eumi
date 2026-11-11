@@ -2,10 +2,12 @@ import { useSyncExternalStore } from "react"
 import { agentApi, type AgentMessage, type ConversationDetail } from "@/api/agentApi"
 import { errorMessage, isApiError } from "@/api/errors"
 import { sessionStore } from "@/session/sessionStore"
+import { screenContext } from "@/stores/screenContextStore"
 
 // AI 에이전트 패널 상태 (FR-071~076, docs/api/ai-agent-panel.md)
 // - 대화 ID와 받은 행(messageId로 중복 없이, 오름차순)을 둔다. 실행 중 = 마지막 질문 행에 끝 행(완료·실패·취소)이 없음.
 // - 질문: POST /agent/questions(202) → 질문 행을 바로 붙이고 after=questionId부터 1초마다 조회 → 끝 행을 받으면 멈춘다.
+//   보내는 순간의 화면 문맥(screenContextStore)을 context로 붙인다 (3-1).
 // - 조회가 실패해도 다음 조회가 마지막 id부터 이어 받는다 (재연결 처리 없음). 401은 공통 처리(로그아웃 → 대화 비움).
 // - 새로고침: 대화 ID만 sessionStorage에 두고(토큰·회원 ID가 아님) 로그인 복원 뒤 after=0으로 다시 그린다.
 //   로그아웃·사용자 전환 때 지운다.
@@ -164,9 +166,11 @@ function restart() {
 async function send(question: string): Promise<boolean> {
   const sendGeneration = generation
   const conversationId = state.conversationId
+  // 보내는 순간 보이는 화면의 문맥 (ai-agent-panel.md 3-1). 없으면 context 필드를 빼고, 질문 행·저장소에는 남기지 않는다
+  const screen = screenContext.get()
   setState({ sending: true, notice: null })
   try {
-    const created = await agentApi.ask({ conversationId, question })
+    const created = await agentApi.ask({ conversationId, question, ...(screen ? { context: screen.context } : {}) })
     if (sendGeneration !== generation) return false
     storeConversationId(created.conversationId)
     setState({ conversationId: created.conversationId, sending: false, loadedFrom: null })
@@ -231,7 +235,7 @@ export const agentStore = {
     return send(text)
   },
 
-  /** 실패한 질문을 같은 대화에 새 질문으로 다시 보낸다 (사용자가 누를 때만) */
+  /** 실패한 질문을 같은 대화에 새 질문으로 다시 보낸다 (사용자가 누를 때만). 화면 문맥은 다시 보내는 때의 값이다 */
   retry(questionMessageId: number) {
     const question = state.messages.find((message) => message.messageId === questionMessageId && message.status === "질문")
     if (question?.content) void agentStore.ask(question.content)

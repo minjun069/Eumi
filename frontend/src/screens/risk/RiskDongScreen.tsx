@@ -20,6 +20,7 @@ import {
   type RiskQuery,
 } from "@/screens/risk/riskQuery"
 import { stageStyle } from "@/screens/risk/riskStyle"
+import { useScreenContext } from "@/stores/screenContextStore"
 import { isPublished, TABLEAU_GRID_LEGEND, TABLEAU_VIEWS, tableauDetailParameters } from "@/tableau/tableauConfig"
 import { formatDateTime } from "@/utils/datetime"
 
@@ -74,6 +75,13 @@ export function RiskDongScreen({ query, profile }: { query: RiskQuery & { dongCo
     queryFn: () => analysisApi.getInsightReport(query.dongCode, baseMonth ?? ""),
     enabled: baseMonth !== null,
   })
+  // AI 패널 질문에 붙이는 화면 문맥: 이 동 · 기준 월 (ai-agent-panel.md 3-1). 기준 월이 없거나 코드 형식이 틀리면 붙이지 않는다
+  const dongName = insight.data?.dongName
+  const contextMonth = validDong ? baseMonth : null
+  useScreenContext(
+    contextMonth ? { dongCode: query.dongCode, month: contextMonth } : null,
+    contextMonth ? `${dongName ? `${dongName} · ` : ""}${formatMonth(contextMonth)} 기준` : "",
+  )
 
   const onBack = () => {
     // 시군구 지도에서 왔고 기간을 바꾸지 않았으면 뒤로 가기, 아니면 지금 기간으로 시군구 화면

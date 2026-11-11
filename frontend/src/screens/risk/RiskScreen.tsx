@@ -26,6 +26,7 @@ import {
   type RiskQuery,
 } from "@/screens/risk/riskQuery"
 import { useSession } from "@/session/sessionStore"
+import { useScreenContext } from "@/stores/screenContextStore"
 import { isPublished, TABLEAU_MAP_VIEWS, TABLEAU_VIEWS, tableauParameters } from "@/tableau/tableauConfig"
 import type { Conditions } from "@/tableau/tableauTypes"
 
@@ -62,7 +63,7 @@ export function RiskScreen() {
     <>
       {districtQuery && (
         <div className={query.dongCode ? "risk-kept" : undefined} inert={Boolean(query.dongCode)}>
-          <RiskDistrictScreen query={districtQuery} profile={profile} />
+          <RiskDistrictScreen query={districtQuery} profile={profile} visible={!query.dongCode} />
         </div>
       )}
       {query.dongCode && (
@@ -78,8 +79,9 @@ export function RiskScreen() {
  * - 지도·그래프 4개는 같은 Tableau 워크북의 임베드용 대시보드를 패널마다 하나씩 띄운다. 게시본이 없는 뷰는 '준비 중'
  * - 지표 전환(종합 위험·배경 취약성·행동 이상)은 우리 화면의 버튼으로 ① 지도의 대시보드를 바꾼다
  * - 지도에서 행정동 하나를 고르면 읍면동 화면으로 (주소에 dong)
+ * - AI 패널 질문에는 적용된 기간의 끝 월만 붙인다 (dongCode 없음). 읍면동 화면 뒤에 숨겨진 동안(visible=false)은 붙이지 않는다
  */
-function RiskDistrictScreen({ query, profile }: { query: RiskQuery; profile: MenuProfile }) {
+function RiskDistrictScreen({ query, profile, visible }: { query: RiskQuery; profile: MenuProfile; visible: boolean }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [form, setForm] = useState<RiskFilters>(() => filtersOf(query))
@@ -118,6 +120,14 @@ function RiskDistrictScreen({ query, profile }: { query: RiskQuery; profile: Men
   const formMonths = formMonthsQuery.data?.months ?? []
   const formPeriod = effectivePeriod(form, formMonths)
   const sigunguName = appliedSigungus.data?.find((item) => item.sigunguCode === query.sigunguCode)?.sigunguName ?? ""
+  // 화면 문맥 (ai-agent-panel.md 3-1): 적용된 기간이 분석 결과가 있는 기간일 때만 그 끝 월
+  const appliedMonths = months.data?.months ?? []
+  const appliedPeriod = effectivePeriod(query, appliedMonths)
+  const contextMonth = visible && appliedPeriod && isLoadedPeriod(appliedPeriod, appliedMonths) ? appliedPeriod.to : null
+  useScreenContext(
+    contextMonth ? { month: contextMonth } : null,
+    contextMonth ? `${sigunguName ? `${sigunguName} · ` : ""}${formatMonth(contextMonth)} 기준` : "",
+  )
 
   const go = (next: RiskQuery, options?: { replace?: boolean; state?: DistrictState }) =>
     navigate(riskUrl(next, profile), options)
