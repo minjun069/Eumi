@@ -51,4 +51,22 @@ class CaseValidationTests {
         assertThat(new ConsultationDtos.Input(LocalDate.of(2020,1,1),"Synthetic purpose","기타","Synthetic other","Synthetic content").toString())
                 .doesNotContain("Synthetic purpose","Synthetic content");
     }
+    @Test void updateVersionIsRequiredWithoutChangingTheRegistrationDto() {
+        var base=input("Synthetic version validation",List.of(1L));
+        var update=new CaseDtos.UpdateInput(base.name(),base.birthDate(),base.gender(),base.dongCode(),base.firstRegisteredAt(),base.managerMemberIds(),null);
+        assertThatThrownBy(update::expectedUpdatedAt).isInstanceOfSatisfying(ApiException.class,
+                error->assertThat(error.fieldErrors().stream().map(f->f.field()).toList()).containsExactly("updatedAt"));
+        assertThat(factory.getValidator().validate(base)).isEmpty();
+        assertThat(update.toString()).doesNotContain(base.name());
+    }
+    @Test void malformedUpdateVersionReportsOnlyTheFieldWithoutEchoingTheInput() {
+        var base=input("Synthetic version validation",List.of(1L));String invalid="Synthetic private invalid timestamp";
+        var update=new CaseDtos.UpdateInput(base.name(),base.birthDate(),base.gender(),base.dongCode(),base.firstRegisteredAt(),base.managerMemberIds(),invalid);
+        assertThatThrownBy(update::expectedUpdatedAt).isInstanceOfSatisfying(ApiException.class,error->{
+            assertThat(error.code()).isEqualTo(ErrorCode.VALIDATION_ERROR);
+            assertThat(error.fieldErrors().stream().map(f->f.field()).toList()).containsExactly("updatedAt");
+            assertThat(error.getMessage()).doesNotContain(invalid);
+            assertThat(error.fieldErrors().stream().anyMatch(f->f.reason().contains(invalid))).isFalse();
+        });
+    }
 }

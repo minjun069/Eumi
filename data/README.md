@@ -153,6 +153,24 @@ docker compose --profile data exec pipeline airflow dags trigger eumi_monthly --
 - 체크포인트를 지우지 않고 다시 시작하면 스트림이 이전 마감 시각(워터마크)을 이어받아, 그보다 이른 날짜를 다시 재생해도 전부 버려진다 (수신은 되는데 닫힌 날짜가 0). 같은 날짜를 다시 재생할 때는 1)의 체크포인트 삭제를 꼭 한다.
 - 예전 Spark 이미지로 만든 체크포인트는 소유자가 달라 지워지지 않는다. 한 번만 `docker compose --profile data exec -u root pipeline sh -c "rm -rf /opt/eumi/checkpoint/flow_detail && chown -R pipeline:pipeline /opt/eumi/checkpoint"`.
 
+## 알림이 오면
+
+Grafana 가 Mattermost 채널로 보내는 알림 8종과 할 일. 설정 · 켜는 법은 `infra/README.md` 의 "알림 (Mattermost)". 메시지의 "대시보드 열기"는 http://localhost:3000/d/eumi-pipeline.
+
+| 알림 | 뜻 | 할 일 |
+|---|---|---|
+| 월 배치 실패 | 가장 최근에 끝난 실행이 실패했다. 메시지에 실패한 단계가 나온다 | Airflow(http://localhost:8081)에서 그 단계의 로그를 보고 원인을 고친 뒤 그 단계를 **Clear** → 거기서부터 다시 돈다. 성공하면 "[해결]"이 온다 |
+| 월 배치가 돌지 않음 | 6일 09:00 이 지났는데 전월 실행 기록이 없다 (5일 03:00 에 도커가 꺼져 있었거나 DAG 가 일시정지) | Airflow 에서 `eumi_monthly` 가 켜져 있는지 보고, **Trigger DAG w/ config** 에 `{"months": ["YYYY-MM"]}` 로 수동 실행 |
+| 원본이 없어 월 배치를 건너뜀 | 그 달 SKT 유동 · 주민등록 원본이 MinIO 에 없어 전 단계를 건너뛰었다. 실패가 아니다 | 원본을 올린 뒤(`m1_collect/upload_raw.py`) 그 달을 수동 실행. 원본이 아직 없으면 할 일 없음 |
+| 월 배치 성공 | 성공으로 끝났다 (단계 수 · 걸린 시간). 결과 검사도 통과한 것이다 | 없음 |
+| 결과 검사 실패 | `verify_outputs` 의 검사 중 실패가 있다. 메시지에 검사 이름이 나온다 | 대시보드 "실패한 검사" 표의 내용을 보고, 그 결과를 만드는 단계부터 다시 돌린다. 기준은 `ops/verify_outputs.py` |
+| 행 수 급변 | 어떤 결과 테이블의 최신 달 행 수가 전월과 30% 넘게 다르다 | 그 테이블을 넣는 단계가 일부만 적재했는지, 원본이 바뀌었는지 확인 (대시보드 "테이블 최신성"). 정상적인 변화면 다음 달에 저절로 꺼진다 |
+| DB 접속 과다 | DB 접속이 80개 이상(최대 100)인 채로 5분이 지났다. 100개가 차면 화면 · 배치가 DB 에 못 붙는다 | 대시보드 "DB 접속 수" · "오래 도는 쿼리"에서 어느 계정이 많이 붙었는지 본다 |
+| Airflow 스케줄러 멈춤 | 스케줄러가 2분 넘게 신호를 안 보낸다. 이 상태면 5일 03:00 배치가 돌지 않는다 | `infra/` 에서 `docker compose --profile data ps` → 내려가 있으면 `docker compose --profile data up -d pipeline` |
+
+- 문제 알림은 해결될 때까지 24시간마다(DB · 스케줄러는 4시간마다) 다시 온다. 당장 고칠 수 없으면 Grafana → Alerting → Silences 에서 잠깐 꺼 둔다.
+- 알림은 웹훅을 `.env` 에 넣은 사람의 Grafana 가 떠 있을 때만 온다. 도커를 내려 둔 동안의 문제는 다시 띄운 뒤 1분쯤 지나 온다. DB 가 내려가 있는 동안에는 오지 않는다.
+
 ## 통합 테스트
 
 배포 전에 로컬에서 세 겹으로 확인한다. 서버에서는 배포 뒤 같은 명령으로 한 번씩 돌린다.

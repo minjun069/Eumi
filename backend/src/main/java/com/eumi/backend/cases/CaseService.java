@@ -1,12 +1,14 @@
 package com.eumi.backend.cases;
 
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import com.eumi.backend.auth.login.AuthService;
 import com.eumi.backend.auth.login.LoginUser;
 import com.eumi.backend.common.error.ApiException;
 import com.eumi.backend.common.error.ErrorCode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -26,10 +28,11 @@ public class CaseService {
         return user;
     }
 
-    public void requireAccess(LoginUser user, long caseId, boolean lock) {
+    public CaseRepository.Access requireAccess(LoginUser user, long caseId, boolean lock) {
         var access = repository.access(caseId, user.orgId(), user.memberId(), lock).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
         if (access.orgId() != user.orgId()) throw new ApiException(ErrorCode.NOT_FOUND);
         if (!access.assigned()) throw new ApiException(ErrorCode.FORBIDDEN);
+        return access;
     }
 
     public CaseDtos.Page search(long member, CaseDtos.Search search) {
@@ -37,6 +40,7 @@ public class CaseService {
         validateSearch(search);
         return repository.search(user.orgId(), user.memberId(), search);
     }
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public CaseDtos.Detail detail(long member, long caseId) {
         var user = requireUser(member); requireAccess(user, caseId, false); return repository.detail(caseId);
     }
@@ -60,13 +64,16 @@ public class CaseService {
     }
 
     @Transactional
-    public void update(long member, long caseId, CaseDtos.Input input) {
+    public void update(long member, long caseId, CaseDtos.UpdateInput request) {
         requireAccess(requireUser(member), caseId, false);
+        var input = request.input();
         validateDatesAndRegion(input);
+        var expected = request.expectedUpdatedAt().truncatedTo(ChronoUnit.MICROS);
         var managers = new TreeSet<>(input.managerMemberIds());
         var lockIds = new TreeSet<>(managers); lockIds.add(member);
         var user = lockWriter(member, lockIds, ErrorCode.VALIDATION_ERROR);
-        requireAccess(user, caseId, true);
+        var current = requireAccess(user, caseId, true);
+        if (!current.updatedAt().truncatedTo(ChronoUnit.MICROS).equals(expected)) throw new ApiException(ErrorCode.STATE_CONFLICT);
         repository.update(caseId, input);
         repository.replaceManagers(caseId, managers);
     }

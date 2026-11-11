@@ -29,6 +29,9 @@ public class AgentService {
     public AgentDtos.QuestionCreated ask(long memberId, AgentDtos.QuestionRequest input) {
         requireMember(memberId);
         var created = transaction.execute(tx -> {
+            // 탈퇴와 같은 회원 → 대화 순서로 잠근다. 대기 뒤 최신 활성/임시 비밀번호 상태를 다시 확인한다.
+            repository.lockActiveMember(memberId);
+            requireMember(memberId);
             UUID id = input.conversationId();
             if (id == null) {
                 id = UUID.randomUUID();

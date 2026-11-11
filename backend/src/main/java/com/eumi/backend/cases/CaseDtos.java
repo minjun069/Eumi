@@ -1,15 +1,22 @@
 package com.eumi.backend.cases;
 
-import java.time.LocalDate;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.eumi.backend.common.error.ApiErrorResponse;
+import com.eumi.backend.common.error.ApiException;
+import com.eumi.backend.common.error.ErrorCode;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.CodePointLength;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public final class CaseDtos {
     public static final long MAX_ID = 9007199254740991L;
+    private static final DateTimeFormatter UPDATED_AT = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSSSSSxxx",Locale.ROOT)
+            .withZone(ZoneId.of("Asia/Seoul"));
     private CaseDtos() { }
     private static String trim(String s) { return s == null ? null : s.trim(); }
     private static String optional(String s) { s = trim(s); return s == null || s.isEmpty() ? null : s; }
@@ -27,6 +34,31 @@ public final class CaseDtos {
         @Override public String toString() { return "CaseInput[redacted]"; }
         @JsonAnySetter public void unknown(String key, Object value) { throw new IllegalArgumentException("Unknown case field"); }
     }
+
+    public record UpdateInput(
+            @JsonProperty(required = true) @NotBlank @CodePointLength(max = 100) String name,
+            @JsonProperty(required = true) @NotNull LocalDate birthDate,
+            @JsonProperty(required = true) @NotNull @Pattern(regexp = "남|여") String gender,
+            @JsonProperty(required = true) @NotNull @Pattern(regexp = "[0-9]{10}") String dongCode,
+            @JsonProperty(required = true) @NotNull LocalDate firstRegisteredAt,
+            @JsonProperty(required = true) @NotNull @Size(min = 1)
+            List<@NotNull @Min(1) @Max(MAX_ID) Long> managerMemberIds,
+            String updatedAt) {
+        public UpdateInput { name = trim(name); gender = trim(gender); dongCode = trim(dongCode); }
+        public Input input() { return new Input(name,birthDate,gender,dongCode,firstRegisteredAt,managerMemberIds); }
+        public Instant expectedUpdatedAt() {
+            if(updatedAt != null) {
+                try { return OffsetDateTime.parse(updatedAt).toInstant(); }
+                catch(DateTimeException ignored) { }
+            }
+            throw new ApiException(ErrorCode.VALIDATION_ERROR,
+                    List.of(new ApiErrorResponse.FieldError("updatedAt","입력값을 확인해 주세요.")));
+        }
+        @Override public String toString() { return "CaseUpdateInput[redacted]"; }
+        @JsonAnySetter public void unknown(String key, Object value) { throw new IllegalArgumentException("Unknown case update field"); }
+    }
+
+    static String formatUpdatedAt(Instant value) { return UPDATED_AT.format(value); }
 
     public record DuplicateInput(
             @JsonProperty(required = true) @NotBlank @CodePointLength(max = 100) String name,
@@ -65,7 +97,7 @@ public final class CaseDtos {
     public record Manager(long memberId, String name, String title) { }
     public record Detail(long caseId, String managementNo, String name, int age, String ageGroup, String gender,
             String sidoName, String sigunguName, String dongName, LocalDate firstRegisteredAt, LocalDate lastRecordedAt,
-            LocalDate birthDate, String sidoCode, String sigunguCode, String dongCode, List<Manager> managers) { }
+            LocalDate birthDate, String sidoCode, String sigunguCode, String dongCode, List<Manager> managers, String updatedAt) { }
     public record Page(long totalCount, long page, int size, long totalPages, List<ListItem> items) { }
     public record Duplicate(long caseId, String managementNo, String name) { }
     public record Duplicates(List<Duplicate> duplicates) { }

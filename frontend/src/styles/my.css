@@ -1,4 +1,4 @@
-/* 5. 마이페이지: 탭, 내 정보, 담당 복지자원 (공통 상세 스타일은 detail.css) */
+/* 5. 마이페이지: 탭, 내 정보, 담당 복지자원, 비밀번호 변경, 회원 탈퇴 (공통 상세 스타일은 detail.css) */
 
 .my-tabs {
   display: flex;
@@ -131,6 +131,145 @@
   color: #a12f2f;
   background: #fff3f3;
   font-size: 14px;
+}
+
+/* 회원 탈퇴 (5.1.4) */
+
+.withdraw-screen .back-link {
+  margin-bottom: 10px;
+}
+
+.withdraw-effects {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+  list-style: disc;
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.withdraw-effects strong {
+  font-family: 'Noto Sans KR:Medium', sans-serif;
+  font-weight: 400;
+}
+
+.withdraw-warning {
+  margin: 14px 0 0;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #a12f2f;
+  background: #fff3f3;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.withdraw-alerts {
+  scroll-margin-top: 16px;
+}
+
+.withdraw-alert {
+  margin: 16px 0 0;
+  border: 1px solid #f0c2c2;
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: #a12f2f;
+  background: #fff3f3;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.withdraw-changed {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  border-color: #f3d9a4;
+  color: #7a5a12;
+  background: #fff8e8;
+}
+
+.withdraw-changed strong {
+  font-family: 'Noto Sans KR:Medium', sans-serif;
+  font-weight: 400;
+}
+
+.withdraw-changed ul {
+  margin: 0;
+  padding-left: 18px;
+  list-style: disc;
+}
+
+.withdraw-screen .is-refreshing {
+  opacity: 0.6;
+}
+
+.bulk-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bulk-pick .input {
+  width: 200px;
+  height: 36px;
+}
+
+.transfer-table tbody tr {
+  cursor: default;
+}
+
+.transfer-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.transfer-table td .input {
+  width: 220px;
+  height: 34px;
+}
+
+/* 다시 불러온 뒤 바뀐 행: 새로 생긴 행(파랑) · 고른 사람이 무효가 되어 비운 행(빨강) */
+.transfer-table tr.is-new td {
+  background: #eef4ff;
+}
+
+.transfer-table tr.is-cleared td {
+  background: #fff6f6;
+}
+
+.transfer-table tr.is-cleared .input {
+  border-color: var(--danger);
+}
+
+.row-mark {
+  flex: none;
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.row-mark-new {
+  color: #2f4fa8;
+  background: #dfe8fb;
+}
+
+.row-mark-cleared {
+  color: #a12f2f;
+  background: #fde3e3;
+}
+
+.withdraw-screen .form-actions {
+  padding-bottom: 20px;
+}
+
+.withdraw-dialog p {
+  margin: 10px 0 14px;
+}
+
+.withdraw-dialog .field-error {
+  margin-top: 6px;
 }
 
 /* AI 대화 기록 (5.3) */

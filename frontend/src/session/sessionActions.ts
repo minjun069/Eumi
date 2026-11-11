@@ -55,6 +55,15 @@ export async function completePasswordChange(user: LoginUser): Promise<void> {
   signInAs(user)
 }
 
+/**
+ * 회원 탈퇴 성공 (API-34 204) 또는 이미 탈퇴된 계정. 서버가 모든 세션을 지웠으므로 로그아웃 API는 부르지 않고
+ * 화면만 로그아웃 상태로 바꾼다 (Query 캐시·열린 AI 대화 비움). 이어서 새 CSRF 토큰을 준비한다. runExclusive 안에서 부른다
+ */
+export async function completeWithdrawal(): Promise<void> {
+  sessionStore.signOut()
+  await prepareCsrf(true).catch(() => {})
+}
+
 /** 로그아웃 (API-02). 서버 세션이 이미 없어도 화면은 로그아웃 상태로 바꾼다 */
 export async function logout(): Promise<void> {
   try {

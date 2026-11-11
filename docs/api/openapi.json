@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "이음이 API 명세서",
-    "version": "2.4.0",
-    "description": "2026-11-10 2.4.0: 인사이트 보고서 연결(AI-b)을 반영했다. API-12의 report를 {quickInsight, graphs: [{sheet, description}] 3개, generatedAt}로 바꾸고 headline · sections와 보고서 블록 · 그래프 스키마를 지웠다. API-11은 응답 모양 그대로이며 insight.summary에 최신 보고서의 quick_insight 한 개를 담는다. INT-05 본문을 {requestId, month, dongCodes}, 응답을 202 본문 없음으로 바꾸고(꼬리표는 AI가 직접 읽음), INT-08(AI → BE 보고서 생성 완료 알림)을 더했다. 상세 계약은 insight-report.md. 화면 API 응답 변경은 BE · 2단계 V 파일 · FE와 같은 배포로 나간다. 2026-11-09 2.3.4: AI 대화 패널 연결(AI-a)을 반영했다. API-03 요청에 선택 context(ScreenContext: 화면에서 보고 있는 동 · 월)를 더했다. 응답 {conversationId, questionId}는 그대로다. 내부 연동 목록 키를 x-internal-ai-api → x-internal-api로 바꾸고, INT-01 본문을 {conversationId, messageId, context?}로 바꿨다. INT-03(실행 상태 조회)을 지우고 같은 messageId 재요청으로 복구한다. INT-07(AI → BE 행 저장 알림)을 더했다. 상세 계약은 ai-agent-panel.md. 2026-11-09 2.3.3: PDF 양식 추출(API-18)을 범위에서 빼 경로와 전용 스키마(DocumentExtract · DocumentExtractionResult)를 지웠다. 나머지 화면 API 형식은 그대로다. 2026-11-09 2.3.2: 인사이트 보고서 저장 주체를 AI로 바꿨다(11/6 결정, 권한은 afterMigrate.sql). AI → BE 보고서 저장 INT-06과 오류 코드 RESULT_VERSION_MISMATCH를 없앴고, AI가 region_insight_report에 직접 저장한다(저장 문장은 insight-report.md 4절). 화면 API 형식은 그대로다. 2026-11-06 2.3.1: 화면 API 형식은 그대로 두고, 내부 연동에 인사이트 보고서 INT-04~06을 추가했다(x-internal-ai-api, 상세 계약은 insight-report.md). x-implementation-status를 develop 구현 상태로 고쳤다(구현 38 · 예정 8). API-11 · 12 응답 변경은 2.4.0에서 BE · FE와 같은 배포로 반영한다. 2026-11-02 AI 패널 A 방식 반영. 업무 HTTP 40개, CSRF·health 2개, AI 질문·메시지 조회·중단 3개 총 45개. 대화 패널의 AI 결과는 FastAPI가 ai_message에 직접 저장하고 화면은 조회 API로 받는다(SSE 없음). 2.2.0과 달라진 곳: API-03·03-S1·03-S2 경로와 형식, API-37 응답(turns → messages), API-36·38 설명. 내부 연동 API는 x-internal-ai-api에 적었다. 기준 DB: V1~V6, V20261102_01~02, V20261106_01, V20261109_01, V20261110_01~02(02: 인사이트 보고서 2단계)."
+    "version": "2.5.0",
+    "description": "2026-11-10 2.5.0: 사례자 수정 경합(C4)을 반영했다. API-20 CaseDetail에 updatedAt을 더하고, API-23 요청을 CaseUpdateInput(CaseInput + updatedAt)으로 바꿨다. updatedAt이 DB 값과 다르면 409 STATE_CONFLICT다. 등록(API-22)의 CaseInput은 그대로다.\n2026-11-10 2.4.1: A3(API-09)와 M3(API-33 · 34) 구현을 반영했다. 구현 상태와 API-33 · 34 설명 · 연결 DB 객체를 구현에 맞췄다. 요청 · 응답 형식은 그대로다. 2026-11-10 2.4.0: 인사이트 보고서 연결(AI-b)을 반영했다. API-12의 report를 {quickInsight, graphs: [{sheet, description}] 3개, generatedAt}로 바꾸고 headline · sections와 보고서 블록 · 그래프 스키마를 지웠다. API-11은 응답 모양 그대로이며 insight.summary에 최신 보고서의 quick_insight 한 개를 담는다. INT-05 본문을 {requestId, month, dongCodes}, 응답을 202 본문 없음으로 바꾸고(꼬리표는 AI가 직접 읽음), INT-08(AI → BE 보고서 생성 완료 알림)을 더했다. 상세 계약은 insight-report.md. 화면 API 응답 변경은 BE · 2단계 V 파일 · FE와 같은 배포로 나간다. 2026-11-09 2.3.4: AI 대화 패널 연결(AI-a)을 반영했다. API-03 요청에 선택 context(ScreenContext: 화면에서 보고 있는 동 · 월)를 더했다. 응답 {conversationId, questionId}는 그대로다. 내부 연동 목록 키를 x-internal-ai-api → x-internal-api로 바꾸고, INT-01 본문을 {conversationId, messageId, context?}로 바꿨다. INT-03(실행 상태 조회)을 지우고 같은 messageId 재요청으로 복구한다. INT-07(AI → BE 행 저장 알림)을 더했다. 상세 계약은 ai-agent-panel.md. 2026-11-09 2.3.3: PDF 양식 추출(API-18)을 범위에서 빼 경로와 전용 스키마(DocumentExtract · DocumentExtractionResult)를 지웠다. 나머지 화면 API 형식은 그대로다. 2026-11-09 2.3.2: 인사이트 보고서 저장 주체를 AI로 바꿨다(11/6 결정, 권한은 afterMigrate.sql). AI → BE 보고서 저장 INT-06과 오류 코드 RESULT_VERSION_MISMATCH를 없앴고, AI가 region_insight_report에 직접 저장한다(저장 문장은 insight-report.md 4절). 화면 API 형식은 그대로다. 2026-11-06 2.3.1: 화면 API 형식은 그대로 두고, 내부 연동에 인사이트 보고서 INT-04~06을 추가했다(x-internal-ai-api, 상세 계약은 insight-report.md). x-implementation-status를 develop 구현 상태로 고쳤다(구현 38 · 예정 8). API-11 · 12 응답 변경은 2.4.0에서 BE · FE와 같은 배포로 반영한다. 2026-11-02 AI 패널 A 방식 반영. 업무 HTTP 40개, CSRF·health 2개, AI 질문·메시지 조회·중단 3개 총 45개. 대화 패널의 AI 결과는 FastAPI가 ai_message에 직접 저장하고 화면은 조회 API로 받는다(SSE 없음). 2.2.0과 달라진 곳: API-03·03-S1·03-S2 경로와 형식, API-37 응답(turns → messages), API-36·38 설명. 내부 연동 API는 x-internal-ai-api에 적었다. 기준 DB: V1~V6, V20261102_01~02, V20261106_01, V20261109_01, V20261110_01~02(02: 인사이트 보고서 2단계)."
   },
   "servers": [
     {
@@ -1671,7 +1671,7 @@
           "public.member",
           "public.spring_session"
         ],
-        "x-implementation-status": "not-implemented",
+        "x-implementation-status": "implemented",
         "x-contract-state": "updated-design",
         "parameters": [
           {
@@ -4682,7 +4682,8 @@
                     "sidoCode": "11",
                     "sigunguCode": "11680",
                     "dongCode": "1168066000",
-                    "managers": []
+                    "managers": [],
+                    "updatedAt": "2026-11-10T21:03:05.120300+09:00"
                   },
                   "meta": {
                     "requestId": "c9814a56-22d4-45f9-a203-e8492ac44e73",
@@ -4859,7 +4860,7 @@
           "사례자"
         ],
         "summary": "사례자 정보 수정",
-        "description": "현재 담당자 확인 후 수정한다. 담당자는 같은 기관 활성 회원 최소 1명이다. 본인 제외 시 수정 후 상세 접근이 없어질 수 있어 목록으로 이동한다. 최초 등록일은 수정 가능하나 management_no는 변경하지 않는다.\n\n공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.",
+        "description": "현재 담당자 확인 후 수정한다. 담당자는 같은 기관 활성 회원 최소 1명이다. 본인 제외 시 수정 후 상세 접근이 없어질 수 있어 목록으로 이동한다. 최초 등록일은 수정 가능하나 management_no는 변경하지 않는다.\n\n공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.\n\n요청의 updatedAt이 잠근 사례자 행의 updated_at과 다르면(마이크로초까지 비교) 409 STATE_CONFLICT다. 담당자만 바꿔도 updated_at이 바뀐다.",
         "security": [
           {
             "SessionCookie": []
@@ -4903,7 +4904,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CaseInput"
+                "$ref": "#/components/schemas/CaseUpdateInput"
               },
               "example": {
                 "name": "김지원",
@@ -4913,7 +4914,8 @@
                 "firstRegisteredAt": "2026-10-30",
                 "managerMemberIds": [
                   1
-                ]
+                ],
+                "updatedAt": "2026-11-10T21:03:05.120300+09:00"
               }
             }
           }
@@ -7961,10 +7963,11 @@
         "x-db-objects": [
           "public.member",
           "public.case_manager",
+          "public.v_case_summary",
           "public.v_resource_summary",
           "public.ai_conversation"
         ],
-        "x-implementation-status": "not-implemented",
+        "x-implementation-status": "implemented",
         "x-contract-state": "updated-design"
       },
       "post": {
@@ -7973,7 +7976,7 @@
           "마이페이지"
         ],
         "summary": "회원 탈퇴",
-        "description": "비밀번호를 재검증하고 틀리면 WITHDRAW_PASSWORD_MISMATCH 400을 반환한다. 회원·대상 사례자·자원을 정해진 순서로 잠근다. 유일 담당 사례자 집합과 진행 중 자원 집합이 각각 transfers·resourceTransfers와 정확히 일치하는지 재검사한다. 인계·공동 담당 연결 제거·soft delete·전체 대화 삭제를 한 트랜잭션으로 수행하고 전체 세션을 폐기한다. 종료 자원 담당 FK와 상담 기록자 FK는 유지한다. 변경 경합은 409다.\n\n공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.",
+        "description": "비밀번호를 재검증하고 틀리면 WITHDRAW_PASSWORD_MISMATCH 400을 반환한다. 회원·대상 사례자·자원을 정해진 순서로 잠근다. 유일 담당 사례자 집합과 진행 중 자원 집합이 각각 transfers·resourceTransfers와 정확히 일치하는지 재검사한다. 인계·공동 담당 연결 제거·soft delete·전체 대화 삭제를 한 트랜잭션으로 수행하고 전체 세션을 폐기한다. 종료 자원 담당 FK와 상담 기록자 FK는 유지한다. 변경 경합은 409다. 같은 caseId · resourceId가 두 번 나오거나 후임이 본인이면 400 VALIDATION_ERROR, 후임이 없거나 다른 기관 · 탈퇴 회원이면 409 STATE_CONFLICT, 본인이 이미 탈퇴했으면 404 NOT_FOUND다.\n\n공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.",
         "security": [
           {
             "SessionCookie": []
@@ -8255,15 +8258,17 @@
           "INTERNAL_SERVER_ERROR"
         ],
         "x-db-objects": [
+          "public.organization",
           "public.member",
           "public.case_record",
           "public.case_manager",
           "public.welfare_resource",
+          "public.v_resource_summary",
           "public.ai_conversation",
-          "public.ai_conversation_turn",
+          "public.ai_message",
           "public.spring_session"
         ],
-        "x-implementation-status": "not-implemented",
+        "x-implementation-status": "implemented",
         "x-contract-state": "updated-design",
         "parameters": [
           {
@@ -12667,6 +12672,71 @@
           "managerMemberIds"
         ]
       },
+      "CaseUpdateInput": {
+        "type": "object",
+        "description": "",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "사례자명. trim 후 필수",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "birthDate": {
+            "type": "string",
+            "description": "생년월일. 미래 날짜 불가",
+            "format": "date",
+            "example": "2026-10-30"
+          },
+          "gender": {
+            "type": "string",
+            "description": "성별",
+            "enum": [
+              "남",
+              "여"
+            ]
+          },
+          "dongCode": {
+            "type": "string",
+            "description": "행정동 코드 10자리. 법정동 코드와 구분",
+            "pattern": "^\\d{10}$",
+            "example": "1168066000"
+          },
+          "firstRegisteredAt": {
+            "type": "string",
+            "description": "최초 등록일. 미래 날짜 불가",
+            "format": "date",
+            "example": "2026-10-30"
+          },
+          "managerMemberIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "같은 기관의 활성 담당자 ID",
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "format": "int64"
+            },
+            "description": "최소 한 명. 서버가 중복을 제거한다. 등록 시 본인을 서버가 자동 추가하며, 수정 시 본인 제외 가능",
+            "minItems": 1
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "사례자 정보 마지막 수정 일시 (소수 6자리 · 오프셋 포함). 수정(API-23) 때 받은 문자열을 그대로 돌려보낸다"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "birthDate",
+          "gender",
+          "dongCode",
+          "firstRegisteredAt",
+          "managerMemberIds",
+          "updatedAt"
+        ]
+      },
       "CaseListItem": {
         "type": "object",
         "description": "",
@@ -12898,6 +12968,11 @@
               "$ref": "#/components/schemas/MemberOption"
             },
             "description": "사례자의 담당자 목록"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "사례자 정보 마지막 수정 일시 (소수 6자리 · 오프셋 포함). 수정(API-23) 때 받은 문자열을 그대로 돌려보낸다"
           }
         },
         "additionalProperties": false,
@@ -12917,7 +12992,8 @@
           "sidoCode",
           "sigunguCode",
           "dongCode",
-          "managers"
+          "managers",
+          "updatedAt"
         ]
       },
       "DuplicateCheckRequest": {
@@ -13407,11 +13483,11 @@
             "items": {
               "$ref": "#/components/schemas/SoleCaseItem"
             },
-            "description": "본인이 유일 담당자여서 인계해야 하는 사례자"
+            "description": "본인이 담당이고 본인 말고 활성 담당자가 없어 인계해야 하는 사례자. 관리번호 순"
           },
           "sharedCaseCount": {
             "type": "integer",
-            "description": "공동 담당 사례자 수",
+            "description": "본인 말고 활성 담당자가 1명 이상인 사례자 수. 탈퇴하면 본인 담당만 빠진다",
             "minimum": 0,
             "maximum": 9007199254740991
           },
@@ -13420,7 +13496,7 @@
             "items": {
               "$ref": "#/components/schemas/MemberOption"
             },
-            "description": "같은 기관의 활성 회원 중 본인 제외"
+            "description": "같은 기관의 활성 회원 중 본인 제외. 이름 · 회원 ID 순"
           },
           "resourceCount": {
             "type": "integer",
@@ -13439,7 +13515,7 @@
             "items": {
               "$ref": "#/components/schemas/OngoingResourceTransferItem"
             },
-            "description": "v_resource_summary.status=진행 중인 현재 담당 자원. 전부 인계해야 한다.",
+            "description": "v_resource_summary.status=진행 중인 현재 담당 자원. 전부 인계해야 한다. 자원 ID 순",
             "minItems": 0
           },
           "endedResourceCount": {

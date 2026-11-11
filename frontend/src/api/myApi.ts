@@ -9,11 +9,15 @@ export type MyResources = SuccessData<"myApi_getMyResources_Success">
 export type PasswordChangeRequest = Schemas["PasswordChangeRequest"]
 /** 비밀번호 변경 성공: 최신 로그인 사용자 (임시 비밀번호 제한이 풀린 상태) */
 export type PasswordChanged = SuccessData<"myApi_changePassword_Success">
+/** 탈퇴 안내: 넘길 사례자·진행 중 자원, 넘겨받을 수 있는 회원, 처리되는 데이터 수 */
+export type WithdrawalInfo = Schemas["WithdrawalInfo"]
+export type WithdrawalRequest = Schemas["WithdrawalRequest"]
 
 export const myKeys = {
   info: ["my", "info"] as const,
   // 복지자원 쿼리(["resources", …]) 아래에 둬서 자원을 등록·수정·삭제하면 함께 무효화된다
   resources: ["resources", "mine"] as const,
+  withdrawal: ["my", "withdrawal"] as const,
 }
 
 export const myApi = {
@@ -33,4 +37,15 @@ export const myApi = {
    */
   changePassword: (request: PasswordChangeRequest) =>
     api.put<PasswordChanged>("/members/me/password", request, { exclusive: true }),
+
+  /** API-33 GET /members/me/withdrawal — 탈퇴 안내 (조회 시점 기준. 제출 때 바뀌어 있으면 API-34가 409) */
+  getWithdrawalInfo: () => api.get<WithdrawalInfo>("/members/me/withdrawal"),
+
+  /**
+   * API-34 POST /members/me/withdrawal — 204. 인계·대화 삭제·탈퇴·모든 세션 삭제를 한 번에 하고 SESSION 쿠키를 만료시킨다.
+   * transfers·resourceTransfers는 현재 넘길 대상과 정확히 같아야 한다 (다르거나 후임이 무효면 409 STATE_CONFLICT).
+   * 비밀번호 불일치 400 WITHDRAW_PASSWORD_MISMATCH, 이미 탈퇴함 404. 세션이 없어지므로 runExclusive 안에서 부른다
+   */
+  withdraw: (request: WithdrawalRequest) =>
+    api.post<void>("/members/me/withdrawal", request, { exclusive: true }),
 }

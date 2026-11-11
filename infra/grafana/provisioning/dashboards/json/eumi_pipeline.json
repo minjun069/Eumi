@@ -82,7 +82,7 @@
     },
     {
       "id": 105, "type": "alertlist", "title": "울린 알림",
-      "description": "지금 켜져 있는 알림. 알림 규칙은 다음 작업에서 넣는다",
+      "description": "지금 울리고 있는 알림 (같은 내용이 Mattermost 로도 간다). 규칙 8개는 grafana/provisioning/alerting/rules.yml, 알림별 할 일은 data/README.md 의 '알림이 오면'. 비어 있으면 정상",
       "gridPos": { "h": 5, "w": 4, "x": 20, "y": 1 },
       "options": { "alertName": "", "dashboardAlerts": false, "groupBy": [], "groupMode": "default", "maxItems": 10, "sortOrder": 1, "stateFilter": { "firing": true, "pending": true, "noData": false, "normal": false, "error": true }, "viewMode": "list" }
     },

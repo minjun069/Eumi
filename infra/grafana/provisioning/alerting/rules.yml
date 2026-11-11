@@ -1,0 +1,422 @@
+# 알림 규칙 8개 (컨테이너가 뜰 때 자동 등록, 화면에서 수정 불가). 메시지는 templates.yml, 보내는 곳 · 반복은 policies.yml
+#
+# 규칙의 모양: A = SQL 한 번(숫자 열 value 하나 + 글자 열들), C = "A 가 기준을 넘으면 알림".
+#   글자 열은 그 알림의 이름표(labels)가 되어 메시지에서 {{ $labels.month }} 처럼 쓴다. 숫자는 {{ $values.A.Value }}.
+#   읽는 곳은 대시보드와 같다: airflow-db(실행 이력) · eumi-db(결과 테이블 · pg_stat). 계정은 읽기 전용 eumi_monitor.
+# 쿼리가 실패하면(DB 가 안 닿음) 직전 상태를 유지한다 (execErrState: KeepLast). 그래서 DB 가 내려가 있는 동안에는 알림이 오지 않는다.
+# 단계 이름 · 기준월 계산은 대시보드(eumi_pipeline.json)의 실행 이력 쿼리와 같은 식이다.
+# 문구에는 로컬 · 운영에서 달라지는 주소를 적지 않는다. 환경 이름과 Airflow 링크는 contact-points.yml 이 환경변수로 붙인다.
+apiVersion: 1
+
+groups:
+  # ---------- 월 배치와 그 결과 검사 (1분마다 확인) ----------
+  - orgId: 1
+    name: eumi-batch
+    folder: Eumi
+    interval: 1m
+    rules:
+      - uid: eumi-batch-failed
+        title: 월 배치 실패
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: KeepLast
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: airflow-db
+            model:
+              refId: A
+              datasource: { type: grafana-postgresql-datasource, uid: airflow-db }
+              editorMode: code
+              format: table
+              rawQuery: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              # 끝난 실행 중 가장 최근 것이 실패인가 (도는 중인 실행은 보지 않는다 → 다시 돌려 성공하면 해결)
+              rawSql: |
+                SELECT CASE WHEN r.state = 'failed' THEN 1 ELSE 0 END AS value,
+                       coalesce(substring(encode(r.conf, 'escape') FROM '[0-9]{4}-[0-9]{2}'), to_char(r.data_interval_start AT TIME ZONE 'Asia/Seoul', 'YYYY-MM')) AS month,
+                       to_char(r.start_date AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') AS started,
+                       coalesce((SELECT string_agg(ti.task_id, ', ' ORDER BY ti.start_date) FROM task_instance ti
+                                 WHERE ti.dag_id = r.dag_id AND ti.run_id = r.run_id AND ti.state = 'failed'), '(단계 기록 없음)') AS failed_tasks
+                FROM dag_run r
+                WHERE r.dag_id = 'eumi_monthly' AND r.state IN ('success', 'failed')
+                ORDER BY r.start_date DESC NULLS LAST
+                LIMIT 1
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              datasource: { type: __expr__, uid: __expr__ }
+              type: threshold
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              conditions:
+                - type: query
+                  evaluator: { type: gt, params: [0] }
+                  operator: { type: and }
+                  query: { params: [C] }
+                  reducer: { type: last, params: [] }
+        annotations:
+          summary: '{{ $labels.month }} 월 배치가 실패했습니다 · 실패한 단계: {{ $labels.failed_tasks }} · 시작 {{ $labels.started }}'
+          resolved: '{{ $labels.month }} 월 배치 실패({{ $labels.started }} 시작)가 해결됐습니다. 그 뒤에 끝난 실행은 실패가 아닙니다.'
+          action: 'Airflow 화면에서 실패한 단계의 로그를 보고 원인을 고친 뒤, 그 단계를 Clear 하면 거기서부터 다시 돕니다.'
+
+      - uid: eumi-batch-missing
+        title: 월 배치가 돌지 않음
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: KeepLast
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: airflow-db
+            model:
+              refId: A
+              datasource: { type: grafana-postgresql-datasource, uid: airflow-db }
+              editorMode: code
+              format: table
+              rawQuery: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              # 6일 09:00(한국 시간)이 지났는데 전월을 처리한 실행이 하나도 없는가. 건너뛴 실행 · 실패한 실행도 "돌았음"으로 센다
+              rawSql: |
+                WITH n AS (SELECT now() AT TIME ZONE 'Asia/Seoul' AS kst),
+                target AS (SELECT to_char(date_trunc('month', kst) - interval '1 month', 'YYYY-MM') AS month,
+                                  kst >= date_trunc('month', kst) + interval '5 days 9 hours' AS due FROM n)
+                SELECT CASE WHEN t.due AND NOT EXISTS (
+                           SELECT 1 FROM dag_run r WHERE r.dag_id = 'eumi_monthly' AND (
+                                (encode(r.conf, 'escape') ~ '[0-9]{4}-[0-9]{2}' AND position(t.month IN encode(r.conf, 'escape')) > 0)
+                             OR (encode(r.conf, 'escape') !~ '[0-9]{4}-[0-9]{2}' AND to_char(r.data_interval_start AT TIME ZONE 'Asia/Seoul', 'YYYY-MM') = t.month)))
+                            THEN 1 ELSE 0 END AS value,
+                       t.month
+                FROM target t
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              datasource: { type: __expr__, uid: __expr__ }
+              type: threshold
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              conditions:
+                - type: query
+                  evaluator: { type: gt, params: [0] }
+                  operator: { type: and }
+                  query: { params: [C] }
+                  reducer: { type: last, params: [] }
+        annotations:
+          summary: '{{ $labels.month }} 월 배치 실행 기록이 없습니다 (매월 5일 03:00 에 돌아야 합니다)'
+          resolved: '{{ $labels.month }} 월 배치 실행 기록이 생겼습니다.'
+          action: 'Airflow 화면에서 eumi_monthly 가 켜져 있는지 보고, 5일 03:00 에 도커(서버)가 떠 있었는지 확인합니다. 그 달을 수동 실행하면 해결됩니다 (Trigger DAG w/ config 에 {"months": ["{{ $labels.month }}"]}).'
+
+      - uid: eumi-batch-skipped
+        title: 원본이 없어 월 배치를 건너뜀
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: KeepLast
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: airflow-db
+            model:
+              refId: A
+              datasource: { type: grafana-postgresql-datasource, uid: airflow-db }
+              editorMode: code
+              format: table
+              rawQuery: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              # 전월 실행이 "건너뜀"(성공한 단계 0, 건너뛴 단계만)뿐이고 실제로 돈 실행은 없는가.
+              # 6일 09:00 부터 4일 동안만 켜진다 → 그 사이 한 번만 알린다 (실패가 아니라 알려만 주는 것)
+              rawSql: |
+                WITH n AS (SELECT now() AT TIME ZONE 'Asia/Seoul' AS kst),
+                target AS (SELECT to_char(date_trunc('month', kst) - interval '1 month', 'YYYY-MM') AS month,
+                                  kst >= date_trunc('month', kst) + interval '5 days 9 hours'
+                                  AND kst < date_trunc('month', kst) + interval '9 days 9 hours' AS in_window FROM n),
+                runs AS (
+                  SELECT (SELECT count(*) FROM task_instance ti WHERE ti.dag_id = r.dag_id AND ti.run_id = r.run_id AND ti.state = 'success') AS ok,
+                         (SELECT count(*) FROM task_instance ti WHERE ti.dag_id = r.dag_id AND ti.run_id = r.run_id AND ti.state = 'skipped') AS skip
+                  FROM dag_run r JOIN target t ON
+                       (encode(r.conf, 'escape') ~ '[0-9]{4}-[0-9]{2}' AND position(t.month IN encode(r.conf, 'escape')) > 0)
+                    OR (encode(r.conf, 'escape') !~ '[0-9]{4}-[0-9]{2}' AND to_char(r.data_interval_start AT TIME ZONE 'Asia/Seoul', 'YYYY-MM') = t.month)
+                  WHERE r.dag_id = 'eumi_monthly')
+                SELECT CASE WHEN t.in_window AND EXISTS (SELECT 1 FROM runs WHERE ok = 0 AND skip > 0)
+                                 AND NOT EXISTS (SELECT 1 FROM runs WHERE ok > 0) THEN 1 ELSE 0 END AS value,
+                       t.month
+                FROM target t
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              datasource: { type: __expr__, uid: __expr__ }
+              type: threshold
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              conditions:
+                - type: query
+                  evaluator: { type: gt, params: [0] }
+                  operator: { type: and }
+                  query: { params: [C] }
+                  reducer: { type: last, params: [] }
+        labels:
+          kind: info
+          tone: notice
+        annotations:
+          summary: '{{ $labels.month }} 월 배치는 원본(SKT 유동 · 주민등록)이 없어 건너뛰었습니다. 실패가 아닙니다. 원본을 올린 뒤 그 달을 수동 실행하면 됩니다.'
+
+      - uid: eumi-batch-success
+        title: 월 배치 성공
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: KeepLast
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: airflow-db
+            model:
+              refId: A
+              datasource: { type: grafana-postgresql-datasource, uid: airflow-db }
+              editorMode: code
+              format: table
+              rawQuery: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              # 가장 최근에 끝난 실행이 성공(건너뜀 제외)이고 끝난 지 30분 안인가 → 그 30분 동안만 켜져 한 번 알린다
+              rawSql: |
+                SELECT CASE WHEN r.state = 'success' AND t.ok > 0 AND r.end_date > now() - interval '30 minutes' THEN 1 ELSE 0 END AS value,
+                       coalesce(substring(encode(r.conf, 'escape') FROM '[0-9]{4}-[0-9]{2}'), to_char(r.data_interval_start AT TIME ZONE 'Asia/Seoul', 'YYYY-MM')) AS month,
+                       t.ok::text AS steps,
+                       round(extract(epoch FROM r.end_date - r.start_date) / 60)::text AS minutes,
+                       to_char(r.end_date AT TIME ZONE 'Asia/Seoul', 'MM/DD HH24:MI') AS ended
+                FROM dag_run r,
+                     LATERAL (SELECT count(*) FILTER (WHERE ti.state = 'success') AS ok FROM task_instance ti WHERE ti.dag_id = r.dag_id AND ti.run_id = r.run_id) t
+                WHERE r.dag_id = 'eumi_monthly' AND r.state IN ('success', 'failed')
+                ORDER BY r.start_date DESC NULLS LAST
+                LIMIT 1
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              datasource: { type: __expr__, uid: __expr__ }
+              type: threshold
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              conditions:
+                - type: query
+                  evaluator: { type: gt, params: [0] }
+                  operator: { type: and }
+                  query: { params: [C] }
+                  reducer: { type: last, params: [] }
+        labels:
+          kind: info
+          tone: good
+        annotations:
+          summary: '{{ $labels.month }} 월 배치 성공 · {{ $labels.steps }}단계 {{ $labels.minutes }}분 · 결과 검사 통과 ({{ $labels.ended }} 끝)'
+
+      - uid: eumi-check-failed
+        title: 결과 검사 실패
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: KeepLast
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: eumi-db
+            model:
+              refId: A
+              datasource: { type: grafana-postgresql-datasource, uid: eumi-db }
+              editorMode: code
+              format: table
+              rawQuery: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              # 가장 최근 달의 검사(analysis.pipeline_check) 중 실패한 개수
+              rawSql: |
+                SELECT count(*) FILTER (WHERE NOT passed) AS value,
+                       to_char(period_start, 'YYYY-MM') AS month,
+                       coalesce(string_agg(check_name, ', ' ORDER BY seq) FILTER (WHERE NOT passed), '-') AS failed_checks
+                FROM analysis.pipeline_check
+                WHERE period_start = (SELECT max(period_start) FROM analysis.pipeline_check)
+                GROUP BY period_start
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              datasource: { type: __expr__, uid: __expr__ }
+              type: threshold
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              conditions:
+                - type: query
+                  evaluator: { type: gt, params: [0] }
+                  operator: { type: and }
+                  query: { params: [C] }
+                  reducer: { type: last, params: [] }
+        annotations:
+          summary: '{{ $labels.month }} 결과 검사에 실패가 있습니다: {{ $labels.failed_checks }}'
+          resolved: '{{ $labels.month }} 결과 검사 실패({{ $labels.failed_checks }})가 해결됐습니다.'
+          action: '대시보드의 "실패한 검사" 표에서 내용을 보고, 그 결과를 만드는 단계부터 다시 돌립니다 (Airflow 에서 Clear). 검사 기준은 data/pipeline/ops/verify_outputs.py.'
+
+  # ---------- 결과 데이터 (10분마다 확인. 유동 상세를 세는 데 2~3초 걸린다) ----------
+  - orgId: 1
+    name: eumi-data
+    folder: Eumi
+    interval: 10m
+    rules:
+      - uid: eumi-rows-changed
+        title: 행 수 급변
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: KeepLast
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: eumi-db
+            model:
+              refId: A
+              datasource: { type: grafana-postgresql-datasource, uid: eumi-db }
+              editorMode: code
+              format: table
+              rawQuery: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              # 달마다 쌓이는 결과 테이블 9개: 가장 최근 달 행 수가 전월과 몇 % 다른가 (전월이 없으면 0 으로 본다)
+              rawSql: |
+                WITH t(name, month, cur, prev) AS (
+                  SELECT '배경 상세 (bg_region_detail)', to_char(m.p, 'YYYY-MM'), count(*) FILTER (WHERE x.period_start = m.p), count(*) FILTER (WHERE x.period_start = m.p - interval '1 month') FROM analysis.bg_region_detail x, (SELECT max(period_start) AS p FROM analysis.bg_region_detail) m GROUP BY m.p
+                  UNION ALL SELECT '배경 지표 (bg_region_indicator)', to_char(m.p, 'YYYY-MM'), count(*) FILTER (WHERE x.period_start = m.p), count(*) FILTER (WHERE x.period_start = m.p - interval '1 month') FROM analysis.bg_region_indicator x, (SELECT max(period_start) AS p FROM analysis.bg_region_indicator) m GROUP BY m.p
+                  UNION ALL SELECT '유동 상세 (flow_detail)', to_char(m.p, 'YYYY-MM'), count(*) FILTER (WHERE x.period_start = m.p), count(*) FILTER (WHERE x.period_start = m.p - interval '1 month') FROM analysis.flow_detail x, (SELECT max(period_start) AS p FROM analysis.flow_detail) m WHERE x.period_start >= m.p - interval '1 month' GROUP BY m.p
+                  UNION ALL SELECT '격자 행동 지표 (bh_grid_indicator)', to_char(m.p, 'YYYY-MM'), count(*) FILTER (WHERE x.period_start = m.p), count(*) FILTER (WHERE x.period_start = m.p - interval '1 month') FROM analysis.bh_grid_indicator x, (SELECT max(period_start) AS p FROM analysis.bh_grid_indicator) m GROUP BY m.p
+                  UNION ALL SELECT '읍면동 행동 지표 (bh_region_indicator)', to_char(m.p, 'YYYY-MM'), count(*) FILTER (WHERE x.period_start = m.p), count(*) FILTER (WHERE x.period_start = m.p - interval '1 month') FROM analysis.bh_region_indicator x, (SELECT max(period_start) AS p FROM analysis.bh_region_indicator) m GROUP BY m.p
+                  UNION ALL SELECT '읍면동 결과 (region_result)', to_char(m.p, 'YYYY-MM'), count(*) FILTER (WHERE x.period_start = m.p), count(*) FILTER (WHERE x.period_start = m.p - interval '1 month') FROM public.region_result x, (SELECT max(period_start) AS p FROM public.region_result) m GROUP BY m.p
+                  UNION ALL SELECT '지표별 기여도 (bh_region_contribution)', to_char(m.p, 'YYYY-MM'), count(*) FILTER (WHERE x.period_start = m.p), count(*) FILTER (WHERE x.period_start = m.p - interval '1 month') FROM analysis.bh_region_contribution x, (SELECT max(period_start) AS p FROM analysis.bh_region_contribution) m GROUP BY m.p
+                  UNION ALL SELECT '격자 이상 점수 (bh_grid_anomaly)', to_char(m.p, 'YYYY-MM'), count(*) FILTER (WHERE x.period_start = m.p), count(*) FILTER (WHERE x.period_start = m.p - interval '1 month') FROM analysis.bh_grid_anomaly x, (SELECT max(period_start) AS p FROM analysis.bh_grid_anomaly) m GROUP BY m.p
+                  UNION ALL SELECT '실거래가 (re_apt_trade)', to_char(m.p, 'YYYY-MM'), count(*) FILTER (WHERE date_trunc('month', x.contract_date) = m.p), count(*) FILTER (WHERE date_trunc('month', x.contract_date) = m.p - interval '1 month') FROM analysis.re_apt_trade x, (SELECT date_trunc('month', max(contract_date)) AS p FROM analysis.re_apt_trade) m GROUP BY m.p
+                )
+                SELECT name AS "table", month,
+                       coalesce(round(abs(100.0 * (cur - prev) / nullif(prev, 0)), 1), 0) AS value,
+                       to_char(prev, 'FM999,999,999') || ' → ' || to_char(cur, 'FM999,999,999') || '행 (' || coalesce(to_char(round(100.0 * (cur - prev) / nullif(prev, 0), 1), 'FMS990.0') || '%', '전월 없음') || ')' AS detail
+                FROM t
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              datasource: { type: __expr__, uid: __expr__ }
+              type: threshold
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              conditions:
+                - type: query
+                  evaluator: { type: gt, params: [30] }
+                  operator: { type: and }
+                  query: { params: [C] }
+                  reducer: { type: last, params: [] }
+        annotations:
+          summary: '{{ $labels.table }} · {{ $labels.month }} 행 수가 전월과 30% 넘게 다릅니다: {{ $labels.detail }}'
+          resolved: '{{ $labels.table }} · {{ $labels.month }} 행 수 차이가 30% 안으로 돌아왔거나 새 달이 들어왔습니다.'
+          action: '그 테이블을 넣는 단계가 일부만 적재했는지, 원본이 바뀐 것인지 확인합니다 (대시보드 "테이블 최신성"). 정상적인 변화면 다음 달에 저절로 꺼집니다.'
+
+  # ---------- 시스템 (1분마다 확인) ----------
+  - orgId: 1
+    name: eumi-system
+    folder: Eumi
+    interval: 1m
+    rules:
+      - uid: eumi-db-connections
+        title: DB 접속 과다
+        condition: C
+        for: 5m
+        noDataState: OK
+        execErrState: KeepLast
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: eumi-db
+            model:
+              refId: A
+              datasource: { type: grafana-postgresql-datasource, uid: eumi-db }
+              editorMode: code
+              format: table
+              rawQuery: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              # 지금 붙어 있는 접속 수 (max_connections 100)
+              rawSql: |
+                SELECT count(*) AS value FROM pg_stat_activity WHERE backend_type = 'client backend'
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              datasource: { type: __expr__, uid: __expr__ }
+              type: threshold
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              conditions:
+                - type: query
+                  evaluator: { type: gt, params: [79] }
+                  operator: { type: and }
+                  query: { params: [C] }
+                  reducer: { type: last, params: [] }
+        labels:
+          repeat: 4h
+        annotations:
+          summary: 'DB 접속이 {{ $values.A.Value }}개입니다 (최대 100개, 80개 이상이 5분째)'
+          resolved: 'DB 접속이 80개 아래로 내려왔습니다.'
+          action: '대시보드의 "DB 접속 수" · "오래 도는 쿼리"에서 어느 계정이 많이 붙어 있는지 봅니다. 100개가 차면 화면 · 배치가 DB 에 못 붙습니다.'
+
+      - uid: eumi-scheduler-down
+        title: Airflow 스케줄러 멈춤
+        condition: C
+        for: 2m
+        noDataState: OK
+        execErrState: KeepLast
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: airflow-db
+            model:
+              refId: A
+              datasource: { type: grafana-postgresql-datasource, uid: airflow-db }
+              editorMode: code
+              format: table
+              rawQuery: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              # 스케줄러가 마지막으로 신호를 남긴 지 몇 초 됐나 (정상이면 5초 안팎)
+              rawSql: |
+                SELECT round(extract(epoch FROM now() - max(latest_heartbeat))) AS value FROM job WHERE job_type = 'SchedulerJob'
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              datasource: { type: __expr__, uid: __expr__ }
+              type: threshold
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              conditions:
+                - type: query
+                  evaluator: { type: gt, params: [60] }
+                  operator: { type: and }
+                  query: { params: [C] }
+                  reducer: { type: last, params: [] }
+        labels:
+          repeat: 4h
+        annotations:
+          summary: 'Airflow 스케줄러 신호가 {{ $values.A.Value }}초째 없습니다 (2분 넘게 멈춤). 이 상태면 5일 03:00 월 배치가 돌지 않습니다.'
+          resolved: 'Airflow 스케줄러가 다시 신호를 보냅니다.'
+          action: 'pipeline 컨테이너가 떠 있는지 보고, 내려가 있으면 다시 띄웁니다. 로컬은 infra/ 에서 docker compose --profile data up -d pipeline, 운영 서버는 인프라 담당에게 요청합니다.'

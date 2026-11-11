@@ -277,6 +277,12 @@ services:
       GF_DATE_FORMATS_DEFAULT_TIMEZONE: Asia/Seoul
       # provisioning/datasources/eumi.yml 이 읽는 값
       EUMI_MONITOR_PASSWORD: ${EUMI_MONITOR_PASSWORD:-monitor_local}
+      # provisioning/alerting/contact-points.yml 이 읽는 값 (Mattermost 수신 웹훅). 알림은 이 값을 .env 에 넣은 사람의 Grafana 만 보낸다.
+      # 비어 있으면 닿지 않는 주소로 보내다 실패하고 끝난다 (키가 없는 팀원의 Grafana 도 뜨고, 같은 알림이 여러 번 가지 않는다)
+      MATTERMOST_WEBHOOK_URL: ${MATTERMOST_WEBHOOK_URL:-http://127.0.0.1:9/eumi-alert-webhook-not-set}
+      # 알림 제목 앞의 환경 이름과 본문의 Airflow 링크 (contact-points.yml 이 읽는다. 운영 compose 는 "운영"과 서버 주소를 넣는다)
+      EUMI_ALERT_ENV: ${EUMI_ALERT_ENV:-로컬}
+      EUMI_AIRFLOW_URL: ${EUMI_AIRFLOW_URL:-http://localhost:8081}
       TZ: Asia/Seoul
     ports:
       - "127.0.0.1:3000:3000"
