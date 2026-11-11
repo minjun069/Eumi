@@ -22,8 +22,8 @@ def initial(event="analysis_pipeline"):
     )
 
 
-def section(messages, title):
-    text = messages[1].content.split(f"[{title}]\n", 1)[1]
+def section(messages, title, *, system=False):
+    text = messages[0 if system else 1].content.split(f"[{title}]\n", 1)[1]
     return json.JSONDecoder().raw_decode(text)[0]
 
 
@@ -32,16 +32,12 @@ class ScriptedModel:
         self.replies = iter(replies)
         self.inputs = []
         self.schemas = []
-        self.tool_definitions = []
         self.response_schemas = []
-
-    def bind_tools(self, tools, **kwargs):
-        self.tool_definitions.append(deepcopy(tools))
-        self.kwargs = {}
-        return self
+        self.response_options = []
 
     def with_structured_output(self, schema, **kwargs):
         self.response_schemas.append(deepcopy(schema))
+        self.response_options.append(deepcopy(kwargs))
 
         async def invoke(messages, config):
             self.schemas.append(schema["title"])

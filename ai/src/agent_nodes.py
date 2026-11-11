@@ -471,10 +471,10 @@ def build_nodes(
     *,
     role: Role,
 ):
-    async def call(state, schema, messages, config, *, tools=None):
+    async def call(state, schema, messages, config, *, strict=False):
         return await invoke_model(
             state,
-            lambda: structured_call(model, schema, messages(), config, tools=tools),
+            lambda: structured_call(model, schema, messages(), config, strict=strict),
         )
 
     async def call_report(state, config, schema, stage):
@@ -678,9 +678,9 @@ def build_nodes(
         choice, usage = await call(
             state,
             selection_schema(definitions),
-            lambda: selection_messages(state, role, catalog),
+            lambda: selection_messages(state, role, catalog, definitions=definitions),
             config,
-            tools=definitions,
+            strict=True,
         )
         records = state["results"]
         records.append(
