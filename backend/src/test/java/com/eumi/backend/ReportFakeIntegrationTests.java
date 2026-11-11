@@ -12,6 +12,8 @@ import com.eumi.backend.support.ReportAiStub;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
@@ -165,11 +167,19 @@ class ReportFakeIntegrationTests extends AgentHttpSupport {
         assertThat(report.path("quickInsight").asText()).isEqualTo(QUICK);
         assertThat(report.path("graphs")).isEqualTo(json.valueToTree(List.of()));
     }
-    @Test void onlyUnsupportedSheetWithoutQuickInsightReturnsNullReport() throws Exception {
+    @ParameterizedTest @ValueSource(ints = {2, 3})
+    void onlyUnsupportedSheetWithoutQuickInsightReturnsNullReport(int slot, CapturedOutput output) throws Exception {
         String code = codes.getFirst();
-        ai.update("INSERT INTO public.region_insight_report(period_start,adm_cd10,graph_2,result_updated_at,generated_at) "
-                + "VALUES (?,?,?,?,?)", month, code, "EmbedDetailV09", ownedRows.get(code), GENERATED);
-        assertThat(data(browser.get(path(code, "report"))).path("report").isNull()).isTrue();
+        // 앞 칸이 비어 있어도 경고에는 필터링 전 원래 칸 번호를 남긴다.
+        ai.update("INSERT INTO public.region_insight_report(period_start,adm_cd10,graph_2,graph_3,result_updated_at,generated_at) "
+                + "VALUES (?,?,?,?,?,?)", month, code, slot == 2 ? "EmbedDetailV09" : null,
+                slot == 3 ? "EmbedDetailV09" : null, ownedRows.get(code), GENERATED);
+        var response = browser.get(path(code, "report"));
+        assertThat(data(response).path("report").isNull()).isTrue();
+        assertThat(output.getAll().lines().filter(line -> line.contains("Saved report graph skipped")).toList())
+                .singleElement().asString().contains("WARN", "Saved report graph skipped: unsupported sheet requestId="
+                        + response.headers().firstValue("X-Request-Id").orElseThrow() + " month=" + ym() + " slot=" + slot);
+        assertThat(output.getAll()).doesNotContain("EmbedDetailV09");
     }
     @Test void databaseRejectsEmptyReportWithCheckViolation() {
         String code = codes.getFirst();

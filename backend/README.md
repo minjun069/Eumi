@@ -4,10 +4,10 @@ Java 21 · Spring Boot 4.1.2 · Gradle Wrapper 9.8.2를 사용한다. 공통 기
 
 ## 먼저 읽을 기록
 
+- [11월 11일 API-12 일부 표시 · 실제 DB/8080 검사 · 리뷰 후속 인계](docs/analysis/2026-11-11_report-partial.md): openapi 2.6.0, V20261111_01. 빈 칸·허용 밖 시트만 제외하고 null 키와 원래 칸 번호를 유지한다.
 - [11월 11일 A2 회원가입 · 실제 DB/Mailpit/8080 검사 · MR 인계](docs/signup/2026-11-11_signup.md): API-04~07, 코드·증명 HMAC, 실패 횟수 커밋, 가입 전 증명 확인과 트랜잭션 밖 PBKDF2. 병합 전 Claude Code 리뷰가 필요하다.
 - [11월 10일 A3 비밀번호 찾기 · 실제 DB/Mailpit/8080 검사 · MR 인계](docs/password/2026-11-10_temp-password.md): API-09, 24시간 임시 비밀번호, 전체 세션 폐기와 메일 실패 롤백. A3 세션 폐기 범위는 병합 전 Claude Code 리뷰 대상이다.
 - [11월 10일 AI-b 보고서 연결 · fake/HTTP 대역 검증 · MR 인계](docs/analysis/2026-11-10_report-integration.md): INT-04·05·08, API-11·12 새 칸, 호출자 권한과 실제 PostgreSQL/8080 검사. 실제 AI 생성은 검사하지 않았다.
-- 11/11: [API-12 일부 표시 (openapi 2.6.0, V20261111_01)](docs/analysis/2026-11-11_report-partial.md).
 - [11월 9일 AI-a 대화 패널 HTTP 연결 · 검증 · MR 인계](docs/ai1/2026-11-09_http-integration.md): API-03 context, INT-01 전용 본문/1회 재요청, INT-07, 내부 토큰 설정과 실제 AI/8080 검사 결과. 병합 전 Claude Code 리뷰가 필요하다.
 
 아래는 작성 당시의 작업 · 인계 기록이다. 현재 기준은 [docs/spec](../docs/spec/README.md)(테이블 정의서 · API 명세 · 기능명세), [docs/api](../docs/api/)(연동 계약), [docs/decisions](../docs/decisions/)(결정 기록)이며, 기록의 내용이 이와 다르면 기준 문서를 따른다.
