@@ -250,8 +250,9 @@ master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migra
 - **배포 조건:** `ai/Dockerfile`과 서버 코드 `ai/api.py`가 둘 다 저장소에 있을 때만 Jenkins가 빌드 · 배포한다. `ai/` 바로 아래 `.md`와 `ai/docs/`만 바뀌면 다시 빌드하지 않는다.
 - **배포 순서와 실패:** ai → backend → web 순서다. ai가 실패하면 이전 ai로 되돌리고 빌드를 노란색(UNSTABLE)으로 표시한 뒤 backend · web 배포는 계속한다.
 - **첫 배포 전 준비:** 서버 `.env.config`에 `EUMI_LLM_API_KEY`(AI 담당 전달)와 `EUMI_AI_TOKEN`(서버에서 `openssl rand -hex 32`)을 넣는다. 값이 없으면 `deploy.sh ai`가 멈춘다. `EUMI_AI_PASSWORD`는 이미 있다.
-- **내부 연동 토큰:** backend도 `EUMI_AI_TOKEN`(ai와 같은 값)과 `EUMI_PIPELINE_TOKEN`(서버에서 따로 만든 다른 값)을 받는다. fake인 동안은 없어도 backend가 뜨고, http 모드는 둘 다 있어야 뜬다.
-- **연결 방식:** backend는 `EUMI_AI_MODE: fake`인 동안 ai를 부르지 않는다. http로 바꾸는 조건(GMS 주소 · 모델, 시간 값 4개, 토큰 `:?`)은 compose의 backend 주석에 있다.
+- **내부 연동 토큰:** backend도 `EUMI_AI_TOKEN`(ai와 같은 값)과 `EUMI_PIPELINE_TOKEN`(서버에서 따로 만든 다른 값)을 받는다. compose가 둘 다 `:?`로 받아 값이 없으면 배포가 멈춘다 (http 모드는 둘 다 있어야 backend가 뜬다).
+- **연결 방식 (11/11부터 http):** backend가 ai를 부른다 (`EUMI_AI_MODE: http`, 시간 값 4개는 compose의 backend 주석). ai는 SSAFY GMS(`SETTINGS_BASE_URL`)의 `gpt-6-luna`(`SETTINGS_MODEL`)를 쓴다. 인사이트 보고서 생성(INT-05)은 INT-04가 들어올 때만 돌고, 지금 DAG는 INT-04를 부르지 않는다.
+- **fake로 되돌리기:** compose의 `EUMI_AI_MODE: http` 한 줄을 `fake`로 바꾸는 커밋을 master에 넣는다. compose 변경이라 앱 서비스 전체가 다시 배포된다. 서버 파일을 직접 고치지 않는다.
 - **실행 기록:** 컨테이너 메모리(`/app/outputs`, 512MB)에만 남고 ai를 다시 배포하면 지워진다.
 
 배포 뒤 확인 (서버, jenkins 계정):
@@ -260,12 +261,14 @@ master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migra
 cd /srv/eumi
 scripts/dc.sh --profile ai ps ai                     # ai: Up … (healthy)
 scripts/dc.sh --profile ai logs --tail=50 ai         # "Uvicorn running on http://0.0.0.0:8000", 오류 없음
+# backend 실행 방식: "http"
+scripts/dc.sh exec -T backend printenv EUMI_AI_MODE
 # backend → ai (내부망): 빈 본문이라 "400 Bad Request"가 나오면 연결된 것이다
 scripts/dc.sh exec -T backend wget -S -O /dev/null --header 'Content-Type: application/json' --post-data '{}' http://ai:8000/internal/agent/runs 2>&1 | grep 'HTTP/'
 # ai → DB (eumi_ai 계정)
 scripts/dc.sh --profile ai exec -T ai /app/.venv/bin/python -c "import os, psycopg; psycopg.connect(os.environ['SETTINGS_DATABASE_URL']).close(); print('db ok')"
 # ai → LLM API (바깥 연결): compose의 SETTINGS_BASE_URL(GMS 주소)로 요청한다. 키는 보내지 않는다.
-#   200 · 401 · 404가 나오면 나가는 길은 열려 있다 (연결 오류 · 시간 초과면 막힘). 주소가 아직 없으면 OpenAI 주소로 확인한다
+#   200 · 401 · 404가 나오면 나가는 길은 열려 있다 (연결 오류 · 시간 초과면 막힘)
 scripts/dc.sh --profile ai exec -T ai /app/.venv/bin/python -c "import os, httpx; u = os.environ.get('SETTINGS_BASE_URL', 'https://api.openai.com/v1').rstrip('/'); print(u, httpx.get(u + '/models', timeout=5).status_code)"
 ```
 
