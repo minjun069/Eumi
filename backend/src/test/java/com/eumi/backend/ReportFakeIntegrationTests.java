@@ -2,6 +2,7 @@ package com.eumi.backend;
 
 import java.net.URI;
 import java.net.http.*;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.*;
 import java.util.*;
@@ -11,9 +12,12 @@ import com.eumi.backend.support.ReportAiStub;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -112,11 +116,84 @@ class ReportFakeIntegrationTests extends AgentHttpSupport {
             assertThat(data(browser.get(path(dong, "report"))).path("report").isNull()).isTrue();
         }
     }
-    @Test void unsupportedSheetHidesOnlyReportAndWritesWarning(CapturedOutput output) throws Exception {
+    @Test void unsupportedSheetSkipsOnlyThatGraphAndWritesWarning(CapturedOutput output) throws Exception {
         String code = codes.getFirst(); save(code, "EmbedDetailV09");
-        assertThat(data(browser.get(path(code, "report"))).path("report").isNull()).isTrue();
+        var response = browser.get(path(code, "report"));
+        var report = data(response).path("report");
+        assertThat(report.propertyNames()).containsExactlyInAnyOrder("quickInsight", "graphs", "generatedAt");
+        assertThat(report.path("quickInsight").asText()).isEqualTo(QUICK);
+        assertThat(report.path("graphs")).isEqualTo(json.valueToTree(List.of(
+                Map.of("sheet", "EmbedDetailV01", "description", "Synthetic graph 2"),
+                Map.of("sheet", "EmbedDetailV08", "description", "Synthetic graph 3"))));
         assertThat(data(browser.get(path(code, "insight"))).path("insight").path("summary")).isEqualTo(json.valueToTree(List.of(QUICK)));
-        assertThat(output.getOut()).contains("Saved report hidden: unsupported sheet requestId=").doesNotContain(QUICK);
+        assertThat(output.getAll().lines().filter(line -> line.contains("Saved report graph skipped")).toList())
+                .singleElement().asString().contains("WARN", "Saved report graph skipped: unsupported sheet requestId="
+                        + response.headers().firstValue("X-Request-Id").orElseThrow() + " month=" + ym() + " slot=1");
+        assertThat(output.getAll()).doesNotContain(QUICK, "Synthetic graph 1", "Synthetic graph 2", "Synthetic graph 3",
+                "EmbedDetailV09", "Saved report hidden");
+    }
+    @Test void partiallySavedSlotsKeepOrderAndNullDescriptionKey(CapturedOutput output) throws Exception {
+        String code = codes.getFirst(); savePartial(code, QUICK);
+        var report = data(browser.get(path(code, "report"))).path("report");
+        assertThat(report.propertyNames()).containsExactlyInAnyOrder("quickInsight", "graphs", "generatedAt");
+        assertThat(report.path("quickInsight").asText()).isEqualTo(QUICK);
+        var graphs = report.path("graphs");
+        assertThat(graphs.size()).isEqualTo(2);
+        assertThat(graphs.get(0).path("sheet").asText()).isEqualTo("EmbedDetailV03");
+        assertThat(graphs.get(0).path("description").asText()).isEqualTo("Synthetic graph 1");
+        assertThat(graphs.get(1).path("sheet").asText()).isEqualTo("EmbedDetailV08");
+        assertThat(graphs.get(1).propertyNames()).containsExactlyInAnyOrder("sheet", "description");
+        assertThat(graphs.get(1).path("description").isNull()).isTrue();
+        assertThat(Instant.parse(report.path("generatedAt").asText())).isEqualTo(GENERATED.toInstant());
+        assertThat(output.getAll()).doesNotContain("Saved report graph skipped");
+    }
+    @Test void nullQuickInsightStaysNullInInsightAndReportResponses() throws Exception {
+        String code = codes.getFirst(); savePartial(code, null);
+        var insight = data(browser.get(path(code, "insight")));
+        assertThat(insight.has("insight")).isTrue();
+        assertThat(insight.path("insight").isNull()).isTrue();
+        assertThat(insight.path("riskGrade").asInt()).isEqualTo(4);
+        var report = data(browser.get(path(code, "report"))).path("report");
+        assertThat(report.propertyNames()).containsExactlyInAnyOrder("quickInsight", "graphs", "generatedAt");
+        assertThat(report.path("quickInsight").isNull()).isTrue();
+        assertThat(report.path("graphs").size()).isEqualTo(2);
+    }
+    @Test void quickInsightOnlyReportHasEmptyGraphsThroughHttp() throws Exception {
+        String code = codes.getFirst();
+        ai.update("INSERT INTO public.region_insight_report(period_start,adm_cd10,quick_insight,result_updated_at,generated_at) "
+                + "VALUES (?,?,?,?,?)", month, code, QUICK, ownedRows.get(code), GENERATED);
+        var report = data(browser.get(path(code, "report"))).path("report");
+        assertThat(report.propertyNames()).containsExactlyInAnyOrder("quickInsight", "graphs", "generatedAt");
+        assertThat(report.path("quickInsight").asText()).isEqualTo(QUICK);
+        assertThat(report.path("graphs")).isEqualTo(json.valueToTree(List.of()));
+    }
+    @ParameterizedTest @ValueSource(ints = {2, 3})
+    void onlyUnsupportedSheetWithoutQuickInsightReturnsNullReport(int slot, CapturedOutput output) throws Exception {
+        String code = codes.getFirst();
+        // 앞 칸이 비어 있어도 경고에는 필터링 전 원래 칸 번호를 남긴다.
+        ai.update("INSERT INTO public.region_insight_report(period_start,adm_cd10,graph_2,graph_3,result_updated_at,generated_at) "
+                + "VALUES (?,?,?,?,?,?)", month, code, slot == 2 ? "EmbedDetailV09" : null,
+                slot == 3 ? "EmbedDetailV09" : null, ownedRows.get(code), GENERATED);
+        var response = browser.get(path(code, "report"));
+        assertThat(data(response).path("report").isNull()).isTrue();
+        assertThat(output.getAll().lines().filter(line -> line.contains("Saved report graph skipped")).toList())
+                .singleElement().asString().contains("WARN", "Saved report graph skipped: unsupported sheet requestId="
+                        + response.headers().firstValue("X-Request-Id").orElseThrow() + " month=" + ym() + " slot=" + slot);
+        assertThat(output.getAll()).doesNotContain("EmbedDetailV09");
+    }
+    @Test void databaseRejectsEmptyReportWithCheckViolation() {
+        String code = codes.getFirst();
+        assertThatThrownBy(() -> ai.update("INSERT INTO public.region_insight_report(period_start,adm_cd10,result_updated_at,generated_at) "
+                + "VALUES (?,?,?,?)", month, code, ownedRows.get(code), GENERATED))
+                .isInstanceOfSatisfying(DataIntegrityViolationException.class, ex -> assertThat(ex.getMostSpecificCause())
+                        .isInstanceOfSatisfying(SQLException.class, sql -> assertThat(sql.getSQLState()).isEqualTo("23514")));
+    }
+    @Test void databaseRejectsDescriptionWithoutGraphWithCheckViolation() {
+        String code = codes.getFirst();
+        assertThatThrownBy(() -> ai.update("INSERT INTO public.region_insight_report(period_start,adm_cd10,quick_insight,desc_2,result_updated_at,generated_at) "
+                + "VALUES (?,?,?,?,?,?)", month, code, QUICK, "Synthetic orphan description", ownedRows.get(code), GENERATED))
+                .isInstanceOfSatisfying(DataIntegrityViolationException.class, ex -> assertThat(ex.getMostSpecificCause())
+                        .isInstanceOfSatisfying(SQLException.class, sql -> assertThat(sql.getSQLState()).isEqualTo("23514")));
     }
     @Test void authRejectionsAndMissingResultsWorkWithRealDatabaseAndHttp() throws Exception {
         String path = path(codes.getFirst(), "report");
@@ -136,6 +213,11 @@ class ReportFakeIntegrationTests extends AgentHttpSupport {
         ai.update("INSERT INTO public.region_insight_report(period_start,adm_cd10,quick_insight,graph_1,desc_1,graph_2,desc_2,graph_3,desc_3,result_updated_at,generated_at) "
                 + "VALUES (?,?,?,?,?,?,?,?,?,?,?)", month, code, QUICK, firstSheet, "Synthetic graph 1", "EmbedDetailV01", "Synthetic graph 2",
                 "EmbedDetailV08", "Synthetic graph 3", ownedRows.get(code), GENERATED);
+    }
+    private void savePartial(String code, String quick) {
+        ai.update("INSERT INTO public.region_insight_report(period_start,adm_cd10,quick_insight,graph_1,desc_1,graph_2,desc_2,graph_3,desc_3,result_updated_at,generated_at) "
+                + "VALUES (?,?,?,?,?,?,?,?,?,?,?)", month, code, quick, "EmbedDetailV03", "Synthetic graph 1", null, null,
+                "EmbedDetailV08", null, ownedRows.get(code), GENERATED);
     }
     private long reportCount() { return jdbc.queryForObject("SELECT count(*) FROM public.region_insight_report WHERE period_start=?", Long.class, month); }
     private String ym() { return month.toString().substring(0, 7); }

@@ -1,6 +1,6 @@
 # 이음이 테이블 정의서
 
-- 판: 2.4.1 (2026-11-10, 인사이트 보고서 2단계 V20261110_02 반영 · analysis.pipeline_check(V20261109_01) · analysis.stream_progress(V20261110_01) 추가)
+- 판: 2.4.2 (2026-11-11, 인사이트 보고서 일부 저장 V20261111_01 반영) · 2.4.1 (2026-11-10, 인사이트 보고서 2단계 V20261110_02 반영 · analysis.pipeline_check(V20261109_01) · analysis.stream_progress(V20261110_01) 추가)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_테이블_정의서.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - DB의 실제 구조는 `db/migration`의 V 파일이 기준이다. V 파일이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -11,7 +11,7 @@
 
 - 제목: 이음이 테이블 목록
 - 요약: PostgreSQL 17  26개 테이블  226개 컬럼  26개 FK
-- 출처: eumi/db/migration/V1~V6·V20261102_01~02·V20261106_01·V20261109_01·V20261110_01~02 원문 사본
+- 출처: eumi/db/migration/V1~V6·V20261102_01~02·V20261106_01·V20261109_01·V20261110_01~02·V20261111_01 원문 사본
 
 ### public
 
@@ -30,7 +30,7 @@
 | public.ai_conversation | AI 대화 | 5 | conversation_id | AI 대화 | V4__ai_conversation.sql<br>V20261102_02__ai_message.sql |
 | public.ai_message | AI 대화 메시지 | 9 | message_id | AI 대화 메시지 (질문·진행 단계·끝 행을 한 행씩) | V20261102_02__ai_message.sql |
 | public.region_result | 읍면동 월별 결과 (데이터 분석 정의, 파이프라인 적재) | 8 | period_start, adm_cd10 | 읍면동 월별 결과 (데이터 분석 정의, 파이프라인 적재) | V5__dashboard.sql |
-| public.region_insight_report | 읍면동 인사이트 보고서 (AI가 만들어 저장, 동·월마다 하나) | 11 | period_start, adm_cd10 | 퀵 인사이트와 그래프 3개 · 그래프별 설명 (AI가 eumi_ai 계정으로 직접 저장, 백엔드는 조회만) | V5__dashboard.sql<br>V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
+| public.region_insight_report | 읍면동 인사이트 보고서 (AI가 만들어 저장, 동·월마다 하나) | 11 | period_start, adm_cd10 | 퀵 인사이트와 그래프 최대 3개 · 그래프별 설명, AI 검토를 통과한 칸만 (AI가 eumi_ai 계정으로 직접 저장, 백엔드는 조회만) | V5__dashboard.sql<br>V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
 
 ### analysis
 
@@ -53,7 +53,7 @@
 
 - 제목: 테이블 컬럼 정의
 - 요약: PK의 NOT NULL 및 IDENTITY를 반영  분석 측정값의 NULL 허용 구분
-- 출처: eumi/db/migration/V1~V6·V20261102_01~02·V20261106_01·V20261109_01·V20261110_01~02 및 COMMENT · ai_message.content 설명은 질문 마스킹 범위(docs/api/ai-agent-panel.md 6절, 11/3) 반영 · region_insight_report는 11/6 변경의 최종 구조 (V20261110_01 2단계 적용 후)
+- 출처: eumi/db/migration/V1~V6·V20261102_01~02·V20261106_01·V20261109_01·V20261110_01~02·V20261111_01 및 COMMENT · ai_message.content 설명은 질문 마스킹 범위(docs/api/ai-agent-panel.md 6절, 11/3) 반영 · region_insight_report는 11/6 변경의 최종 구조 (V20261110_02 2단계 · V20261111_01 일부 저장 적용 후)
 
 ### public.organization
 
@@ -233,13 +233,13 @@
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | period_start | 기준월 | DATE | 필수 | PK | public.region_result |  | DATE NOT NULL | V5__dashboard.sql |
 | 2 | adm_cd10 | 행정동코드 | VARCHAR(10) | 필수 | PK | public.region_result |  | VARCHAR(10) NOT NULL | V5__dashboard.sql |
-| 3 | quick_insight | 퀵 인사이트 (읍면동 화면 위쪽 위험 설명 2~3줄) | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
-| 4 | graph_1 | 그래프 1 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01) | VARCHAR(100) | 필수 |  |  |  | VARCHAR(100) NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
-| 5 | desc_1 | 그래프 1 설명 | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
-| 6 | graph_2 | 그래프 2 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01) | VARCHAR(100) | 필수 |  |  |  | VARCHAR(100) NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
-| 7 | desc_2 | 그래프 2 설명 | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
-| 8 | graph_3 | 그래프 3 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01) | VARCHAR(100) | 필수 |  |  |  | VARCHAR(100) NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
-| 9 | desc_3 | 그래프 3 설명 | TEXT | 필수 |  |  |  | TEXT NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
+| 3 | quick_insight | 퀵 인사이트 (읍면동 화면 위쪽 위험 설명 2~3줄). AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 4 | graph_1 | 그래프 1 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01). 만들지 못하면 NULL | VARCHAR(100) | 선택 |  |  |  | VARCHAR(100) | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 5 | desc_1 | 그래프 1 설명. 그래프 1이 있을 때만 쓰고, AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 6 | graph_2 | 그래프 2 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01). 만들지 못하면 NULL | VARCHAR(100) | 선택 |  |  |  | VARCHAR(100) | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 7 | desc_2 | 그래프 2 설명. 그래프 2가 있을 때만 쓰고, AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 8 | graph_3 | 그래프 3 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01). 만들지 못하면 NULL | VARCHAR(100) | 선택 |  |  |  | VARCHAR(100) | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 9 | desc_3 | 그래프 3 설명. 그래프 3이 있을 때만 쓰고, AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
 | 10 | result_updated_at | 기준 결과 수정 시각 (보고서를 만들 때 읽은 region_result.updated_at, 다르면 옛 보고서로 보고 조회·저장 제외) | TIMESTAMP | 필수 |  |  |  | TIMESTAMP NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
 | 11 | generated_at | AI 생성 일시 | TIMESTAMPTZ | 필수 |  |  |  | TIMESTAMPTZ NOT NULL | V5__dashboard.sql |
 
@@ -449,8 +449,8 @@
 ## 제약조건
 
 - 제목: 기본키 고유키 검사 제약
-- 요약: 91개 테이블 제약  FOREIGN KEY 포함  명시적 INDEX는 인덱스 시트
-- 출처: eumi/db/migration/V1~V6·V20261102_02·V20261106_01·V20261109_01·V20261110_01~02
+- 요약: 93개 테이블 제약  FOREIGN KEY 포함  명시적 INDEX는 인덱스 시트
+- 출처: eumi/db/migration/V1~V6·V20261102_02·V20261106_01·V20261109_01·V20261110_01~02·V20261111_01
 
 ### public.organization
 
@@ -582,6 +582,8 @@
 | CHECK | ck_region_insight_report_text | CHECK (quick_insight ~ '\S' AND desc_1 ~ '\S' AND desc_2 ~ '\S' AND desc_3 ~ '\S') | V20261106_01__insight_report_slots.sql |
 | CHECK | ck_region_insight_report_sheets | CHECK (graph_1 ~ '^[A-Za-z][A-Za-z0-9_]*$' AND graph_2 ~ '^[A-Za-z][A-Za-z0-9_]*$' AND graph_3 ~ '^[A-Za-z][A-Za-z0-9_]*$') | V20261106_01__insight_report_slots.sql |
 | CHECK | ck_region_insight_report_graphs | CHECK (graph_1 <> graph_2 AND graph_1 <> graph_3 AND graph_2 <> graph_3) | V20261106_01__insight_report_slots.sql |
+| CHECK | ck_region_insight_report_filled | CHECK (num_nonnulls(quick_insight, graph_1, graph_2, graph_3) >= 1) | V20261111_01__insight_report_partial.sql |
+| CHECK | ck_region_insight_report_desc | CHECK ((desc_1 IS NULL OR graph_1 IS NOT NULL) AND (desc_2 IS NULL OR graph_2 IS NOT NULL) AND (desc_3 IS NULL OR graph_3 IS NOT NULL)) | V20261111_01__insight_report_partial.sql |
 
 ### analysis.dim_grid100
 
@@ -907,7 +909,7 @@
 ## SQL 원문
 
 - 제목: PostgreSQL 최신 스키마 원문
-- 요약: V1~V6·V20261102_01~02·V20261106_01·V20261109_01·V20261110_01~02 연결 스냅샷  적용은 원본 마이그레이션과 Flyway 컨테이너 사용
+- 요약: V1~V6·V20261102_01~02·V20261106_01·V20261109_01·V20261110_01~02·V20261111_01 연결 스냅샷  적용은 원본 마이그레이션과 Flyway 컨테이너 사용
 - 출처: db/migration의 V 파일 + 이 절의 sql 블록
 
 엑셀의 이 시트는 아래 sql 블록을 줄마다 옮겨 만든다. `-- @MIGRATIONS` 줄 자리에는 `db/migration`의 V 파일을 버전 순서로 넣는다(파일마다 `-- SOURCE 파일명`). V 파일 내용은 여기에 다시 적지 않는다.

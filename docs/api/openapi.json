@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "이음이 API 명세서",
-    "version": "2.5.1",
-    "description": "2026-11-11 2.5.1: A2(API-04~07) 구현을 반영했다. API-04~07 구현 상태, API-04 keyword 설명(trim 후 1~200자, 비었거나 없으면 400)과 검색 방식, API-05 재발송 제한(429) 설명, API-20 연결 DB 객체(case_record)를 구현에 맞췄다. 요청 · 응답 형식은 그대로다.\n2026-11-10 2.5.0: 사례자 수정 경합(C4)을 반영했다. API-20 CaseDetail에 updatedAt을 더하고, API-23 요청을 CaseUpdateInput(CaseInput + updatedAt)으로 바꿨다. updatedAt이 DB 값과 다르면 409 STATE_CONFLICT다. 등록(API-22)의 CaseInput은 그대로다.\n2026-11-10 2.4.1: A3(API-09)와 M3(API-33 · 34) 구현을 반영했다. 구현 상태와 API-33 · 34 설명 · 연결 DB 객체를 구현에 맞췄다. 요청 · 응답 형식은 그대로다. 2026-11-10 2.4.0: 인사이트 보고서 연결(AI-b)을 반영했다. API-12의 report를 {quickInsight, graphs: [{sheet, description}] 3개, generatedAt}로 바꾸고 headline · sections와 보고서 블록 · 그래프 스키마를 지웠다. API-11은 응답 모양 그대로이며 insight.summary에 최신 보고서의 quick_insight 한 개를 담는다. INT-05 본문을 {requestId, month, dongCodes}, 응답을 202 본문 없음으로 바꾸고(꼬리표는 AI가 직접 읽음), INT-08(AI → BE 보고서 생성 완료 알림)을 더했다. 상세 계약은 insight-report.md. 화면 API 응답 변경은 BE · 2단계 V 파일 · FE와 같은 배포로 나간다. 2026-11-09 2.3.4: AI 대화 패널 연결(AI-a)을 반영했다. API-03 요청에 선택 context(ScreenContext: 화면에서 보고 있는 동 · 월)를 더했다. 응답 {conversationId, questionId}는 그대로다. 내부 연동 목록 키를 x-internal-ai-api → x-internal-api로 바꾸고, INT-01 본문을 {conversationId, messageId, context?}로 바꿨다. INT-03(실행 상태 조회)을 지우고 같은 messageId 재요청으로 복구한다. INT-07(AI → BE 행 저장 알림)을 더했다. 상세 계약은 ai-agent-panel.md. 2026-11-09 2.3.3: PDF 양식 추출(API-18)을 범위에서 빼 경로와 전용 스키마(DocumentExtract · DocumentExtractionResult)를 지웠다. 나머지 화면 API 형식은 그대로다. 2026-11-09 2.3.2: 인사이트 보고서 저장 주체를 AI로 바꿨다(11/6 결정, 권한은 afterMigrate.sql). AI → BE 보고서 저장 INT-06과 오류 코드 RESULT_VERSION_MISMATCH를 없앴고, AI가 region_insight_report에 직접 저장한다(저장 문장은 insight-report.md 4절). 화면 API 형식은 그대로다. 2026-11-06 2.3.1: 화면 API 형식은 그대로 두고, 내부 연동에 인사이트 보고서 INT-04~06을 추가했다(x-internal-ai-api, 상세 계약은 insight-report.md). x-implementation-status를 develop 구현 상태로 고쳤다(구현 38 · 예정 8). API-11 · 12 응답 변경은 2.4.0에서 BE · FE와 같은 배포로 반영한다. 2026-11-02 AI 패널 A 방식 반영. 업무 HTTP 40개, CSRF·health 2개, AI 질문·메시지 조회·중단 3개 총 45개. 대화 패널의 AI 결과는 FastAPI가 ai_message에 직접 저장하고 화면은 조회 API로 받는다(SSE 없음). 2.2.0과 달라진 곳: API-03·03-S1·03-S2 경로와 형식, API-37 응답(turns → messages), API-36·38 설명. 내부 연동 API는 x-internal-ai-api에 적었다. 기준 DB: V1~V6, V20261102_01~02, V20261106_01, V20261109_01, V20261110_01~02(02: 인사이트 보고서 2단계)."
+    "version": "2.6.0",
+    "description": "2026-11-11 2.6.0: 인사이트 보고서 일부 저장(V20261111_01)을 반영했다. AI는 검토를 통과한 칸만 저장하고 나머지는 NULL로 둔다(퀵 인사이트와 그래프 중 하나는 있어야 함). API-12 report.quickInsight와 graphs[].description을 null 가능으로, graphs를 찬 칸만 칸 순서대로 0~3개로 바꿨다. 허용 목록 밖 시트는 그 그래프만 빼고, 보여 줄 퀵 인사이트와 그래프가 모두 없으면 report=null이다. INT-08 savedCount는 일부만 찬 보고서도 센다. API-11은 그대로다. BE · FE는 이어지는 MR에서 반영한다(그 전에는 일부만 찬 보고서가 '준비 중'으로 보인다).\n2026-11-11 2.5.1: A2(API-04~07) 구현을 반영했다. API-04~07 구현 상태, API-04 keyword 설명(trim 후 1~200자, 비었거나 없으면 400)과 검색 방식, API-05 재발송 제한(429) 설명, API-20 연결 DB 객체(case_record)를 구현에 맞췄다. 요청 · 응답 형식은 그대로다.\n2026-11-10 2.5.0: 사례자 수정 경합(C4)을 반영했다. API-20 CaseDetail에 updatedAt을 더하고, API-23 요청을 CaseUpdateInput(CaseInput + updatedAt)으로 바꿨다. updatedAt이 DB 값과 다르면 409 STATE_CONFLICT다. 등록(API-22)의 CaseInput은 그대로다.\n2026-11-10 2.4.1: A3(API-09)와 M3(API-33 · 34) 구현을 반영했다. 구현 상태와 API-33 · 34 설명 · 연결 DB 객체를 구현에 맞췄다. 요청 · 응답 형식은 그대로다. 2026-11-10 2.4.0: 인사이트 보고서 연결(AI-b)을 반영했다. API-12의 report를 {quickInsight, graphs: [{sheet, description}] 3개, generatedAt}로 바꾸고 headline · sections와 보고서 블록 · 그래프 스키마를 지웠다. API-11은 응답 모양 그대로이며 insight.summary에 최신 보고서의 quick_insight 한 개를 담는다. INT-05 본문을 {requestId, month, dongCodes}, 응답을 202 본문 없음으로 바꾸고(꼬리표는 AI가 직접 읽음), INT-08(AI → BE 보고서 생성 완료 알림)을 더했다. 상세 계약은 insight-report.md. 화면 API 응답 변경은 BE · 2단계 V 파일 · FE와 같은 배포로 나간다. 2026-11-09 2.3.4: AI 대화 패널 연결(AI-a)을 반영했다. API-03 요청에 선택 context(ScreenContext: 화면에서 보고 있는 동 · 월)를 더했다. 응답 {conversationId, questionId}는 그대로다. 내부 연동 목록 키를 x-internal-ai-api → x-internal-api로 바꾸고, INT-01 본문을 {conversationId, messageId, context?}로 바꿨다. INT-03(실행 상태 조회)을 지우고 같은 messageId 재요청으로 복구한다. INT-07(AI → BE 행 저장 알림)을 더했다. 상세 계약은 ai-agent-panel.md. 2026-11-09 2.3.3: PDF 양식 추출(API-18)을 범위에서 빼 경로와 전용 스키마(DocumentExtract · DocumentExtractionResult)를 지웠다. 나머지 화면 API 형식은 그대로다. 2026-11-09 2.3.2: 인사이트 보고서 저장 주체를 AI로 바꿨다(11/6 결정, 권한은 afterMigrate.sql). AI → BE 보고서 저장 INT-06과 오류 코드 RESULT_VERSION_MISMATCH를 없앴고, AI가 region_insight_report에 직접 저장한다(저장 문장은 insight-report.md 4절). 화면 API 형식은 그대로다. 2026-11-06 2.3.1: 화면 API 형식은 그대로 두고, 내부 연동에 인사이트 보고서 INT-04~06을 추가했다(x-internal-ai-api, 상세 계약은 insight-report.md). x-implementation-status를 develop 구현 상태로 고쳤다(구현 38 · 예정 8). API-11 · 12 응답 변경은 2.4.0에서 BE · FE와 같은 배포로 반영한다. 2026-11-02 AI 패널 A 방식 반영. 업무 HTTP 40개, CSRF·health 2개, AI 질문·메시지 조회·중단 3개 총 45개. 대화 패널의 AI 결과는 FastAPI가 ai_message에 직접 저장하고 화면은 조회 API로 받는다(SSE 없음). 2.2.0과 달라진 곳: API-03·03-S1·03-S2 경로와 형식, API-37 응답(turns → messages), API-36·38 설명. 내부 연동 API는 x-internal-ai-api에 적었다. 기준 DB: V1~V6, V20261102_01~02, V20261106_01, V20261109_01, V20261110_01~02(02: 인사이트 보고서 2단계)."
   },
   "servers": [
     {
@@ -2195,7 +2195,7 @@
           "분석"
         ],
         "summary": "인사이트 보고서 조회",
-        "description": "region_insight_report의 quick_insight · graph_1~3 · desc_1~3 · generated_at을 report로 매핑한다(graphs는 graph_1~3 순서). 최신 보고서(result_updated_at = 결과 행 updated_at)만 보여 주고, 없거나 옛 보고서면 report=null. 그래프 시트가 허용 목록(EmbedDetailV01~V08) 밖인 보고서도 report=null로 보고 BE가 경고 로그를 남긴다. 결과 행이 없으면 404. 조회 요청이 AI 생성을 실행하지 않는다.\n\n공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.",
+        "description": "region_insight_report의 quick_insight · graph_1~3 · desc_1~3 · generated_at을 report로 매핑한다. 최신 보고서(result_updated_at = 결과 행 updated_at)만 보여 주고, 없거나 옛 보고서면 report=null. AI는 검토를 통과한 칸만 저장하므로 칸이 비어 있을 수 있다: quickInsight는 없으면 null, graphs는 graph_n이 있는 칸만 칸 순서대로 0~3개(빈 칸은 건너뜀), description은 없으면 null. 그래프 시트가 허용 목록(EmbedDetailV01~V08) 밖이면 그 그래프만 빼고 BE가 경고 로그를 남긴다. 빼고 나서 퀵 인사이트와 그래프가 모두 없으면 report=null. 결과 행이 없으면 404. 조회 요청이 AI 생성을 실행하지 않는다.\n\n일부만 찬 예: {\"report\": {\"quickInsight\": null, \"graphs\": [{\"sheet\": \"EmbedDetailV01\", \"description\": \"예시 설명\"}, {\"sheet\": \"EmbedDetailV03\", \"description\": null}], \"generatedAt\": \"2026-10-30T10:00:00+09:00\"}}\n\n공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.",
         "security": [
           {
             "SessionCookie": []
@@ -11975,21 +11975,22 @@
         "properties": {
           "report": {
             "type": "object",
-            "description": "최신 보고서(result_updated_at = 결과 행 updated_at)가 없거나 옛 보고서면 null. 결과 행 자체가 없으면 404. 생성 시각은 report.generatedAt에 generated_at을 매핑한다.",
+            "description": "최신 보고서(result_updated_at = 결과 행 updated_at)가 없거나 옛 보고서면 null. 보여 줄 퀵 인사이트와 그래프가 모두 없을 때(허용 목록 밖 시트만 있음)도 null. 결과 행 자체가 없으면 404. 생성 시각은 report.generatedAt에 generated_at을 매핑한다.",
             "properties": {
               "quickInsight": {
                 "type": "string",
-                "description": "퀵 인사이트 (quick_insight). 일반 글(HTML 아님)이며 줄바꿈을 포함할 수 있다",
+                "description": "퀵 인사이트 (quick_insight). 일반 글(HTML 아님)이며 줄바꿈을 포함할 수 있다. AI 검토를 통과하지 못해 저장되지 않았으면 null",
                 "minLength": 1,
-                "maxLength": 500
+                "maxLength": 500,
+                "nullable": true
               },
               "graphs": {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/InsightReportGraph"
                 },
-                "description": "그래프 3개. 순서 = 화면 순서(graph_1~3), 시트는 서로 다르다",
-                "minItems": 3,
+                "description": "그래프. 찬 칸(graph_n이 있는 칸)만 칸 순서대로(graph_1~3, 빈 칸은 건너뜀) 0~3개. 순서 = 화면 순서, 시트는 서로 다르다. 허용 목록(EmbedDetailV01~V08) 밖 시트는 빼고 BE가 경고 로그를 남긴다",
+                "minItems": 0,
                 "maxItems": 3
               },
               "generatedAt": {
@@ -12015,7 +12016,7 @@
       },
       "InsightReportGraph": {
         "type": "object",
-        "description": "보고서 그래프 한 칸 (graph_n · desc_n)",
+        "description": "보고서 그래프 한 칸 (graph_n · desc_n). 그래프가 있는 칸만 온다",
         "properties": {
           "sheet": {
             "type": "string",
@@ -12033,9 +12034,10 @@
           },
           "description": {
             "type": "string",
-            "description": "그 그래프의 비교와 근거 설명 (desc_n). 일반 글(HTML 아님)이며 줄바꿈을 포함할 수 있다",
+            "description": "그 그래프의 비교와 근거 설명 (desc_n). 일반 글(HTML 아님)이며 줄바꿈을 포함할 수 있다. AI 검토를 통과하지 못해 저장되지 않았으면 null (화면은 '설명 준비 중')",
             "minLength": 1,
-            "maxLength": 1000
+            "maxLength": 1000,
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -14858,7 +14860,7 @@
           "dongCodes": "string[] 10자리 (필수, 그 달 결과가 있는 모든 동, 1개 이상, 중복 없음)"
         },
         "response": "202 본문 없음. 접수만 하고 뒤에서 동별로 생성. 400 본문 오류(모르는 필드 · 형식 · 중복 동)",
-        "note": "AI는 동마다 그 동 결과 행의 updated_at(꼬리표)을 먼저 읽고, eumi_ai 권한으로 분석 데이터를 읽어 보고서를 만든 뒤 region_insight_report에 직접 저장한다(결과 행 updated_at = 읽어 둔 꼬리표일 때만 반영, 같은 동 · 월은 덮어씀, 0행이면 버림. insight-report.md 4절). 생성 중 오류가 난 동은 요청 끝에 한 번 더 만든다. 모든 동을 처리한 뒤 INT-08을 한 번 보낸다. BE는 다시 보내지 않는다(실패하면 INT-04가 503으로 끝나고 파이프라인이 다시 보냄)"
+        "note": "AI는 동마다 그 동 결과 행의 updated_at(꼬리표)을 먼저 읽고, eumi_ai 권한으로 분석 데이터를 읽어 보고서를 만든 뒤 region_insight_report에 직접 저장한다(검토를 통과한 칸만 저장하고 나머지는 NULL, 저장할 칸이 없으면 실패한 동. 결과 행 updated_at = 읽어 둔 꼬리표일 때만 반영, 같은 동 · 월은 덮어씀, 0행이면 버림. insight-report.md 4절). 생성 중 오류가 난 동은 요청 끝에 한 번 더 만든다. 모든 동을 처리한 뒤 INT-08을 한 번 보낸다. BE는 다시 보내지 않는다(실패하면 INT-04가 503으로 끝나고 파이프라인이 다시 보냄)"
       },
       {
         "id": "INT-07",
@@ -14889,8 +14891,8 @@
         "body": {
           "requestId": "string (INT-05에서 받은 값 그대로)",
           "month": "YYYY-MM",
-          "savedCount": "int 0 이상 (저장 문장이 1행을 반영한 동 수)",
-          "failedDongCodes": "string[] 10자리 (저장하지 못한 동: 생성 실패 · 저장 0행 · 제약 위반 · 재시도 소진. 없으면 빈 배열)"
+          "savedCount": "int 0 이상 (저장 문장이 1행을 반영한 동 수. 일부 칸만 저장한 보고서도 센다)",
+          "failedDongCodes": "string[] 10자리 (저장하지 못한 동: 생성 실패 · 저장할 칸 없음 · 저장 0행 · 제약 위반 · 재시도 소진. 없으면 빈 배열)"
         },
         "response": "204 본문 없음",
         "errors": [
