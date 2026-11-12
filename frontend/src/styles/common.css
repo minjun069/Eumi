@@ -232,7 +232,7 @@
   font-size: 14px;
 }
 
-/* 확인 창: 1440×1024 화면 안에서만 덮는다 */
+/* 확인 창: 서비스 화면(.app-frame) 안에서만 덮는다 */
 
 .dialog-backdrop {
   position: absolute;

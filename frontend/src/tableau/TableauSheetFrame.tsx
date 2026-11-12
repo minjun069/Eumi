@@ -17,8 +17,11 @@ import type {
  * - 틀이 화면에 보일 때 처음 띄운다 (닫힌 패널, 스크롤 밖의 틀은 띄우지 않는다)
  * - 매개변수는 처음 띄울 때 넘기고, FirstInteractive 뒤 매개변수 → 대상 시트 필터 순서로 맞춘 다음 다시 읽어 확인한다.
  *   p_detail_adm은 표시값('강남구 신사동')이나 코드로 오고 다시 읽은 원값은 코드라서 표시값 · 별칭으로도 비교한다
- * - 대시보드는 크기가 고정이라 FirstVizSizeKnown의 크기로 띄우고 틀 폭에 맞춰 줄여 보인다
- * - 보일 높이(visibleHeight)를 주면 시트의 위쪽 그만큼만 보이고 아래(남는 칸 · 도구 모음)는 잘라 낸다
+ * - 대시보드는 크기가 고정이라 FirstVizSizeKnown의 크기로 시트 전체를 띄우고, 틀이 더 좁으면 틀 폭에 맞춰 줄여 보인다
+ * - desktopLayout이면 게시본의 데스크톱 배치(설계 크기)로 띄운다. 처음 틀이 500px보다 낮으면 Tableau가 자동 휴대폰 배치
+ *   (높이 700에 그래프를 위에 쌓은 배치)를 골라 아래가 비어 보인다 (11/12 확인: V01 · V04 · V05 · V06)
+ * - hideToolbar면 Tableau 도구 모음(chromeHeight)을 위에 두고 그만큼 잘라 낸다. 시트 내용은 자르지 않는다.
+ *   아래에 두고 자르면 맨 아래 마크의 툴팁이 도구 모음 자리까지 내려와 잘린다 (Tableau는 iframe 안에서만 툴팁 자리를 잡는다)
  * - 불러오지 못하거나, 값이 다르게 들어가거나, 제한 시간 안에 끝나지 않으면 "그래프를 불러오지 못했습니다"와 '다시 시도'
  */
 
@@ -30,6 +33,8 @@ const INITIAL_SIZE: Size = { width: 640, height: 480 }
 const ERROR_HEIGHT = 120
 
 type Size = { width: number; height: number }
+/** 띄울 크기(도구 모음 포함)와 그중 도구 모음 높이 */
+type FrameSize = Size & { chrome: number }
 type VizSizeDetail = {
   vizSize?: { chromeHeight?: number; sheetSize?: { behavior?: string; minSize?: Size; maxSize?: Size } }
 }
@@ -51,12 +56,13 @@ export const TABLEAU_OPEN_WIDTH = 720
  * 띄울 크기. 고정 · 상한이 있으면 그 크기, 폭 상한이 없으면 펼칠 폭(최소 폭이 더 크면 최소 폭),
  * 높이 상한도 없으면 최소 높이나 기본 높이. 도구 모음 높이(chromeHeight)를 더한다
  */
-function vizFrameSize(detail: VizSizeDetail | undefined, openWidth: number, fallbackHeight: number): Size | null {
+function vizFrameSize(detail: VizSizeDetail | undefined, openWidth: number, fallbackHeight: number): FrameSize | null {
   const sheet = detail?.vizSize?.sheetSize
   if (!sheet) return null
   const width = bounded(sheet.maxSize?.width) ?? Math.max(bounded(sheet.minSize?.width) ?? 0, openWidth)
   const height = bounded(sheet.maxSize?.height) ?? bounded(sheet.minSize?.height) ?? fallbackHeight
-  return { width, height: height + (detail?.vizSize?.chromeHeight ?? 0) }
+  const chrome = detail?.vizSize?.chromeHeight ?? 0
+  return { width, height: height + chrome, chrome }
 }
 
 /** 지금 값이 원하는 값인지: 원값, 표시값, 별칭 중 하나가 같으면 같다. 날짜는 앞 10자(YYYY-MM-DD)로 비교한다 */
@@ -158,12 +164,10 @@ export type TableauSheetFrameProps = {
   openWidth?: number
   /** 크기를 알기 전 자리 (도구 모음 제외). 기본 640×480 */
   initialSize?: Size
-  /**
-   * 보일 높이 (도구 모음 제외, 설계 크기). 게시본이 이보다 높으면 위쪽 이만큼만 보인다.
-   * 11/10 확인: 상세 시트 V01 · V04 · V06이 높이 700으로 게시돼 그림(설계 높이 420 · 440) 아래가 비어 있다.
-   * 도구 모음은 아래에 있어 함께 잘린다 (⑥ · 메인 대시보드와 같다)
-   */
-  visibleHeight?: number
+  /** Tableau 도구 모음을 가린다 (위에 두고 잘라 낸다). 시트 내용은 그대로 다 보인다 */
+  hideToolbar?: boolean
+  /** 게시본의 데스크톱 배치로 띄운다 (틀 높이로 휴대폰 배치가 골라지지 않게) */
+  desktopLayout?: boolean
 }
 
 export function TableauSheetFrame({
@@ -173,7 +177,8 @@ export function TableauSheetFrame({
   filters = [],
   openWidth = TABLEAU_OPEN_WIDTH,
   initialSize = INITIAL_SIZE,
-  visibleHeight,
+  hideToolbar = false,
+  desktopLayout = false,
 }: TableauSheetFrameProps) {
   const parametersKey = JSON.stringify(parameters)
   const filtersKey = JSON.stringify(filters)
@@ -183,7 +188,7 @@ export function TableauSheetFrame({
   labelRef.current = label
   const [visible, setVisible] = useState(false)
   const [phase, setPhase] = useState<Phase>("waiting")
-  const [size, setSize] = useState<Size>(initialSize)
+  const [size, setSize] = useState<FrameSize>({ ...initialSize, chrome: 0 })
   const [frameWidth, setFrameWidth] = useState(0)
   const [retry, setRetry] = useState(0)
   const initialWidth = initialSize.width
@@ -218,7 +223,7 @@ export function TableauSheetFrame({
     const wantedParameters = JSON.parse(parametersKey) as TableauParameterInput[]
     const wantedFilters = JSON.parse(filtersKey) as TableauFilterInput[]
     setPhase("loading")
-    setSize({ width: initialWidth, height: initialHeight })
+    setSize({ width: initialWidth, height: initialHeight, chrome: 0 })
 
     const fail = (reason: unknown) => {
       if (disposed) return
@@ -243,8 +248,9 @@ export function TableauSheetFrame({
         // 틀(.tableau-sheet-host) 크기를 따라간다. 크기를 알면 틀만 바꾼다 (Tableau 속성을 바꾸면 다시 불러온다)
         created.width = "100%"
         created.height = "100%"
-        created.toolbar = "bottom"
+        created.toolbar = hideToolbar ? "top" : "bottom"
         created.hideTabs = true
+        if (desktopLayout) created.device = "desktop"
         created.setAttribute("aria-label", labelRef.current)
         sizeEvent = TableauEventType.FirstVizSizeKnown ?? sizeEvent
         firstEvent = TableauEventType.FirstInteractive ?? firstEvent
@@ -284,11 +290,14 @@ export function TableauSheetFrame({
       viz?.removeEventListener(errorEvent, onLoadError)
       viz?.remove()
     }
-  }, [visible, src, parametersKey, filtersKey, openWidth, initialWidth, initialHeight, retry])
+  }, [visible, src, parametersKey, filtersKey, openWidth, initialWidth, initialHeight, hideToolbar, desktopLayout, retry])
 
   const shown: Phase = src ? phase : "error"
   const scale = frameWidth > 0 ? Math.min(1, frameWidth / size.width) : 1
-  const shownHeight = visibleHeight ? Math.min(visibleHeight, size.height) : size.height
+  const shownHeight = hideToolbar ? size.height - size.chrome : size.height
+  // 위 도구 모음을 틀 밖으로 올린다 (줄이기 전 크기로 올리고 줄인다)
+  const transforms = [scale < 1 ? `scale(${scale})` : "", hideToolbar && size.chrome ? `translateY(-${size.chrome}px)` : ""]
+  const transform = transforms.filter(Boolean).join(" ") || undefined
   return (
     <div
       ref={frameRef}
@@ -303,7 +312,7 @@ export function TableauSheetFrame({
           style={{
             width: size.width,
             height: size.height,
-            transform: scale < 1 ? `scale(${scale})` : undefined,
+            transform,
             pointerEvents: shown === "ready" ? undefined : "none",
           }}
         />
