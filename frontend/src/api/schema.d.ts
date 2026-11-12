@@ -35,7 +35,7 @@ export interface paths {
         };
         /**
          * 소속기관 검색
-         * @description 기관명 부분 검색. official_domain은 필수 값이다. 관할명은 코드 앞 2·5자리로 지역 뷰에서 조회한다.
+         * @description 기관명 부분 검색. 검색어는 문자 그대로 비교하며(% · _ · \는 와일드카드가 아님) 기관명 · 기관 ID 순으로 최대 20개를 반환한다. official_domain은 필수 값이다. 관할명은 코드 앞 2·5자리로 지역 뷰에서 조회한다.
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -59,7 +59,7 @@ export interface paths {
         put?: never;
         /**
          * 인증 메일 발송
-         * @description 기관 공식 도메인과 이메일 도메인을 비교하고 탈퇴 회원까지 포함한 기존 이메일은 EMAIL_ALREADY_EXISTS 409로 거절한다. 이메일당 한 행으로 재발송 시 기존 코드를 폐기한다. 코드 10분·재발송 간격 60초·실패 5회는 문서 구현 기준이다. 인증 코드는 SMTP 메일로만 전달한다. 가입 증명 verificationToken은 API-06 성공 응답으로 전달하고 API-07 요청에서 한 번 사용한다. 코드와 가입 증명은 DB에 해시로만 저장하며 원문을 로그에 남기지 않는다.
+         * @description 기관 공식 도메인과 이메일 도메인을 비교하고 탈퇴 회원까지 포함한 기존 이메일은 EMAIL_ALREADY_EXISTS 409로 거절한다. 이메일당 한 행으로 재발송 시 기존 코드를 폐기한다. 코드 10분·재발송 간격 60초·실패 5회는 문서 구현 기준이다. 인증 코드는 SMTP 메일로만 전달한다. 가입 증명 verificationToken은 API-06 성공 응답으로 전달하고 API-07 요청에서 한 번 사용한다. 코드와 가입 증명은 DB에 해시로만 저장하며 원문을 로그에 남기지 않는다. 같은 이메일로 60초 안에 다시 요청하거나 같은 이메일의 첫 요청이 동시에 오면 RATE_LIMITED 429다 (IP당 요청 제한은 Nginx).
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -211,7 +211,9 @@ export interface paths {
         };
         /**
          * 인사이트 보고서 조회
-         * @description region_insight_report의 quick_insight · graph_1~3 · desc_1~3 · generated_at을 report로 매핑한다(graphs는 graph_1~3 순서). 최신 보고서(result_updated_at = 결과 행 updated_at)만 보여 주고, 없거나 옛 보고서면 report=null. 그래프 시트가 허용 목록(EmbedDetailV01~V08) 밖인 보고서도 report=null로 보고 BE가 경고 로그를 남긴다. 결과 행이 없으면 404. 조회 요청이 AI 생성을 실행하지 않는다.
+         * @description region_insight_report의 quick_insight · graph_1~3 · desc_1~3 · generated_at을 report로 매핑한다. 최신 보고서(result_updated_at = 결과 행 updated_at)만 보여 주고, 없거나 옛 보고서면 report=null. AI는 검토를 통과한 칸만 저장하므로 칸이 비어 있을 수 있다: quickInsight는 없으면 null, graphs는 graph_n이 있는 칸만 칸 순서대로 0~3개(빈 칸은 건너뜀), description은 없으면 null. 그래프 시트가 허용 목록(EmbedDetailV01~V08) 밖이면 그 그래프만 빼고 BE가 경고 로그를 남긴다. 빼고 나서 퀵 인사이트와 그래프가 모두 없으면 report=null. 결과 행이 없으면 404. 조회 요청이 AI 생성을 실행하지 않는다.
+         *
+         *     일부만 찬 예: {"report": {"quickInsight": null, "graphs": [{"sheet": "EmbedDetailV01", "description": "예시 설명"}, {"sheet": "EmbedDetailV03", "description": null}], "generatedAt": "2026-10-30T10:00:00+09:00"}}
          *
          *     공통_응답_및_세션_규칙.md의 인증·CSRF·검증·페이지 규칙을 함께 적용한다.
          */
@@ -1099,11 +1101,11 @@ export interface components {
             riskGrade: number;
         };
         InsightReportData: {
-            /** @description 최신 보고서(result_updated_at = 결과 행 updated_at)가 없거나 옛 보고서면 null. 결과 행 자체가 없으면 404. 생성 시각은 report.generatedAt에 generated_at을 매핑한다. */
+            /** @description 최신 보고서(result_updated_at = 결과 행 updated_at)가 없거나 옛 보고서면 null. 보여 줄 퀵 인사이트와 그래프가 모두 없을 때(허용 목록 밖 시트만 있음)도 null. 결과 행 자체가 없으면 404. 생성 시각은 report.generatedAt에 generated_at을 매핑한다. */
             report: {
-                /** @description 퀵 인사이트 (quick_insight). 일반 글(HTML 아님)이며 줄바꿈을 포함할 수 있다 */
-                quickInsight: string;
-                /** @description 그래프 3개. 순서 = 화면 순서(graph_1~3), 시트는 서로 다르다 */
+                /** @description 퀵 인사이트 (quick_insight). 일반 글(HTML 아님)이며 줄바꿈을 포함할 수 있다. AI 검토를 통과하지 못해 저장되지 않았으면 null */
+                quickInsight: string | null;
+                /** @description 그래프. 찬 칸(graph_n이 있는 칸)만 칸 순서대로(graph_1~3, 빈 칸은 건너뜀) 0~3개. 순서 = 화면 순서, 시트는 서로 다르다. 허용 목록(EmbedDetailV01~V08) 밖 시트는 빼고 BE가 경고 로그를 남긴다 */
                 graphs: components["schemas"]["InsightReportGraph"][];
                 /**
                  * Format: date-time
@@ -1113,15 +1115,15 @@ export interface components {
                 generatedAt: string;
             } | null;
         };
-        /** @description 보고서 그래프 한 칸 (graph_n · desc_n) */
+        /** @description 보고서 그래프 한 칸 (graph_n · desc_n). 그래프가 있는 칸만 온다 */
         InsightReportGraph: {
             /**
              * @description Tableau 시트 이름 (insight-report.md 9절). 화면은 이 이름으로 상세 워크북의 시트를 임베딩한다
              * @enum {string}
              */
             sheet: "EmbedDetailV01" | "EmbedDetailV02" | "EmbedDetailV03" | "EmbedDetailV04" | "EmbedDetailV05" | "EmbedDetailV06" | "EmbedDetailV07" | "EmbedDetailV08";
-            /** @description 그 그래프의 비교와 근거 설명 (desc_n). 일반 글(HTML 아님)이며 줄바꿈을 포함할 수 있다 */
-            description: string;
+            /** @description 그 그래프의 비교와 근거 설명 (desc_n). 일반 글(HTML 아님)이며 줄바꿈을 포함할 수 있다. AI 검토를 통과하지 못해 저장되지 않았으면 null (화면은 '설명 준비 중') */
+            description: string | null;
         };
         /** @description 등록 및 전체 수정 공통. FE가 선택 입력의 빈값을 null로 보낸다. 코드·정수 필드에 빈 문자열을 보내지 않는다. 선택 글은 trim 후 빈 문자열을 null로 정규화한다. PUT에서 선택 필드 생략도 null로 덮어쓴다 */
         ResourceInput: {
@@ -2196,7 +2198,7 @@ export interface operations {
     signupApi_searchOrganizations: {
         parameters: {
             query?: {
-                /** @description 기관명 일부 */
+                /** @description 기관명 일부. trim 후 1~200자. 비었거나 없으면 400 VALIDATION_ERROR (fieldErrors keyword) */
                 keyword?: string;
             };
             header?: never;
