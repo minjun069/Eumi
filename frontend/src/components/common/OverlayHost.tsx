@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { settleConfirm, useConfirmRequest } from "@/stores/confirmStore"
 import { useToasts } from "@/stores/toastStore"
 
-/** 1440×1024 화면 안에 확인 창과 알림 메시지를 띄운다 (개발용 영역은 가리지 않음) */
+/** 서비스 화면(.app-frame) 안에 확인 창과 알림 메시지를 띄운다 (개발용 영역은 가리지 않음) */
 export function OverlayHost() {
   return (
     <>

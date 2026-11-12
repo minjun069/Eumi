@@ -1,38 +1,40 @@
-/* 전체 배치: 1440×1024 서비스 화면을 가운데에 둔다 */
+/* 전체 배치: 서비스 화면(폭 1440~1920px, 높이 1024px)을 가운데에 둔다. 폭은 창 폭을 따라간다 (base.css) */
 
 .app-shell {
   display: flex;
   align-items: flex-start;
-  width: var(--frame-width);
+  width: 100%;
+  max-width: var(--frame-max-width);
   min-height: var(--frame-height);
   margin: 0 auto;
 }
 
 .app-frame {
   position: relative;
-  flex: none;
-  width: var(--frame-width);
+  flex: 1 1 auto;
+  min-width: 0;
   height: var(--frame-height);
   overflow: hidden;
   background: #fff;
 }
 
-/* 헤더 (V1 치수 유지) */
+/* 헤더 (V1 치수 유지, 폭은 틀 전체) */
 
 .top-header {
   position: absolute;
   z-index: 20;
   top: 0;
+  right: 0;
   left: 0;
-  width: var(--frame-width);
   height: 74px;
   background: var(--navy);
 }
 
+/* 로고는 틀 가운데 (1440px에서 왼쪽 632px) */
 .logo-window {
   position: absolute;
   top: 11px;
-  left: 632px;
+  left: calc(50% - 88px);
   width: 176px;
   height: 52px;
   overflow: hidden;
@@ -152,13 +154,13 @@
   color: var(--text);
 }
 
-/* 본문 */
+/* 본문: 틀 폭에서 왼쪽 메뉴 215px를 뺀 폭 (1440px 틀에서 1225px) */
 
 .workspace {
   position: absolute;
   top: 74px;
+  right: 0;
   left: 215px;
-  width: 1225px;
   height: 950px;
   overflow-y: auto;
 }
