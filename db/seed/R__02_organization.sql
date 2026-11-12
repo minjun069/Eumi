@@ -5,7 +5,9 @@ INSERT INTO organization (org_name, jurisdiction_sigungu_code, official_domain)
 SELECT seed.org_name, seed.sigungu_code, seed.official_domain
 FROM (VALUES
     ('이음이 강남 시연기관', '11680', 'demo-gangnam.eumi.test'),
-    ('이음이 춘천 시연기관', '51110', 'demo-chuncheon.eumi.test')
+    ('이음이 춘천 시연기관', '51110', 'demo-chuncheon.eumi.test'),
+    -- 11/12 시연 기관. 회원 · 사례자 · 복지자원은 화면에서 등록한다
+    ('싸피 복지기관', '11680', 'ssafy.eumi.test')
 ) AS seed(org_name, sigungu_code, official_domain)
 WHERE NOT EXISTS (
     SELECT 1 FROM organization existing
