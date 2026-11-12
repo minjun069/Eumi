@@ -21,7 +21,14 @@ import {
 } from "@/screens/risk/riskQuery"
 import { stageStyle } from "@/screens/risk/riskStyle"
 import { useScreenContext } from "@/stores/screenContextStore"
-import { isPublished, TABLEAU_GRID_LEGEND, TABLEAU_VIEWS, tableauDetailParameters } from "@/tableau/tableauConfig"
+import {
+  gridSelectionCount,
+  isPublished,
+  TABLEAU_GRID_SELECTION_PARAMETER,
+  TABLEAU_VIEWS,
+  tableauDetailParameters,
+  tableauGridCrop,
+} from "@/tableau/tableauConfig"
 import { formatDateTime } from "@/utils/datetime"
 
 const NOT_FOUND_DONG = {
@@ -214,6 +221,11 @@ function DongBody({
   const stage = stageStyle(dong.behavior.stage)
   const month = formatMonth(baseMonth)
   const published = isPublished(dong.sigunguCode, period)
+  // ⑥ 비교표에 보일 줄 수: Tableau 안에서 고른 격자 수 (세 줄 아래로는 줄이지 않는다, tableauGridCrop)
+  const [selectedGrids, setSelectedGrids] = useState(0)
+  const onGridParameter = (name: string, value: string) => {
+    if (name === TABLEAU_GRID_SELECTION_PARAMETER) setSelectedGrids(gridSelectionCount(value))
+  }
 
   return (
     <div className="risk-dong-body">
@@ -235,14 +247,16 @@ function DongBody({
         </div>
 
         {published ? (
-          // 행정동·기준 월은 매개변수로 처음부터 넘기고 FirstInteractive 뒤에 다시 읽어 확인한다 (TableauWorksheet)
+          // 행정동·기준 월은 위쪽 필터 값을 매개변수로 처음부터 넘기고 FirstInteractive 뒤에 다시 읽어 확인한다 (TableauWorksheet).
+          // 대시보드에서 위 선택 칸만 잘라 내고 지도 · 범례 · 격자 선택 카드 · 비교표를 보인다.
+          // 비교표는 세 줄 높이가 기본이고, 넷째 격자부터 고른 만큼 늘어난다 (해제하면 다시 줄어든다)
           <TableauViewPanel
-            view={TABLEAU_VIEWS.grid}
+            view={{ ...TABLEAU_VIEWS.grid, crop: tableauGridCrop(selectedGrids) }}
             title={`${dong.dongName} 격자별 행동 이상 위험도 · ${month}`}
             label="격자별 행동 이상 위험도"
             conditions={{ filters: {}, parameters: tableauDetailParameters(dong.dongCode, dong.sigunguCode, period) }}
-            legend={<GridLegend />}
             refreshKey={refreshKey}
+            onParameterValue={onGridParameter}
           />
         ) : (
           <section className="risk-panel">
@@ -315,29 +329,6 @@ function DongBody({
           <p className="risk-empty-text">이 달의 인사이트 보고서를 준비 중입니다.</p>
         )}
       </aside>
-    </div>
-  )
-}
-
-/**
- * ⑥ 격자 지도의 색 범례. Tableau에서는 지도 그림만 잘라 띄우고, 범례와 지도 제목의 안내(100m 격자·회색 미산출)는 여기서 그린다
- */
-function GridLegend() {
-  const { title, min, max, colors } = TABLEAU_GRID_LEGEND
-  return (
-    <div className="grid-legend">
-      <span className="grid-legend-title">{title}</span>
-      <span
-        className="grid-legend-bar"
-        style={{ background: `linear-gradient(90deg, ${colors.join(", ")})` }}
-        role="img"
-        aria-label={`${min.toFixed(2)}점 연한 파랑부터 ${max.toFixed(2)}점 진한 남색까지`}
-      />
-      <span className="grid-legend-scale" aria-hidden="true">
-        <span>{min.toFixed(2)}</span>
-        <span>{max.toFixed(2)}</span>
-      </span>
-      <span className="grid-legend-note">100m 격자 · 회색 칸은 점수 미산출</span>
     </div>
   )
 }
