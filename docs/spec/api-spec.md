@@ -1,6 +1,6 @@
 # 이음이 API 명세
 
-- 판: 2.6.0 (2026-11-11, 11/6 초안 · 11/9 INT-06 · API-18 삭제 · 11/9 AI-a 반영 · 11/10 AI-b 반영: API-11 · 12 새 형식, INT-05 dongCodes, INT-08 · 11/10 A3 · M3 구현: API-09 · 33 · 34 · 11/10 C4: API-20 updatedAt, API-23 CaseUpdateInput · 11/11 A2 구현: API-04~07 · 11/11 보고서 일부 저장: API-12 찬 칸만, INT-05 · 08)
+- 판: 2.6.0 (2026-11-11, 11/6 초안 · 11/9 INT-06 · API-18 삭제 · 11/9 AI-a 반영 · 11/10 AI-b 반영: API-11 · 12 새 형식, INT-05 dongCodes, INT-08 · 11/10 A3 · M3 구현: API-09 · 33 · 34 · 11/10 C4: API-20 updatedAt, API-23 CaseUpdateInput · 11/11 A2 구현: API-04~07 · 11/11 보고서 일부 저장: API-12 찬 칸만, INT-05 · 08 · 11/12 문서 정리: API-03 · 03-S1 · 03-S2 운영 http, API-11 · 12 배포 상태, Tableau 워크북 하나)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_API_명세표.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - API 형식의 기준은 `docs/api/openapi.json`, 내부 연동은 `docs/api/ai-agent-panel.md` · `docs/api/insight-report.md`다. 계약이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -32,21 +32,21 @@
 - 요청 경로: POST /api/agent/questions
 - 요청 형식: 인증 SESSION 쿠키 · CSRF 필수<br><br>본문 application/json AgentQuestionRequest<br>conversationId*:string(uuid) 또는 null; question*:string(1~4000자); context:ScreenContext{dongCode:string(숫자 10자리); month:string(YYYY-MM)} (선택, 위험 탐색 · 읍면동 화면에서 보고 있는 동 · 월, {}와 생략 허용, 저장 안 함, ai-agent-panel.md 3-1)<br>저장 전 이름·생년월일 표지 값과 이메일·휴대전화(하이픈형)만 가림 · 그 밖의 식별정보는 남을 수 있음(완전한 비식별화 아님) · 질문 본문은 로그에 남기지 않음 · 범위는 ai-agent-panel.md 6절
 - 응답 형식: 202 application/json AgentQuestionCreated_Success<br>conversationId*:string(uuid); questionId*:integer(int64)<br>첫 질문이면 대화 생성 · 질문 행 저장, 커밋 뒤 AI 실행 요청(INT-01)<br>400 INVALID_JSON: context의 모르는 필드 · 문자열이 아닌 값 · 400 VALIDATION_ERROR: context 형식 오류<br>409 RUN_ALREADY_ACTIVE: 끝 행이 없는 질문이 있음
-- 구현 (11/6): 구현 (운영 fake 모드. 11/9 context는 BE 구현, FE 연결은 2.3.4 gen:api 뒤)
+- 구현 (11/6): 구현 (11/11부터 운영 http 모드, GMS gpt-6-luna · 화면 문맥 context는 BE 11/9 · FE 11/11)
 
 ### API-03-S1 AI 대화 메시지 조회<br>신규 설계
 - 페이지 범위: 공통 Agent 패널
 - 요청 경로: GET /api/agent/conversations/{conversationId}/messages
 - 요청 형식: 인증 SESSION 쿠키<br>path conversationId*:string(uuid); query after:integer(int64)<br>본문 없음
 - 응답 형식: 200 application/json AgentMessages_Success<br>messages*:AgentMessage[]<br>AgentMessage: messageId*:integer(int64); questionId*:integer(int64) 또는 null; role*:string(Member·AI); status*:string(질문·진행·완료·실패·취소); content*:string 또는 null(질문 행은 등록 당시 마스킹 처리 결과); details*:string 또는 null; artifacts*:JSON 또는 null(Tableau · 표 · 그래프, 형식과 FE 표시 규칙은 ai-agent-panel.md 2-1); createdAt*:string(date-time)<br>after보다 큰 messageId만 오름차순 · 실행 중 1초마다, 대화를 열 때 after=0<br>새 행이 응답 없음 기준 동안 없으면 BE가 같은 messageId로 INT-01을 질문당 1번 다시 보냄 · 질문 시각 + 실행 제한 + 여유가 지나면 BE가 실패 행
-- 구현 (11/6): 구현 (운영 fake 모드)
+- 구현 (11/6): 구현 (11/11부터 운영 http 모드)
 
 ### API-03-S2 AI 실행 중단<br>신규 설계
 - 페이지 범위: 공통 Agent 패널
 - 요청 경로: POST /api/agent/conversations/{conversationId}/cancel
 - 요청 형식: 인증 SESSION 쿠키 · CSRF 필수<br>path conversationId*:string(uuid)<br>본문 없음
 - 응답 형식: 204 본문 없음<br>취소 행은 API-03-S1로 받음 · 이미 끝났으면 아무것도 하지 않음<br>AI가 정해진 시간 안에 응답하지 않으면 BE가 취소 행을 대신 저장
-- 구현 (11/6): 구현 (운영 fake 모드)
+- 구현 (11/6): 구현 (11/11부터 운영 http 모드)
 
 ### API-04 소속기관 검색
 - 페이지 범위: /signup
@@ -102,14 +102,14 @@
 - 요청 경로: GET /api/analysis/dongs/{dongCode}/insight
 - 요청 형식: 인증 SESSION 쿠키<br>path dongCode*:string; query month*:string<br>본문 없음
 - 응답 형식: 200 application/json analysisApi_getDongInsight_Success<br>dongCode*:string; dongName*:string; sigunguCode*:string; sigunguName*:string; month*:string; background*:RiskValue; behavior*:RiskValue; insight*:object 또는 null; riskGrade*:integer<br>insight = {summary*:string[] (최신 보고서의 quick_insight 한 개, 줄바꿈으로 나누지 않음); generatedAt*:string(date-time)} 또는 null · 최신 보고서(result_updated_at = 결과 updated_at)만 · quick_insight가 없으면 insight null · 결과 없음 404
-- 구현 (11/6): 구현 · 새 칸을 읽는 변경은 AI-b BE MR (응답 모양 유지, 2단계 V 파일 · FE와 같은 배포)
+- 구현 (11/6): 구현 · 새 칸(quick_insight) 읽기는 11/10 (응답 모양 유지)
 
 ### API-12 인사이트 보고서 조회
 - 페이지 범위: /risk?dong=…
 - 요청 경로: GET /api/analysis/dongs/{dongCode}/report
 - 요청 형식: 인증 SESSION 쿠키<br>path dongCode*:string; query month*:string<br>본문 없음
 - 응답 형식: 200 application/json analysisApi_getInsightReport_Success<br>report*:object 또는 null<br>report = {quickInsight*:string(1~500자) 또는 null; graphs*:[{sheet*:string(EmbedDetailV01~V08); description*:string(1~1000자) 또는 null}] 0~3개(graph_n이 있는 칸만 graph_1~3 순서, 빈 칸은 건너뜀); generatedAt*:string(date-time)} 또는 null · AI는 검토를 통과한 칸만 저장(2.6.0) · 허용 밖 시트는 그 그래프만 빼고 경고 로그 · 퀵 인사이트와 그래프가 모두 없거나 옛 보고서(결과 시각 불일치)면 null · 결과 없음 404 · 조회가 생성을 실행하지 않음
-- 구현 (11/6): 구현 (2.4.0 형식, 8칸이 모두 찬 보고서) · 2.6.0 일부 표시는 BE · FE MR에서 반영 (V20261111_01과 같은 배포)
+- 구현 (11/6): 구현 (11/12 2.6.0 일부 표시, V20261111_01과 함께 배포)
 
 ### API-13 복지자원 목록 조회
 - 페이지 범위: /resources
@@ -374,13 +374,13 @@
 
 - 제목: 외부 연동과 구현 경계
 - 요약: Tableau·내부 AI·데이터 파이프라인은 외부 REST 목록과 구별
-- 출처: 대시보드_구현_확정안.md · tableau_views.json 3.0.0 (11/3 새 워크북) · 3.2.0 (11/5 상세 워크북 v2_0_6 · 보고서 시트 EmbedDetailV01~V08) · eumi/db/README.md
+- 출처: 대시보드_구현_확정안.md · tableau_views.json 3.0.0 (11/3 새 워크북) · 3.2.0 (11/5 상세 워크북 v2_0_6 · 보고서 시트 EmbedDetailV01~V08) · eumi/db/README.md · 11/12 워크북 v2_0_6 하나로 통일 (frontend/src/tableau/tableauConfig.ts)
 
 ### Tableau
-- 대상: 뷰 1~6
-- 현재 근거: Embedding API v3 · 워크북 eumi_tableau_main_dashboard_v_master (①②③⑤ 연결, 11/3) · 상세 워크북 v2_0_6 (⑥ 디테일 지도 · 보고서 시트 EmbedDetailV01~V08, 11/5)
+- 대상: 시군구 ①②③⑤ · 읍면동 ⑥ · 인사이트 보고서 그래프 EmbedDetailV01~V08
+- 현재 근거: Embedding API v3 · 워크북 eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed 하나 (11/12 재게시, 모든 뷰. 메인 워크북 eumi_tableau_main_dashboard_v_master는 11/12부터 쓰지 않음) · 대시보드는 모두 고정 크기, 크기 · 배치가 바뀌면 FE tableauConfig.ts도 바꿈
 - 경계: 서비스 REST로 세지 않음
-- 선행 조건: ④·⑥ 게시 · 데이터 파일 계약 확인(월 형식·산출불가·계산 값·공개 범위)
+- 선행 조건: ⑥ 게시(11/5) · ④는 11/5 결정으로 넣지 않음 · 데이터 파일 계약 확인(월 형식·산출불가·계산 값·공개 범위)
 - 검증: 동 선택·매개변수(시군구·기간)·로딩·게시 오류
 
 ### FastAPI 내부

@@ -22,7 +22,6 @@
 | [대시보드_구현_확정안.md](대시보드_구현_확정안.md) | `INFRA/fe-ref/` | 11/5 | 고립 위험 탐색 · 읍면동 상세 화면의 Tableau 임베딩 | 대시보드 · 읍면동 상세 · 보고서 화면이 끝날 때 |
 | [대시보드_파일_계약.md](대시보드_파일_계약.md) | `INFRA/fe-ref/` | 11/2 | Tableau 게시 데이터 형식 (데이터 파트와 맞춤) | 위와 같다 |
 | [tableau_views.json](tableau_views.json) | `INFRA/fe-ref/` | 3.2.0 (11/5) | Tableau 뷰 목록 (`frontend/src/tableau/tableauConfig.ts`의 기준) | 위와 같다 |
-| [Grafana_서버_배포_인계.md](Grafana_서버_배포_인계.md) | 저장소에서 작성 (데이터 파트 → 인프라 담당) | 11/10 | 운영 서버에 Grafana(대시보드 · Mattermost 알림)를 올릴 때 넣을 compose · Nginx · 비밀값 · 서버 절차. 데이터 파이프라인 서버 구성과 같이 진행 | 문서 8절 (운영에서 Grafana 가 뜨고 `infra/README.md` 운영 절에 반영될 때) |
 
 ## 적용하지 않는 부분
 
