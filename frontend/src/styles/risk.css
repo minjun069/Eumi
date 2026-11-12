@@ -200,7 +200,7 @@
   flex: none;
 }
 
-/* 대시보드 일부만 보일 때(⑥ 지도만): 틀은 보일 크기로 가운데에 두고, Tableau는 위·왼쪽으로 밀어 넣는다 (TableauWorksheet crop) */
+/* 일부만 보일 때(⑥ 위 선택 칸을 잘라 냄): 틀은 보일 크기로 가운데에 두고, Tableau는 위·왼쪽으로 밀어 넣는다 (TableauWorksheet crop) */
 .tableau-host.is-cropped {
   justify-content: flex-start;
   margin: 0 auto;
@@ -208,44 +208,6 @@
 
 .tableau-host.is-cropped tableau-viz {
   margin: var(--crop-y) 0 0 var(--crop-x);
-}
-
-.risk-panel.is-tableau .grid-legend {
-  margin-left: 13px;
-}
-
-/* ⑥ 격자 지도의 색 범례 (RiskDongScreen GridLegend, 게시본 범례와 같은 색·범위) */
-.grid-legend {
-  display: grid;
-  grid-template-columns: 200px auto;
-  column-gap: 14px;
-  align-items: center;
-  margin-bottom: 8px;
-  color: var(--text-muted);
-  font-size: 12px;
-  line-height: 18px;
-}
-
-.grid-legend-title {
-  grid-column: 1 / -1;
-  color: var(--text);
-}
-
-.grid-legend-bar {
-  height: 12px;
-  border: 1px solid #c9d1dc;
-  border-radius: 2px;
-}
-
-.grid-legend-scale {
-  display: flex;
-  grid-row: 3;
-  justify-content: space-between;
-}
-
-.grid-legend-note {
-  grid-row: 2;
-  grid-column: 2;
 }
 
 /* 확인 전·실패 때 Tableau를 덮는다 (숨기지 않고 덮어야 iframe이 느려지지 않는다) */
@@ -477,5 +439,79 @@
   font-size: 14px;
   line-height: 23px;
   white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* 그래프 크게 보기 (InsightReportView · ReportGraphDialog) */
+
+.report-graph.has-zoom {
+  position: relative;
+}
+
+.report-graph.has-zoom .report-subtitle {
+  padding-right: 84px;
+}
+
+.report-zoom-button {
+  position: absolute;
+  top: 7px;
+  right: 10px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0 10px;
+  color: var(--navy);
+  background: #fff;
+  font-family: 'Noto Sans KR:Medium', sans-serif;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.report-zoom-button:hover {
+  border-color: #c3ccd9;
+  background: var(--bg-soft);
+}
+
+/* 확인 창(z-index 90)보다 아래, AI 패널(30)보다 위 */
+.report-zoom-backdrop {
+  z-index: 80;
+}
+
+/* 폭은 시트 설계 폭 + 좌우 여백 (ReportGraphDialog). 서비스 화면보다 크면 줄이고 안에서 스크롤 */
+.report-zoom-dialog {
+  max-width: calc(100% - 48px);
+  max-height: calc(100% - 48px);
+  overflow-y: auto;
+  padding-top: 18px;
+  padding-bottom: 20px;
+}
+
+.report-zoom-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.report-zoom-close {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 5px;
+  color: var(--text-muted);
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.report-zoom-close:hover {
+  color: var(--navy);
+  background: var(--bg-soft);
+}
+
+.report-zoom-dialog .report-zoom-description {
+  margin-top: 12px;
   overflow-wrap: anywhere;
 }

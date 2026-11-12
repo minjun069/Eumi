@@ -43,20 +43,13 @@ export type Worksheet = {
   applyFilterAsync: (field: string, values: string[], updateType: unknown) => Promise<unknown>
   clearFilterAsync: (field: string) => Promise<unknown>
   getFiltersAsync: () => Promise<Filter[]>
-}
-
-/** 대시보드 안의 개체 (워크시트·범례·매개변수 선택 칸 등). 위치·크기는 대시보드 왼쪽 위 기준 px */
-export type DashboardObject = {
-  type: string
-  position: { x: number; y: number }
-  size: { width: number; height: number }
+  clearSelectedMarksAsync: () => Promise<void>
 }
 
 export type Dashboard = {
   name: string
   sheetType: "dashboard"
   worksheets: Worksheet[]
-  objects: DashboardObject[]
 }
 
 export type Viz = HTMLElement & {
@@ -65,6 +58,8 @@ export type Viz = HTMLElement & {
   height: string
   toolbar: string
   hideTabs: boolean
+  /** 띄울 배치 (desktop · tablet · phone). 주지 않으면 Tableau가 틀 크기로 고른다 */
+  device: string
   workbook: {
     activeSheet: Worksheet | Dashboard | { name: string; sheetType: "story" }
     activateSheetAsync: (name: string) => Promise<unknown>
@@ -75,9 +70,7 @@ export type Viz = HTMLElement & {
 }
 
 export type TableauWorksheetProps = {
-  /** 워크북 이름. 없으면 메인 워크북. 바뀌면 다시 띄운다 */
-  workbook?: string
-  /** 같은 워크북 안의 대시보드 이름. 바뀌면 다시 띄우지 않고 띄운 Tableau 안에서 대시보드를 바꾼다 */
+  /** 워크북 안의 대시보드 이름. 바뀌면 다시 띄우지 않고 띄운 Tableau 안에서 대시보드를 바꾼다 */
   dashboard: string
   /** 대시보드 안의 워크시트 이름 (확인·필터·마크 선택 대상) */
   worksheet: string
@@ -91,9 +84,11 @@ export type TableauWorksheetProps = {
   toolbar?: "hidden" | "bottom"
   /** 대시보드에서 이 부분만 보인다 (px, 대시보드 왼쪽 위 기준). 있으면 도구 모음도 보이지 않는다 */
   crop?: { x: number; y: number; width: number; height: number }
-  /** 마크에서 행정동 하나를 골랐을 때 (빈 선택은 알리지 않는다) */
+  /** 마크에서 행정동 하나를 골랐을 때 (빈 선택은 알리지 않는다). 알린 뒤 Tableau의 마크 선택은 지운다 */
   onSelectDong?: (dongCode: string) => void
   onStateChange?: (state: ChartState) => void
+  /** Tableau 매개변수 값 (불러온 뒤 한 번 모두, 그 뒤로는 바뀔 때마다). Tableau 안의 조작(매개변수 동작)으로 바뀐 값도 온다 */
+  onParameterValue?: (name: string, value: string) => void
   /** 같은 조건으로 '적용'을 다시 눌렀을 때 값을 다시 확인한다 */
   refreshKey?: number
 }
