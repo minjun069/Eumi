@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-/** DB에 쓸 수 없는 미적재·생성 완료·손상 데이터를 mock으로 검사한다. */
+/** 미적재·일부 생성·손상 데이터의 조회 동작을 mock으로 검사한다. */
 @ExtendWith(MockitoExtension.class)
 class AnalysisServiceTests {
     @Mock AnalysisRepository repository;
@@ -114,13 +114,64 @@ class AnalysisServiceTests {
     }
 
     @Test
-    void unsupportedSheetHidesOnlyTheReport() {
+    void unsupportedSheetSkipsOnlyThatGraphAndKeepsSlotOrder() {
         var graphs = List.of(new AnalysisDtos.ReportGraph("EmbedDetailV09", "Unsupported"),
                 new AnalysisDtos.ReportGraph("EmbedDetailV01", "First"), new AnalysisDtos.ReportGraph("EmbedDetailV08", "Eighth"));
         when(repository.report(DONG, MONTH)).thenReturn(Optional.of(new AnalysisRepository.ReportRow(true, "Quick", graphs, GENERATED)));
         when(repository.insight(DONG, MONTH)).thenReturn(Optional.of(row(0, "Quick", GENERATED)));
-        assertThat(service.report(1, DONG, "2025-12").report()).isNull();
+        var report = service.report(1, DONG, "2025-12").report();
+        assertThat(report.quickInsight()).isEqualTo("Quick");
+        assertThat(report.graphs()).containsExactly(graphs.get(1), graphs.get(2));
         assertThat(service.insight(1, DONG, "2025-12").insight().summary()).containsExactly("Quick");
+    }
+
+    @Test
+    void emptySecondSlotIsSkippedWithoutChangingSlotOrder() {
+        var first = new AnalysisDtos.ReportGraph("EmbedDetailV08", "Eighth");
+        var third = new AnalysisDtos.ReportGraph("EmbedDetailV01", "First");
+        when(repository.report(DONG, MONTH)).thenReturn(Optional.of(new AnalysisRepository.ReportRow(true, "Quick",
+                List.of(first, new AnalysisDtos.ReportGraph(null, null), third), GENERATED)));
+        assertThat(service.report(1, DONG, "2025-12").report().graphs()).containsExactly(first, third);
+    }
+
+    @Test
+    void graphWithoutDescriptionKeepsExplicitNull() {
+        var graphs = List.of(new AnalysisDtos.ReportGraph("EmbedDetailV03", null),
+                new AnalysisDtos.ReportGraph("EmbedDetailV01", "First"), new AnalysisDtos.ReportGraph("EmbedDetailV08", "Eighth"));
+        when(repository.report(DONG, MONTH)).thenReturn(Optional.of(new AnalysisRepository.ReportRow(true, "Quick", graphs, GENERATED)));
+        var report = service.report(1, DONG, "2025-12").report();
+        assertThat(report.graphs()).containsExactlyElementsOf(graphs);
+        assertThat(report.graphs().getFirst().description()).isNull();
+    }
+
+    @Test
+    void graphOnlyReportKeepsNullQuickInsight() {
+        var graph = new AnalysisDtos.ReportGraph("EmbedDetailV03", "Third");
+        when(repository.report(DONG, MONTH)).thenReturn(Optional.of(new AnalysisRepository.ReportRow(true, null,
+                List.of(new AnalysisDtos.ReportGraph(null, null), graph, new AnalysisDtos.ReportGraph(null, null)), GENERATED)));
+        var report = service.report(1, DONG, "2025-12").report();
+        assertThat(report.quickInsight()).isNull();
+        assertThat(report.graphs()).containsExactly(graph);
+        assertThat(report.generatedAt()).isEqualTo(GENERATED);
+    }
+
+    @Test
+    void quickInsightOnlyReportHasEmptyGraphs() {
+        when(repository.report(DONG, MONTH)).thenReturn(Optional.of(new AnalysisRepository.ReportRow(true, "Quick",
+                List.of(new AnalysisDtos.ReportGraph(null, null), new AnalysisDtos.ReportGraph(null, null),
+                        new AnalysisDtos.ReportGraph(null, null)), GENERATED)));
+        var report = service.report(1, DONG, "2025-12").report();
+        assertThat(report.quickInsight()).isEqualTo("Quick");
+        assertThat(report.graphs()).isEmpty();
+        assertThat(report.generatedAt()).isEqualTo(GENERATED);
+    }
+
+    @Test
+    void onlyUnsupportedSheetsWithoutQuickInsightReturnNullReport() {
+        when(repository.report(DONG, MONTH)).thenReturn(Optional.of(new AnalysisRepository.ReportRow(true, null,
+                List.of(new AnalysisDtos.ReportGraph("EmbedDetailV09", null), new AnalysisDtos.ReportGraph("EmbedDetailV10", null),
+                        new AnalysisDtos.ReportGraph("EmbedDetailV11", null)), GENERATED)));
+        assertThat(service.report(1, DONG, "2025-12").report()).isNull();
     }
 
     @Test
