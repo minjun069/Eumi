@@ -372,8 +372,7 @@ class Database:
                 "quick_insight=EXCLUDED.quick_insight, "
                 "graph_1=EXCLUDED.graph_1, desc_1=EXCLUDED.desc_1, "
                 "graph_2=EXCLUDED.graph_2, desc_2=EXCLUDED.desc_2, "
-                "graph_3=EXCLUDED.graph_3, desc_3=EXCLUDED.desc_3, "
-                "summary_lines=NULL, report=NULL",
+                "graph_3=EXCLUDED.graph_3, desc_3=EXCLUDED.desc_3",
                 tuple(
                     row[k]
                     for k in (
