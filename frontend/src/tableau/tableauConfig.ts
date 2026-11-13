@@ -70,10 +70,12 @@ export const TABLEAU_VIEWS = {
     width: 430,
     height: 480,
   },
-  // 대시보드(640×720)에서 위 줄 선택 칸(읍면동 · 기준월 · 지도 보기)을 잘라 내고, 지도 · 지도 위 범례 · 격자 선택 카드 · 비교표 세 줄을 보인다
-  // (11/12 게시본 배치: 지도 8,60 624×395, 범례 490,76 140×82, 선택 카드 8,460 624×56, 비교표 8,522 624×186: 머리줄 ~541, 줄마다 20px, 셋째 줄 끝 y 601 → 2px 여유).
+  // 대시보드(640×720)에서 위 줄 선택 칸(읍면동 · 기준월 · 지도 보기, y 8~60)을 잘라 내고, 지도 · 지도 위 범례 · 격자 선택 카드 · 비교표를 보인다
+  // (11/13 재게시 배치, 대시보드 객체 위치로 확인: 지도 12,63 616×363 — 그 위에 범례 · '아파트 평균 매매금액' 표시 스위치,
+  //  선택 카드 y 434~589 — 제목 12,434 485×40 · '전체 해제' 버튼 512,436 105×40 · 평균 두 칸 12,481 300×108 / 322,481 306×108,
+  //  비교표 12,600 616×116).
   // 격자를 누르면 카드에 선택 요약(개수 · 평균 · 미산출), 비교표에 격자별 점수가 나온다 (매개변수 p_selected_grid, 우리가 넘기지 않는다).
-  // 기본은 세 줄 높이이고, 넷째 격자부터 고른 개수만큼 늘린다 (tableauGridCrop). 이 crop은 기본(세 줄) 값이다.
+  // 처음(고른 격자 없음)에는 카드 제목 줄까지만 보이고, 격자를 고르면 평균 두 칸과 비교표가 고른 줄 수만큼 늘어난다 (tableauGridCrop). 이 crop은 처음 값이다.
   // 조건은 우리 화면 위쪽 필터로만 고른다. 지도 보기(p_map_mode)는 기본값(점수 보기) 그대로 둔다. 게시본 배치가 바뀌면 crop을 같이 바꾼다
   grid: {
     number: "⑥",
@@ -81,7 +83,9 @@ export const TABLEAU_VIEWS = {
     worksheet: "DETAIL_MAP_100m",
     width: 640,
     height: 720,
-    crop: { x: 8, y: 60, width: 624, height: 543 },
+    // 고른 격자가 없으면 카드는 제목 줄('지도에서 격자를 선택하세요' · 전체 해제)만 있고 평균 두 칸은 비어 있다.
+    // 그래서 처음에는 제목 줄 끝(476) + 여유 4px까지만 보인다
+    crop: { x: 8, y: 61, width: 624, height: 419 },
   },
 } satisfies Record<string, TableauView>
 
@@ -93,21 +97,24 @@ export function gridSelectionCount(value: string): number {
   return value.match(/\|[^|]+\|/g)?.length ?? 0
 }
 
-// ⑥ 비교표 배치 (대시보드 y, 11/12 게시본): 머리줄 끝 541, 줄마다 20px, 비교표 칸 끝 708
-const GRID_TABLE_HEADER_BOTTOM = 541
-const GRID_TABLE_ROW_HEIGHT = 20
-const GRID_TABLE_BOTTOM = 708
+// ⑥ 비교표 배치 (대시보드 y, 11/13 재게시본 화면에서 잼 · Noto Sans KR로 그린 상태): 칸 600~716, 머리줄 끝 620, 줄마다 29px.
+// 칸 안에 세 줄까지 들어가고, 넷째 줄부터 Tableau가 표 안에 스크롤 막대를 만든다
+const GRID_TABLE_HEADER_BOTTOM = 620
+const GRID_TABLE_ROW_HEIGHT = 29
+const GRID_TABLE_BOTTOM = 716
 /** 마지막 줄 아래 여유 */
 const GRID_TABLE_MARGIN = 2
 
 /**
- * ⑥에서 보일 부분. 비교표는 세 줄 높이를 기본으로 두고, 넷째 격자부터 한 줄씩 늘린다 (해제하면 세 줄로 돌아온다).
- * 여덟 줄까지 늘리고, 그보다 많으면 비교표 칸 전체를 보인다 (Tableau가 표 안에 스크롤을 만든다)
+ * ⑥에서 보일 부분. 고른 격자가 없으면 선택 카드 제목 줄까지만 보인다.
+ * 고르면 평균 두 칸 · 비교표 머리줄과 고른 줄 수만큼 늘리고(해제하면 다시 줄어든다), 넷째 격자부터는 비교표 칸 전체를 보인다.
+ * 칸 전체가 보이므로 Tableau가 표 안에 만든 스크롤 막대로 아래 줄을 볼 수 있다
  */
 export function tableauGridCrop(selectedCount: number) {
   const base = TABLEAU_VIEWS.grid.crop
+  if (selectedCount <= 0) return base
   const rowsBottom = GRID_TABLE_HEADER_BOTTOM + GRID_TABLE_ROW_HEIGHT * selectedCount + GRID_TABLE_MARGIN
-  const bottom = Math.min(Math.max(base.y + base.height, rowsBottom), GRID_TABLE_BOTTOM)
+  const bottom = Math.min(rowsBottom, GRID_TABLE_BOTTOM + GRID_TABLE_MARGIN)
   return { ...base, height: bottom - base.y }
 }
 

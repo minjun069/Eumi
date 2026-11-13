@@ -14,7 +14,7 @@ import type {
 /**
  * Tableau 시트 하나를 틀 폭에 맞춰 띄우는 틀. AI 패널의 Tableau 카드와 인사이트 보고서 그래프가 함께 쓴다
  * - 틀마다 Tableau를 새로 띄운다. 틀끼리 매개변수 · 필터를 나누지 않는다
- * - 틀이 화면에 보일 때 처음 띄운다 (닫힌 패널, 스크롤 밖의 틀은 띄우지 않는다)
+ * - 틀이 화면에 보일 때 처음 띄운다 (닫힌 패널, 스크롤 밖의 틀은 띄우지 않는다). eager면 바로 띄운다 (숨겨 둔 시연 동 화면)
  * - 매개변수는 처음 띄울 때 넘기고, FirstInteractive 뒤 매개변수 → 대상 시트 필터 순서로 맞춘 다음 다시 읽어 확인한다.
  *   p_detail_adm은 표시값('강남구 신사동')이나 코드로 오고 다시 읽은 원값은 코드라서 표시값 · 별칭으로도 비교한다
  * - 대시보드는 크기가 고정이라 FirstVizSizeKnown의 크기로 시트 전체를 띄우고, 틀이 더 좁으면 틀 폭에 맞춰 줄여 보인다
@@ -168,6 +168,8 @@ export type TableauSheetFrameProps = {
   hideToolbar?: boolean
   /** 게시본의 데스크톱 배치로 띄운다 (틀 높이로 휴대폰 배치가 골라지지 않게) */
   desktopLayout?: boolean
+  /** 화면에 보이기를 기다리지 않고 바로 띄운다 (숨겨 둔 시연 동 화면의 보고서 그래프) */
+  eager?: boolean
 }
 
 export function TableauSheetFrame({
@@ -179,6 +181,7 @@ export function TableauSheetFrame({
   initialSize = INITIAL_SIZE,
   hideToolbar = false,
   desktopLayout = false,
+  eager = false,
 }: TableauSheetFrameProps) {
   const parametersKey = JSON.stringify(parameters)
   const filtersKey = JSON.stringify(filters)
@@ -186,7 +189,7 @@ export function TableauSheetFrame({
   const hostRef = useRef<HTMLDivElement>(null)
   const labelRef = useRef(label)
   labelRef.current = label
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(eager)
   const [phase, setPhase] = useState<Phase>("waiting")
   const [size, setSize] = useState<FrameSize>({ ...initialSize, chrome: 0 })
   const [frameWidth, setFrameWidth] = useState(0)

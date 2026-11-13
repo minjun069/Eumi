@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { EmptyState } from "@/components/common/EmptyState"
 import { formatMonth } from "@/screens/risk/riskQuery"
 import type { TableauView } from "@/tableau/tableauConfig"
-import type { Conditions } from "@/tableau/tableauTypes"
+import type { ChartState, Conditions } from "@/tableau/tableauTypes"
 import { TableauWorksheet } from "@/tableau/TableauWorksheet"
 
 // 고립 위험 탐색 화면들이 함께 쓰는 패널
@@ -23,6 +23,7 @@ export function TableauViewPanel({
   refreshKey,
   onSelectDong,
   onParameterValue,
+  onStateChange,
 }: {
   view: TableauView
   title: string
@@ -35,6 +36,8 @@ export function TableauViewPanel({
   onSelectDong?: (dongCode: string) => void
   /** Tableau 매개변수 값 (TableauWorksheet onParameterValue) */
   onParameterValue?: (name: string, value: string) => void
+  /** 불러오기 · 적용 상태 (TableauWorksheet onStateChange) */
+  onStateChange?: (state: ChartState) => void
 }) {
   const { dashboard, worksheet, width, height, crop } = view
   return (
@@ -60,6 +63,7 @@ export function TableauViewPanel({
               refreshKey={refreshKey}
               onSelectDong={onSelectDong}
               onParameterValue={onParameterValue}
+              onStateChange={onStateChange}
             />
             {hint && <p className="tableau-hint">{hint}</p>}
           </>

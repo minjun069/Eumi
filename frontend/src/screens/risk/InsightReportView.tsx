@@ -12,7 +12,8 @@ import { formatDateTime } from "@/utils/datetime"
  *   상세 워크북 시트(EmbedDetailV01~V08)와 그 설명
  * - 설명이 없으면(null · 공백) 그 그래프 아래에 '설명 준비 중', 그래프가 0개면 그 자리에 '그래프 준비 중'
  * - 퀵 인사이트(report.quickInsight)는 여기서 보이지 않는다. 왼쪽 아래 퀵 인사이트는 API-11(summary[0])이 기준이다
- * - 그래프는 ⑥ 격자 지도와 같은 매개변수(시군구 · 기간 · 행정동)로 띄우고, 화면에 보일 때 불러온다 (TableauSheetFrame)
+ * - 그래프는 ⑥ 격자 지도와 같은 매개변수(시군구 · 기간 · 행정동)로 띄우고, 화면에 보일 때 불러온다 (TableauSheetFrame).
+ *   eager(숨겨 둔 시연 동 화면)면 보이기 전에 모두 불러온다
  * - 시트는 게시본 데스크톱 배치의 고정 크기(그래프마다 다름: 720 · 900 폭, 420~700 높이) 그대로 전체를 띄우고,
  *   패널이 더 좁으면 패널 폭에 맞춰 줄인다. 틀 높이는 그래프마다 그 크기를 따른다. 도구 모음만 가린다
  * - 그래프마다 '크게 보기': 같은 시트를 설계 크기(1배)로 창에 띄우고 설명을 함께 보인다 (ReportGraphDialog)
@@ -24,11 +25,14 @@ export function InsightReportView({
   dongCode,
   sigunguCode,
   period,
+  eager = false,
 }: {
   report: InsightReport
   dongCode: string
   sigunguCode: string
   period: { from: string; to: string }
+  /** 보이기 전에 그래프를 모두 불러온다 */
+  eager?: boolean
 }) {
   const published = isPublished(sigunguCode, period)
   const parameters = tableauParameterInputs(tableauDetailParameters(dongCode, sigunguCode, period))
@@ -43,6 +47,7 @@ export function InsightReportView({
           description={graph.description}
           parameters={parameters}
           published={published}
+          eager={eager}
         />
       ))}
       <p className="report-footnote">
@@ -58,12 +63,14 @@ function ReportGraph({
   description,
   parameters,
   published,
+  eager,
 }: {
   number: number
   sheet: string
   description: string | null
   parameters: TableauParameterInput[]
   published: boolean
+  eager: boolean
 }) {
   const view = reportSheet(sheet)
   const title = view?.title ?? "그래프"
@@ -112,6 +119,7 @@ function ReportGraph({
           initialSize={view ? { width: view.width, height: view.height } : undefined}
           hideToolbar
           desktopLayout
+          eager={eager}
         />
       ) : (
         <p className="tableau-pending">Tableau 게시본이 아직 이 지역·기간을 담고 있지 않습니다.</p>
