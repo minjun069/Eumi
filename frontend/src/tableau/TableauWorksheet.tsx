@@ -4,14 +4,18 @@ import type { ChartState, MarksTable, Parameter, TableauWorksheetProps, Viz, Wor
 
 /**
  * Tableau Public 임베드용 대시보드 하나 (Embedding API v3, 프로토타입 feat/dashboard-PoC의 TableauWorksheet.tsx를 바꿈)
+ * - 대시보드는 Tableau에서 만든 그대로 고정 크기로 띄운다 (도구 모음만 숨길 수 있다).
+ *   crop이 있으면 그 부분만 보인다 (⑥: 위 선택 칸만 잘라 내고 지도 · 범례 · 격자 선택 카드 · 비교표를 보인다)
  * - 매개변수는 처음 띄울 때부터 넘기고, FirstInteractive 뒤에 실제 값을 다시 읽어 확인한다. 다르면 바꾸고 다시 확인한다
  * - 대시보드 이름이 바뀌면(지도 지표 전환) 다시 띄우지 않고 같은 워크북 안에서 대시보드만 바꾼다
  * - 조건 적용은 한 번에 하나씩 하고, 적용하는 사이 조건이 바뀌면 최신 조건으로 다시 적용한다 (오래된 결과가 덮지 않게)
  * - 갱신 중에는 이전 결과를 보이며 안내하고 클릭을 막는다. 실패하면 안내와 '다시 시도'
- * - 마크 선택(MarkSelectionChanged → getMarksAsync)에서 행정동 코드를 하나 받았을 때만 알린다
- * - 대시보드 안의 매개변수 선택 칸(⑥의 읍면동·기준월)은 그 자리만 잘라 숨긴다. 조건은 우리 화면에서만 바꾼다
- *   (숨긴 칸도 키보드로는 바꿀 수 있어, 우리 조건과 다른 값이 들어오면 되돌린다)
- * - crop이 있으면 대시보드에서 그 부분만 보인다 (⑥: 지도 그림만)
+ * - 마크 선택(MarkSelectionChanged → getMarksAsync)에서 행정동 코드를 하나 받았을 때만 알리고, 알린 뒤 그 선택을 지운다.
+ *   시군구 지도는 읍면동 화면으로 넘어가는 동안 숨겨 두므로, 지우지 않으면 '이전으로'로 돌아왔을 때 그 동이 선택된 채 보이고
+ *   같은 동을 다시 누르면 선택이 풀리기만 한다
+ * - 조건은 우리 화면 위쪽 필터로만 바꾼다. 잘라 낸 선택 칸도 키보드로는 바꿀 수 있어,
+ *   우리가 넘긴 매개변수(⑥의 읍면동·기준월)가 다른 값으로 바뀌면 우리 조건으로 되돌린다
+ * - 매개변수 값은 onParameterValue로 알린다 (⑥ 고른 격자 p_selected_grid로 보일 높이를 정한다). 우리가 넘기지 않은 값은 되돌리지 않는다
  */
 
 /** 게시본 설정이 잘못돼 다시 게시해야 하는 오류 (안내 문구를 그대로 보인다) */
@@ -32,19 +36,7 @@ function parameterInput(parameter: Parameter, value: string) {
   return option?.hasAlias && option.aliasValue ? option.aliasValue : value
 }
 
-/**
- * 지금 대시보드의 매개변수 선택 칸 자리를 뺀 잘라내기 (선택 칸이 없으면 풀어 둔다).
- * 잘라낸 자리는 보이지도 눌리지도 않는다. Tableau 임베드 API로는 칸 하나만 숨길 수 없어(11/5 확인) 화면에서 자른다
- */
-function hideParameterControls(viz: Viz, width: number, height: number) {
-  const sheet = viz.workbook.activeSheet
-  const controls = sheet.sheetType === "dashboard" ? sheet.objects.filter((item) => item.type === "parameter-control") : []
-  const holes = controls.map(({ position, size }) => `M${position.x} ${position.y}h${size.width}v${size.height}h${-size.width}Z`)
-  viz.style.clipPath = holes.length ? `path(evenodd, "M0 0H${width}V${height}H0Z${holes.join("")}")` : ""
-}
-
 export function TableauWorksheet({
-  workbook,
   dashboard,
   worksheet,
   label,
@@ -56,6 +48,7 @@ export function TableauWorksheet({
   crop,
   onSelectDong,
   onStateChange,
+  onParameterValue,
   refreshKey = 0,
 }: TableauWorksheetProps) {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -69,6 +62,8 @@ export function TableauWorksheet({
   stateCallbackRef.current = onStateChange
   const selectionCallbackRef = useRef(onSelectDong)
   selectionCallbackRef.current = onSelectDong
+  const parameterCallbackRef = useRef(onParameterValue)
+  parameterCallbackRef.current = onParameterValue
   const syncRef = useRef<(() => void) | null>(null)
   const [state, setState] = useState<ChartState>({ phase: "loading" })
   const [hasRendered, setHasRendered] = useState(false)
@@ -217,7 +212,6 @@ export function TableauWorksheet({
               pending = true
               continue
             }
-            hideParameterControls(viz, width, vizHeight)
             notify({ phase: "ready" })
           } catch (error) {
             if (disposed) return
@@ -245,6 +239,18 @@ export function TableauWorksheet({
     const onFirstInteractive = () => {
       interactive = true
       requestSync()
+      // 다시 불러오면(다시 시도) Tableau 쪽 값이 기본값으로 돌아가므로 처음 값을 한 번 알린다
+      if (parameterCallbackRef.current) {
+        viz!.workbook
+          .getParametersAsync()
+          .then((list) => {
+            if (disposed) return
+            for (const item of list) parameterCallbackRef.current?.(item.name, String(item.currentValue.value))
+          })
+          .catch((error) => {
+            if (!disposed) console.error("[TableauWorksheet] Parameter read error", error)
+          })
+      }
     }
     const onLoadError = (event: Event) => {
       interactive = false
@@ -255,13 +261,14 @@ export function TableauWorksheet({
       // Tableau 화면 안의 조작·도구 모음이 React 밖에서 값을 바꿀 수 있다
       parameterVersion += 1
       parameterCache = null
-      // 숨긴 선택 칸도 키보드(Tab → Enter)로는 열려 값이 바뀐다 (11/5 확인: ⑥ 읍면동을 바꾸면 화면과 다른 동이 그려졌다).
+      // 대시보드 안의 선택 칸으로 우리가 넘긴 매개변수를 바꾸면 화면과 다른 동·월이 그려진다 (11/5 확인: ⑥ 읍면동).
       // 우리 조건과 다른 값이면 우리 조건으로 되돌린다. 우리가 넣은 값은 조건과 같아서 다시 적용하지 않는다
       if (!interactive) return
       try {
         const detail = (event as CustomEvent<{ getParameterAsync: () => Promise<Parameter> }>).detail
         const parameter = await detail.getParameterAsync()
         if (disposed) return
+        parameterCallbackRef.current?.(parameter.name, String(parameter.currentValue.value))
         const wanted = conditionsRef.current.values.parameters[parameter.name]
         if (wanted !== undefined && String(parameter.currentValue.value) !== wanted) requestSync()
       } catch (error) {
@@ -292,7 +299,16 @@ export function TableauWorksheet({
         }
         setSelectionError("")
         // 매개변수를 바꿔도 선택이 풀린다. 행정동 하나를 고른 경우만 알리고, 빈 선택으로 화면 조건을 되돌리지 않는다
-        if (codes.size === 1) selectionCallbackRef.current?.([...codes][0])
+        if (codes.size !== 1) return
+        selectionCallbackRef.current?.([...codes][0])
+        // 고른 동은 위에서 넘겼다 (주소에 들어간다). 지우면 빈 선택이 한 번 더 오지만 위에서 알리지 않고 지나간다
+        const { dashboard: dashboardName, worksheet: worksheetName } = conditionsRef.current.values
+        try {
+          await targetWorksheet(dashboardName, worksheetName).clearSelectedMarksAsync()
+        } catch (error) {
+          // 지우지 못해도 선택이 남아 보일 뿐이다
+          if (!disposed) console.error("[TableauWorksheet] Clear selection error", error)
+        }
       } catch (error) {
         if (disposed || revision !== selectionRevision) return
         console.error("[TableauWorksheet] Selection error", error)
@@ -326,7 +342,7 @@ export function TableauWorksheet({
           parameter.setAttribute("value", value)
           viz.appendChild(parameter)
         }
-        viz.src = tableauViewUrl(conditionsRef.current.values.dashboard, workbook)
+        viz.src = tableauViewUrl(conditionsRef.current.values.dashboard)
         hostRef.current?.appendChild(viz)
       } catch (error) {
         console.error("[TableauWorksheet]", error)
@@ -343,7 +359,7 @@ export function TableauWorksheet({
       viz?.removeEventListener("vizloaderror", onLoadError)
       viz?.remove()
     }
-  }, [workbook, width, vizHeight, retry])
+  }, [width, vizHeight, retry])
 
   useEffect(() => {
     syncRef.current?.()

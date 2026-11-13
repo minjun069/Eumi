@@ -1,7 +1,7 @@
 import "@/styles/risk.css"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useLocation, useNavigate, useSearchParams } from "react-router"
+import { type Location, useNavigate } from "react-router"
 import { analysisApi, analysisKeys } from "@/api/analysisApi"
 import { errorMessage, isApiError } from "@/api/errors"
 import { regionApi, regionKeys } from "@/api/regionApi"
@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/common/EmptyState"
 import { FieldError } from "@/components/common/FieldError"
 import { RiskDongScreen } from "@/screens/risk/RiskDongScreen"
 import { LoadError, Loading, MONTHS_UNAVAILABLE, MonthSelect, TableauViewPanel } from "@/screens/risk/RiskPanels"
+import { isPreloadDong, PRELOAD_DONGS } from "@/screens/risk/riskPreload"
 import {
   compactPeriod,
   effectivePeriod,
@@ -30,18 +31,33 @@ import { useScreenContext } from "@/stores/screenContextStore"
 import { isPublished, TABLEAU_MAP_VIEWS, TABLEAU_VIEWS, tableauParameters } from "@/tableau/tableauConfig"
 import type { Conditions } from "@/tableau/tableauTypes"
 
+type DongQuery = RiskQuery & { dongCode: string }
+
+const sameQuery = (a: RiskQuery | null, b: RiskQuery | null) =>
+  a === b ||
+  (a !== null &&
+    b !== null &&
+    a.sigunguCode === b.sigunguCode &&
+    a.from === b.from &&
+    a.to === b.to &&
+    a.index === b.index &&
+    a.dongCode === b.dongCode)
+
 /**
  * 2.1 고립 위험 탐색. 주소에 dong이 있으면 읍면동 화면(RiskDongScreen), 없으면 시군구 화면
  * - 조건은 주소에 남긴다 (R5-A, riskQuery.ts). 뒤로 가기·새로고침하면 주소에서 다시 그린다
+ * - 다른 메뉴로 가도 이 화면을 지우지 않고 숨겨 둔다 (RiskHost). 숨긴 동안(active=false)에는 떠날 때의 주소(location)로 멈춰 있다
  * - 시군구 지도에서 읍면동으로 가면 시군구 화면을 지우지 않고 숨겨 둔다. '이전으로'에서 Tableau 4개를 다시 띄우지 않으려고.
  *   숨긴 동안에는 떠날 때의 조건으로 멈춰 두고(읍면동 화면에서 기간을 바꿔도 뒤에서 다시 적용하지 않는다), 돌아오면 그때 맞춘다.
  *   새로고침·주소로 바로 들어온 읍면동 화면에서는 시군구 화면을 미리 띄우지 않는다
+ * - 읍면동 화면은 마지막으로 본 동 하나와 시연 동(riskPreload.ts)을 숨겨 둔다.
+ *   시연 동은 시군구 ① 지도가 다 뜬 뒤 그 시군구 화면의 조건으로 미리 띄우고, 숨겨진 동안 시군구 화면의 조건을 따라간다.
+ *   마지막으로 본 동은 마지막으로 보였을 때의 조건으로 멈춰 있다. 다른 동을 보면 그 동으로 바뀐다
+ * - 숨긴 화면은 inert(누르기 · 포커스 · 화면 읽기 제외)이고 AI 화면 문맥을 붙이지 않는다
  */
-export function RiskScreen() {
+export function RiskScreen({ location, active }: { location: Location; active: boolean }) {
   const session = useSession()
-  const location = useLocation()
-  const [params] = useSearchParams()
-  const search = params.toString()
+  const search = location.search
   const profile = session.status === "authenticated" ? session.profile : null
   const query = useMemo(() => (profile ? parseRiskQuery(new URLSearchParams(search), profile) : null), [search, profile])
   // 이 화면이 떠 있는 동안 시군구 화면을 띄운 적이 있는지 (새로고침해도 navigation state는 남으므로 따로 기억한다)
@@ -49,27 +65,96 @@ export function RiskScreen() {
   useEffect(() => {
     if (query && !query.dongCode) districtShown.current = true
   }, [query])
+  // ① 지도가 다 뜬 시군구 (시연 동은 그 뒤에 띄워 시군구 화면이 늦어지지 않게 한다)
+  const [mapReadyFor, setMapReadyFor] = useState<string | null>(null)
+  const [lastDong, setLastDong] = useState<DongQuery | null>(null)
+  const [preloadDong, setPreloadDong] = useState<DongQuery | null>(null)
+
+  const leftFrom = location.state as DistrictState | null
+  const districtQuery: RiskQuery | null = !query
+    ? null
+    : !query.dongCode
+      ? query
+      : leftFrom?.fromDistrict && districtShown.current
+        ? { ...query, from: leftFrom.from, to: leftFrom.to, dongCode: null }
+        : null
+  const shownDong: DongQuery | null = query?.dongCode ? { ...query, dongCode: query.dongCode } : null
+
+  // 숨겨 둘 읍면동의 조건을 렌더 중에 정한다 (값이 같으면 다시 정하지 않는다). 보이는 동은 주소의 조건을 따른다
+  if (shownDong && !isPreloadDong(shownDong.dongCode) && !sameQuery(lastDong, shownDong)) setLastDong(shownDong)
+  let nextPreload = preloadDong
+  if (shownDong && isPreloadDong(shownDong.dongCode)) nextPreload = shownDong
+  else if (districtQuery) {
+    const code = PRELOAD_DONGS[districtQuery.sigunguCode]
+    if (code && mapReadyFor === districtQuery.sigunguCode) nextPreload = { ...districtQuery, dongCode: code }
+    // 시연 동이 없는 시군구로 바꾸면 앞 시군구의 시연 동은 내린다
+    else if (preloadDong && preloadDong.dongCode.slice(0, 5) !== districtQuery.sigunguCode) nextPreload = null
+  }
+  if (!sameQuery(preloadDong, nextPreload)) setPreloadDong(nextPreload)
 
   if (!profile || !query) return null
-  const leftFrom = location.state as DistrictState | null
-  const districtQuery: RiskQuery | null = !query.dongCode
-    ? query
-    : leftFrom?.fromDistrict && districtShown.current
-      ? { ...query, from: leftFrom.from, to: leftFrom.to, dongCode: null }
-      : null
+  const otherDong = lastDong && lastDong.dongCode !== preloadDong?.dongCode ? lastDong : null
 
-  // 두 화면의 자리를 고정해 두어야 시군구 화면이 숨겨졌다 돌아와도 다시 만들어지지 않는다
+  // 화면마다 자리를 고정해 두어야 숨겨졌다 돌아와도 다시 만들어지지 않는다 (Tableau iframe은 옮기면 다시 불러온다)
   return (
     <>
       {districtQuery && (
         <div className={query.dongCode ? "risk-kept" : undefined} inert={Boolean(query.dongCode)}>
-          <RiskDistrictScreen query={districtQuery} profile={profile} visible={!query.dongCode} />
+          <RiskDistrictScreen
+            query={districtQuery}
+            profile={profile}
+            location={location}
+            visible={active && !query.dongCode}
+            onMapReady={setMapReadyFor}
+          />
         </div>
       )}
-      {query.dongCode && (
-        <RiskDongScreen key={query.dongCode} query={{ ...query, dongCode: query.dongCode }} profile={profile} />
+      {preloadDong && (
+        <DongSlot
+          key={preloadDong.dongCode}
+          query={preloadDong}
+          profile={profile}
+          location={location}
+          shown={query.dongCode === preloadDong.dongCode}
+          active={active}
+          preload
+        />
+      )}
+      {otherDong && (
+        <DongSlot
+          key={otherDong.dongCode}
+          query={otherDong}
+          profile={profile}
+          location={location}
+          shown={query.dongCode === otherDong.dongCode}
+          active={active}
+          preload={false}
+        />
       )}
     </>
+  )
+}
+
+/** 읍면동 화면 하나의 자리. 보이지 않으면 숨겨 둔다 */
+function DongSlot({
+  query,
+  profile,
+  location,
+  shown,
+  active,
+  preload,
+}: {
+  query: DongQuery
+  profile: MenuProfile
+  location: Location
+  shown: boolean
+  active: boolean
+  preload: boolean
+}) {
+  return (
+    <div className={shown ? undefined : "risk-kept"} inert={!shown}>
+      <RiskDongScreen query={query} profile={profile} location={location} active={active && shown} preload={preload} />
+    </div>
   )
 }
 
@@ -79,11 +164,23 @@ export function RiskScreen() {
  * - 지도·그래프 4개는 같은 Tableau 워크북의 임베드용 대시보드를 패널마다 하나씩 띄운다. 게시본이 없는 뷰는 '준비 중'
  * - 지표 전환(종합 위험·배경 취약성·행동 이상)은 우리 화면의 버튼으로 ① 지도의 대시보드를 바꾼다
  * - 지도에서 행정동 하나를 고르면 읍면동 화면으로 (주소에 dong)
- * - AI 패널 질문에는 적용된 기간의 끝 월만 붙인다 (dongCode 없음). 읍면동 화면 뒤에 숨겨진 동안(visible=false)은 붙이지 않는다
+ * - AI 패널 질문에는 적용된 기간의 끝 월만 붙인다 (dongCode 없음). 숨겨진 동안(visible=false: 읍면동 화면 뒤 · 다른 메뉴)은 붙이지 않는다
+ * - ① 지도가 다 뜨면 onMapReady로 알린다 (시연 동 미리 띄우기)
  */
-function RiskDistrictScreen({ query, profile, visible }: { query: RiskQuery; profile: MenuProfile; visible: boolean }) {
+function RiskDistrictScreen({
+  query,
+  profile,
+  location,
+  visible,
+  onMapReady,
+}: {
+  query: RiskQuery
+  profile: MenuProfile
+  location: Location
+  visible: boolean
+  onMapReady: (sigunguCode: string) => void
+}) {
   const navigate = useNavigate()
-  const location = useLocation()
   const [form, setForm] = useState<RiskFilters>(() => filtersOf(query))
   const [errors, setErrors] = useState<{ region?: string; period?: string }>({})
   const [refreshKey, setRefreshKey] = useState(0)
@@ -213,6 +310,7 @@ function RiskDistrictScreen({ query, profile, visible }: { query: RiskQuery; pro
         refreshKey={refreshKey}
         onIndex={(index) => go({ ...query, index }, { replace: true })}
         onSelectDong={selectDong}
+        onMapReady={() => onMapReady(query.sigunguCode)}
       />
     )
   }
@@ -301,6 +399,7 @@ function RiskDashboard({
   refreshKey,
   onIndex,
   onSelectDong,
+  onMapReady,
 }: {
   query: RiskQuery
   sigunguName: string
@@ -308,6 +407,8 @@ function RiskDashboard({
   refreshKey: number
   onIndex: (index: RiskIndex) => void
   onSelectDong: (dongCode: string) => void
+  /** ① 지도가 다 떴을 때 (조건을 다시 적용해 다 뜬 때도) */
+  onMapReady: () => void
 }) {
   // 모든 대시보드가 같은 매개변수를 쓴다 (기준 월 = 종료 월 = p_end). 지역·기간 필터는 없다
   const conditions: Conditions = { filters: {}, parameters: tableauParameters(query.sigunguCode, period) }
@@ -324,6 +425,9 @@ function RiskDashboard({
           conditions={conditions}
           refreshKey={refreshKey}
           onSelectDong={onSelectDong}
+          onStateChange={(state) => {
+            if (state.phase === "ready") onMapReady()
+          }}
           hint="행정동을 누르면 읍면동 화면으로 이동합니다."
           actions={
             <div className="index-toggle" role="group" aria-label="지표">

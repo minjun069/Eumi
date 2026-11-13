@@ -13,8 +13,18 @@ const MENUS = [
   { label: "마이페이지", to: PATHS.my },
 ]
 
-/** 0.1 공통 메뉴바: 소속 기관명·이름·직함, 메뉴 이동(0.1.1), 로그아웃(0.1.2) */
-export function Sidebar({ profile }: { profile: MenuProfile }) {
+/**
+ * 0.1 공통 메뉴바: 소속 기관명·이름·직함, 메뉴 이동(0.1.1), 로그아웃(0.1.2)
+ * - riskLink가 있으면(다른 메뉴에 있고 고립 위험 탐색을 본 적이 있으면) '고립 위험 탐색'은 마지막으로 본 화면(조건 · 읍면동)으로 간다.
+ *   숨겨 둔 화면이 그대로 보인다 (RiskHost)
+ */
+export function Sidebar({
+  profile,
+  riskLink,
+}: {
+  profile: MenuProfile
+  riskLink: { pathname: string; search: string; state: unknown } | null
+}) {
   const navigate = useNavigate()
   const locked = profile.mustChangePassword
 
@@ -35,7 +45,10 @@ export function Sidebar({ profile }: { profile: MenuProfile }) {
         {MENUS.map((menu) => (
           <NavLink
             key={menu.to}
-            to={menu.to}
+            to={
+              menu.to === PATHS.risk && riskLink ? { pathname: riskLink.pathname, search: riskLink.search } : menu.to
+            }
+            state={menu.to === PATHS.risk ? riskLink?.state : undefined}
             className={({ isActive }) => (isActive ? "selected" : undefined)}
             aria-disabled={locked || undefined}
             onClick={(event) => {

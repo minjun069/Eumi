@@ -1,6 +1,6 @@
 # 이음이 API 명세
 
-- 판: 2.5.1 (2026-11-11, 11/6 초안 · 11/9 INT-06 · API-18 삭제 · 11/9 AI-a 반영 · 11/10 AI-b 반영: API-11 · 12 새 형식, INT-05 dongCodes, INT-08 · 11/10 A3 · M3 구현: API-09 · 33 · 34 · 11/10 C4: API-20 updatedAt, API-23 CaseUpdateInput · 11/11 A2 구현: API-04~07)
+- 판: 2.6.0 (2026-11-11, 11/6 초안 · 11/9 INT-06 · API-18 삭제 · 11/9 AI-a 반영 · 11/10 AI-b 반영: API-11 · 12 새 형식, INT-05 dongCodes, INT-08 · 11/10 A3 · M3 구현: API-09 · 33 · 34 · 11/10 C4: API-20 updatedAt, API-23 CaseUpdateInput · 11/11 A2 구현: API-04~07 · 11/11 보고서 일부 저장: API-12 찬 칸만, INT-05 · 08)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_API_명세표.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - API 형식의 기준은 `docs/api/openapi.json`, 내부 연동은 `docs/api/ai-agent-panel.md` · `docs/api/insight-report.md`다. 계약이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -10,8 +10,8 @@
 ## API 목록
 
 - 제목: 이음이 API 명세표
-- 요약: API 2.5.1  45개 작업 (구현 45 · 예정 0)  * 필수 입력  기본 경로 /api
-- 출처: eumi/docs/api/openapi.json 2.5.1 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장) · AI 대화 패널 연결(API-03 화면 문맥, INT-01 messageId, INT-07, INT-03 삭제)은 2026-11-09 openapi 2.3.4 · ai-agent-panel.md · 인사이트 보고서 연결(API-11 · 12 새 형식, INT-05 dongCodes · 202 본문 없음, INT-08)은 2026-11-10 openapi 2.4.0 · insight-report.md 확정
+- 요약: API 2.6.0  45개 작업 (구현 45 · 예정 0)  * 필수 입력  기본 경로 /api
+- 출처: eumi/docs/api/openapi.json 2.6.0 · eumi DB 및 인증 결정 · AI 패널(API-03·03-S1·03-S2·36~38)은 2026-11-02 A 방식 결정 · 질문 마스킹 범위는 2026-11-03 (ai-agent-panel.md 6절) · 인사이트 보고서 연동(INT-04 · 05)과 API-11·12 변경은 2026-11-06 초안 (A 방식, 문서 '이음이 API 명세 — 구현 현황과 AI 연동') · 보고서 저장 INT-06은 2026-11-09 삭제 (AI가 DB에 직접 저장) · AI 대화 패널 연결(API-03 화면 문맥, INT-01 messageId, INT-07, INT-03 삭제)은 2026-11-09 openapi 2.3.4 · ai-agent-panel.md · 인사이트 보고서 연결(API-11 · 12 새 형식, INT-05 dongCodes · 202 본문 없음, INT-08)은 2026-11-10 openapi 2.4.0 · insight-report.md 확정 · 보고서 일부 저장(API-12 찬 칸만 0~3개, null 가능)은 2026-11-11 openapi 2.6.0 · V20261111_01
 
 ### API-01 로그인 상태와 메뉴 프로필 조회
 - 페이지 범위: /login·공통
@@ -108,8 +108,8 @@
 - 페이지 범위: /risk?dong=…
 - 요청 경로: GET /api/analysis/dongs/{dongCode}/report
 - 요청 형식: 인증 SESSION 쿠키<br>path dongCode*:string; query month*:string<br>본문 없음
-- 응답 형식: 200 application/json analysisApi_getInsightReport_Success<br>report*:object 또는 null<br>report = {quickInsight*:string(1~500자); graphs*:[{sheet*:string(EmbedDetailV01~V08); description*:string(1~1000자)}] 정확히 3개(graph_1~3 순서); generatedAt*:string(date-time)} 또는 null · 옛 보고서(결과 시각 불일치) · 허용 밖 시트는 null · 결과 없음 404 · 조회가 생성을 실행하지 않음
-- 구현 (11/6): 구현 · 새 형식은 AI-b BE MR (2단계 V 파일 · FE와 같은 배포)
+- 응답 형식: 200 application/json analysisApi_getInsightReport_Success<br>report*:object 또는 null<br>report = {quickInsight*:string(1~500자) 또는 null; graphs*:[{sheet*:string(EmbedDetailV01~V08); description*:string(1~1000자) 또는 null}] 0~3개(graph_n이 있는 칸만 graph_1~3 순서, 빈 칸은 건너뜀); generatedAt*:string(date-time)} 또는 null · AI는 검토를 통과한 칸만 저장(2.6.0) · 허용 밖 시트는 그 그래프만 빼고 경고 로그 · 퀵 인사이트와 그래프가 모두 없거나 옛 보고서(결과 시각 불일치)면 null · 결과 없음 404 · 조회가 생성을 실행하지 않음
+- 구현 (11/6): 구현 (2.4.0 형식, 8칸이 모두 찬 보고서) · 2.6.0 일부 표시는 BE · FE MR에서 반영 (V20261111_01과 같은 배포)
 
 ### API-13 복지자원 목록 조회
 - 페이지 범위: /resources
@@ -356,7 +356,7 @@
 - 구간: BE → AI
 - 요청 경로: POST /internal/insight-reports/runs
 - 요청 형식: 인증 없음 (내부 네트워크)<br><br>본문 application/json<br>requestId*:string(uuid, INT-04를 처리하며 BE가 만든 값 = INT-04 응답의 X-Request-Id · meta.requestId); month*:string(YYYY-MM); dongCodes*:string[](10자리, 그 달 결과가 있는 모든 동, 1개 이상, 중복 없음)
-- 응답 형식: 202 본문 없음<br>400 본문 오류(모르는 필드 · 형식 · 중복 동)<br>접수만 바로 돌려주고 뒤에서 동별로 생성 · AI가 동마다 꼬리표(결과 행 updated_at)를 먼저 읽고 region_insight_report에 직접 저장(eumi_ai INSERT · UPDATE, 결과 행 updated_at = 꼬리표일 때만 반영, 같은 동 · 월 덮어씀, 0행이면 버림, 8칸을 다 채우지 못한 동은 저장하지 않음)<br>생성 중 오류가 난 동은 요청 끝에 한 번 더 · 모든 동을 처리한 뒤 INT-08 한 번 · 같은 달 요청이 겹치면 진행 중 작업을 멈추고 새 요청으로 다시 시작 · BE는 다시 보내지 않음
+- 응답 형식: 202 본문 없음<br>400 본문 오류(모르는 필드 · 형식 · 중복 동)<br>접수만 바로 돌려주고 뒤에서 동별로 생성 · AI가 동마다 꼬리표(결과 행 updated_at)를 먼저 읽고 region_insight_report에 직접 저장(eumi_ai INSERT · UPDATE, 결과 행 updated_at = 꼬리표일 때만 반영, 같은 동 · 월 덮어씀, 0행이면 버림, 검토를 통과한 칸만 저장하고 나머지는 NULL, 저장할 칸이 없는 동은 실패)<br>생성 중 오류가 난 동은 요청 끝에 한 번 더 · 모든 동을 처리한 뒤 INT-08 한 번 · 같은 달 요청이 겹치면 진행 중 작업을 멈추고 새 요청으로 다시 시작 · BE는 다시 보내지 않음
 
 ### INT-07 AI 행 저장 알림<br>신규 설계
 - 구간: AI → BE
@@ -367,7 +367,7 @@
 ### INT-08 보고서 생성 완료 알림<br>신규 설계
 - 구간: AI → BE
 - 요청 경로: POST /api/internal/analysis/insight-report-completions
-- 요청 형식: Authorization: Bearer <AI 토큰><br><br>본문 application/json<br>requestId*:string(INT-05에서 받은 값); month*:string(YYYY-MM); savedCount*:integer(0 이상, 저장된 동 수); failedDongCodes*:string[](10자리, 저장하지 못한 동, 없으면 빈 배열)
+- 요청 형식: Authorization: Bearer <AI 토큰><br><br>본문 application/json<br>requestId*:string(INT-05에서 받은 값); month*:string(YYYY-MM); savedCount*:integer(0 이상, 저장된 동 수, 일부 칸만 저장한 보고서 포함); failedDongCodes*:string[](10자리, 저장하지 못한 동, 없으면 빈 배열)
 - 응답 형식: 204 본문 없음<br>400 INVALID_JSON(모르는 필드 · 타입 오류) · 400 VALIDATION_ERROR · 401 UNAUTHENTICATED · 403 FORBIDDEN(AI 토큰 아님)<br>INT-05 요청 하나의 모든 동을 처리한 뒤 한 번 보냄 · 최대 2번(5xx · 연결 오류 · 시간 초과일 때만 한 번 더, 4xx는 다시 안 보냄) · BE는 requestId · 월 · 저장 수 · 실패한 동을 로그에만 남기고 저장하지 않음, 두 번 받아도 결과가 같음
 
 ## 별도 범위

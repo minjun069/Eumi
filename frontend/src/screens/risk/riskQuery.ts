@@ -18,8 +18,11 @@ export type RiskQuery = {
   dongCode: string | null
 }
 
-/** 시군구 지도에서 읍면동으로 갈 때 남기는 값 (navigation state): 돌아갈 때 기간이 그대로면 뒤로 가기 */
-export type DistrictState = { fromDistrict: true; from: string | null; to: string | null }
+/**
+ * 시군구 지도에서 읍면동으로 갈 때 남기는 값 (navigation state): 돌아갈 때 기간이 그대로면 뒤로 가기.
+ * viaMenu는 다른 메뉴에서 메뉴로 돌아온 읍면동 화면이다. 바로 앞 기록이 시군구 화면이 아니라서 뒤로 가기를 쓰지 않는다
+ */
+export type DistrictState = { fromDistrict: true; from: string | null; to: string | null; viaMenu?: true }
 
 /** 입력칸 (지역·기간). '적용'을 눌러야 주소에 반영된다 */
 export type RiskFilters = {

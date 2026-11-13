@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { EmptyState } from "@/components/common/EmptyState"
 import { formatMonth } from "@/screens/risk/riskQuery"
 import type { TableauView } from "@/tableau/tableauConfig"
-import type { Conditions } from "@/tableau/tableauTypes"
+import type { ChartState, Conditions } from "@/tableau/tableauTypes"
 import { TableauWorksheet } from "@/tableau/TableauWorksheet"
 
 // 고립 위험 탐색 화면들이 함께 쓰는 패널
@@ -10,8 +10,8 @@ import { TableauWorksheet } from "@/tableau/TableauWorksheet"
 /**
  * 우리 화면의 패널(제목·버튼) + 안쪽 Tableau 대시보드.
  * 게시본(tableauConfig)이 없는 뷰는 다른 뷰를 대신 넣지 않고 '준비 중'을 보인다
+ * - 대시보드는 Tableau에서 만든 그대로 띄운다. crop이 있으면 그 부분만 보인다 (⑥: 위 선택 칸만 잘라 낸다)
  * - Tableau 도구 모음은 모든 패널에서 숨긴다 (틀 높이 = 대시보드 높이). 출처는 번호 없이 작은 'Tableau Public' 표시로 남긴다
- * - 대시보드 일부만 띄우는 뷰(crop)는 잘라 낸 범례를 legend로 받아 그 위에 그린다
  */
 export function TableauViewPanel({
   view,
@@ -19,10 +19,11 @@ export function TableauViewPanel({
   label,
   conditions,
   actions,
-  legend,
   hint,
   refreshKey,
   onSelectDong,
+  onParameterValue,
+  onStateChange,
 }: {
   view: TableauView
   title: string
@@ -30,13 +31,15 @@ export function TableauViewPanel({
   label: string
   conditions: Conditions
   actions?: ReactNode
-  /** 대시보드 위에 그릴 범례 */
-  legend?: ReactNode
   hint?: string
   refreshKey: number
   onSelectDong?: (dongCode: string) => void
+  /** Tableau 매개변수 값 (TableauWorksheet onParameterValue) */
+  onParameterValue?: (name: string, value: string) => void
+  /** 불러오기 · 적용 상태 (TableauWorksheet onStateChange) */
+  onStateChange?: (state: ChartState) => void
 }) {
-  const { workbook, dashboard, worksheet, width, height, crop } = view
+  const { dashboard, worksheet, width, height, crop } = view
   return (
     <section className="risk-panel is-tableau">
       <header className="risk-panel-head">
@@ -47,9 +50,7 @@ export function TableauViewPanel({
         {dashboard && worksheet ? (
           <>
             <span className="tableau-badge">Tableau Public</span>
-            {legend}
             <TableauWorksheet
-              workbook={workbook}
               dashboard={dashboard}
               worksheet={worksheet}
               label={label}
@@ -61,6 +62,8 @@ export function TableauViewPanel({
               crop={crop}
               refreshKey={refreshKey}
               onSelectDong={onSelectDong}
+              onParameterValue={onParameterValue}
+              onStateChange={onStateChange}
             />
             {hint && <p className="tableau-hint">{hint}</p>}
           </>

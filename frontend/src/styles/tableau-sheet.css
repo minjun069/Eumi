@@ -8,8 +8,10 @@
   background: #fff;
 }
 
-/* Tableau는 대시보드 고정 크기로 띄우고 틀 폭에 맞춰 줄인다 (줄여도 클릭·툴팁 위치는 맞는다) */
+/* Tableau는 대시보드 고정 크기로 띄우고 틀 폭에 맞춰 줄인다 (줄여도 클릭·툴팁 위치는 맞는다).
+   틀이 대시보드보다 넓으면 가운데에 둔다 (더 좁으면 auto 여백이 0이라 왼쪽 위 기준으로 줄어든다) */
 .tableau-sheet-host {
+  margin: 0 auto;
   transform-origin: 0 0;
 }
 
