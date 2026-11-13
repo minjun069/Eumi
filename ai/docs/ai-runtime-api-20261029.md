@@ -100,7 +100,9 @@ grace-period=5초, unresponsive-after=40초, cancel-wait=3초다.
 설정·컨테이너 명령은 [AI README](../README.md), 검증 방법은 [API 왕복 검증](api-roundtrip.md)을 따른다.
 
 - BE: INT-01·02 호출, INT-07·08 수신과 토큰·시간 설정을 실제 AI와 검증해야 한다.
-- DB: eumi_ai 보고서 INSERT·UPDATE 부여는 BE 측 변경 예정이다. 기존 부분 NULL 금지 제약은 AI에서 변경하지 않는다.
+- DB 저장 SQL: 현행 컬럼으로 UPSERT하며 삭제된 `summary_lines`·`report`를 참조하지 않는다. 실제 PostgreSQL 저장은 미검증이다.
+- DB 권한: [권한 스크립트](../../db/migration/afterMigrate.sql)에 `eumi_ai`의 보고서 INSERT·UPDATE가 반영돼 있다. 실제 적용 권한은 미검증이다.
+- DB 제약: [11/10 마이그레이션](../../db/migration/V20261110_02__insight_report.sql)은 `quick_insight`, `graph_1~3`, `desc_1~3`, `result_updated_at` 8개 컬럼에 NOT NULL을 적용한다. AI의 미완성 항목 NULL 저장 계약과 충돌하며, DB 제약·업무 계약은 변경하지 않았다.
 - AI의 시점 비교를 제거했으므로 분석 갱신과 생성이 겹치면 이전 자료로 작성한 보고서가 나중에 저장될 수 있다. 기존 DB 뷰의 result_updated_at 일치 조건은 AI 범위 밖이라 그대로이며, 화면에서 해당 결과가 숨겨질 수 있다.
 - DB 장애·프로세스 강제 종료에서는 끝 행 커밋을 보장할 수 없다. 동기 작업이 이벤트 루프를 막는 동안에는 timeout 처리도 지연될 수 있다.
 - 40초는 LLM timeout에 근거한 BE 설정이다. 긴 도구 작업에는 별도 주기적 진행 알림이 없으므로 실제 데이터로 진행 행 간격을 확인해야 한다.
