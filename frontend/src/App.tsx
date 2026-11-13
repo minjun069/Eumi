@@ -17,7 +17,6 @@ import { WithdrawScreen } from "@/screens/my/WithdrawScreen"
 import { ResourceDetailScreen } from "@/screens/resource/ResourceDetailScreen"
 import { ResourceFormScreen } from "@/screens/resource/ResourceFormScreen"
 import { ResourceListScreen } from "@/screens/resource/ResourceListScreen"
-import { RiskScreen } from "@/screens/risk/RiskScreen"
 import { restoreSession } from "@/session/sessionActions"
 import { useSession } from "@/session/sessionStore"
 
@@ -50,7 +49,8 @@ export default function App() {
               </RequireAuth>
             }
           >
-            <Route path={PATHS.risk} element={<RiskScreen />} />
+            {/* 고립 위험 탐색 화면은 AppLayout의 RiskHost가 그린다 (다른 메뉴로 가도 지우지 않고 숨겨 두려고) */}
+            <Route path={PATHS.risk} element={null} />
             <Route path={PATHS.resources} element={<ResourceListScreen />} />
             <Route path={PATHS.resourceNew} element={<ResourceFormScreen key="new" mode="new" />} />
             <Route path="/resources/:resourceId" element={<ResourceDetailScreen />} />
