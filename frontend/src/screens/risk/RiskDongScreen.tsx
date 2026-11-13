@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useState, type ReactNode } from "react"
-import { useLocation, useNavigate } from "react-router"
+import { type Location, useNavigate } from "react-router"
 import { analysisApi, analysisKeys, type DongInsight, type InsightReportData } from "@/api/analysisApi"
 import { errorMessage, isApiError } from "@/api/errors"
 import type { MenuProfile } from "@/api/types"
@@ -47,10 +47,24 @@ const isNotFound = (error: unknown) =>
  * - ⑥ 격자 지도는 Tableau, 요약·인사이트(API-11)와 보고서(API-12)는 우리 서버 API
  * - 결과 없음(404)과 인사이트·보고서 준비 중(null)을 나눠 보인다
  * - 다른 읍면동은 '이전으로'로 시군구 지도로 돌아가 고른다
+ * - 숨겨 둘 수 있다 (RiskScreen): 숨긴 동안(active=false) AI 화면 문맥을 붙이지 않는다.
+ *   preload(시연 동)면 보이기 전에 보고서 그래프까지 모두 띄워 둔다
  */
-export function RiskDongScreen({ query, profile }: { query: RiskQuery & { dongCode: string }; profile: MenuProfile }) {
+export function RiskDongScreen({
+  query,
+  profile,
+  location,
+  active,
+  preload,
+}: {
+  query: RiskQuery & { dongCode: string }
+  profile: MenuProfile
+  /** 지금 주소 ('이전으로' · '적용'에서 쓴다. 숨긴 화면은 누를 수 없다) */
+  location: Location
+  active: boolean
+  preload: boolean
+}) {
   const navigate = useNavigate()
-  const location = useLocation()
   const validDong = DONG_PATTERN.test(query.dongCode)
   // 행정동 코드 앞 5자리가 시군구 코드다
   const sigunguCode = validDong ? query.dongCode.slice(0, 5) : query.sigunguCode
@@ -82,18 +96,19 @@ export function RiskDongScreen({ query, profile }: { query: RiskQuery & { dongCo
     queryFn: () => analysisApi.getInsightReport(query.dongCode, baseMonth ?? ""),
     enabled: baseMonth !== null,
   })
-  // AI 패널 질문에 붙이는 화면 문맥: 이 동 · 기준 월 (ai-agent-panel.md 3-1). 기준 월이 없거나 코드 형식이 틀리면 붙이지 않는다
+  // AI 패널 질문에 붙이는 화면 문맥: 이 동 · 기준 월 (ai-agent-panel.md 3-1). 숨겨져 있거나 기준 월이 없거나 코드 형식이 틀리면 붙이지 않는다
   const dongName = insight.data?.dongName
-  const contextMonth = validDong ? baseMonth : null
+  const contextMonth = active && validDong ? baseMonth : null
   useScreenContext(
     contextMonth ? { dongCode: query.dongCode, month: contextMonth } : null,
     contextMonth ? `${dongName ? `${dongName} · ` : ""}${formatMonth(contextMonth)} 기준` : "",
   )
 
   const onBack = () => {
-    // 시군구 지도에서 왔고 기간을 바꾸지 않았으면 뒤로 가기, 아니면 지금 기간으로 시군구 화면
+    // 시군구 지도에서 바로 왔고 기간을 바꾸지 않았으면 뒤로 가기, 아니면(메뉴로 돌아옴 · 기간 바꿈) 지금 기간으로 시군구 화면.
+    // 숨겨 둔 시군구 화면이 같은 조건이면 다시 띄우지 않고 그대로 보인다
     const state = location.state as DistrictState | null
-    if (state?.fromDistrict && state.from === query.from && state.to === query.to) navigate(-1)
+    if (state?.fromDistrict && !state.viaMenu && state.from === query.from && state.to === query.to) navigate(-1)
     else navigate(riskUrl({ ...query, sigunguCode, dongCode: null }, profile), { replace: true })
   }
 
@@ -158,6 +173,7 @@ export function RiskDongScreen({ query, profile }: { query: RiskQuery & { dongCo
         period={period ?? { from: baseMonth, to: baseMonth }}
         report={report}
         refreshKey={refreshKey}
+        preload={preload}
       />
     )
   }
@@ -210,18 +226,21 @@ function DongBody({
   period,
   report,
   refreshKey,
+  preload,
 }: {
   dong: DongInsight
   baseMonth: string
   period: { from: string; to: string }
   report: { isPending: boolean; isError: boolean; error: unknown; data?: InsightReportData; refetch: () => unknown }
   refreshKey: number
+  /** 보고서 그래프를 보이기 전에 모두 띄운다 */
+  preload: boolean
 }) {
   const navigate = useNavigate()
   const stage = stageStyle(dong.behavior.stage)
   const month = formatMonth(baseMonth)
   const published = isPublished(dong.sigunguCode, period)
-  // ⑥ 비교표에 보일 줄 수: Tableau 안에서 고른 격자 수 (세 줄 아래로는 줄이지 않는다, tableauGridCrop)
+  // ⑥ 비교표에 보일 줄 수: Tableau 안에서 고른 격자 수 (없으면 선택 카드 제목 줄까지만 보인다, tableauGridCrop)
   const [selectedGrids, setSelectedGrids] = useState(0)
   const onGridParameter = (name: string, value: string) => {
     if (name === TABLEAU_GRID_SELECTION_PARAMETER) setSelectedGrids(gridSelectionCount(value))
@@ -249,7 +268,7 @@ function DongBody({
         {published ? (
           // 행정동·기준 월은 위쪽 필터 값을 매개변수로 처음부터 넘기고 FirstInteractive 뒤에 다시 읽어 확인한다 (TableauWorksheet).
           // 대시보드에서 위 선택 칸만 잘라 내고 지도 · 범례 · 격자 선택 카드 · 비교표를 보인다.
-          // 비교표는 세 줄 높이가 기본이고, 넷째 격자부터 고른 만큼 늘어난다 (해제하면 다시 줄어든다)
+          // 처음에는 선택 카드 제목 줄까지만 보이고, 격자를 고르면 평균 두 칸과 비교표가 고른 만큼 늘어난다 (해제하면 다시 줄어든다)
           <TableauViewPanel
             view={{ ...TABLEAU_VIEWS.grid, crop: tableauGridCrop(selectedGrids) }}
             title={`${dong.dongName} 격자별 행동 이상 위험도 · ${month}`}
@@ -324,6 +343,7 @@ function DongBody({
             dongCode={dong.dongCode}
             sigunguCode={dong.sigunguCode}
             period={period}
+            eager={preload}
           />
         ) : (
           <p className="risk-empty-text">이 달의 인사이트 보고서를 준비 중입니다.</p>
