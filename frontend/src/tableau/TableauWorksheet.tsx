@@ -5,7 +5,9 @@ import type { ChartState, MarksTable, Parameter, TableauWorksheetProps, Viz, Wor
 /**
  * Tableau Public 임베드용 대시보드 하나 (Embedding API v3, 프로토타입 feat/dashboard-PoC의 TableauWorksheet.tsx를 바꿈)
  * - 대시보드는 Tableau에서 만든 그대로 고정 크기로 띄운다 (도구 모음만 숨길 수 있다).
- *   crop이 있으면 그 부분만 보인다 (⑥: 위 선택 칸만 잘라 내고 지도 · 범례 · 격자 선택 카드 · 비교표를 보인다)
+ *   crop이 있으면 그 부분만 보인다 (⑥: 위 선택 칸만 잘라 내고 지도 · 범례 · 격자 선택 카드 · 비교표를 보인다).
+ *   hoverHeight가 crop 높이보다 크면 마우스를 올린 동안 그 높이까지 아래 내용 위에 겹쳐 펼친다 (⑥ 격자 상세 정보가 잘리지 않게).
+ *   Tableau iframe 안의 마우스 위치는 받을 수 없어 ⑥ 어디에 올려도 펼친다
  * - 매개변수는 처음 띄울 때부터 넘기고, FirstInteractive 뒤에 실제 값을 다시 읽어 확인한다. 다르면 바꾸고 다시 확인한다
  * - 대시보드 이름이 바뀌면(지도 지표 전환) 다시 띄우지 않고 같은 워크북 안에서 대시보드만 바꾼다
  * - 조건 적용은 한 번에 하나씩 하고, 적용하는 사이 조건이 바뀌면 최신 조건으로 다시 적용한다 (오래된 결과가 덮지 않게)
@@ -46,6 +48,7 @@ export function TableauWorksheet({
   parameters = {},
   toolbar = "bottom",
   crop,
+  hoverHeight,
   onSelectDong,
   onStateChange,
   onParameterValue,
@@ -77,6 +80,13 @@ export function TableauWorksheet({
   const cropStyle = crop
     ? ({ width: crop.width, "--crop-x": `${-crop.x}px`, "--crop-y": `${-crop.y}px` } as CSSProperties)
     : undefined
+  // 마우스를 올린 동안 아래 내용 위에 겹쳐 펼친다 (자리는 frameHeight 그대로, CSS :hover가 최소 높이만 hoverHeight로 올린다).
+  // 이미 hoverHeight보다 크게 보이면(⑥ 격자 3개 이상) 그대로라 펼쳐지지 않는다. 클래스는 바꾸지 않아 높이 전환이 끊기지 않는다
+  const expandable = crop !== undefined && hoverHeight !== undefined
+  const grows = expandable && hoverHeight > frameHeight
+  const hostStyle: CSSProperties = expandable
+    ? ({ ...cropStyle, "--frame-height": `${frameHeight}px`, "--hover-height": `${hoverHeight}px` } as CSSProperties)
+    : { ...cropStyle, height: frameHeight }
 
   useEffect(() => {
     let disposed = false
@@ -369,7 +379,7 @@ export function TableauWorksheet({
   const updating = state.phase === "applying" && hasRendered
   return (
     <div
-      className="tableau-embed"
+      className={expandable ? "tableau-embed has-expandable" : "tableau-embed"}
       style={{ height: frameHeight + (selectionError ? 50 : 0) }}
       aria-label={label}
       aria-busy={state.phase === "loading" || state.phase === "applying"}
@@ -379,8 +389,10 @@ export function TableauWorksheet({
           (11/3 측정: 화면 진입부터 4개 확인까지 4.6~7.3초 → 덮기만 하면 1.7~3.6초) 숨기지 않는다 */}
       <div
         ref={hostRef}
-        className={crop ? "tableau-host is-cropped" : "tableau-host"}
-        style={{ ...cropStyle, height: frameHeight, pointerEvents: ready ? undefined : "none" }}
+        className={["tableau-host", crop && "is-cropped", expandable && "is-expandable", grows && "is-growing"]
+          .filter(Boolean)
+          .join(" ")}
+        style={{ ...hostStyle, pointerEvents: ready ? undefined : "none" }}
       />
       {updating && (
         <div className="tableau-updating" role="status">

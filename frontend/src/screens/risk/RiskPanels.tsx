@@ -39,7 +39,7 @@ export function TableauViewPanel({
   /** 불러오기 · 적용 상태 (TableauWorksheet onStateChange) */
   onStateChange?: (state: ChartState) => void
 }) {
-  const { dashboard, worksheet, width, height, crop } = view
+  const { dashboard, worksheet, width, height, crop, hoverHeight } = view
   return (
     <section className="risk-panel is-tableau">
       <header className="risk-panel-head">
@@ -60,6 +60,7 @@ export function TableauViewPanel({
               parameters={conditions.parameters}
               toolbar="hidden"
               crop={crop}
+              hoverHeight={hoverHeight}
               refreshKey={refreshKey}
               onSelectDong={onSelectDong}
               onParameterValue={onParameterValue}
