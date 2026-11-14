@@ -210,6 +210,46 @@
   margin: var(--crop-y) 0 0 var(--crop-x);
 }
 
+/* ⑥: 마우스를 올린 동안 격자 상세 정보가 들어가는 높이까지 아래 내용(퀵 인사이트) 위에 겹쳐 펼친다 (TableauWorksheet hoverHeight).
+   Tableau 격자 상세 정보(툴팁)는 iframe 크기 기준으로 자리를 잡아 잘라 낸 경계 아래로 나가므로, 펼쳐야 다 보인다.
+   펼칠 때는 자리(.tableau-embed 높이)가 그대로라 아래 내용이 밀리지 않는다.
+   스쳐 지나갈 때는 펼치지 않고(0.15초 뒤 펼침), 벗어난 뒤 잠시 기다렸다 접는다(0.25초). 이 지연은 min-height에만 건다.
+   격자를 고르거나 풀어 보일 높이(--frame-height)가 바뀌면 틀과 자리가 같이 0.2초 동안 바뀌어,
+   아래 내용(퀵 인사이트)이 순간 이동하지 않고 미끄러지듯 움직이고 그 사이 빈칸이 보이지 않는다 */
+.tableau-embed.has-expandable {
+  overflow: visible;
+  transition: height 0.2s ease;
+}
+
+.tableau-host.is-expandable {
+  position: relative;
+  height: var(--frame-height);
+  min-height: 0;
+  border-radius: 0 0 8px 8px;
+  transition:
+    height 0.2s ease,
+    min-height 0s linear 0.25s,
+    box-shadow 0s linear 0.25s,
+    z-index 0s linear 0.25s;
+}
+
+.tableau-host.is-expandable:hover {
+  z-index: 5;
+  min-height: var(--hover-height);
+  transition-delay: 0s, 0.15s, 0.15s, 0.15s;
+}
+
+.tableau-host.is-expandable.is-growing:hover {
+  box-shadow: 0 14px 24px -12px rgb(16 24 40 / 40%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tableau-embed.has-expandable,
+  .tableau-host.is-expandable {
+    transition-duration: 0s;
+  }
+}
+
 /* 확인 전·실패 때 Tableau를 덮는다 (숨기지 않고 덮어야 iframe이 느려지지 않는다) */
 .tableau-loading {
   position: absolute;

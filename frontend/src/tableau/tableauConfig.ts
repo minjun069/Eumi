@@ -30,6 +30,8 @@ export type TableauView = {
   height: number
   /** 대시보드에서 이 부분만 보인다 (px, 대시보드 왼쪽 위 기준). 없으면 대시보드 전체 */
   crop?: { x: number; y: number; width: number; height: number }
+  /** crop이 있을 때 마우스를 올린 동안 보일 높이. 아래 내용 위에 겹쳐 펼친다 (TableauWorksheet hoverHeight) */
+  hoverHeight?: number
 }
 
 /** 워크북 안의 뷰 주소 */
@@ -84,8 +86,14 @@ export const TABLEAU_VIEWS = {
     width: 640,
     height: 720,
     // 고른 격자가 없으면 카드는 제목 줄('지도에서 격자를 선택하세요' · 전체 해제)만 있고 평균 두 칸은 비어 있다.
-    // 그래서 처음에는 제목 줄 끝(476) + 여유 4px까지만 보인다
-    crop: { x: 8, y: 61, width: 624, height: 419 },
+    // 그래서 처음에는 제목 줄 끝(476) + 여유 4px까지만 보인다.
+    // 오른쪽은 대시보드 끝(640)까지 보인다 (오른쪽 끝 격자의 상세 정보가 640까지 나온다)
+    crop: { x: 8, y: 61, width: 632, height: 419 },
+    // 격자 상세 정보(툴팁, 격자 상세지표 포함 약 370×275)는 격자 아래로 나온다. 지도는 동 모양에 맞춰 확대돼
+    // 맨 아래 격자가 y 373~386에 오고, 거기서 뜬 상세 정보는 y 676 근처에서 끝난다 (11/13 역삼1동 확인).
+    // 상세 정보는 마우스 위치를 따라 붙으므로 격자 아래 끝을 가리켜도 들어가게 y 700까지만 겹쳐 펼친다.
+    // 격자를 골라 이미 그보다 크게 보이면(3개 이상) 펼치지 않는다
+    hoverHeight: 700 - 61,
   },
 } satisfies Record<string, TableauView>
 

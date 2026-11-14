@@ -84,6 +84,11 @@ export type TableauWorksheetProps = {
   toolbar?: "hidden" | "bottom"
   /** 대시보드에서 이 부분만 보인다 (px, 대시보드 왼쪽 위 기준). 있으면 도구 모음도 보이지 않는다 */
   crop?: { x: number; y: number; width: number; height: number }
+  /**
+   * crop이 있을 때 마우스를 올린 동안 보일 높이 (px). crop 높이보다 크면 그만큼 아래 내용 위에 겹쳐 펼친다.
+   * Tableau 상세 정보(툴팁)는 iframe 크기를 기준으로 자리를 잡아 잘라 낸 경계 아래로 나가기 때문이다
+   */
+  hoverHeight?: number
   /** 마크에서 행정동 하나를 골랐을 때 (빈 선택은 알리지 않는다). 알린 뒤 Tableau의 마크 선택은 지운다 */
   onSelectDong?: (dongCode: string) => void
   onStateChange?: (state: ChartState) => void
