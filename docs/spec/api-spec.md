@@ -1,6 +1,6 @@
 # 이음이 API 명세
 
-- 판: 2.6.0 (2026-11-11, 11/6 초안 · 11/9 INT-06 · API-18 삭제 · 11/9 AI-a 반영 · 11/10 AI-b 반영: API-11 · 12 새 형식, INT-05 dongCodes, INT-08 · 11/10 A3 · M3 구현: API-09 · 33 · 34 · 11/10 C4: API-20 updatedAt, API-23 CaseUpdateInput · 11/11 A2 구현: API-04~07 · 11/11 보고서 일부 저장: API-12 찬 칸만, INT-05 · 08 · 11/12 문서 정리: API-03 · 03-S1 · 03-S2 운영 http, API-11 · 12 배포 상태, Tableau 워크북 하나)
+- 판: 2.6.0 (2026-11-11, 11/6 초안 · 11/9 INT-06 · API-18 삭제 · 11/9 AI-a 반영 · 11/10 AI-b 반영: API-11 · 12 새 형식, INT-05 dongCodes, INT-08 · 11/10 A3 · M3 구현: API-09 · 33 · 34 · 11/10 C4: API-20 updatedAt, API-23 CaseUpdateInput · 11/11 A2 구현: API-04~07 · 11/11 보고서 일부 저장: API-12 찬 칸만, INT-05 · 08 · 11/12 문서 정리: API-03 · 03-S1 · 03-S2 운영 http, API-11 · 12 배포 상태, Tableau 워크북 하나 · 11/13 운영 메모: 보고서 생성 요청은 서버에서만, INT-04)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_API_명세표.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - API 형식의 기준은 `docs/api/openapi.json`, 내부 연동은 `docs/api/ai-agent-panel.md` · `docs/api/insight-report.md`다. 계약이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -350,7 +350,7 @@
 - 구간: 파이프라인 → BE
 - 요청 경로: POST /api/internal/analysis/pipeline-completions
 - 요청 형식: Authorization: Bearer <파이프라인 토큰><br><br>본문 application/json<br>month*:string(YYYY-MM); pipelineRunId:string(1~200자, 로그용); reason:string(FULL · RESULT_RELOAD · ANALYSIS_RELOAD, 기본 FULL, 로그용)
-- 응답 형식: 202 application/json<br>month*:string; targetCount*:integer<br>BE가 그 달 region_result의 동 코드를 모두 읽어 INT-05를 보내고, AI가 http-timeout(기본 3초) 안에 202로 접수하면 202 · targetCount는 보낸 동 수<br>400 VALIDATION_ERROR · 401 UNAUTHENTICATED · 403 FORBIDDEN · 404 NOT_FOUND(그 달 결과 없음) · 503 AI_UNAVAILABLE(AI 접수 실패 → 파이프라인이 재시도)<br>14단계(결과 검증) 성공 뒤 Airflow 마지막 작업이 보냄. 12·13단계만 다시 돌려도 보냄 · fake 모드는 INT-05 없이 202(targetCount는 그 달 동 수)
+- 응답 형식: 202 application/json<br>month*:string; targetCount*:integer<br>BE가 그 달 region_result의 동 코드를 모두 읽어 INT-05를 보내고, AI가 http-timeout(기본 3초) 안에 202로 접수하면 202 · targetCount는 보낸 동 수<br>400 VALIDATION_ERROR · 401 UNAUTHENTICATED · 403 FORBIDDEN · 404 NOT_FOUND(그 달 결과 없음) · 503 AI_UNAVAILABLE(AI 접수 실패 → 파이프라인이 재시도)<br>14단계(결과 검증) 성공 뒤 Airflow 마지막 작업이 보냄. 12·13단계만 다시 돌려도 보냄 · fake 모드는 INT-05 없이 202(targetCount는 그 달 동 수)<br>운영(11/13, 이 상태 유지): Airflow DAG에 아직 붙이지 않았다. 보고서 생성 요청은 인프라 담당이 서버 안에서만 보낸다(insight-report.md 머리 · infra/README.md의 AI 서버)
 
 ### INT-05 인사이트 보고서 생성 요청<br>신규 설계
 - 구간: BE → AI
