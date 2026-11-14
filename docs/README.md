@@ -11,7 +11,7 @@
 | 인사이트 보고서 내부 연동 | [api/insight-report.md](api/insight-report.md) | 확정 (11/10, 11/11 일부 저장). AI 구현이 아직 다른 곳은 0절, 운영에서는 서버에서만 생성 요청(머리의 운영 특이사항) |
 | 저장소 초기 설정 | [gitlab-setup.md](gitlab-setup.md) | - |
 | 결정 기록: 로그인 방식 · 에이전트 흐름 전달 | [decisions/login-sse.md](decisions/login-sse.md) | 확정 (11/2 수정: 에이전트 흐름 SSE → 1초 조회) |
-| 결정 기록: 내부 연동 (BE · AI · 파이프라인) | [decisions/internal-integration.md](decisions/internal-integration.md) | 확정 (11/6, 11/7 보완). 구현은 [계획](work-ref/내부_연동_변경_계획.md)대로 진행 |
+| 결정 기록: 내부 연동 (BE · AI · 파이프라인) | [decisions/internal-integration.md](decisions/internal-integration.md) | 확정 (11/6, 11/7 보완). 구현 끝남 (11/13, [계획](work-ref/내부_연동_변경_계획.md)은 기록으로 둠) |
 | 성능 평가 (계획 · 1회차 · 2회차 결과) | [perf/](perf/README.md) | 끝남 (11/13). 목표 12개 중 10개 충족, 기능명세 NFR-PER-01의 근거 |
 | 작업 참고 | [work-ref/](work-ref/README.md) | 작업 계획에 딸린 참고 문서. 계획이 끝나면 바뀐 계약을 api/에 반영하고 지움 |
 

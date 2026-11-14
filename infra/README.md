@@ -43,7 +43,7 @@ docker compose logs flyway   # "Successfully applied …" (처음이면 V1부터
 
 ## AI 서버 (profile `ai`)
 
-운영과 같은 `ai/Dockerfile`(AI 담당 관리)로 빌드한다. 의존성은 `ai/pyproject.toml` · `ai/uv.lock` 그대로(`uv sync --locked --no-dev`, Python 3.12)이고, `ai/Dockerfile`과 서버 코드(`ai/api.py`)가 있어야 뜬다. 주고받는 형식은 [docs/api](../docs/api/README.md)와 진행 중인 [내부 연동 변경 계획](../docs/work-ref/내부_연동_변경_계획.md)을 따른다.
+운영과 같은 `ai/Dockerfile`(AI 담당 관리)로 빌드한다. 의존성은 `ai/pyproject.toml` · `ai/uv.lock` 그대로(`uv sync --locked --no-dev`, Python 3.12)이고, `ai/Dockerfile`과 서버 코드(`ai/api.py`)가 있어야 뜬다. 주고받는 형식은 [docs/api](../docs/api/README.md)를 따른다 ([내부 연동 변경 계획](../docs/work-ref/내부_연동_변경_계획.md)은 11/13에 끝나 기록으로만 둔다).
 
 | 항목 | 값 |
 |---|---|
