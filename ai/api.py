@@ -17,8 +17,19 @@ from langgraph.checkpoint.memory import InMemorySaver
 from pydantic import ConfigDict, Field, TypeAdapter, with_config
 from typing_extensions import TypedDict
 
-from report_html import build_report
 from src.agent_nodes import build_nodes, finish, publish_report
+from src.api_observation import (
+    RequestTraceMiddleware,
+    deployment_manifest,
+    execution_recorder,
+    observe_admission,
+    observe_notification,
+    observe_report_completion,
+    observe_report_results,
+    report_batch_trace,
+    save_execution_report,
+    trace_notification,
+)
 from src.database import (
     Database,
     DatabaseUnavailable,
@@ -28,7 +39,7 @@ from src.database import (
 )
 from src.exceptions import LimitReached
 from src.execution import consume, finalizing, record
-from src.execution_trace import TraceRecorder, recording, trace_span
+from src.execution_trace import recording, trace_acall, trace_output, trace_span
 from src.gemini import create_model
 from src.graph import compile_graph
 from src.monitoring import (
@@ -88,7 +99,7 @@ run_request_adapter = TypeAdapter(RunRequest)
 
 async def notify(client, settings, state, path, payload):
     """커밋한 결과의 전송만 최대 두 번 시도한다. 4xx·잘못된 204는 재시도하지 않는다."""
-    for _ in range(2):
+    for attempt in range(1, 3):
         item = record(
             "transport",
             "notification",
@@ -98,7 +109,9 @@ async def notify(client, settings, state, path, payload):
         )
         state["results"].append(item)
         try:
-            with trace_span("http", "notification", payload) as span:
+            with trace_notification(
+                path, payload, attempt=attempt, timeout=settings.notification_timeout
+            ):
                 async with asyncio.timeout(settings.notification_timeout):
                     result = await client.post(
                         str(settings.backend_url).rstrip("/") + path,
@@ -108,9 +121,9 @@ async def notify(client, settings, state, path, payload):
                             + settings.backend_token.get_secret_value()
                         },
                     )
-                if span:
-                    span.update(output={"status_code": result.status_code})
-                if result.status_code == 204 and not result.content:
+                accepted = result.status_code == 204 and not result.content
+                observe_notification(result, accepted=accepted)
+                if accepted:
                     item["outcome"] = "success"
                     return True
                 if result.status_code < 500:
@@ -140,10 +153,9 @@ async def notify_message(state, message_id, *, client, settings):
 
 async def commit_response(state, *, database, client, settings):
     async with asyncio.timeout(3):
-        with trace_span("database", "save_response", {"state": state}) as span:
+        with trace_span("database", "save_response", {"state": state}):
             message_id = await database.save_response(state)
-            if span:
-                span.update(output={"message_id": message_id, "committed": True})
+            trace_output({"message_id": message_id, "committed": True})
     await notify_message(state, message_id, client=client, settings=settings)
 
 
@@ -167,32 +179,21 @@ async def publish_progress(state, name, *, database, client, settings):
     await commit_response(state, database=database, client=client, settings=settings)
 
 
-def execution_recorder(settings, folder):
-    secrets = [
-        value.get_secret_value()
-        for value in (
-            settings.api_key,
-            settings.database_url,
-            settings.langfuse_secret_key,
-            settings.backend_token,
-        )
-        if value
-    ]
-    return TraceRecorder(secrets=secrets, journal=folder / "trace.jsonl")
-
-
-def save_execution_report(state, recorder, folder, failure=None):
-    # 관측 파일은 업무 State나 재개 저장소를 대체하지 않는다.
-    report = recorder.snapshot(
-        {
-            "state": state_adapter.dump_python(state, mode="json"),
-            "trace": recorder.export(),
-            "failure": failure,
-        }
-    )
-    path = folder / "report.json"
-    path.write_text(json.dumps(report, ensure_ascii=False), encoding="utf-8")
-    build_report([path], folder / "report.html")
+async def commit_cancelled(state, *, database, client, settings):
+    """실행 코루틴 진입 전 취소도 별도 기록에서 커밋·알림을 끝까지 관측한다."""
+    folder = settings.output_dir / state["execution"]["run_id"] / str(uuid4())
+    recorder = execution_recorder(settings, folder)
+    failure = None
+    with recording(recorder):
+        try:
+            await commit_response(
+                state, database=database, client=client, settings=settings
+            )
+        except BaseException as exc:
+            failure = {"error_type": type(exc).__name__}
+            raise
+        finally:
+            save_execution_report(state, recorder, folder, failure)
 
 
 async def execute(state, *, database, model, client, settings, monitoring):
@@ -228,9 +229,7 @@ async def execute(state, *, database, model, client, settings, monitoring):
                 )
                 # 최종 커밋에 3초를 남긴다. DB 읽기 시간은 접수 시 사용량에 반영한다.
                 async with asyncio.timeout(max(0, seconds - 3)):
-                    with trace_span(
-                        "agent", "api.run", {"initial_state": state}
-                    ) as span:
+                    with trace_span("agent", "api.run", {"initial_state": state}):
                         async for value in graph.astream(
                             state,
                             execution_config(run_id, config),
@@ -245,8 +244,7 @@ async def execute(state, *, database, model, client, settings, monitoring):
                                     }
                                 )
                             )
-                        if span:
-                            span.update(output=state)
+                        trace_output(state)
                 record_execution(observation, state)
         except asyncio.CancelledError:
             state["execution"]["status"] = "cancelled"
@@ -370,10 +368,9 @@ async def save_report(state, *, database):
         item = record("report", "report_save", "보고서 DB 직접 저장", success=False)
         state["results"].append(item)
         try:
-            with trace_span("database", "save_report", {"state": state}) as span:
+            with trace_span("database", "save_report", {"state": state}):
                 await database.save_report(state)
-                if span:
-                    span.update(output={"committed": True})
+                trace_output({"committed": True})
             item["outcome"] = "success"
             return
         except Exception as exc:
@@ -386,6 +383,25 @@ async def save_report(state, *, database):
 
 
 async def execute_reports(states, *, database, model, client=None, semaphore=None):
+    with report_batch_trace(database.settings, states) as observation:
+        try:
+            return await _execute_reports(
+                states,
+                database=database,
+                model=model,
+                client=client,
+                semaphore=semaphore,
+                observation=observation,
+            )
+        finally:
+            observe_report_results(
+                observation, states, [report_saved(s) for s in states]
+            )
+
+
+async def _execute_reports(
+    states, *, database, model, client=None, semaphore=None, observation
+):
     # 관측 객체만 별도로 보관한다. 재처리도 같은 동의 기록기에 이어 쓴다.
     recorders = {
         state["execution"]["run_id"]: execution_recorder(
@@ -416,11 +432,17 @@ async def execute_reports(states, *, database, model, client=None, semaphore=Non
     async def run_one(state):
         with (
             recording(recorders[state["execution"]["run_id"]]),
-            trace_span("agent", "api.report", {"initial_state": state}) as span,
+            trace_span("agent", "api.report", {"initial_state": state}),
         ):
             try:
                 if not any(r["decision"] == "report_source" for r in state["results"]):
-                    await database.prepare_report(state)
+                    await trace_acall(
+                        "database",
+                        "prepare_report",
+                        {"request": report_input(state)},
+                        lambda: database.prepare_report(state),
+                        output=lambda _: {"source": report_source(state)},
+                    )
                 state.update(
                     await execute_report(state, database=database, model=model)
                 )
@@ -437,12 +459,23 @@ async def execute_reports(states, *, database, model, client=None, semaphore=Non
                 state["execution"]["status"] = "failed"
             if not retry_report(state):
                 await finish_one(state)
-            span.update(output=state)
+            trace_output(state)
             return state
 
     async def limited(state):
-        async with semaphore:
-            return await run_one(state)
+        with recording(recorders[state["execution"]["run_id"]]):
+            acquired = False
+            try:
+                with trace_span(
+                    "queue", "report_wait", {"run_id": state["execution"]["run_id"]}
+                ):
+                    await semaphore.acquire()
+                    acquired = True
+                    trace_output({"acquired": True})
+                return await run_one(state)
+            finally:
+                if acquired:
+                    semaphore.release()
 
     semaphore = semaphore or asyncio.Semaphore(database.settings.report_concurrency)
     failure = None
@@ -491,17 +524,17 @@ async def execute_reports(states, *, database, model, client=None, semaphore=Non
                     ],
                 },
             )
+        observe_report_completion(
+            observation, notification_attempted=client is not None
+        )
         for state in states:
             run_id = state["execution"]["run_id"]
-            try:
-                save_execution_report(
-                    state,
-                    recorders[run_id],
-                    database.settings.output_dir / run_id,
-                    failure,
-                )
-            except OSError:
-                logger.warning("Report diagnostic write failed run_id=%s", run_id)
+            save_execution_report(
+                state,
+                recorders[run_id],
+                database.settings.output_dir / run_id,
+                failure,
+            )
 
     return states
 
@@ -548,9 +581,19 @@ def create_app(settings=None, *, database=None, model=None):
                     await app.state.model.http_async_client.aclose()
 
     app = FastAPI(lifespan=lifespan)
+    app.add_middleware(
+        RequestTraceMiddleware,
+        settings=settings,
+        manifest=deployment_manifest(settings),
+        report_path=REPORT_PATH,
+    )
 
     @app.exception_handler(RequestValidationError)
     async def invalid_request(request, exc):
+        observe_admission(
+            "invalid_request",
+            errors=[{"type": e["type"], "loc": e["loc"]} for e in exc.errors()],
+        )
         return Response(status_code=400)
 
     @app.get("/health")
@@ -577,6 +620,7 @@ def create_app(settings=None, *, database=None, model=None):
         )
         app.state.report_tasks.add(task)
         task.add_done_callback(reports_finished)
+        observe_admission("accepted")
         return Response(status_code=202)
 
     def finished(run_id, task):
@@ -596,7 +640,9 @@ def create_app(settings=None, *, database=None, model=None):
         if run_id in app.state.tasks:
             active, _ = app.state.tasks[run_id]
             if question_id(active) == body["messageId"]:
+                observe_admission("duplicate_active")
                 return Response(status_code=202)
+            observe_admission("conversation_conflict")
             raise HTTPException(409, "Conversation is already running")
         state = create_state(
             {"goal": "저장된 질문 조회"},
@@ -620,12 +666,14 @@ def create_app(settings=None, *, database=None, model=None):
         app.state.tasks[run_id] = (state, asyncio.current_task())
         try:
             inputs = state["results"][0]["action"]["arguments"]
-            async with asyncio.timeout(
-                min(settings.database_timeout, settings.runtime_timeout)
-            ):
-                loaded = await database.load_question(
-                    UUID(inputs["conversationId"]), inputs["messageId"]
-                )
+            with trace_span("database", "load_question", inputs):
+                async with asyncio.timeout(
+                    min(settings.database_timeout, settings.runtime_timeout)
+                ):
+                    loaded = await database.load_question(
+                        UUID(inputs["conversationId"]), inputs["messageId"]
+                    )
+                trace_output({"state": loaded})
             loaded["results"] = state["results"] + loaded["results"]
             state.update(state_adapter.validate_python(loaded))
             context = inputs.get("context", {})
@@ -649,12 +697,15 @@ def create_app(settings=None, *, database=None, model=None):
             app.state.tasks[run_id] = (state, task)
             task.add_done_callback(lambda task: finished(run_id, task))
         except QuestionNotFound:
+            observe_admission("question_not_found")
             app.state.tasks.pop(run_id, None)
             raise HTTPException(400, "Question not found") from None
         except QuestionFinished:
+            observe_admission("already_finished")
             app.state.tasks.pop(run_id, None)
             return Response(status_code=202)
         except asyncio.CancelledError:
+            observe_admission("cancelled_during_admission")
             state["execution"]["status"] = "cancelled"
             try:
                 await commit_response(
@@ -664,11 +715,14 @@ def create_app(settings=None, *, database=None, model=None):
                 app.state.tasks.pop(run_id, None)
             return Response(status_code=202)
         except (DatabaseUnavailable, psycopg.Error, TimeoutError):
+            observe_admission("database_unavailable")
             app.state.tasks.pop(run_id, None)
             raise HTTPException(503, "Database unavailable") from None
         except BaseException:
+            observe_admission("admission_error")
             app.state.tasks.pop(run_id, None)
             raise
+        observe_admission("accepted")
         return Response(status_code=202)
 
     @app.post(
@@ -678,19 +732,32 @@ def create_app(settings=None, *, database=None, model=None):
     )
     async def cancel(conversation_id: UUID):
         running = app.state.tasks.get(str(conversation_id))
+        observe_admission("cancel_no_active_run", conversation_id=str(conversation_id))
         if running:
             state, task = running
+            observe_admission(
+                "cancel_already_requested"
+                if task.cancelling()
+                else "cancel_already_finished",
+                conversation_id=str(conversation_id),
+                question_id=question_id(state),
+            )
             if (
                 state["execution"]["status"] in {"queued", "running"}
                 and not task.cancelling()
             ):
+                observe_admission(
+                    "cancel_requested",
+                    conversation_id=str(conversation_id),
+                    question_id=question_id(state),
+                )
                 task.cancel()
                 await asyncio.sleep(0)
                 # coroutine 진입 전에 취소된 Task는 execute의 finally를 실행하지 않는다.
                 if task.cancelled():
                     state["execution"]["status"] = "cancelled"
                     finalizer = asyncio.create_task(
-                        commit_response(
+                        commit_cancelled(
                             state,
                             database=database,
                             client=app.state.client,
