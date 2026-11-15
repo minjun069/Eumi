@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+from pathlib import Path
 
 import httpx
 import pytest
@@ -32,6 +33,66 @@ async def test_local_http_report_runner(monkeypatch, tmp_path):
     # 같은 파일 DB라도 다시 접수해 생성한다.
     assert await report_roundtrip.run(settings, db, BODY)
     assert len(list(settings.output_dir.glob("*/report.json"))) == 2
+    evidence_files = list(settings.output_dir.glob("roundtrips/*/evidence.json"))
+    assert len(evidence_files) == 2
+    for path in evidence_files:
+        raw = path.read_text(encoding="utf-8")
+        assert "local-test-token" not in raw
+        evidence = json.loads(raw)
+        assert evidence["passed"] is True
+        assert evidence["storage"] == "temporary_json"
+        exchange = evidence["api_exchanges"][0]
+        assert exchange["request_body"] == BODY
+        assert exchange["response"] == {"status_code": 202, "body": "", "body_bytes": 0}
+        notification = evidence["notifications"][0]
+        assert notification["request_body"]["savedCount"] == 1
+        assert notification["authorization_matches"] is True
+        assert notification["response"] == {
+            "status_code": 204,
+            "body": "",
+            "body_bytes": 0,
+        }
+        report = json.loads(
+            await asyncio.to_thread(
+                Path(evidence["report_paths"][0]).read_text, encoding="utf-8"
+            )
+        )
+        observed = evidence["database_reads"][0]
+        assert observed["rows"] == [report_artifact(report["state"])]
+        assert observed["started_at"] <= observed["observed_at"]
+
+
+@pytest.mark.asyncio
+async def test_rejected_report_request_preserves_http_and_readback(
+    monkeypatch, tmp_path
+):
+    settings, _ = setup(tmp_path / "runs")
+    db = FileReportDatabase(settings, tmp_path / "db")
+    db.seed(BODY)
+    model = ReportModel()
+    monkeypatch.setattr(
+        report_roundtrip,
+        "create_app",
+        lambda settings, *, database: create_app(
+            settings, database=database, model=model
+        ),
+    )
+    invalid = BODY | {"month": "invalid"}
+    with pytest.raises(RuntimeError, match="HTTP 400"):
+        await report_roundtrip.run(settings, db, invalid)
+    path = next(settings.output_dir.glob("roundtrips/*/evidence.json"))
+    evidence = json.loads(path.read_text("utf-8"))
+    assert evidence["passed"] is False
+    assert evidence["error_type"] == "RuntimeError"
+    assert evidence["api_exchanges"][0]["request_body"] == invalid
+    assert evidence["api_exchanges"][0]["response"] == {
+        "status_code": 400,
+        "body": "",
+        "body_bytes": 0,
+    }
+    assert evidence["notifications"] == []
+    assert evidence["database_reads"][0]["rows"] == []
+    assert model.calls == []
 
 
 @pytest.mark.asyncio

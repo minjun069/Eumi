@@ -9,10 +9,16 @@ from uuid import uuid4
 
 import httpx
 from fastapi import FastAPI, Response
-from pydantic import SecretStr, TypeAdapter
+from pydantic import HttpUrl, SecretStr, TypeAdapter
 
 from api import REPORT_PATH, create_app, report_request_adapter
 from experiments.api_roundtrip import serve, write_json
+from experiments.evidence import (
+    NotificationEvidence,
+    database_read,
+    observed_post,
+    roundtrip_evidence,
+)
 from experiments.report_fixtures import datasets
 from src.database import Database, record_report_source
 from src.settings import Settings
@@ -92,55 +98,72 @@ class FileReportDatabase(Database):
 
 
 async def run(settings, database, body):
-    previous_reports = set(settings.output_dir.glob("*/report.json"))
-    receiver = FastAPI()
-    received = []
+    with roundtrip_evidence(
+        settings.output_dir,
+        storage="temporary_json",
+        storage_reference=str((database.folder / "reports.json").resolve()),
+        settings=settings,
+    ) as (evidence, _):
+        previous_reports = set(settings.output_dir.glob("*/report.json"))
+        receiver = FastAPI()
+        received = []
 
-    @receiver.post("/api/internal/analysis/insight-report-completions", status_code=204)
-    async def receive(payload: dict):
-        received.append(payload)
-        return Response(status_code=204)
-
-    async with serve(receiver) as backend:
-        settings.backend_url = backend
-        settings.backend_token = SecretStr("local-test-token")
-        app = create_app(settings, database=database)
-        async with serve(app) as url, httpx.AsyncClient(timeout=30) as client:
-            response = await client.post(f"{url}{REPORT_PATH}", json=body)
-            if response.content or response.status_code != 202:
-                raise RuntimeError(f"접수 실패: HTTP {response.status_code}")
-            print(f"HTTP {response.status_code}", flush=True)
-            await asyncio.gather(*list(app.state.report_tasks))
-    # HTTP 응답 전에 Task가 끝난 경우도 파일에서 같은 요청의 결과를 확인한다.
-    reports = [
-        json.loads(path.read_text(encoding="utf-8"))
-        for path in settings.output_dir.glob("*/report.json")
-        if path not in previous_reports
-    ]
-    reports = [
-        r for r in reports if report_input(r["state"])["requestId"] == body["requestId"]
-    ]
-    saved = database.read_reports()
-    return (
-        received
-        == [
-            {
-                "requestId": body["requestId"],
-                "month": body["month"],
-                "savedCount": len(body["dongCodes"]),
-                "failedDongCodes": [],
-            }
-        ]
-        and len(reports) == len(body["dongCodes"])
-        and all(
-            r["failure"] is None
-            and r["state"]["execution"]["status"] == "completed"
-            and report_artifact(r["state"]) in saved
-            and r["trace"]["coverage"]["model_inputs"] > 0
-            and r["trace"]["coverage"]["unfinished_spans"] == 0
-            for r in reports
+        @receiver.post(
+            "/api/internal/analysis/insight-report-completions", status_code=204
         )
-    )
+        async def receive(payload: dict):
+            received.append(payload)
+            return Response(status_code=204)
+
+        try:
+            async with serve(
+                NotificationEvidence(receiver, settings=settings, evidence=evidence)
+            ) as backend:
+                settings.backend_url = HttpUrl(backend)
+                settings.backend_token = SecretStr("local-test-token")
+                app = create_app(settings, database=database)
+                async with serve(app) as url, httpx.AsyncClient(timeout=30) as client:
+                    response = await observed_post(
+                        client, f"{url}{REPORT_PATH}", body, evidence
+                    )
+                    if response.content or response.status_code != 202:
+                        raise RuntimeError(f"접수 실패: HTTP {response.status_code}")
+                    print(f"HTTP {response.status_code}", flush=True)
+                    await asyncio.gather(*list(app.state.report_tasks))
+        finally:
+            # 실행 객체의 캐시 대신 새 파일 DB 객체에서 저장값을 다시 읽는다.
+            with database_read(evidence, "public.region_insight_report") as observation:
+                saved = FileReportDatabase(settings, database.folder).read_reports()
+                observation["rows"] = saved
+        # HTTP 응답 전에 Task가 끝난 경우도 파일에서 같은 요청의 결과를 확인한다.
+        reports = []
+        for path in settings.output_dir.glob("*/report.json"):
+            if path not in previous_reports:
+                report = json.loads(path.read_text(encoding="utf-8"))
+                if report_input(report["state"])["requestId"] == body["requestId"]:
+                    reports.append(report)
+                    evidence["report_paths"].append(str(path.resolve()))
+        evidence["passed"] = (
+            received
+            == [
+                {
+                    "requestId": body["requestId"],
+                    "month": body["month"],
+                    "savedCount": len(body["dongCodes"]),
+                    "failedDongCodes": [],
+                }
+            ]
+            and len(reports) == len(body["dongCodes"])
+            and all(
+                r["failure"] is None
+                and r["state"]["execution"]["status"] == "completed"
+                and report_artifact(r["state"]) in saved
+                and r["trace"]["coverage"]["model_inputs"] > 0
+                and r["trace"]["coverage"]["unfinished_spans"] == 0
+                for r in reports
+            )
+        )
+        return evidence["passed"]
 
 
 if __name__ == "__main__":

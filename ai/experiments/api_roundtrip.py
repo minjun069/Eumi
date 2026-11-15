@@ -13,9 +13,15 @@ from uuid import UUID, uuid4
 import httpx
 import uvicorn
 from fastapi import FastAPI, Response
-from pydantic import SecretStr, TypeAdapter
+from pydantic import HttpUrl, SecretStr, TypeAdapter
 
 from api import Notification, create_app
+from experiments.evidence import (
+    NotificationEvidence,
+    database_read,
+    observed_post,
+    roundtrip_evidence,
+)
 from src.database import (
     Database,
     MessageRow,
@@ -27,6 +33,7 @@ from src.database import (
 from src.database import (
     question_id as state_question_id,
 )
+from src.execution_trace import TraceRecorder
 from src.gemini import create_model
 from src.settings import Settings
 
@@ -188,11 +195,51 @@ async def roundtrip(
         runtime_timeout=150,
         llm_timeout=30,
     )
+    storage_reference = (
+        str(await asyncio.to_thread(file_db.resolve))
+        if file_db
+        else "public.ai_message"
+    )
+    with roundtrip_evidence(
+        output,
+        storage="temporary_json" if file_db else "postgresql",
+        storage_reference=storage_reference,
+        settings=settings,
+    ) as (evidence, evidence_path):
+        summary = await _roundtrip(
+            output,
+            conversation_id=conversation_id,
+            question_id=question_id,
+            file_db=file_db,
+            question=question,
+            model_name=model_name,
+            evidence=evidence,
+            evidence_path=evidence_path,
+            settings=settings,
+        )
+        evidence["passed"] = summary["passed"]
+        return summary
+
+
+async def _roundtrip(
+    output,
+    *,
+    conversation_id,
+    question_id,
+    file_db,
+    question,
+    model_name,
+    evidence,
+    evidence_path,
+    settings,
+):
     database = FileDatabase(settings, file_db) if file_db else Database(settings)
     if file_db:
         database.seed(conversation_id, question_id, question)
     # DB 환경이 없으면 모델 호출·HTTP 성공 판정 전에 중단한다.
     await database.load_question(conversation_id, question_id)
+    previous_reports = set((output / str(conversation_id)).glob("*/report.json"))
+    previous_journals = set((output / str(conversation_id)).glob("*/trace.jsonl"))
     received = []
     receiver = FastAPI()
 
@@ -202,24 +249,27 @@ async def roundtrip(
     async def receive(body: Notification):
         assert body["conversationId"] == conversation_id
         # 새 연결·파일 재읽기로 저장 후 알림임을 확인한다.
-        if file_db:
-            row = next(
-                (
-                    r
-                    for r in FileDatabase(settings, file_db).read()
-                    if r["conversation_id"] == body["conversationId"]
-                    and r["message_id"] == body["messageId"]
-                ),
-                None,
-            )
-        else:
-            async with await database.connect() as connection:
-                cursor = await connection.execute(
-                    "SELECT question_id, role, status FROM public.ai_message "
-                    "WHERE conversation_id = %s AND message_id = %s",
-                    (body["conversationId"], body["messageId"]),
+        with database_read(evidence, "public.ai_message") as observation:
+            if file_db:
+                row = next(
+                    (
+                        r
+                        for r in FileDatabase(settings, file_db).read()
+                        if r["conversation_id"] == body["conversationId"]
+                        and r["message_id"] == body["messageId"]
+                    ),
+                    None,
                 )
-                row = await cursor.fetchone()
+            else:
+                async with await database.connect() as connection:
+                    cursor = await connection.execute(
+                        "SELECT conversation_id, message_id, question_id, role, "
+                        "status, content, details, artifacts FROM public.ai_message "
+                        "WHERE conversation_id = %s AND message_id = %s",
+                        (body["conversationId"], body["messageId"]),
+                    )
+                    row = await cursor.fetchone()
+            observation["rows"] = [row] if row else []
         assert row and row["question_id"] == question_id and row["role"] == "AI"
         assert row["status"] in {"진행", "완료", "실패", "취소"}
         received.append(
@@ -227,8 +277,10 @@ async def roundtrip(
         )
         return Response(status_code=204)
 
-    async with serve(receiver) as callback:
-        settings.backend_url = callback
+    async with serve(
+        NotificationEvidence(receiver, settings=settings, evidence=evidence)
+    ) as callback:
+        settings.backend_url = HttpUrl(callback)
         settings.backend_token = SecretStr("local-test-token")
         model = create_model(settings).model_copy(
             update={
@@ -240,12 +292,14 @@ async def roundtrip(
         live_seen = False
         try:
             async with serve(app) as url, httpx.AsyncClient(timeout=30) as client:
-                response = await client.post(
+                response = await observed_post(
+                    client,
                     f"{url}/internal/agent/runs",
-                    json={
+                    {
                         "conversationId": str(conversation_id),
                         "messageId": question_id,
                     },
+                    evidence,
                 )
                 if response.status_code != 202 or response.content:
                     raise RuntimeError(f"접수 실패: HTTP {response.status_code}")
@@ -256,7 +310,8 @@ async def roundtrip(
                         "*/trace.jsonl"
                     ):
                         if (
-                            journal.stat().st_size
+                            journal not in previous_journals
+                            and journal.stat().st_size
                             and not (journal.parent / "report.json").exists()
                         ):
                             live_seen = True
@@ -264,16 +319,24 @@ async def roundtrip(
                 await asyncio.gather(*tasks)
         finally:
             await model.http_async_client.aclose()
-    reports = sorted(
-        (output / str(conversation_id)).glob("*/report.json"),
-        key=lambda path: path.stat().st_mtime,
-    )
-    report = json.loads(reports[-1].read_text(encoding="utf-8"))
+    reports = []
+    for path in (output / str(conversation_id)).glob("*/report.json"):
+        if path not in previous_reports:
+            report = json.loads(path.read_text(encoding="utf-8"))
+            if state_question_id(report["state"]) == question_id:
+                reports.append((path, report))
+    reports.sort(key=lambda item: item[0].stat().st_mtime)
+    evidence["report_paths"] = [str(path.resolve()) for path, _ in reports]
+    if not reports:
+        raise RuntimeError("이번 질문의 새 실행 기록 없음")
+    report_path, report = reports[-1]
     spans = report["trace"]["spans"]
     models = [s for s in spans if s["kind"] == "model"]
     saves = [s for s in spans if s["kind"] == "database" and s["status"] == "success"]
     notifications = [
-        s for s in spans if s["name"] == "notification" and s["status"] == "success"
+        s
+        for s in spans
+        if s["name"] == "notification" and s.get("output", {}).get("accepted") is True
     ]
     stored_before_notification = bool(
         saves
@@ -304,11 +367,11 @@ async def roundtrip(
         "received": received,
         "status": report["state"]["execution"]["status"],
         "failure": report["failure"],
-        "report": str(reports[-1].resolve()),
+        "report": str(report_path.resolve()),
+        "evidence": str(evidence_path.resolve()),
     }
-    (output / "roundtrip.json").write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2),
-        encoding="utf-8",
+    TraceRecorder.from_settings(settings).write_json(
+        output / "roundtrip.json", summary, strict=True
     )
     return summary
 
