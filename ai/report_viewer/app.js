@@ -12,6 +12,14 @@
   let selectedNode;
   let searchIndex = new Map();
 
+  // 화면 폭에 따른 목록 접기만 제어하며 불러온 실행 기록은 변경하지 않습니다.
+  const compactNavigation = globalThis.matchMedia?.("(max-width: 680px)");
+  function syncRunPicker() {
+    if (compactNavigation) $("run-picker").open = !compactNavigation.matches;
+  }
+  compactNavigation?.addEventListener("change", syncRunPicker);
+  syncRunPicker();
+
   const currentReport = () => reports[current]?.report;
   const reportTitle = (item, index) =>
     item.report.scenario || `실행 ${String(index + 1).padStart(2, "0")}`;
@@ -68,7 +76,7 @@
       const heading = $(name).querySelector("h2");
       heading.tabIndex = -1;
       heading.focus({ preventScroll: true });
-      $(name).scrollIntoView({ block: "start", behavior: "smooth" });
+      $(name).scrollIntoView({ block: "start", behavior: "auto" });
     }
   }
 
@@ -84,6 +92,10 @@
           $("node-search").value = "";
           $("errors-only").checked = false;
           render();
+          if (compactNavigation?.matches) {
+            $("run-picker").open = false;
+            showSection(section, true);
+          }
         },
         "run-button",
       );

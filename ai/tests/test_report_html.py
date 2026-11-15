@@ -1,9 +1,16 @@
 """분리된 소스를 묶은 파일이 오프라인에서 안전하게 열리는지 확인한다."""
 
+import base64
+import hashlib
 import json
+import re
 from html.parser import HTMLParser
+from pathlib import Path
 
-from report_html import build_report
+import pytest
+
+import report_html
+from report_html import _render_report, build_report
 
 
 class ReportDocument(HTMLParser):
@@ -11,26 +18,52 @@ class ReportDocument(HTMLParser):
         super().__init__()
         self.script_ids = []
         self.sources = []
-        self.script_data = []
-        self.in_data = False
+        self.script_data = {}
+        self.data_id = None
+        self.styles = []
+        self.in_style = False
+        self.license_data = []
+        self.in_license = False
+        self.csp = ""
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         if tag == "script":
             self.script_ids.append(attrs.get("id"))
-            self.in_data = attrs.get("id") == "report-data"
+            self.data_id = attrs.get("id")
+            if self.data_id == "report-data":
+                self.script_data[self.data_id] = []
+            else:
+                self.data_id = None
             if "src" in attrs:
                 self.sources.append(attrs["src"])
         if tag == "link" and attrs.get("rel") == "stylesheet":
             self.sources.append(attrs["href"])
+        if tag == "style":
+            self.in_style = True
+        if tag == "template" and attrs.get("id") == "pretendard-license":
+            self.in_license = True
+        if tag == "meta" and attrs.get("http-equiv") == "Content-Security-Policy":
+            self.csp = attrs["content"]
 
     def handle_endtag(self, tag):
         if tag == "script":
-            self.in_data = False
+            self.data_id = None
+        if tag == "style":
+            self.in_style = False
+        if tag == "template":
+            self.in_license = False
 
     def handle_data(self, data):
-        if self.in_data:
-            self.script_data.append(data)
+        if self.data_id:
+            self.script_data[self.data_id].append(data)
+        if self.in_style:
+            self.styles.append(data)
+        if self.in_license:
+            self.license_data.append(data)
+
+    def payload(self, element_id):
+        return json.loads("".join(self.script_data[element_id]))
 
 
 def test_offline_bundle_preserves_payload_without_script_injection(tmp_path):
@@ -45,8 +78,98 @@ def test_offline_bundle_preserves_payload_without_script_injection(tmp_path):
     assert not document.sources
     assert document.script_ids.count("report-data") == 1
     assert "injected" not in document.script_ids
-    assert json.loads("".join(document.script_data)) == [
+    assert document.payload("report-data") == [
         {"name": f"{tmp_path.name}/report.json", "value": value}
     ]
     assert html.index('id="report-data"') < html.index("globalThis.ReportData")
     assert "script-src 'self'" not in html
+
+
+def test_render_preserves_existing_embedded_payload_text_and_hashes():
+    original = (
+        '\r\n  [{"name":"original/run.json", "value":'
+        '{"text":"\\u003c/script\\u003e & \\u0026",'
+        '"marker":"/*__REPORT_DATA__*/ []", "zero":0, "unknown":null}}]\n'
+    )
+    document = ReportDocument()
+    document.feed(_render_report(original))
+    actual = "".join(document.script_data["report-data"])
+    assert actual == original
+    assert (
+        hashlib.sha256(actual.encode()).digest()
+        == hashlib.sha256(original.encode()).digest()
+    )
+    assert document.payload("report-data") == json.loads(original)
+
+
+def test_bundle_embeds_exact_font_bytes_and_license_with_offline_csp():
+    document = ReportDocument()
+    document.feed(_render_report("[]"))
+    css = "".join(document.styles)
+    urls = re.findall(r"url\(\s*['\"]?([^'\")\s]+)", css)
+    font_urls = [url for url in urls if url.startswith("data:font/woff2;base64,")]
+    assert len(font_urls) == 1
+    assets = Path(report_html.__file__).parent / "report_viewer/assets"
+    assert (
+        base64.b64decode(font_urls[0].split(",", 1)[1], validate=True)
+        == (assets / "PretendardVariable.woff2").read_bytes()
+    )
+    assert all(url.startswith("data:") for url in urls)
+    assert "@import" not in css
+    assert not document.sources
+    policies = dict(
+        part.strip().split(maxsplit=1)
+        for part in document.csp.split(";")
+        if part.strip()
+    )
+    assert policies["font-src"] == "data:"
+    assert policies["script-src"] == "'unsafe-inline'"
+    assert policies["style-src"] == "'unsafe-inline'"
+    assert policies["connect-src"] == "'none'"
+    license_text = (assets / "Pretendard.LICENSE.txt").read_text(encoding="utf-8")
+    assert "".join(document.license_data) == license_text
+
+
+def test_license_text_cannot_escape_its_inert_template(tmp_path, monkeypatch):
+    source_dir = Path(report_html.__file__).parent
+    viewer = tmp_path / "report_viewer"
+    assets = viewer / "assets"
+    assets.mkdir(parents=True)
+    (tmp_path / "report_viewer.html").write_text(
+        (source_dir / "report_viewer.html").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    (viewer / "styles.css").write_text(
+        '@font-face {src: url("assets/PretendardVariable.woff2")}', encoding="utf-8"
+    )
+    for script in ("data", "components", "app"):
+        (viewer / f"{script}.js").write_text("", encoding="utf-8")
+    (assets / "PretendardVariable.woff2").write_bytes(b"font fixture")
+    license_text = '</template><script id="license-injection">& license text</script>\n'
+    (assets / "Pretendard.LICENSE.txt").write_text(license_text, encoding="utf-8")
+    monkeypatch.setattr(report_html, "__file__", str(tmp_path / "report_html.py"))
+    document = ReportDocument()
+    document.feed(_render_report("[]"))
+    assert "license-injection" not in document.script_ids
+    assert "".join(document.license_data) == license_text
+
+
+def test_directory_inputs_only_discover_reports(tmp_path):
+    directory = tmp_path / "run"
+    directory.mkdir()
+    (directory / "report.json").write_text('{"state": {}}', encoding="utf-8")
+    (directory / "other.json").write_text('{"type": "unrelated"}', encoding="utf-8")
+    output = tmp_path / "report.html"
+
+    build_report([tmp_path], output)
+
+    document = ReportDocument()
+    document.feed(output.read_text(encoding="utf-8"))
+    assert document.payload("report-data") == [
+        {"name": "run/report.json", "value": {"state": {}}}
+    ]
+
+
+def test_no_report_inputs_still_require_a_report(tmp_path):
+    with pytest.raises(ValueError, match="report.json"):
+        build_report([tmp_path], tmp_path / "report.html")

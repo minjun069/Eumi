@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src data:; frame-src about:; connect-src 'none'; base-uri 'none'; form-action 'none'"
+      content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src data:; frame-src about:; connect-src 'none'; base-uri 'none'; form-action 'none'"
     />
-    <title>이음 · Agent 실행 모니터</title>
+    <title>이음 · 실행 기록 검토</title>
     <link rel="stylesheet" href="report_viewer/styles.css" />
     <script defer src="report_viewer/data.js"></script>
     <script defer src="report_viewer/components.js"></script>
@@ -19,12 +19,13 @@
       <aside class="sidebar" aria-label="실행 기록">
         <div class="brand">
           <span class="brand-mark">이</span>
-          <div>이음<span>AGENT MONITOR</span></div>
+          <div>이음<span>실행 기록 검토</span></div>
         </div>
-        <div class="sidebar-heading">
-          <h2>실행 목록</h2>
-          <span id="run-count" class="count">0</span>
-        </div>
+        <details id="run-picker" open>
+          <summary class="sidebar-heading">
+            <span class="run-picker-title">실행 목록 <span id="run-count" class="count">0</span></span>
+            <span class="run-picker-chevron" aria-hidden="true">⌄</span>
+          </summary>
         <label class="file-button" for="files">＋ 실행 기록 불러오기</label>
         <input
           class="visually-hidden"
@@ -37,6 +38,7 @@
         <p class="sidebar-foot">
           report.json 파일을 선택하세요.<br />파일은 브라우저 안에서 읽습니다.
         </p>
+        </details>
       </aside>
       <main id="main" class="main">
         <header class="page-header">
@@ -52,38 +54,38 @@
         <div id="load-error" class="notice error" role="alert" hidden></div>
         <div id="run-notice" aria-live="polite"></div>
         <div id="stats" class="stats" aria-label="실행 요약"></div>
-        <!-- 화면 순서와 제목은 이 다섯 버튼 및 아래 section에서 수정합니다. -->
+        <!-- 화면 순서와 제목은 이 버튼 및 아래 section에서 수정합니다. -->
         <nav id="sections" class="section-nav" aria-label="리포트 영역">
           <button
             data-section="overview"
             aria-pressed="true"
             aria-controls="overview"
           >
-            <span>01</span>전체 입출력
+            전체 입출력
           </button>
           <button data-section="flow" aria-pressed="false" aria-controls="flow">
-            <span>02</span>실행 흐름
+            실행 흐름
           </button>
           <button
             data-section="nodes"
             aria-pressed="false"
             aria-controls="nodes"
           >
-            <span>03</span>노드별 입출력
+            노드별 입출력
           </button>
           <button
             data-section="settings"
             aria-pressed="false"
             aria-controls="settings"
           >
-            <span>04</span>실행 설정
+            실행 설정
           </button>
           <button
             data-section="conversation"
             aria-pressed="false"
             aria-controls="conversation"
           >
-            <span>05</span>이전 대화
+            이전 대화
           </button>
         </nav>
         <div id="welcome" class="empty welcome">
@@ -97,7 +99,6 @@
           <section id="overview" class="panel" aria-labelledby="overview-title">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">01 / INPUT & OUTPUT</p>
                 <h2 id="overview-title">전체 입출력</h2>
               </div>
               <p>요청의 시작과 Agent의 답변</p>
@@ -107,7 +108,6 @@
           <section id="flow" class="panel" aria-labelledby="flow-title" hidden>
             <div class="section-heading">
               <div>
-                <p class="eyebrow">02 / EXECUTION FLOW</p>
                 <h2 id="flow-title">실행 흐름</h2>
               </div>
               <p>노드를 선택하면 상세 입력과 결과로 이동합니다.</p>
@@ -122,7 +122,6 @@
           >
             <div class="section-heading">
               <div>
-                <p class="eyebrow">03 / NODE INSPECTOR</p>
                 <h2 id="nodes-title">노드별 입출력</h2>
               </div>
               <p id="node-count"></p>
@@ -152,7 +151,6 @@
           >
             <div class="section-heading">
               <div>
-                <p class="eyebrow">04 / CONFIGURATION</p>
                 <h2 id="settings-title">환경 변수·실행 설정</h2>
               </div>
               <p>이 실행에 기록된 설정 값</p>
@@ -167,7 +165,6 @@
           >
             <div class="section-heading">
               <div>
-                <p class="eyebrow">05 / CONVERSATION</p>
                 <h2 id="conversation-title">이전 대화 내역</h2>
               </div>
               <p>이번 실행을 시작하기 전에 전달된 대화</p>
