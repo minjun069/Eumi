@@ -145,9 +145,7 @@ def validate_visualization(
     view = catalog["views"][key]
     profile = catalog["input_profiles"][view["input_profile"]]
     definitions = profile["parameters"]
-    parameters = {
-        name: item["default"] for name, item in definitions.items() if "default" in item
-    }
+    parameters: dict[str, str] = {}
     for name, value in request.get("parameters", {}).items():
         definition = definitions.get(name)
         if definition is None:
@@ -178,7 +176,7 @@ def validate_visualization(
                 _issue(
                     "missing_parameter",
                     f"parameters.{name}",
-                    "기본값이 없는 필수 매개변수입니다.",
+                    "이 뷰에 등록된 필수 매개변수입니다. 값을 명시하세요.",
                     None,
                     definition["allowed"],
                 )

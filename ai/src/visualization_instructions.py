@@ -114,9 +114,7 @@ def visualization_context(state, *, include_inputs: bool) -> VisualizationContex
         if key not in allowed or not isinstance(requested, dict):
             continue
         profile = catalog["input_profiles"][catalog["views"][key]["input_profile"]]
-        parameters = {
-            n: d["default"] for n, d in profile["parameters"].items() if "default" in d
-        }
+        parameters = {}
         for name, value in requested.items():
             if name in profile["parameters"]:
                 if isinstance(value, str):

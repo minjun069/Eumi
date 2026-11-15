@@ -70,7 +70,16 @@ def test_different_workbook_and_filter_types_share_one_validator(monkeypatch, ca
     ]
     assert {f["worksheet"] for f in data["filters"]} == {"연령별 수", "연령별 비율"}
     assert all(f["values"] == ["노년"] for f in data["filters"])
-    assert validate_visualization({"view_key": "Embed01RiskMap"})["valid"]
+    assert validate_visualization(
+        {
+            "view_key": "Embed01RiskMap",
+            "parameters": {
+                "p_city": "51110",
+                "p_start": "2025-07-01",
+                "p_end": "2025-12-01",
+            },
+        }
+    )["valid"]
 
 
 @pytest.mark.parametrize(
@@ -106,16 +115,19 @@ def test_only_declared_date_order_is_checked(monkeypatch, catalog):
     assert result["issues"][0]["requested"] == request["parameters"]
 
 
-@pytest.mark.parametrize(
-    "mutation",
-    [
-        lambda c: c["views"]["AgeGroups"].update(input_profile="missing"),
-        lambda c: c["input_profiles"]["groups"]["parameters"]["measure"].update(
-            default="missing"
-        ),
-    ],
-)
-def test_registration_rejects_inconsistent_configuration(catalog, mutation):
-    mutation(catalog)
+def test_registration_rejects_inconsistent_configuration(catalog):
+    catalog["views"]["AgeGroups"]["input_profile"] = "missing"
     with pytest.raises((ValueError, ValidationError)):
         validate_catalog(catalog)
+
+
+def test_registration_rejects_parameter_defaults_even_when_allowed(catalog):
+    catalog["input_profiles"]["groups"]["parameters"]["measure"]["default"] = "count"
+    with pytest.raises(ValidationError) as exc_info:
+        validate_catalog(catalog)
+    assert any(
+        error["type"] == "extra_forbidden"
+        and error["loc"]
+        == ("input_profiles", "groups", "parameters", "measure", "default")
+        for error in exc_info.value.errors()
+    )

@@ -70,12 +70,24 @@ def test_valid_artifact_preserves_conditions_and_public_contract():
     [
         ({"view_key": "https://example.com/arbitrary"}, "view_not_allowed", "view_key"),
         (
-            {"parameters": {"p_city": "99999"}},
+            {
+                "parameters": {
+                    "p_city": "99999",
+                    "p_start": "2025-07-01",
+                    "p_end": "2025-12-01",
+                }
+            },
             "invalid_parameter_value",
             "parameters.p_city",
         ),
         (
-            {"parameters": {"p_start": "2025-12-01", "p_end": "2025-07-01"}},
+            {
+                "parameters": {
+                    "p_city": "51110",
+                    "p_start": "2025-12-01",
+                    "p_end": "2025-07-01",
+                }
+            },
             "invalid_period",
             "parameters",
         ),
@@ -104,6 +116,68 @@ def test_strict_input_rejects_coercion_and_unknown_fields(overrides):
     result = validate_visualization(request(**overrides))
     assert not result["valid"] and result["artifact"] is None
     assert result["issues"][0]["code"] == "invalid_input"
+
+
+@pytest.mark.parametrize(
+    "view_key,region",
+    [
+        ("Embed01VulnerabilityMap", {"p_city": "51110"}),
+        ("EmbedDetailV01", {"p_detail_adm": "춘천시 후평3동"}),
+    ],
+)
+@pytest.mark.parametrize("missing", ["region", "p_start", "p_end", "all", "object"])
+def test_every_registered_parameter_must_be_explicit(view_key, region, missing):
+    parameters = region | {"p_start": "2025-07-01", "p_end": "2025-12-01"}
+    expected_missing = (
+        set(parameters)
+        if missing in {"all", "object"}
+        else {next(iter(region)) if missing == "region" else missing}
+    )
+    original = {
+        "view_key": view_key,
+        "parameters": {
+            name: value
+            for name, value in parameters.items()
+            if name not in expected_missing
+        },
+    }
+    if missing == "object":
+        del original["parameters"]
+    before = deepcopy(original)
+
+    result = validate_visualization(original)
+
+    assert original == before
+    assert not result["valid"] and result["artifact"] is None
+    assert {issue["path"] for issue in result["issues"]} == {
+        f"parameters.{name}" for name in expected_missing
+    }
+    assert all(
+        issue["code"] == "missing_parameter"
+        and issue["requested"] is None
+        and issue["allowed"]
+        and issue["message"]
+        and issue["retryable"] is False
+        for issue in result["issues"]
+    )
+    TypeAdapter(VisualizationResult).validate_python(result)
+
+
+@pytest.mark.parametrize("omit_filters", [False, True])
+def test_filter_omission_preserves_all_selection_with_explicit_parameters(omit_filters):
+    original = request(filters={})
+    if omit_filters:
+        del original["filters"]
+    result = validate_visualization(original)
+    assert result["valid"] and result["issues"] == []
+    assert result["artifact"]["data"]["filters"] == [
+        {
+            "worksheet": "① 지도 · 배경 취약성",
+            "field": "읍면동",
+            "operation": "all",
+            "values": [],
+        }
+    ]
 
 
 def test_hash_is_stable_for_equivalent_selections_but_changes_for_conditions():

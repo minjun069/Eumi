@@ -19,7 +19,6 @@ Values = Annotated[list[Text], Field(min_length=1)]
 class ParameterDefinition(TypedDict):
     data_type: Literal["date", "string"]
     allowed: Values
-    default: NotRequired[Text]
     labels: NotRequired[dict[Text, Text]]
 
 
@@ -114,10 +113,6 @@ def validate_catalog(value: object) -> TableauCatalog:
             field_path = f"{path}.parameters.{field}"
             allowed = definition["allowed"]
             unique(allowed, field_path)
-            if "default" in definition:
-                require(
-                    definition["default"] in allowed, field_path, "허용되지 않은 기본값"
-                )
             require(
                 set(definition.get("labels", {})) <= set(allowed),
                 field_path,
@@ -155,12 +150,6 @@ def validate_catalog(value: object) -> TableauCatalog:
                 path,
                 "날짜 순서는 서로 다른 날짜 매개변수를 참조해야 합니다",
             )
-            if all("default" in params[p] for p in (start, end)):
-                require(
-                    params[start]["default"] <= params[end]["default"],
-                    path,
-                    "기본 시작 날짜가 종료 날짜보다 늦습니다",
-                )
     for key, view in catalog["views"].items():
         path = f"views.{key}"
         require(

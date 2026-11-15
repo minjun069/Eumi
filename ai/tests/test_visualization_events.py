@@ -26,6 +26,9 @@ from tests.helpers import ScriptedModel, section
 MAP = "Embed01RiskMap"
 OTHER = "Embed03Vulnerability"
 EVENTS = ("analysis_pipeline", "user_request")
+PERIOD_PARAMETERS = {"p_start": "2025-07-01", "p_end": "2025-12-01"}
+CITY_PARAMETERS = PERIOD_PARAMETERS | {"p_city": "51110"}
+DETAIL_PARAMETERS = PERIOD_PARAMETERS | {"p_detail_adm": "춘천시 후평3동"}
 
 
 def initial(event="user_request"):
@@ -88,7 +91,7 @@ class Model(ScriptedModel):
             )
             reply = {
                 "Interpretation": INTERPRET,
-                "Selection": selection(view_key=MAP),
+                "Selection": selection(view_key=MAP, parameters=CITY_PARAMETERS),
                 "Decision": ACT if needs_work else DONE,
                 "Composition": COMPOSE,
             }[schema["title"]]
@@ -112,7 +115,7 @@ def test_event_limits_description_schema_and_validation(catalog, event, key):
         t for t in create_tools({}, state=state) if t.name == "validate_visualization"
     )
     assert tool.args_schema["properties"]["view_key"]["enum"] == [key]
-    assert tool.invoke({"view_key": key})["valid"]
+    assert tool.invoke({"view_key": key, "parameters": CITY_PARAMETERS})["valid"]
     forbidden = OTHER if key == MAP else MAP
     rejected = tool.invoke({"view_key": forbidden})
     assert not rejected["valid"] and rejected["artifact"] is None
@@ -178,10 +181,12 @@ def test_deployed_event_assignment_and_detail_parameter_values():
     assert tableau_catalog.allowed_views(initial()) == set(catalog["views"])
     # 지도·기간 분포·상세 뷰의 서로 다른 입력 규격만 대표로 검사한다.
     for key in ("Embed01RiskMap", "Embed02RiskDistribution", "EmbedDetailV01"):
+        parameters = DETAIL_PARAMETERS if key in detail else CITY_PARAMETERS
+        request = {"view_key": key, "parameters": parameters}
         state = initial("analysis_pipeline")
-        result = validate_visualization({"view_key": key}, state=state)
+        result = validate_visualization(request, state=state)
         assert result["valid"] is (key in detail)
-        user_result = validate_visualization({"view_key": key}, state=initial())
+        user_result = validate_visualization(request, state=initial())
         assert user_result["valid"]
         registered = catalog["views"][key]
         assert user_result["artifact"]["data"]["src"].endswith(
@@ -190,7 +195,7 @@ def test_deployed_event_assignment_and_detail_parameter_values():
     result = validate_visualization(
         {
             "view_key": "EmbedDetailV01",
-            "parameters": {"p_detail_adm": "춘천시 후평3동"},
+            "parameters": DETAIL_PARAMETERS,
         },
         state=initial(),
     )
@@ -199,7 +204,10 @@ def test_deployed_event_assignment_and_detail_parameter_values():
         "p_detail_adm"
     ] == "춘천시 후평3동"
     invalid = validate_visualization(
-        {"view_key": "EmbedDetailV01", "parameters": {"p_detail_adm": "5111061100"}},
+        {
+            "view_key": "EmbedDetailV01",
+            "parameters": DETAIL_PARAMETERS | {"p_detail_adm": "5111061100"},
+        },
         state=initial(),
     )
     assert invalid["issues"][0]["code"] == "invalid_parameter_value"
@@ -211,7 +219,9 @@ def test_all_includes_new_registration_without_expanding_explicit_list(catalog):
     tableau_catalog.validate_catalog(catalog)
     assert "NewView" in tableau_catalog.allowed_views(initial())
     assert "NewView" not in tableau_catalog.allowed_views(initial("analysis_pipeline"))
-    assert validate_visualization({"view_key": "NewView"}, state=initial())["valid"]
+    assert validate_visualization(
+        {"view_key": "NewView", "parameters": CITY_PARAMETERS}, state=initial()
+    )["valid"]
     assert not validate_visualization({"view_key": "unregistered"}, state=initial())[
         "valid"
     ]
@@ -288,7 +298,7 @@ async def test_rebuilt_graph_resumes_saved_event_without_scope_injection(catalog
             [
                 INTERPRET,
                 ACT,
-                selection(view_key=key),
+                selection(view_key=key, parameters=CITY_PARAMETERS),
                 DONE,
                 COMPOSE,
             ]
@@ -310,7 +320,10 @@ async def test_rebuilt_graph_resumes_saved_event_without_scope_injection(catalog
 @pytest.mark.usefixtures("all_tableau_views")
 def test_followup_receives_selected_city_only_and_is_isolated():
     artifact = validate_visualization(
-        {"view_key": "Embed01RiskMap", "parameters": {"p_city": "11680"}},
+        {
+            "view_key": "Embed01RiskMap",
+            "parameters": CITY_PARAMETERS | {"p_city": "11680"},
+        },
         state=initial(),
     )["artifact"]
     state = {"response": {"artifacts": [artifact]}}
@@ -325,29 +338,34 @@ def test_followup_receives_selected_city_only_and_is_isolated():
 
 
 @pytest.mark.usefixtures("all_tableau_views")
-def test_invalid_dependency_does_not_expose_default_domain_as_selected():
+@pytest.mark.parametrize("parameters", [None, {}, {"p_city": 51110}])
+def test_missing_or_invalid_city_does_not_fill_parameters_or_select_domain(parameters):
+    arguments = {"view_key": "Embed01RiskMap"}
+    if parameters is not None:
+        arguments["parameters"] = parameters
     state = {
         "results": [
             {
                 "action": {
                     "name": "validate_visualization",
-                    "arguments": {
-                        "view_key": "Embed01RiskMap",
-                        "parameters": {"p_city": 51110},
-                    },
+                    "arguments": arguments,
                 }
             }
         ]
     }
     state["execution"] = initial()["execution"]
     context = visualization_context(state, include_inputs=True)
+    assert context["selected"]["Embed01RiskMap"]["parameters"] == {}
     assert "allowed" not in context["selected"]["Embed01RiskMap"]["filters"]["읍면동"]
 
 
 @pytest.mark.usefixtures("all_tableau_views")
 def test_latest_attempt_supersedes_previous_view_conditions():
     artifact = validate_visualization(
-        {"view_key": "Embed01RiskMap", "parameters": {"p_city": "11680"}},
+        {
+            "view_key": "Embed01RiskMap",
+            "parameters": CITY_PARAMETERS | {"p_city": "11680"},
+        },
         state=initial(),
     )["artifact"]
     state = {
@@ -366,5 +384,6 @@ def test_latest_attempt_supersedes_previous_view_conditions():
     }
     state["execution"] = initial()["execution"]
     context = visualization_context(state, include_inputs=True)
+    assert context["selected"]["Embed01RiskMap"]["parameters"] == {"p_city": "51110"}
     selected = context["selected"]["Embed01RiskMap"]["filters"]["읍면동"]["allowed"]
     assert "후평3동" in selected and "역삼1동" not in selected
