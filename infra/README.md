@@ -257,14 +257,18 @@ master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migra
 - **쓰는 곳:** 부하 시험에서 "서버가 쓴 시간"과 "서버 밖(네트워크 · PC)에서 쓴 시간"을 가른다. k6가 잰 시간에서 `rt`를 빼면 서버 밖에서 쓴 시간이다.
 - **읽을 때:** 대화 진행 알림(SSE, `/api/agent/conversations/…/messages`)은 연결이 열려 있던 시간 전체가 `rt`로 찍히므로 처리 시간으로 읽지 않는다.
 - **요약:** 측정 도구 `perf-nginx.sh <시작> <끝>`(저장소 밖, 성능 평가 도구 폴더)이 구간 안 기록을 API 이름별 건수 · 중앙값 · p95로 묶는다. 접속 IP · 쿼리 문자열은 출력하지 않는다.
+- **11/15 측정:** 단독 · 탐색 1명에서 서버가 쓴 시간은 API마다 p95 15ms 이하였고, PC에서 본 시간의 나머지(중앙값 10 ~ 15ms)는 네트워크 · PC 쪽이었다 ([docs/perf 2회차 결과](../docs/perf/성능_평가_결과_2회차.md) 2절 "Nginx 처리 시간").
 
-반영은 다른 Nginx 변경과 같이 master 병합 뒤 인프라 담당이 손으로 한다. 저장소의 `eumi.conf`는 서버 `/srv/eumi`에 복사되지 않으므로 PC에서 올린다.
+**반영:** 11/15 20:05에 서버에 반영했다. 이번에는 측정 결과를 문서에 함께 넣으려고 문서 MR 병합 전에 반영했다. 다음부터는 다른 Nginx 변경처럼 master 병합 뒤 인프라 담당이 손으로 한다. 저장소의 `eumi.conf`는 서버 `/srv/eumi`에 복사되지 않으므로 PC에서 올린다. 작업 폴더의 파일 대신 git에서 꺼내 올린다 (Windows에서 줄바꿈이 바뀌면 Jenkins 비교가 계속 "다르다"고 나온다).
 
 ```bash
 # PC (저장소 폴더에서)
-scp -i C:/keys/eumi.pem infra/deploy/nginx/eumi.conf ubuntu@k15b201.p.ssafy.io:~/eumi.conf
+git fetch origin
+git show origin/master:infra/deploy/nginx/eumi.conf > /tmp/eumi.conf
+scp -i C:/keys/eumi.pem /tmp/eumi.conf ubuntu@k15b201.p.ssafy.io:~/eumi.conf
 # 서버
 sudo cp /etc/nginx/sites-available/eumi ~/eumi.conf.before
+diff ~/eumi.conf.before ~/eumi.conf              # 바꾸려는 줄만 나오는지 확인한다
 sudo cp ~/eumi.conf /etc/nginx/sites-available/eumi
 sudo nginx -t && sudo systemctl reload nginx
 sudo tail -n 1 /var/log/nginx/access.log        # 줄 끝에 rt=… urt=… 가 붙는다 (요청이 한 번 들어온 뒤)
