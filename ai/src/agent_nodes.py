@@ -25,6 +25,7 @@ from src.execution_trace import trace_span
 from src.gemini import structured_call
 from src.graph import compile_graph
 from src.prompting import (
+    REPORT_ROLES,
     Role,
     ask_messages,
     compose_messages,
@@ -305,18 +306,30 @@ def check_report_text(reviewed, target):
         reviewed["reason"] = reviewed["output"]["reason"]
 
 
-def report_draft_target(state):
+def report_draft_target(state, role):
     selected = approved_report_selection(state)
     if not selected:
         return None
     accepted = accepted_outputs(state)
-    for view in selected["output"]["views"]:
-        draft = last_report_draft(state, view["view_key"])
-        if draft and draft["id"] in accepted:
-            continue
-        if report_draft_exhausted(state, view["view_key"]):
-            continue
-        return view["view_key"], [selected["id"], *view["evidence_ids"]]
+    if role == "report_description":
+        for view in selected["output"]["views"]:
+            draft = last_report_draft(state, view["view_key"])
+            if draft and draft["id"] in accepted:
+                continue
+            if report_draft_exhausted(state, view["view_key"]):
+                continue
+            return view["view_key"], list(
+                dict.fromkeys(
+                    [
+                        selected["id"],
+                        *view["evidence_ids"],
+                        *report_additional_evidence(state, role),
+                    ]
+                )
+            )
+        return None
+    if role != "report_insight":
+        return None
     descriptions = [
         last_report_draft(state, v["view_key"]) for v in selected["output"]["views"]
     ]
@@ -327,8 +340,76 @@ def report_draft_target(state):
         and not (draft and draft["id"] in accepted)
         and not report_draft_exhausted(state, None)
     ):
-        return None, [selected["id"], *(r["id"] for r in descriptions)]
+        return None, list(
+            dict.fromkeys(
+                [
+                    selected["id"],
+                    *(r["id"] for r in descriptions),
+                    *report_additional_evidence(state, role),
+                ]
+            )
+        )
     return None
+
+
+def report_additional_evidence(state, role):
+    """이번 역할에서 확보한 근거만 추가한다. 앞 단계의 근거 목록은 유지한다."""
+    start = next(
+        (
+            i
+            for i, item in enumerate(state["results"])
+            if item["decision"] == "report_stage"
+            and item["action"]["name"] == role + "_agent"
+        ),
+        0,
+    )
+    available = accepted_outputs(state)
+    return [
+        item["id"]
+        for item in state["results"][start:]
+        if item["id"] in available and "data" in available[item["id"]]
+    ]
+
+
+def complete_report_stage(state, role):
+    """역할의 검증된 산출물만 반환한다. 보고서 조립·저장은 실행 흐름이 맡는다."""
+    selected = approved_report_selection(state)
+    accepted = accepted_outputs(state)
+    views = selected["output"]["views"] if selected else []
+    if role == "report_selection":
+        contents = [f"{v['view_key']}: {v['reason']}" for v in views]
+        complete = selected is not None and len(views) == 3
+    elif role == "report_description":
+        drafts = [last_report_draft(state, v["view_key"]) for v in views]
+        contents = [r["output"]["content"] for r in drafts if r and r["id"] in accepted]
+        complete = bool(views) and len(contents) == len(views)
+    else:
+        draft = last_report_draft(state, None)
+        contents = (
+            [draft["output"]["content"]] if draft and draft["id"] in accepted else []
+        )
+        complete = bool(contents)
+    status = "completed" if complete else "partial"
+    content = "\n".join(contents) or "검증된 산출물이 없어 미완성으로 남깁니다."
+    reason = "검증된 자기 산출물만 반환하며 미완성 항목을 보존합니다."
+    state["results"].append(
+        record(
+            "compose",
+            "composition",
+            reason,
+            action={
+                "name": role + "_agent",
+                "arguments": {"view_key": None, "result_ids": list(accepted)},
+            },
+            output={
+                "content": content,
+                "artifact_ids": [],
+                "status": status,
+                "reason": reason,
+            },
+        )
+    )
+    state["response"] = response(state, "final", content)
 
 
 def report_draft_exhausted(state, view_key):
@@ -348,9 +429,18 @@ def consume_report_retry(state, previous):
         i for i, r in enumerate(state["results"]) if r["id"] == previous["id"]
     )
     # 실행 오류 재처리는 외부 실행 계층에서 이미 1회 집계했다.
-    if not any(
-        r["decision"] == "report_retry" for r in state["results"][previous_index + 1 :]
-    ):
+    later = state["results"][previous_index + 1 :]
+    retry_index = next(
+        (i for i, r in enumerate(later) if r["decision"] == "report_retry"), None
+    )
+    # 검토 오류 재처리가 끝난 뒤의 내용 수정에는 외부 재처리 집계를 재사용하지 않는다.
+    recovered = retry_index is not None and any(
+        r["outcome"] == "success"
+        and r["decision"] in {"verification", "retry"}
+        and (r["output"] or {}).get("call_id") == previous["id"]
+        for r in later[retry_index + 1 :]
+    )
+    if retry_index is None or recovered:
         consume(state, "retries")
     state["results"].append(
         record(
@@ -482,7 +572,7 @@ def build_nodes(
             value, usage = await call(
                 state,
                 schema,
-                lambda: report_messages(state, stage, catalog),
+                lambda: report_messages(state, stage, catalog, role=role),
                 config,
             )
             item["output"] = value | {"model_usage": usage}
@@ -525,6 +615,28 @@ def build_nodes(
             ),
             None,
         )
+        if (
+            previous
+            and previous["outcome"] == "success"
+            and not report_review(state, previous)
+        ):
+            begin_report_call(
+                state,
+                "verification",
+                "review_report",
+                None,
+                [previous["id"]],
+                "기존 선정의 검토 재실행",
+            )
+            checked = await call_report(
+                state,
+                config=config,
+                schema=Verification,
+                stage="selection_review",
+            )
+            checked["output"]["call_id"] = previous["id"]
+            checked["reason"] = checked["output"]["reason"]
+            return checked["output"]["accepted"]
         if previous:
             consume_report_retry(state, previous)
         begin_report_call(
@@ -570,7 +682,7 @@ def build_nodes(
         return checked["output"]["accepted"]
 
     async def write_report(state, config):
-        while (target := report_draft_target(state)) is not None:
+        while (target := report_draft_target(state, role)) is not None:
             view_key, refs = target
             previous = last_report_draft(state, view_key)
             review = report_review(state, previous) if previous else None
@@ -593,6 +705,10 @@ def build_nodes(
                 checked["output"]["call_id"] = previous["id"]
                 checked["reason"] = checked["output"]["reason"]
                 check_report_text(checked, previous)
+                if not checked["output"]["accepted"]:
+                    if report_draft_exhausted(state, view_key):
+                        continue
+                    return False
                 continue
             if previous:
                 consume_report_retry(state, previous)
@@ -613,29 +729,41 @@ def build_nodes(
                 schema=ReportText,
                 stage="draft",
             )
-            await verify_report(
+            checked = await verify_report(
                 state,
                 config=config,
                 stage="draft_review",
             )
+            if not checked["output"]["accepted"]:
+                if report_draft_exhausted(state, view_key):
+                    continue
+                # 추가 근거 확보와 기존 근거로 재작성을 진행 판단에서 구분한다.
+                return False
+        return True
 
     async def compose_report(state, config):
         first = len(state["results"])
         if finalizing(state):
-            publish_report(state)
+            complete_report_stage(state, role)
         else:
-            if not await select_report_views(state, config):
+            ready = (
+                await select_report_views(state, config)
+                if role == "report_selection"
+                else await write_report(state, config)
+            )
+            if not ready:
                 return Command(
                     update={
                         "results": state["results"][first:],
                         "response": response(
-                            state, "intermediate", "뷰 선정 근거를 보완합니다."
+                            state,
+                            "intermediate",
+                            "검토 사유를 작업 진행 판단에 전달합니다.",
                         ),
                     },
                     goto="decide",
                 )
-            await write_report(state, config)
-            publish_report(state)
+            complete_report_stage(state, role)
         return Command(
             update={
                 "results": state["results"][first:],
@@ -726,9 +854,8 @@ def build_nodes(
                             span.update(output=result)
                     return {k: result[k] for k in ("response", "results", "execution")}
                 if (
-                    role in {"interpretation", "report"}
-                    and name == "validate_visualization"
-                ):
+                    role == "interpretation" or role in REPORT_ROLES
+                ) and name == "validate_visualization":
                     raise ToolFailure("tool_not_allowed")
                 actual = deepcopy(arguments)
                 if name == "process_data":
@@ -825,7 +952,7 @@ def build_nodes(
         )
 
     async def compose(state, config):
-        if role == "report":
+        if role in REPORT_ROLES:
             return await compose_report(state, config)
         first_record = len(state["results"])
         value, usage = await call(

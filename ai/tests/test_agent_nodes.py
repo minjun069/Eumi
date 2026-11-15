@@ -124,7 +124,11 @@ async def test_restored_selection_receives_latest_progress_decision():
 @pytest.mark.parametrize(
     "role,name",
     [
-        ("report", "validate_visualization"),
+        ("report_selection", "validate_visualization"),
+        ("report_description", "validate_visualization"),
+        ("report_insight", "validate_visualization"),
+        ("report_description", "report_selection_agent"),
+        ("report_insight", "report_description_agent"),
         ("interpretation", "visualization_agent"),
         ("request", "none"),
     ],

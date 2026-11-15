@@ -13,7 +13,16 @@ from src.visualization_instructions import (
     visualization_context,
 )
 
-Role = Literal["request", "interpretation", "visualization", "report"]
+Role = Literal[
+    "request",
+    "interpretation",
+    "visualization",
+    "report_selection",
+    "report_description",
+    "report_insight",
+]
+REPORT_ROLES = ("report_selection", "report_description", "report_insight")
+
 
 COMMON = """복지 담당자의 지역·집단 단위 탐색을 돕는다. 한국어로 작성한다.
 관측 사실, 비교 근거, 가능한 설명, 해석 한계를 구분한다. 개인을 진단하지 않는다.
@@ -68,18 +77,42 @@ ROLE_INSTRUCTIONS = {
         "validate_visualization의 유효한 산출물을 "
         "반환한다."
     ),
-    "report": (
+    "report_selection": (
         "행정동 보고서의 시각화 선정·근거 확보 역할이다. "
         "query_data와 process_data로 상세 뷰 3개에"
         " 필요한 근거를 확보한다. 작업 선택의 name은 "
         "query_data, process_data 중 하나다. 하위"
         " Agent와 validate_visualization은 "
-        "호출하지 않는다. 현재 완료 조건은 선정·설명에 필요한 근거 "
-        "확보다. 설명문과 퀵 인사이트의 완성 여부는 후속 작성·검토 "
-        "단계에서 판단한다. 입력 동·요청 월은 report_input"
-        " 기록을 따른다. 근거가 충분하거나 공급 범위상 보완할 수 "
-        "없으면 compose로 넘긴다. 선정 부적합 시 검토 사유에 "
-        "따라 근거를 보완하거나 선정 범위를 조정한다."
+        "호출하지 않는다. 현재 완료 조건은 근거·설명 범위가 검토된 "
+        "뷰 선정이다. 설명문과 퀵 인사이트의 완성 여부는 후속 "
+        "작성·검토 단계에서 판단한다. 입력 동·요청 월은 "
+        "report_input 기록을 따른다. 작업 진행 판단에서 "
+        "근거가 충분하거나 공급 범위상 보완할 수 없다고 판단하면 "
+        "compose로 넘긴다. 선정 부적합 시 작업 진행 판단에서 "
+        "검토 사유를 읽고 추가 근거 확보(act)와 현재 근거로 선정"
+        " 범위 조정(compose) 중 다음 단계를 판단한다."
+    ),
+    "report_description": (
+        "현재 역할은 시각화 설명 에이전트다. 검토된 선정 뷰와 "
+        "reason의 설명 범위·제외 비교를 그대로 받아 뷰별 설명을"
+        " 작성·검토한다. 선정 결과와 앞 단계 기록을 변경하거나 이전"
+        " 에이전트를 호출할 수 없다. 검토에서 부족한 근거가 드러나면"
+        " 자신의 작업 진행 판단으로 돌아간다. 진행 판단이 추가 "
+        "작업을 결정한 경우에만 작업 선택에서 "
+        "query_data/process_data로 해당 설명에 "
+        "필요한 자료를 확보한다. 추가 근거는 자신의 작성 입력 "
+        "result_ids에 연결한다. 검증된 설명과 수정 상한에 "
+        "도달한 미완성 항목을 구분해 완료를 판단한다."
+    ),
+    "report_insight": (
+        "현재 역할은 퀵 인사이트 에이전트다. 검토를 통과한 설명의 "
+        "범위만 요약한다. 중복·새로운 주장 여부를 검토하고 자신의 "
+        "초안만 수정한다. query_data/process_data는"
+        " 검증된 설명의 근거 확인에만 사용할 수 있다. 추가 자료에서"
+        " 알게 된 사실도 설명에 없으면 요약에 추가하지 않는다. 뷰 "
+        "선정·설명과 앞 단계 기록을 변경하거나 이전 에이전트를 "
+        "호출하지 않는다. 검증된 설명이 없으면 새 주장을 만들지 않고"
+        " 미완성으로 끝낸다."
     ),
 }
 
@@ -114,11 +147,10 @@ NODE_INSTRUCTIONS = {
         "arguments_json, reason에 작성한다. 실행기가"
         " 선택 결과의 입력을 검사하고 해당 작업을 호출한다. "
         "request 역할은 전문 Agent를 호출하고, 전문 역할은"
-        " 필요한 도구를 사용한다. "
-        "interpretation·report 역할은 "
-        "query_data/process_data만 호출한다. 해석의"
-        " 비교표는 응답 작성에서 생성한다. 한 번에 한 작업을 "
-        "선택한다. query_data의 "
+        " 필요한 도구를 사용한다. interpretation과 보고서"
+        " 세 역할은 query_data/process_data만 "
+        "호출한다. 해석의 비교표는 응답 작성에서 생성한다. 한 번에 "
+        "한 작업을 선택한다. query_data의 "
         "filters·fields·sort에는 자료 목록 또는 실제 "
         "columns의 정확한 열 이름만 쓴다. 열을 모르면 "
         "fields를 생략해 확인하고 추측하지 않는다. "
@@ -155,6 +187,48 @@ NODE_INSTRUCTIONS = {
     "Question": (
         "한국어로, 사용자가 제공해야 할 필수 정보를 한 번에 "
         "구체적으로 질문한다. 이미 확보한 내용은 다시 묻지 않는다."
+    ),
+}
+
+REPORT_INSTRUCTIONS = {
+    "selection": (
+        "상세 뷰를 선정한다. views에 view_key, "
+        "reason, evidence_ids를 기록한다. 성공한 "
+        "조회·가공 자료만 참조한다."
+    ),
+    "selection_review": (
+        "마지막 뷰 선정의 적합성·중복·설명 범위에 대한 근거 충분 "
+        "여부를 검토한다. 부적합이면 근거 보완 또는 설명 범위 조정이"
+        " 필요한 뷰와 이유를 명시한다."
+    ),
+    "draft_description": (
+        "대상 뷰의 설명을 한 단락·최대 3문장으로 작성한다. 마지막 "
+        "호출의 result_ids가 입력이다. 이전 검토 사유가 "
+        "있으면 재작성에 반영한다. 근거가 부족하면 수치를 만들지 말고"
+        " 부족한 범위를 명시한다."
+    ),
+    "draft_insight": (
+        "검증된 설명에서 퀵 인사이트 3~4문장을 작성한다. 문장 "
+        "사이를 줄바꿈한다. 마지막 호출의 result_ids가 "
+        "입력이다. 이전 검토 사유가 있으면 재작성에 반영한다. 근거가"
+        " 부족하면 수치를 만들지 말고 부족한 범위를 명시한다."
+    ),
+    "draft_review_description": (
+        "result_ids의 설명 초안을 근거와 대조하고 한 "
+        "단락·최대 3문장을 검토한다. 자료가 부족하면 "
+        "accepted=false와 필요한 근거를 reason에 "
+        "명시한다. 같은 에이전트의 작업 진행 판단에서 추가 조회 또는"
+        " 현재 근거로 수정할지 판단하며, 이 작성·검토 호출은 도구를"
+        " 선택하거나 호출하지 않는다."
+    ),
+    "draft_review_insight": (
+        "마지막 퀵 인사이트를 검증된 설명과 대조한다. 줄바꿈으로 "
+        "구분된 3~4개 한 문장인지, 중복·새 주장이 없는지 "
+        "검토한다."
+    ),
+    "review": (
+        "result_ids에 지정된 초안을 검토한다. 설명 또는 퀵 "
+        "인사이트의 검토 기준을 적용한다."
     ),
 }
 
@@ -239,28 +313,26 @@ def _analysis_instructions() -> str:
     )
 
 
-def _messages(state, role, node, sections, *, guide="", system_sections=()):
+def _messages(
+    state, role, node, sections, *, guide="", system_sections=(), limited=False
+):
     instruction = NODE_INSTRUCTIONS[node]
     if guide:
         instruction += "\n\n" + guide
     system = "\n\n".join(
-        (
+        [
             _section("공통 원칙", COMMON),
             _analysis_instructions(),
             _section(
                 "현재 Agent 역할",
                 ROLE_INSTRUCTIONS[role]
-                + ("\n" + REPORT_EVIDENCE if role == "report" else ""),
+                + ("\n" + REPORT_EVIDENCE if role in REPORT_ROLES else ""),
             ),
             _section("이번 노드의 작업 지침", instruction),
             *system_sections,
-        )
+        ]
     )
-    # 전송용 메시지는 지역값이며 State.messages나 다른 실행 저장소에 추가하지 않는다.
-    return [
-        SystemMessage(system),
-        HumanMessage("\n\n".join(_inputs(state) + sections)),
-    ]
+    return [SystemMessage(system), HumanMessage("\n\n".join(_inputs(state) + sections))]
 
 
 def interpret_messages(state: State, role: Role):
@@ -313,7 +385,7 @@ def selection_messages(state: State, role: Role, catalog, *, definitions):
         ),
     ]
     guide = ""
-    if role == "report":
+    if role in REPORT_ROLES:
         sections.append(
             _section(
                 "상세 뷰의 표현 범위",
@@ -361,7 +433,7 @@ def decide_messages(state: State, role: Role, catalog=None):
                 _json(visualization_context(state, include_inputs=True)),
             )
         )
-    if role == "report":
+    if role in REPORT_ROLES:
         sections.append(
             _section(
                 "상세 뷰의 표현 범위",
@@ -393,6 +465,7 @@ def compose_messages(state: State, role: Role):
             _section("작업 결과와 검증 이력", _json(_records(state["results"]))),
         ],
         guide=guide,
+        limited=limited,
     )
 
 
@@ -405,83 +478,61 @@ def ask_messages(state: State, role: Role):
             _section(
                 "작업·판단 이력",
                 _json(_records(state["results"], include_call_outputs=False)),
-            ),
+            )
         ],
     )
 
 
-def report_messages(state: State, stage: str, catalog):
+def report_messages(state: State, stage: str, catalog, *, role: Role):
     view_key = state["results"][-1]["action"]["arguments"]["view_key"]
-    instructions = {
-        "selection": (
-            "상세 뷰를 선정한다. views에 view_key, "
-            "reason, evidence_ids를 기록한다. 성공한 "
-            "조회·가공 자료만 참조한다."
-        ),
-        "selection_review": (
-            "마지막 뷰 선정의 적합성·중복·설명 범위에 대한 근거 충분 "
-            "여부를 검토한다. 부적합이면 근거 보완 또는 설명 범위 조정이"
-            " 필요한 뷰와 이유를 명시한다."
-        ),
-        "review_retry": (
-            "result_ids에 지정된 초안을 검토한다. 설명 또는 퀵 "
-            "인사이트의 검토 기준을 적용한다."
-        ),
-        "draft": (
-            (
-                "대상 뷰의 설명을 한 단락·최대 3문장으로 작성한다."
-                if view_key
-                else (
-                    "검증된 설명에서 퀵 인사이트 3~4문장을 작성한다. 문장 "
-                    "사이를 줄바꿈한다."
-                )
-            )
-            + (
-                " 마지막 호출의 result_ids가 입력이다. 이전 검토 "
-                "사유가 있으면 재작성에 반영한다."
-            )
-        ),
-        "draft_review": (
-            ("마지막 설명 초안을 근거와 대조하고 한 단락·최대 3문장을 검토한다.")
-            if view_key
-            else (
-                "마지막 퀵 인사이트를 검증된 설명과 대조한다. 줄바꿈으로 "
-                "구분된 3~4개 한 문장인지, 중복·새 주장이 없는지 "
-                "검토한다."
-            )
-        ),
-    }
-    instruction = instructions[stage]
-    guide = (
-        Path(__file__)
-        .with_name("instructions")
-        .joinpath("analysis-report.md")
-        .read_text(encoding="utf-8")
+    node = (
+        f"{stage}_{('description' if view_key else 'insight')}"
+        if stage in {"draft", "draft_review"}
+        else "review"
+        if stage == "review_retry"
+        else stage
     )
-    # 원본은 State다. 이번 호출에 필요한 직렬화만 지역값으로 만든다.
+    instruction = REPORT_INSTRUCTIONS[node]
     return [
         SystemMessage(
-            _analysis_instructions()
-            + "\n\n"
-            + guide
-            + "\n\n"
-            + REPORT_EVIDENCE
-            + "\n\n이번 호출: "
-            + instruction
-            + "\n\n"
-            + _section("조회 가능한 자료 목록", _json(catalog))
+            "\n\n".join(
+                [
+                    _analysis_instructions(),
+                    Path(__file__)
+                    .with_name("instructions")
+                    .joinpath("analysis-report.md")
+                    .read_text(encoding="utf-8"),
+                    REPORT_EVIDENCE,
+                    ROLE_INSTRUCTIONS[role],
+                    "이번 호출: " + instruction,
+                    _section("조회 가능한 자료 목록", _json(catalog)),
+                ]
+            )
         ),
         HumanMessage(
-            json.dumps(
-                {
-                    "request": state["request"],
-                    "execution": state["execution"],
-                    "results": _records(state["results"]),
-                    "views": visualization_context(state, include_inputs=False)[
-                        "views"
-                    ],
-                },
-                ensure_ascii=False,
+            "\n\n".join(
+                [
+                    json.dumps(
+                        {
+                            "request": state["request"],
+                            "execution": state["execution"],
+                            "results": _records(
+                                [
+                                    item
+                                    for item in state["results"]
+                                    if role != "report_insight"
+                                    or item["decision"] != "report_draft"
+                                    or item["action"]["arguments"]["view_key"] is None
+                                    or (item["id"] in accepted_outputs(state))
+                                ]
+                            ),
+                            "views": visualization_context(state, include_inputs=False)[
+                                "views"
+                            ],
+                        },
+                        ensure_ascii=False,
+                    )
+                ]
             )
         ),
     ]

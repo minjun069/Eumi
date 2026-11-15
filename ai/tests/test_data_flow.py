@@ -106,7 +106,7 @@ def test_processing_choices_come_only_from_usable_state_results(tmp_path):
     state = state_adapter.validate_json(state_adapter.dump_json(state))
     original = deepcopy(state)
     tools = {t.name: t for t in create_tools(providers, state=state)}
-    definitions = selection_tools(tools, "report", state=state)
+    definitions = selection_tools(tools, "report_selection", state=state)
     functions = {d["function"]["name"]: d["function"] for d in definitions}
     ids = functions["process_data"]["parameters"]["properties"]["input_result_id"][
         "enum"
@@ -124,7 +124,7 @@ def test_processing_choices_come_only_from_usable_state_results(tmp_path):
         functions["query_data"]["parameters"]["properties"]["target"]["enum"]
     ) == set(providers)
     shown = section(
-        selection_messages(state, "report", catalog, definitions=definitions),
+        selection_messages(state, "report_selection", catalog, definitions=definitions),
         "가공 가능한 결과 ID와 열",
     )
     assert set(shown) == set(ids)
@@ -166,7 +166,7 @@ async def test_query_failure_can_be_corrected_from_actual_catalog(
     model = ScriptedModel(
         [selection("query_data", {"target": target, "fields": [invalid]}), repair]
     )
-    nodes = build_nodes(model, providers, catalog, role="report")
+    nodes = build_nodes(model, providers, catalog, role="report_selection")
     await nodes["act"](state, {})
     await nodes["act"](state, {})
     result = state["results"][-1]
@@ -217,7 +217,7 @@ async def test_derived_reference_rejected_then_real_record_id_processed(tmp_path
             repair,
         ]
     )
-    nodes = build_nodes(model, providers, catalog, role="report")
+    nodes = build_nodes(model, providers, catalog, role="report_selection")
     await nodes["act"](state, {})
     assert state["results"][-1]["output"]["code"] == "invalid_data_reference"
     await nodes["act"](state, {})
@@ -237,7 +237,9 @@ async def test_invalid_reference_is_recorded_without_breaking_the_node(
     model = ScriptedModel(
         [selection("process_data", {"input_result_id": source_id, "operations": []})]
     )
-    await build_nodes(model, providers, catalog, role="report")["act"](state, {})
+    await build_nodes(model, providers, catalog, role="report_selection")["act"](
+        state, {}
+    )
     failure = state["results"][-1]
     assert failure["outcome"] == "failure"
     assert failure["output"]["code"] == "invalid_data_reference"
@@ -427,7 +429,9 @@ async def test_join_rejects_unusable_or_inline_right_data(tmp_path, condition):
             )
         ]
     )
-    await build_nodes(model, providers, catalog, role="report")["act"](state, {})
+    await build_nodes(model, providers, catalog, role="report_selection")["act"](
+        state, {}
+    )
     failure = state["results"][-1]
     assert failure["outcome"] == "failure"
     assert failure["output"]["code"] == "invalid_data_reference"
@@ -515,7 +519,7 @@ async def test_join_retry_uses_restored_state_and_actual_right_columns(tmp_path)
         return selection("process_data", corrected)
 
     model = ScriptedModel([selection("process_data", arguments), repair])
-    nodes = build_nodes(model, providers, catalog, role="report")
+    nodes = build_nodes(model, providers, catalog, role="report_selection")
     await nodes["act"](state, {})
     await nodes["act"](state, {})
     result = state["results"][-1]
@@ -599,7 +603,7 @@ async def test_month_comparison_preserves_periods_and_matches_each_dong(
         ]
         + [compare]
     )
-    nodes = build_nodes(model, providers, catalog, role="report")
+    nodes = build_nodes(model, providers, catalog, role="report_selection")
     await nodes["act"](state, {})
     await nodes["act"](state, {})
     original = deepcopy(state["results"])
@@ -675,7 +679,7 @@ async def test_valid_grid_count_uses_score_presence(
             count,
         ]
     )
-    nodes = build_nodes(model, providers, catalog, role="report")
+    nodes = build_nodes(model, providers, catalog, role="report_selection")
     await nodes["act"](state, {})
     await nodes["act"](state, {})
     result = state["results"][-1]
@@ -788,12 +792,14 @@ async def test_real_query_process_report_and_file_save_flow(tmp_path):
             {"next": "compose", "reason": "근거 확보"},
             views,
             review,
+            {"next": "compose", "reason": "선정 근거로 설명 가능"},
             {"content": "합성 기여도 설명입니다."},
             review,
             {"content": "합성 활동량 설명입니다."},
             review,
             {"content": "합성 격자 설명입니다."},
             review,
+            {"next": "compose", "reason": "검증된 설명으로 요약 가능"},
             {"content": "합성 기여도입니다.\n합성 활동량입니다.\n합성 격자입니다."},
             review,
         ]

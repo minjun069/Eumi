@@ -83,7 +83,9 @@ def test_decision_keeps_nested_call_results_without_model_verification():
     "role,expected",
     [
         ("interpretation", {"query_data", "process_data"}),
-        ("report", {"query_data", "process_data"}),
+        ("report_selection", {"query_data", "process_data"}),
+        ("report_description", {"query_data", "process_data"}),
+        ("report_insight", {"query_data", "process_data"}),
         ("visualization", {"query_data", "process_data", "validate_visualization"}),
         (
             "request",

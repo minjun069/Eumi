@@ -37,6 +37,7 @@ from src.monitoring import (
     shutdown_monitoring,
     trace_execution,
 )
+from src.report_flow import run_report_flow
 from src.runtime import execution_config
 from src.settings import Settings
 from src.state import (
@@ -340,17 +341,12 @@ async def execute_report(state, *, database, model):
         }
         return state
     providers, catalog = database.report_sources()
-    graph = compile_graph(
-        build_nodes(model, providers, catalog, role="report"), finish=finish
+    return await run_report_flow(
+        state,
+        model=model,
+        providers=providers,
+        catalog=catalog,
     )
-    # 재처리도 동일 State·이력·누적 한도로 공통 그래프를 실행한다.
-    state = state_adapter.validate_python(
-        await graph.ainvoke(
-            state,
-            execution_config(state["execution"]["run_id"]),
-        )
-    )
-    return state
 
 
 def retry_report(state):

@@ -286,6 +286,7 @@ async def test_forbidden_selection_uses_existing_retry_without_calling_child(
     assert state["execution"]["budget"]["agent_calls"]["used"] == 0
     assert state["execution"]["budget"]["retries"]["used"] == 1
     assert all(r["action"]["name"] != name for r in state["results"] if r["action"])
+    # 실패한 선정 역할만 작업을 다시 선택하고 후속 역할은 확보 근거로 작성한다.
     assert len([c for c in model.calls if c[0] == "Selection"]) == 2
     assert len([c for c in model.calls if c[0] == "ReportText"]) == 4
 
@@ -437,6 +438,7 @@ async def test_long_report_reselects_supported_scope_and_saves_partial(
             {"next": "compose", "reason": scope},
             lambda messages: choose_views(messages, limited=True),
             review,
+            {"next": "compose", "reason": "선정된 근거로 설명 작성 가능"},
             {
                 "content": "시연용 예시 데이터의 동 점수는 7월 30점, 12월 35점입니다. "
                 "도시 비교는 제외했습니다."
@@ -447,6 +449,7 @@ async def test_long_report_reselects_supported_scope_and_saves_partial(
                 "SAMPLE_A 15, SAMPLE_B 20입니다. 전월 변화는 제외했습니다."
             },
             review,
+            {"next": "compose", "reason": "검증된 설명에서 요약 가능"},
             {
                 "content": "시연용 예시 데이터의 동 점수는 7월 30점, 12월 35점입니다.\n"
                 "12월 기여도는 SAMPLE_A 15, SAMPLE_B 20입니다.\n"
@@ -478,23 +481,27 @@ async def test_long_report_reselects_supported_scope_and_saves_partial(
     ]
     assert row["desc_1"] and row["desc_2"] and row["quick_insight"]
     assert row["desc_3"] is None
-    assert model.schemas[-11:] == [
+    assert model.schemas[-13:] == [
         "ReportSelection",
         "Verification",
         "Decision",
         "ReportSelection",
         "Verification",
+        "Decision",
         "ReportText",
         "Verification",
         "ReportText",
         "Verification",
+        "Decision",
         "ReportText",
         "Verification",
     ]
-    records = section(model.inputs[-9], "작업 결과와 검증 이력")
+    records = section(model.inputs[-11], "작업 결과와 검증 이력")
     assert any(r["reason"] == rejection for r in records)
     assert records[-1]["reason"] == rejection
-    for messages in model.inputs[-7:]:
+    for messages in model.inputs[-9:]:
+        if not messages[1].content.startswith("{"):
+            continue
         records = json.loads(messages[1].content)["results"]
         selected = next(
             r for r in reversed(records) if r["decision"] == "report_selection"
