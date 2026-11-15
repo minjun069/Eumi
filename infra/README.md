@@ -43,7 +43,7 @@ docker compose logs flyway   # "Successfully applied …" (처음이면 V1부터
 
 ## AI 서버 (profile `ai`)
 
-운영과 같은 `ai/Dockerfile`(AI 담당 관리)로 빌드한다. 의존성은 `ai/pyproject.toml` · `ai/uv.lock` 그대로(`uv sync --locked --no-dev`, Python 3.12)이고, `ai/Dockerfile`과 서버 코드(`ai/api.py`)가 있어야 뜬다. 주고받는 형식은 [docs/api](../docs/api/README.md)와 진행 중인 [내부 연동 변경 계획](../docs/work-ref/내부_연동_변경_계획.md)을 따른다.
+운영과 같은 `ai/Dockerfile`(AI 담당 관리)로 빌드한다. 의존성은 `ai/pyproject.toml` · `ai/uv.lock` 그대로(`uv sync --locked --no-dev`, Python 3.12)이고, `ai/Dockerfile`과 서버 코드(`ai/api.py`)가 있어야 뜬다. 주고받는 형식은 [docs/api](../docs/api/README.md)를 따른다 ([내부 연동 변경 계획](../docs/work-ref/내부_연동_변경_계획.md)은 11/13에 끝나 기록으로만 둔다).
 
 | 항목 | 값 |
 |---|---|
@@ -202,7 +202,7 @@ Grafana 가 대시보드와 같은 쿼리로 1분마다(행 수는 10분마다) 
 - **Grafana 가 떠 있어야 온다**: 도커를 내린 동안에는 조건을 보지 않는다. "월 배치가 돌지 않음"은 6일 09:00 이후 Grafana 가 켜질 때 울린다.
 - **DB 가 내려가 있으면 오지 않는다**: 모든 규칙이 DB 를 읽으므로, DB 에 닿지 않는 동안에는 직전 상태를 유지하고 새 알림을 보내지 않는다.
 - 해결되면 "[해결] …" 메시지가 한 번 더 온다 (알려만 주는 두 알림은 제외). 지금 울리는 알림은 파이프라인 대시보드의 "울린 알림" 칸과 Grafana 의 Alerting 메뉴에서도 보인다.
-- **환경 표시**: 제목 맨 앞에 환경 이름이 붙고(`[로컬] 월 배치 실패`), 본문 끝에 "대시보드 열기 · Airflow 열기" 링크가 붙는다. 로컬과 운영 알림이 같은 채널에 와도 구분하기 위한 것이다. 값은 compose 의 `EUMI_ALERT_ENV`(기본 `로컬`) · `EUMI_AIRFLOW_URL`(기본 `http://localhost:8081`)이고, 규칙 문구에는 환경마다 달라지는 주소를 적지 않는다. 운영에 올릴 때 넣을 값과 절차는 `docs/work-ref/Grafana_서버_배포_인계.md`.
+- **환경 표시**: 제목 맨 앞에 환경 이름이 붙고(`[로컬] 월 배치 실패`), 본문 끝에 "대시보드 열기 · Airflow 열기" 링크가 붙는다. 로컬과 운영 알림이 같은 채널에 와도 구분하기 위한 것이다. 값은 compose 의 `EUMI_ALERT_ENV`(기본 `로컬`) · `EUMI_AIRFLOW_URL`(기본 `http://localhost:8081`)이고, 규칙 문구에는 환경마다 달라지는 주소를 적지 않는다. 운영 값과 절차는 아래 "데이터 파이프라인 · Grafana (운영)" 절.
 - **고치는 법**: 파일을 바꾸고 `docker compose --profile data restart grafana`. 규칙을 파일에서 지웠는데 Grafana 에 남아 있으면 `rules.yml` 에 `deleteRules` 항목(orgId · uid)을 적는다. 단계 이름 · 기준월 계산식은 대시보드 쿼리와 같으니 DAG 를 바꾸면 같이 본다.
 - **다시 띄운 직후 1분**: Grafana 는 뜨자마자 이전에 저장해 둔 알림 설정(보낼 곳 · 제목)으로 동작하고, 파일에서 읽은 새 설정은 약 1분 뒤에 적용된다. 웹훅 주소나 문구를 바꾼 뒤 시험할 때는 로그에 `Applying new configuration to Alertmanager` 가 두 번째로 찍힌 다음에 한다.
 - 확인(2026-11-10): 결과 검사 실패 · 월 배치 실패 · 스케줄러 멈춤을 실제로 만들어 발동(약 1분 뒤) · 해결 메시지를 확인했다. 돌지 않음 · 건너뜀은 날짜 조건이라 시각을 바꿔 가며 쿼리로만 확인했고, 행 수 급변 · DB 접속 과다는 조건을 만들지 않아 평소 값(0~2% · 10개)에서 울리지 않는 것만 확인했다.
@@ -245,15 +245,58 @@ master 병합 ─> GitLab 웹훅 ─> Jenkins: Plan → Sync → Build → Migra
 - 병합된 마이그레이션은 운영 DB에 그대로 적용된다. 컬럼 삭제 · 이름 변경처럼 이전 버전 코드가 깨지는 변경은 "추가 → 코드 전환 → 다음 배포에서 삭제" 두 번에 나눈다.
 - 배포 결과는 `https://k15b201.p.ssafy.io/jenkins/`의 `eumi-deploy`에서 본다 (읽기 전용 계정은 인프라 담당에게 요청. Jenkins는 서버 관리자 권한으로 동작하므로 실행 · 설정 권한은 인프라 담당만 가진다). 롤백 · 복구는 서버 접속이 필요하므로 인프라 담당이 진행한다.
 
+### 접근 기록 (Nginx 처리 시간)
+
+`eumi.conf`의 `log_format eumi_timed`가 접근 기록 한 줄 끝에 시간 두 개를 붙인다. 파일은 그대로 `/var/log/nginx/access.log`다 (HTTPS 서버만. 80 포트는 기본 형식).
+
+| 값 | 뜻 |
+|---|---|
+| `rt=` | Nginx가 요청을 받은 때부터 응답을 다 보낼 때까지 (초) |
+| `urt=` | 뒤 서버(backend · web 컨테이너 등)가 답하는 데 걸린 시간 (초). 뒤 서버로 가지 않은 요청은 `-` |
+
+- **쓰는 곳:** 부하 시험에서 "서버가 쓴 시간"과 "서버 밖(네트워크 · PC)에서 쓴 시간"을 가른다. k6가 잰 시간에서 `rt`를 빼면 서버 밖에서 쓴 시간이다.
+- **읽을 때:** 대화 진행 알림(SSE, `/api/agent/conversations/…/messages`)은 연결이 열려 있던 시간 전체가 `rt`로 찍히므로 처리 시간으로 읽지 않는다.
+- **요약:** 측정 도구 `perf-nginx.sh <시작> <끝>`(저장소 밖, 성능 평가 도구 폴더)이 구간 안 기록을 API 이름별 건수 · 중앙값 · p95로 묶는다. 접속 IP · 쿼리 문자열은 출력하지 않는다.
+- **11/15 측정:** 단독 · 탐색 1명에서 서버가 쓴 시간은 API마다 p95 15ms 이하였고, PC에서 본 시간의 나머지(중앙값 10 ~ 15ms)는 네트워크 · PC 쪽이었다 ([docs/perf 2회차 결과](../docs/perf/성능_평가_결과_2회차.md) 2절 "Nginx 처리 시간").
+
+**반영:** 11/15 20:05에 서버에 반영했다. 이번에는 측정 결과를 문서에 함께 넣으려고 문서 MR 병합 전에 반영했다. 다음부터는 다른 Nginx 변경처럼 master 병합 뒤 인프라 담당이 손으로 한다. 저장소의 `eumi.conf`는 서버 `/srv/eumi`에 복사되지 않으므로 PC에서 올린다. 작업 폴더의 파일 대신 git에서 꺼내 올린다 (Windows에서 줄바꿈이 바뀌면 Jenkins 비교가 계속 "다르다"고 나온다).
+
+```bash
+# PC (저장소 폴더에서)
+git fetch origin
+git show origin/master:infra/deploy/nginx/eumi.conf > /tmp/eumi.conf
+scp -i C:/keys/eumi.pem /tmp/eumi.conf ubuntu@k15b201.p.ssafy.io:~/eumi.conf
+# 서버
+sudo cp /etc/nginx/sites-available/eumi ~/eumi.conf.before
+diff ~/eumi.conf.before ~/eumi.conf              # 바꾸려는 줄만 나오는지 확인한다
+sudo cp ~/eumi.conf /etc/nginx/sites-available/eumi
+sudo nginx -t && sudo systemctl reload nginx
+sudo tail -n 1 /var/log/nginx/access.log        # 줄 끝에 rt=… urt=… 가 붙는다 (요청이 한 번 들어온 뒤)
+```
+
+`nginx -t`가 실패하면 reload 하지 말고 `sudo cp ~/eumi.conf.before /etc/nginx/sites-available/eumi`로 되돌린다. 반영하면 Jenkins의 "Nginx 설정이 저장소와 다릅니다" 경고가 사라진다.
+
+### 메일함 (mailpit)
+
+운영은 실제 SMTP 없이 `mailpit`이 메일을 모아 두고 밖으로 보내지 않는다. 회원가입 인증 코드와 임시 비밀번호 메일은 여기서 본다. 메일함 화면은 인증이 없어 서버의 127.0.0.1:8025에만 열려 있으므로 PC에서 SSH 터널로 본다. PC의 8025는 로컬 개발 mailpit이 쓰므로 PC 쪽은 18025를 쓴다.
+
+```bash
+ssh -i C:/keys/eumi.pem -o ServerAliveInterval=60 -L 18025:127.0.0.1:8025 ubuntu@k15b201.p.ssafy.io
+```
+
+터널을 연 창을 그대로 두고 http://localhost:18025 를 연다. 창을 닫으면 터널도 닫힌다. `ServerAliveInterval`은 시연처럼 오래 열어 둘 때 끊기지 않게 하는 옵션이다.
+
 ### AI 서버 (ai)
 
 - **배포 조건:** `ai/Dockerfile`과 서버 코드 `ai/api.py`가 둘 다 저장소에 있을 때만 Jenkins가 빌드 · 배포한다. `ai/` 바로 아래 `.md`와 `ai/docs/`만 바뀌면 다시 빌드하지 않는다.
 - **배포 순서와 실패:** ai → backend → web 순서다. ai가 실패하면 이전 ai로 되돌리고 빌드를 노란색(UNSTABLE)으로 표시한 뒤 backend · web 배포는 계속한다.
 - **첫 배포 전 준비:** 서버 `.env.config`에 `EUMI_LLM_API_KEY`(AI 담당 전달)와 `EUMI_AI_TOKEN`(서버에서 `openssl rand -hex 32`)을 넣는다. 값이 없으면 `deploy.sh ai`가 멈춘다. `EUMI_AI_PASSWORD`는 이미 있다.
 - **내부 연동 토큰:** backend도 `EUMI_AI_TOKEN`(ai와 같은 값)과 `EUMI_PIPELINE_TOKEN`(서버에서 따로 만든 다른 값)을 받는다. compose가 둘 다 `:?`로 받아 값이 없으면 배포가 멈춘다 (http 모드는 둘 다 있어야 backend가 뜬다).
-- **연결 방식 (11/11부터 http):** backend가 ai를 부른다 (`EUMI_AI_MODE: http`, 시간 값 4개는 compose의 backend 주석). ai는 SSAFY GMS(`SETTINGS_BASE_URL`)의 `gpt-6-luna`(`SETTINGS_MODEL`)를 쓴다. 인사이트 보고서 생성(INT-05)은 INT-04가 들어올 때만 돌고, 지금 DAG는 INT-04를 부르지 않는다.
+- **연결 방식 (11/11부터 http):** backend가 ai를 부른다 (`EUMI_AI_MODE: http`, 시간 값 4개는 compose의 backend 주석). ai는 SSAFY GMS(`SETTINGS_BASE_URL`)의 `gpt-6-luna`(`SETTINGS_MODEL`)를 쓴다. 인사이트 보고서 생성(INT-05)은 INT-04가 들어올 때만 돌고, 지금 DAG는 INT-04를 부르지 않는다 (만드는 법은 아래 "인사이트 보고서 생성").
 - **fake로 되돌리기:** compose의 `EUMI_AI_MODE: http` 한 줄을 `fake`로 바꾸는 커밋을 master에 넣는다. compose 변경이라 앱 서비스 전체가 다시 배포된다. 서버 파일을 직접 고치지 않는다.
-- **실행 기록:** 컨테이너 메모리(`/app/outputs`, 512MB)에만 남고 ai를 다시 배포하면 지워진다.
+- **실행 기록:** 질문 · 보고서마다 추적 파일(`trace.jsonl` · `report.json`)을 컨테이너 메모리(`/app/outputs`, 512MB, ai 상한 2GB에 포함)에만 쓴다. 디스크에 남지 않고 ai를 다시 띄우면 지워진다. 대화 내용은 DB에 있어 남는다.
+- **실행 기록 공간 비우기:** 패널 질문 하나가 14~34MB라 무거운 질문 25개 안팎이면 512MB가 찬다. 부하 시험 뒤와 시연 전에, 진행 중인 질문이 없을 때 ai를 다시 띄워 비운다.
+  `sudo docker exec eumi-ai-1 df -h /app/outputs` (남은 공간) · `sudo docker restart eumi-ai-1` (비우기, 다시 뜰 때까지 수십 초 동안 대화 패널이 답하지 못한다)
 
 배포 뒤 확인 (서버, jenkins 계정):
 
@@ -270,6 +313,60 @@ scripts/dc.sh --profile ai exec -T ai /app/.venv/bin/python -c "import os, psyco
 # ai → LLM API (바깥 연결): compose의 SETTINGS_BASE_URL(GMS 주소)로 요청한다. 키는 보내지 않는다.
 #   200 · 401 · 404가 나오면 나가는 길은 열려 있다 (연결 오류 · 시간 초과면 막힘)
 scripts/dc.sh --profile ai exec -T ai /app/.venv/bin/python -c "import os, httpx; u = os.environ.get('SETTINGS_BASE_URL', 'https://api.openai.com/v1').rstrip('/'); print(u, httpx.get(u + '/models', timeout=5).status_code)"
+```
+
+**인사이트 보고서 생성 (서버에서만 · 임시 ai)**
+
+- **지금 상태 (11/13, 이대로 유지):** 보고서 생성 요청(INT-04 · 05)은 서버 안에서만 보낼 수 있다. Nginx가 `/api/internal/`을 막고, ai는 밖으로 열린 포트가 없고, DAG는 INT-04를 부르지 않는다. 그래서 보고서는 인프라 담당이 서버에 접속해 아래 순서로 만들 때만 바뀐다. 화면이나 대화 패널로는 만들거나 바꿀 수 없다.
+- **운영 DB의 보고서:** 235건 중 역삼1동(1168064000) 2025-12 한 건만 AI가 만들었다 (11/13 13:59, 퀵 인사이트 + 그래프 2개). 나머지는 시연용 보고서(V20261110_02)다.
+- **임시 ai를 쓰는 이유:** 운영 ai의 기본 한도(동 하나 300초 · 도구 재시도 2회)로는 보고서가 일부만 만들어진다. 한도는 compose 값이라 고치면 앱 전체가 다시 배포되므로, 한도만 늘린 ai 컨테이너를 따로 띄워 만들고 지운다. 운영 ai(`eumi-ai-1`)와 대화 패널은 그동안 그대로 돈다.
+- **드는 것 (11/13 로컬 2회 · 운영 1회):** 동 하나에 약 3.5~6.5분, GMS 크레딧 약 1,000~2,400, 실행 기록 180~650MB(임시 ai의 디스크), 메모리 최대 435MiB. 같은 동도 실행마다 결과가 달라 그래프가 2개일 때도 3개일 때도 있다. 47개 동 전체는 약 3시간 · 크레딧 4.7만~11만으로 예상되어 만들지 않았다.
+- **지킬 것:** 같은 동 · 월을 다시 만들면 덮어쓴다. 보내기 전에 표를 백업하고, 시연 전에는 다시 보내지 않는다. 시연 기관 되돌리기(`backups/demo-org/restore.sh`)는 보고서를 건드리지 않는다.
+
+```bash
+# 1) 백업 (보고서 표 전체)
+sudo -u jenkins /srv/eumi/scripts/dc.sh exec -T postgres psql -U postgres -d eumi -c "COPY public.region_insight_report TO STDOUT" </dev/null | sudo tee /srv/eumi/backups/insight-report/all-$(date +%Y%m%d-%H%M).copy >/dev/null
+
+# 2) 임시 ai 띄우기 (동 하나 600초 · 재시도 6회, 실행 기록은 컨테이너 디스크에)
+sudo -u jenkins /srv/eumi/scripts/dc.sh run -d --no-deps --name eumi-ai-report -e SETTINGS_RUNTIME_TIMEOUT=600 -e SETTINGS_MAX_TOOL_RETRIES=6 -e SETTINGS_OUTPUT_DIR=/app/report-outputs ai </dev/null
+sudo docker update --memory 3g --memory-swap 3g eumi-ai-report
+sudo docker logs --tail=5 eumi-ai-report        # "Uvicorn running on http://0.0.0.0:8000"
+
+# 3) 생성 요청 (INT-05를 임시 ai 안에서 보낸다. month · dongCodes를 바꾼다) → 202
+sudo docker exec eumi-ai-report /app/.venv/bin/python -c "
+import json, urllib.request, uuid
+body = {'requestId': str(uuid.uuid4()), 'month': '2025-12', 'dongCodes': ['1168064000']}
+req = urllib.request.Request('http://127.0.0.1:8000/internal/insight-reports/runs', json.dumps(body).encode(), {'Content-Type': 'application/json'})
+print(urllib.request.urlopen(req, timeout=10).status)
+"
+
+# 4) 끝났는지 확인: 임시 ai 로그에 완료 알림(INT-08) 전송이 찍히고, 표의 generated_at이 바뀐다
+sudo docker logs --tail=20 eumi-ai-report
+sudo -u jenkins /srv/eumi/scripts/dc.sh exec -T postgres psql -U postgres -d eumi -c "SELECT adm_cd10, generated_at, quick_insight IS NOT NULL AS quick, graph_1, graph_2, graph_3 FROM region_insight_report WHERE period_start = DATE '2025-12-01' AND adm_cd10 = '1168064000'" </dev/null
+
+# 5) 실행 기록 보관(필요할 때만) → 임시 ai 지우기
+sudo docker cp eumi-ai-report:/app/report-outputs - | gzip | sudo tee /srv/eumi/backups/insight-report/trace-$(date +%Y%m%d-%H%M).tar.gz >/dev/null
+sudo docker rm -f eumi-ai-report
+```
+
+백업은 `/srv/eumi/backups/insight-report/`에 있다 (11/13).
+
+| 파일 | 내용 |
+|---|---|
+| `all-before-ai.copy` | AI 생성 전 표 전체 (235행, 모두 시연용 보고서) |
+| `yeoksam1-202512-ai-run1.copy` | AI가 만든 역삼1동 2025-12 한 행 |
+| `yeoksam1-202512-ai-run1-trace.tar.gz` | 그때의 실행 기록 (모델 호출 · 도구 호출 추적) |
+
+역삼1동 2025-12를 AI 생성 전(시연용 보고서)으로 되돌릴 때는 전체 백업에서 그 행만 다시 넣는다. 다른 동 · 월은 `WHERE` 두 곳의 값을 바꾼다.
+
+```bash
+{ printf 'BEGIN;\nCREATE TEMP TABLE r (LIKE public.region_insight_report);\nCOPY r FROM STDIN;\n'
+  sudo cat /srv/eumi/backups/insight-report/all-before-ai.copy
+  printf '\\.\n'
+  printf "DELETE FROM public.region_insight_report WHERE period_start = DATE '2025-12-01' AND adm_cd10 = '1168064000';\n"
+  printf "INSERT INTO public.region_insight_report SELECT * FROM r WHERE period_start = DATE '2025-12-01' AND adm_cd10 = '1168064000';\nCOMMIT;\n"
+} | sudo -u jenkins /srv/eumi/scripts/dc.sh exec -T postgres psql -U postgres -d eumi -v ON_ERROR_STOP=1
+# BEGIN · CREATE TABLE · COPY 235 · DELETE 1 · INSERT 0 1 · COMMIT 이 차례로 나온다
 ```
 
 ### 데이터 파이프라인 · Grafana (운영)
@@ -332,7 +429,9 @@ scripts/dc.sh --profile pipeline logs --tail=50 pipeline
 
 - 유동 상세가 없어 대시보드 "테이블 최신성"의 유동 상세가 비어 보이고, `analysis.pipeline_check`가 비어 "검사 결과"가 "기록 없음"이다. 서버에서 월 배치가 처음 실제로 돌면 채워진다.
 - 스트리밍은 시연 때만 수동으로 돌리므로 스트리밍 대시보드는 평소 "멈춤"이 정상이다.
-- 월 배치가 끝난 뒤 backend에 알리는 호출(INT-04)은 아직 DAG에 없다. 보고서 생성은 서버에서 INT-04를 직접 호출한다.
+- Mattermost 웹훅은 11/11 배포 때 넣지 않았다. 알림은 Grafana의 Alerting 메뉴와 대시보드 "울린 알림" 칸에만 남고 채널로는 가지 않는다. 넣는 법은 위 "배포 뒤" 4번이다.
+- 서버가 채널로 알림을 보내기 시작하면 데이터 파트 로컬 `.env`의 `MATTERMOST_WEBHOOK_URL`을 뺀다. 그 전까지 채널에 오는 알림은 제목이 "[로컬]"로 시작한다.
+- 월 배치가 끝난 뒤 backend에 알리는 호출(INT-04)은 아직 DAG에 없다. 보고서는 인프라 담당이 서버에서 임시 ai로 만든다 (위 "AI 서버"의 "인사이트 보고서 생성").
 
 **문제가 생기면**
 

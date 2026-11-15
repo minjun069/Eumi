@@ -10,7 +10,7 @@
   2. 둘 다 ERD를 바꾸지 않으면 차이를 비교해 권장안을 고른다.
   3. AI 초안의 나은 점은 ERD를 바꾸지 않는 선에서 받아들인다.
   4. 내부 API JSON은 camelCase로 쓴다.
-- **구현 계획 (진행 중):** [docs/work-ref/내부_연동_변경_계획.md](../work-ref/내부_연동_변경_계획.md). 계약은 [docs/api](../api/README.md)에 반영했다: 대화 패널(AI-a)은 11/9 [ai-agent-panel.md](../api/ai-agent-panel.md), 인사이트 보고서(AI-b)는 11/10 [insight-report.md](../api/insight-report.md).
+- **구현 계획 (끝남, 11/13):** [docs/work-ref/내부_연동_변경_계획.md](../work-ref/내부_연동_변경_계획.md). 계약은 [docs/api](../api/README.md)에 반영했다: 대화 패널(AI-a)은 11/9 [ai-agent-panel.md](../api/ai-agent-panel.md), 인사이트 보고서(AI-b)는 11/10 [insight-report.md](../api/insight-report.md).
   - 1번(보고서 저장 주체)은 권한 변경이 운영에 반영돼 11/9에 먼저 반영했다: INT-06 삭제, 저장 문장은 [insight-report.md](../api/insight-report.md) 4절.
 - **출처:** 11/6 AI 담당자에게 전달한 'AI 연동 초안 변경 요청 (11/6 결정 반영)'
 
