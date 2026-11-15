@@ -7,7 +7,7 @@ from pydantic import ConfigDict, Field, TypeAdapter, with_config
 from typing_extensions import TypedDict
 
 from src.exceptions import ToolFailure
-from src.execution_trace import trace_span
+from src.execution_trace import trace_output, trace_span, trace_tool_call
 from src.tools.data import (
     Dataset,
     Scalar,
@@ -106,6 +106,7 @@ def matching_rows(data: Dataset, filters: list[Filter]) -> list[dict[str, Scalar
     return [row for row in data["rows"] if all(matches(row, f) for f in filters)]
 
 
+@trace_tool_call(query_adapter)
 def query_data(
     request: QueryRequest, providers: Mapping[str, DataProvider]
 ) -> QueryResult:
@@ -116,10 +117,9 @@ def query_data(
     if request.get("offset", 0) and "version" not in request:
         raise ToolFailure("version_required")
     try:
-        with trace_span("provider", target, {"query": request}) as span:
+        with trace_span("provider", target, {"query": request}):
             raw = providers[target]()
-            if span:
-                span.update(output=raw)
+            trace_output(raw)
             data = read_dataset(raw)
     except PermissionError as exc:
         raise ToolFailure("permission_denied") from exc

@@ -2,7 +2,6 @@
 
 import argparse
 import asyncio
-import json
 from pathlib import Path
 
 from langgraph.checkpoint.memory import InMemorySaver
@@ -46,7 +45,11 @@ async def run_case(
             observation,
         ):
             result = await resume_graph(
-                graph, result["execution"]["run_id"], result["response"]["id"], answer, config
+                graph,
+                result["execution"]["run_id"],
+                result["response"]["id"],
+                answer,
+                config,
             )
             record_execution(observation, result)
     return state_adapter.validate_python(result)
@@ -58,9 +61,7 @@ def save_report(report, output: Path):
         case | {"state": state_adapter.dump_python(case["state"], mode="json")}
         for case in report
     ]
-    (output / "report.json").write_text(
-        json.dumps(serialized, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    TraceRecorder().write_json(output / "report.json", serialized, strict=True)
     build_report([output / "report.json"], output / "report.html")
 
 

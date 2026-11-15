@@ -8,6 +8,7 @@ from pydantic import ConfigDict, Field, TypeAdapter, with_config
 from typing_extensions import TypedDict
 
 from src.exceptions import ToolFailure
+from src.execution_trace import trace_tool_call
 from src.tools.data import (
     DataReference,
     Dataset,
@@ -432,6 +433,7 @@ def _map(data: Dataset, spec: MapSpec) -> tuple[str, MapSpec, list[str]]:
     return _svg(spec["title"], "".join(body)), applied, warnings
 
 
+@trace_tool_call(render_adapter)
 def render_visualization(request: RenderRequest) -> RenderResult:
     request = validate(render_adapter, request)
     data = read_dataset(request["data"])

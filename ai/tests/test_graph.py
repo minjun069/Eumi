@@ -10,6 +10,7 @@ from langgraph.types import Command
 
 from experiments.fixtures import mock_nodes
 from src.execution import record
+from src.execution_trace import TraceRecorder, recording
 from src.graph import compile_graph
 from src.settings import Settings
 from src.state import create_state, state_adapter
@@ -23,6 +24,29 @@ def initial():
         version="test",
         event="user_request",
     )
+
+
+@pytest.mark.asyncio
+async def test_wait_trace_preserves_interrupt_then_resume_boundary():
+    state = initial()
+    nodes, finish = mock_nodes("question")
+    graph = compile_graph(nodes, finish=finish, checkpointer=InMemorySaver())
+    config = {"configurable": {"thread_id": state["execution"]["run_id"]}}
+    recorder = TraceRecorder()
+    with recording(recorder):
+        waiting = await graph.ainvoke(state, config)
+        assert waiting["execution"]["status"] == "waiting_input"
+        completed = await graph.ainvoke(Command(resume="answer"), config)
+    spans = [s for s in recorder.spans if s["name"] == "wait"]
+    assert len(spans) == 2
+    assert spans[0]["status"] == "interrupted"
+    assert spans[0]["error"]["type"] == "GraphInterrupt"
+    assert "output" not in spans[0]
+    assert spans[1]["status"] == "success"
+    assert spans[1]["output"]["goto"] == "interpret"
+    assert spans[1]["output"]["node_update"]["messages"][0]["content"] == "answer"
+    assert completed["execution"]["status"] == "completed"
+    assert recorder.export()["coverage"]["unfinished_spans"] == 0
 
 
 @pytest.mark.parametrize("scenario", ["intermediate", "question", "partial", "failure"])

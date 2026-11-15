@@ -25,7 +25,7 @@ from src.execution import (
     require,
     timed,
 )
-from src.execution_trace import trace_span
+from src.execution_trace import trace_call, trace_output, trace_span
 from src.state import Error, State, StateUpdate, state_adapter
 
 Node = Callable[[State], Command | Awaitable[Command]]
@@ -191,7 +191,7 @@ def _wrap_node(
         if publish is not None:
             await publish(state, name)
         prepared = deepcopy(state_adapter.validate_python(state))
-        with trace_span("node", name, {"state": prepared}) as span:
+        with trace_span("node", name, {"state": prepared}):
             command = None
             try:
                 if finalizing(prepared):
@@ -243,14 +243,18 @@ def _wrap_node(
                     cause="실행 오류로 요청을 완료하지 못했습니다. "
                     "기존 공개 결과를 보존합니다.",
                 )
-            if span:
-                span.update(
-                    output={
-                        "node_update": command.update if command is not None else None,
-                        "applied_update": result.update,
-                        "goto": result.goto,
-                    }
-                )
+            except BaseException:
+                # 취소 중 소비한 예산·호출 이력은 관측만 한다. 완료하지 않은
+                # 노드의 상태를 그래프 반환값이나 체크포인트로 반영하지 않는다.
+                trace_output({"observed_state": prepared})
+                raise
+            trace_output(
+                {
+                    "node_update": command.update if command is not None else None,
+                    "applied_update": result.update,
+                    "goto": result.goto,
+                }
+            )
             if (
                 publish is not None
                 and (result.update.get("response") or {}).get("kind") == "intermediate"
@@ -265,11 +269,13 @@ def _wrap_node(
 
 
 def _wait_for_input(state: State):
-    with trace_span("node", "wait", {"state": state}) as span:
-        command = _receive_input(state)
-        if span:
-            span.update(output={"node_update": command.update, "goto": command.goto})
-        return command
+    return trace_call(
+        "node",
+        "wait",
+        {"state": state},
+        lambda: _receive_input(state),
+        output=lambda command: {"node_update": command.update, "goto": command.goto},
+    )
 
 
 def _receive_input(state: State):

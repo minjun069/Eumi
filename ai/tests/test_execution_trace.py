@@ -9,11 +9,118 @@ from pydantic import ValidationError
 
 from demo.scenario_demo import run_scenario
 from src.agent_nodes import Decision
-from src.execution_trace import TraceRecorder, recording, trace_span
+from src.execution_trace import (
+    TraceRecorder,
+    execution_manifest,
+    recording,
+    trace_acall,
+    trace_call,
+    trace_output,
+    trace_span,
+)
 from src.gemini import create_model, structured_call
 from src.prompting import decide_messages
 from src.settings import Settings
 from tests.helpers import DONE, ScriptedModel, composition, initial, selection
+
+
+@pytest.mark.asyncio
+async def test_call_wrappers_snapshot_before_mutation_and_preserve_result_identity():
+    value = {"rows": [1]}
+    recorder = TraceRecorder()
+    calls = []
+
+    def mutate():
+        calls.append("sync")
+        value["rows"].append(2)
+        return value
+
+    async def invoke():
+        calls.append("async")
+        await asyncio.sleep(0)
+        return trace_call("tool", "mutate", value, mutate)
+
+    with recording(recorder):
+        result = await trace_acall("agent", "invoke", value, invoke)
+    assert result is value
+    assert calls == ["async", "sync"]
+    parent, child = recorder.spans
+    assert parent["input"] == child["input"] == {"rows": [1]}
+    assert parent["output"] == child["output"] == {"rows": [1, 2]}
+    assert child["parent_id"] == parent["id"]
+    value["rows"].clear()
+    assert parent["output"] == {"rows": [1, 2]}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("error", [ValueError("private"), asyncio.CancelledError()])
+async def test_call_wrapper_propagates_original_error_once_and_restores_parent(error):
+    recorder = TraceRecorder()
+    calls = 0
+
+    async def fail():
+        nonlocal calls
+        calls += 1
+        raise error
+
+    with recording(recorder), trace_span("agent", "parent", {}):
+        with pytest.raises(type(error)) as caught:
+            await trace_acall("tool", "fail", {}, fail)
+        trace_output({"caught": True})
+    assert caught.value is error
+    assert calls == 1
+    parent, child = recorder.spans
+    assert parent["output"] == {"caught": True}
+    assert parent["status"] == "success"
+    assert child["status"] == "error"
+    assert child["error"]["type"] == type(error).__name__
+
+
+def test_disabled_trace_does_not_evaluate_output_builders():
+    def unexpected(*args):
+        pytest.fail("disabled trace evaluated an output builder")
+
+    value = object()
+    assert trace_call("tool", "disabled", {}, lambda: value, output=unexpected) is value
+    trace_output(build=unexpected)
+
+
+def test_trace_output_treats_a_returned_callable_as_data():
+    def unexpected():
+        pytest.fail("logging executed the returned value")
+
+    recorder = TraceRecorder()
+    with recording(recorder), trace_span("provider", "invalid", {}):
+        trace_output(unexpected)
+    assert recorder.spans[0]["output"] == "<function>"
+
+
+def test_shared_writer_redacts_without_mutating_and_can_require_evidence(
+    tmp_path, monkeypatch
+):
+    settings = Settings(
+        _env_file=None, api_key="model-secret", langfuse_public_key="telemetry-secret"
+    )
+    recorder = TraceRecorder.from_settings(settings)
+    value = {"text": "model-secret telemetry-secret", "authorization": "Bearer token"}
+    path = tmp_path / "evidence.json"
+    assert recorder.write_json(path, value)
+    assert json.loads(path.read_text(encoding="utf-8")) == {
+        "text": "[REDACTED] [REDACTED]",
+        "authorization": "[REDACTED]",
+    }
+    assert value["text"] == "model-secret telemetry-secret"
+
+    def fail_replace(*args):
+        raise OSError("private-location")
+
+    monkeypatch.setattr(type(path), "replace", fail_replace)
+    assert recorder.write_json(path, {"text": "replacement"}) is False
+    assert json.loads(path.read_text(encoding="utf-8"))["text"] == (
+        "[REDACTED] [REDACTED]"
+    )
+    with pytest.raises(OSError):
+        recorder.write_json(path, {}, strict=True)
 
 
 def test_snapshots_are_detached_and_nested_secrets_redacted(tmp_path):
@@ -27,6 +134,63 @@ def test_snapshots_are_detached_and_nested_secrets_redacted(tmp_path):
     assert saved["output"]["rows"][0]["n"] == 999
     assert saved["input"]["api_key"] == "[REDACTED]"
     assert saved["input"]["text"] == "x-[REDACTED]-y"
+
+
+def test_manifest_tracks_current_code_and_criteria_without_reading_secrets(
+    tmp_path, monkeypatch
+):
+    def unavailable(*args, **kwargs):
+        raise FileNotFoundError("git unavailable")
+
+    monkeypatch.setattr("src.execution_trace.subprocess.run", unavailable)
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "example.py").write_text("version = 1", encoding="utf-8")
+    (tmp_path / "eval" / "docs").mkdir(parents=True)
+    criteria = tmp_path / "eval" / "docs" / "tools.md"
+    criteria.write_text("first criteria", encoding="utf-8")
+    node_criteria_dir = tmp_path / "eval" / "docs" / "nodes"
+    originals = node_criteria_dir / "originals"
+    originals.mkdir(parents=True)
+    node_criteria = node_criteria_dir / "compose.json"
+    node_criteria.write_text('{"version": 1}', encoding="utf-8")
+    original = originals / "compose.md"
+    original.write_text("migration reference", encoding="utf-8")
+    (tmp_path / ".env").write_text("private-env-value", encoding="utf-8")
+    settings = Settings(
+        _env_file=None,
+        api_key="private-api-key",
+        base_url="https://private-user:private-password@example.com/v1?token=private-query",
+        backend_token="private-backend-token",
+    )
+    before = execution_manifest(settings, root=tmp_path)
+    assert before["git"] == {"revision": None, "dirty": None}
+    assert set(before["files_sha256"]) == {
+        "src/example.py",
+        "eval/docs/tools.md",
+        "eval/docs/nodes/compose.json",
+    }
+    assert before["settings"]["base_url"] == "https://example.com/v1"
+    assert "private-" not in json.dumps(before)
+    original.write_text("updated migration reference", encoding="utf-8")
+    assert (
+        execution_manifest(settings, root=tmp_path)["content_sha256"]
+        == before["content_sha256"]
+    )
+    node_criteria.write_text('{"version": 2}', encoding="utf-8")
+    updated_node_criteria = execution_manifest(settings, root=tmp_path)
+    assert updated_node_criteria["content_sha256"] != before["content_sha256"]
+    criteria.write_text("updated criteria", encoding="utf-8")
+    after = execution_manifest(settings, root=tmp_path)
+    assert updated_node_criteria["content_sha256"] != after["content_sha256"]
+    assert (
+        before["files_sha256"]["src/example.py"]
+        == after["files_sha256"]["src/example.py"]
+    )
+    (tmp_path / "src" / "example.py").write_text("version = 2", encoding="utf-8")
+    assert (
+        execution_manifest(settings, root=tmp_path)["content_sha256"]
+        != after["content_sha256"]
+    )
 
 
 @pytest.mark.asyncio
@@ -51,7 +215,12 @@ async def test_failed_model_input_survives_without_state_commit(tmp_path):
 @pytest.mark.asyncio
 async def test_node_and_tool_inputs_link_to_model_without_trace_feedback():
     model = ScriptedModel(
-        [selection("query_data", {"target": "D3"}), DONE, composition]
+        [
+            {"next": "act", "reason": "비율 계산에 사용할 가구 자료 필요"},
+            selection("query_data", {"target": "D3"}),
+            DONE,
+            composition,
+        ]
     )
     report = await run_scenario("S1", model, Settings(_env_file=None))
     spans = report["trace"]["spans"]

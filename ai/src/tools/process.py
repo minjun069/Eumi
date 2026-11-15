@@ -9,7 +9,7 @@ from pydantic import ConfigDict, Field, TypeAdapter, with_config
 from typing_extensions import TypedDict
 
 from src.exceptions import ToolFailure
-from src.execution_trace import trace_span
+from src.execution_trace import trace_output, trace_span, trace_tool_call
 from src.tools.data import (
     Column,
     Dataset,
@@ -281,6 +281,7 @@ def _cast(data: Dataset, op: Cast, missing: str) -> int:
     return excluded
 
 
+@trace_tool_call(process_adapter)
 def process_data(request: ProcessRequest) -> ProcessResult:
     request = validate(process_adapter, request)
     data = read_dataset(request["data"])
@@ -293,7 +294,7 @@ def process_data(request: ProcessRequest) -> ProcessResult:
                 "operation",
                 op["operation"],
                 {"operation": op, "data": data, "missing": missing},
-            ) as span:
+            ):
                 before = len(data["rows"])
                 match op["operation"]:
                     case "calculate":
@@ -332,8 +333,7 @@ def process_data(request: ProcessRequest) -> ProcessResult:
                         "excluded_rows": excluded,
                     }
                 )
-                if span:
-                    span.update(output={"data": data, "counts": counts[-1]})
+                trace_output({"data": data, "counts": counts[-1]})
         except ToolFailure as exc:
             exc.details["operation_index"] = index
             raise

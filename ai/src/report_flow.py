@@ -2,7 +2,7 @@
 
 from src.agent_nodes import build_nodes, finish, publish_report
 from src.execution import accepted_outputs, finalizing, record
-from src.execution_trace import trace_span
+from src.execution_trace import trace_acall
 from src.graph import compile_graph
 from src.prompting import REPORT_ROLES
 from src.runtime import execution_config
@@ -66,16 +66,17 @@ async def run_report_flow(
             finish=finish,
             publish=publish,
         )
-        with trace_span(
-            "agent", role + "_agent", {"initial_state": state, "role": role}
-        ) as span:
-            state = state_adapter.validate_python(
-                await graph.ainvoke(
-                    state, execution_config(state["execution"]["run_id"], config)
-                )
+        state = state_adapter.validate_python(
+            await trace_acall(
+                "agent",
+                role + "_agent",
+                {"initial_state": state, "role": role},
+                lambda graph=graph, state=state: graph.ainvoke(
+                    state,
+                    execution_config(state["execution"]["run_id"], config),
+                ),
             )
-            if span:
-                span.update(output=state)
+        )
         if not completed_stage(state, role):
             break
     # 오류·한도에서도 검증된 항목은 저장 대상으로 남긴다. 기존 오류는 유지한다.

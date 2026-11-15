@@ -1,13 +1,19 @@
 """Agent 실행 과정의 상세 입출력과 오류를 로컬에 기록한다."""
 
 import json
+import logging
+import os
+import subprocess
 from collections import Counter
 from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import UTC, datetime
+from functools import wraps
+from hashlib import sha256
 from pathlib import Path
 from time import monotonic
 from typing import Any, NotRequired
+from urllib.parse import urlsplit, urlunsplit
 from uuid import uuid4
 
 from pydantic import SecretStr, ValidationError
@@ -32,8 +38,23 @@ class SpanRecord(TypedDict):
     http_response: NotRequired[dict]
 
 
+class ManifestGit(TypedDict):
+    revision: str | None
+    dirty: bool | None
+
+
+class ExecutionManifest(TypedDict):
+    version: str
+    captured_at: str
+    git: ManifestGit
+    content_sha256: str
+    files_sha256: dict[str, str]
+    settings: dict[str, Any]
+
+
 _recorder: ContextVar = ContextVar("execution_recorder", default=None)
 _span: ContextVar = ContextVar("execution_span", default=None)
+logger = logging.getLogger(__name__)
 SECRET_FIELDS = {
     "backend_token",
     "api_key",
@@ -54,7 +75,101 @@ def utc_now():
 
 def safe_settings(settings):
     """Exclude credentials before serialization, including the public telemetry key."""
-    return settings.model_dump(mode="json", exclude=SECRET_FIELDS)
+    values = settings.model_dump(mode="json", exclude=SECRET_FIELDS)
+    for name, value in values.items():
+        if name.endswith("_url") and isinstance(value, str):
+            parsed = urlsplit(value)
+            # URL credentials and query tokens are not deployment identifiers.
+            values[name] = urlunsplit(
+                (parsed.scheme, parsed.netloc.rsplit("@", 1)[-1], parsed.path, "", "")
+            )
+    return values
+
+
+def execution_manifest(settings, *, root: Path | None = None) -> ExecutionManifest:
+    """Fingerprint only runtime sources and published evaluation instructions."""
+    root = (root or Path(__file__).resolve().parents[1]).resolve()
+    archived_criteria = root / "eval" / "docs" / "nodes" / "originals"
+    paths = {
+        *root.joinpath("src").rglob("*.py"),
+        *root.joinpath("src", "instructions").rglob("*.md"),
+        *root.joinpath("src", "instructions").rglob("*.json"),
+        *root.joinpath("eval", "docs").rglob("*.md"),
+        *root.joinpath("eval", "docs", "nodes").glob("*.json"),
+        *(
+            root / name
+            for name in (
+                "api.py",
+                "AGENTS.md",
+                "pyproject.toml",
+                "uv.lock",
+                "docs/coding-guide.md",
+                "docs/writing-guide.md",
+                "src/tools/tableau_catalog.json",
+                "experiments/api_roundtrip.py",
+                "experiments/report_roundtrip.py",
+                "experiments/evidence.py",
+            )
+        ),
+    }
+    files = {
+        path.relative_to(root).as_posix(): sha256(path.read_bytes()).hexdigest()
+        for path in sorted(paths)
+        if path.is_file()
+        and not path.is_symlink()
+        and path.resolve().is_relative_to(root)
+        and not path.is_relative_to(archived_criteria)
+    }
+    encoded = json.dumps(files, sort_keys=True, separators=(",", ":")).encode()
+    git: ManifestGit = {"revision": None, "dirty": None}
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            check=False,
+        )
+        if result.returncode == 0:
+            git["revision"] = result.stdout.strip()
+            status = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(root),
+                    "status",
+                    "--porcelain",
+                    "--",
+                    "src",
+                    "api.py",
+                    "AGENTS.md",
+                    "pyproject.toml",
+                    "uv.lock",
+                    "eval/docs",
+                    ":!eval/docs/nodes/originals",
+                    "docs/coding-guide.md",
+                    "docs/writing-guide.md",
+                    "experiments/api_roundtrip.py",
+                    "experiments/report_roundtrip.py",
+                    "experiments/evidence.py",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=2,
+                check=False,
+            )
+            if status.returncode == 0:
+                git["dirty"] = bool(status.stdout.strip())
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return {
+        "version": "execution-manifest-v1",
+        "captured_at": utc_now(),
+        "git": git,
+        "content_sha256": sha256(encoded).hexdigest(),
+        "files_sha256": files,
+        "settings": safe_settings(settings),
+    }
 
 
 def error_info(exc):
@@ -65,6 +180,10 @@ def error_info(exc):
     }
     if isinstance(exc, ValidationError):
         info["validation_errors"] = exc.errors(include_url=False, include_context=False)
+    if hasattr(exc, "details"):
+        info["details"] = exc.details
+    if hasattr(exc, "retryable"):
+        info["retryable"] = exc.retryable
     if exc.__cause__ is not None and exc.__cause__ is not exc:
         info["cause"] = error_info(exc.__cause__)
     # Provider exception strings may echo authentication headers. The sanitized
@@ -78,8 +197,27 @@ class TraceRecorder:
         self.secrets = tuple(s for s in secrets if s)
         self.journal = journal
         if journal:
-            journal.parent.mkdir(parents=True, exist_ok=True)
-            journal.write_text("", encoding="utf-8")
+            try:
+                journal.parent.mkdir(parents=True, exist_ok=True)
+                journal.write_text("", encoding="utf-8")
+            except OSError as exc:
+                self._disable_journal(exc)
+
+    @classmethod
+    def from_settings(cls, settings, journal: Path | None = None):
+        secrets = [
+            value.get_secret_value()
+            for value in settings.model_dump().values()
+            if isinstance(value, SecretStr)
+        ]
+        return cls(secrets=[*secrets, settings.langfuse_public_key], journal=journal)
+
+    def _disable_journal(self, exc):
+        self.journal = None
+        logger.warning(
+            "Execution journal unavailable; keeping in-memory trace (%s)",
+            type(exc).__name__,
+        )
 
     def snapshot(self, value):
         def scrub(item):
@@ -101,16 +239,41 @@ class TraceRecorder:
             return item
 
         # A detached JSON snapshot, including message metadata and full artifacts.
-        return scrub(to_jsonable_python(scrub(value)))
+        return scrub(
+            to_jsonable_python(
+                scrub(value), fallback=lambda item: f"<{type(item).__name__}>"
+            )
+        )
 
     def persist(self, event, entry):
         if self.journal:
-            with self.journal.open("a", encoding="utf-8") as stream:
-                stream.write(
-                    json.dumps({"event": event, "span": entry}, ensure_ascii=False)
-                    + "\n"
-                )
+            try:
+                with self.journal.open("a", encoding="utf-8") as stream:
+                    stream.write(
+                        json.dumps({"event": event, "span": entry}, ensure_ascii=False)
+                        + "\n"
+                    )
+                    stream.flush()
+            except OSError as exc:
+                self._disable_journal(exc)
+
+    def write_json(self, path: Path, value, *, strict=False):
+        """Write a detached, redacted snapshot; evidence checks can require success."""
+        try:
+            payload = json.dumps(self.snapshot(value), ensure_ascii=False, indent=2)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            temporary = path.with_suffix(".tmp")
+            with temporary.open("w", encoding="utf-8") as stream:
+                stream.write(payload)
                 stream.flush()
+                os.fsync(stream.fileno())
+            temporary.replace(path)
+        except OSError as exc:
+            logger.warning("Diagnostic write failed type=%s", type(exc).__name__)
+            if strict:
+                raise
+            return False
+        return True
 
     def export(self):
         counts = Counter(s["kind"] for s in self.spans)
@@ -211,6 +374,62 @@ def trace_span(kind, name, inputs):
         span.finish()
     finally:
         _span.reset(token)
+
+
+def trace_output(value=None, *, build=None):
+    """Record output at this boundary; build lazy values only while tracing."""
+    span = _span.get()
+    if span is not None:
+        span.update(output=build() if build is not None else value)
+
+
+def trace_call(kind, name, inputs, operation, *, output=None):
+    """Observe one synchronous call without retrying or changing its result."""
+    with trace_span(kind, name, inputs):
+        result = operation()
+        trace_output(build=lambda: output(result) if output is not None else result)
+        return result
+
+
+async def trace_acall(kind, name, inputs, operation, *, output=None):
+    """Observe one awaitable call; ContextVar nesting and cancellation are preserved."""
+    with trace_span(kind, name, inputs):
+        result = await operation()
+        trace_output(build=lambda: output(result) if output is not None else result)
+        return result
+
+
+def trace_tool_call(adapter):
+    """Record direct tool calls; reuse the caller's selected/resolved tool span."""
+
+    def decorate(function):
+        @wraps(function)
+        def call(request, *args, **kwargs):
+            parent = _span.get()
+            if _recorder.get() is None or (
+                parent is not None
+                and parent.entry["kind"] == "tool"
+                and parent.entry["name"] == function.__name__
+            ):
+                return function(request, *args, **kwargs)
+            inputs = {
+                "selected_arguments": request,
+                "resolved_arguments": request,
+                "input_schema": adapter.json_schema(),
+            }
+            # Tableau's event is part of its actual input, supplied outside args.
+            if "state" in kwargs:
+                inputs["state"] = kwargs["state"]
+            return trace_call(
+                "tool",
+                function.__name__,
+                inputs,
+                lambda: function(request, *args, **kwargs),
+            )
+
+        return call
+
+    return decorate
 
 
 async def capture_http_request(request):

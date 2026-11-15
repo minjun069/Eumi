@@ -2,7 +2,6 @@
 
 import argparse
 import asyncio
-import json
 from copy import deepcopy
 from pathlib import Path
 from time import monotonic
@@ -14,7 +13,7 @@ from experiments.scenario_checks import evaluate
 from experiments.scenario_fixtures import CATALOG, PROVIDERS, S1, S2, S3, SCREEN
 from report_html import build_report
 from src.agent_nodes import build_nodes, finish
-from src.execution_trace import TraceRecorder, recording, safe_settings, trace_span
+from src.execution_trace import TraceRecorder, recording, safe_settings, trace_acall
 from src.gemini import create_model
 from src.graph import compile_graph
 from src.monitoring import (
@@ -56,14 +55,7 @@ def metrics(state):
 async def run_scenario(
     name, model, settings, monitoring=None, previous=None, answer=None, *, journal=None
 ):
-    recorder = TraceRecorder(
-        secrets=[
-            settings.api_key.get_secret_value() if settings.api_key else "",
-            settings.langfuse_secret_key.get_secret_value(),
-            settings.langfuse_public_key,
-        ],
-        journal=journal,
-    )
+    recorder = TraceRecorder.from_settings(settings, journal=journal)
     with recording(recorder):
         case = await _run_scenario(name, model, settings, monitoring, previous, answer)
     case["trace"] = recorder.export()
@@ -105,27 +97,37 @@ async def _run_scenario(
     )
     started = monotonic()
     with trace_execution(monitoring, state["execution"]) as (config, observation):
-        with trace_span("agent", "scenario." + name, {
-            "initial_state": state,
-            "settings": safe_settings(settings), "catalog": CATALOG,
-            "previous_run_id": previous["execution"]["run_id"] if previous else None,
-        }) as span:
-            state = await run_graph(graph, state, config)
-            if span:
-                span.update(output=state)
+        state = await trace_acall(
+            "agent",
+            "scenario." + name,
+            {
+                "initial_state": state,
+                "settings": safe_settings(settings),
+                "catalog": CATALOG,
+                "previous_run_id": previous["execution"]["run_id"]
+                if previous
+                else None,
+            },
+            lambda: run_graph(graph, state, config),
+        )
         record_execution(observation, state)
     if state["execution"]["status"] == "waiting_input" and answer:
         with trace_execution(monitoring, state["execution"], phase="resume") as (
-            config, observation,
+            config,
+            observation,
         ):
-            with trace_span("agent", "scenario.resume", {
-                "resume": answer, "checkpoint_state": state,
-            }) as span:
-                state = await resume_graph(
-                    graph, state["execution"]["run_id"], state["response"]["id"], answer, config
-                )
-                if span:
-                    span.update(output=state)
+            state = await trace_acall(
+                "agent",
+                "scenario.resume",
+                {"resume": answer, "checkpoint_state": state},
+                lambda: resume_graph(
+                    graph,
+                    state["execution"]["run_id"],
+                    state["response"]["id"],
+                    answer,
+                    config,
+                ),
+            )
             record_execution(observation, state)
     failure = state["execution"]["error"]
     return {
@@ -142,9 +144,7 @@ def save_case(case, destination):
     destination.mkdir(parents=True, exist_ok=True)
     state = case["state"]
     serialized = case | {"state": state_adapter.dump_python(state, mode="json")}
-    (destination / "report.json").write_text(
-        json.dumps(serialized, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    TraceRecorder().write_json(destination / "report.json", serialized, strict=True)
     reply = state["response"] or {"content": "응답 없음", "artifacts": []}
     (destination / "answer.txt").write_text(reply["content"], encoding="utf-8")
     for index, artifact in enumerate(reply["artifacts"]):
@@ -212,8 +212,8 @@ async def main(args):
                 break
     finally:
         args.output.mkdir(parents=True, exist_ok=True)
-        (args.output / "summary.json").write_text(
-            json.dumps(summaries, ensure_ascii=False, indent=2), encoding="utf-8"
+        TraceRecorder.from_settings(settings).write_json(
+            args.output / "summary.json", summaries, strict=True
         )
         if list(args.output.rglob("report.json")):
             build_report([args.output], args.output / "report.html")

@@ -16,6 +16,7 @@ from pydantic import (
 )
 from typing_extensions import TypedDict
 
+from src.execution_trace import trace_tool_call
 from src.state import State
 from src.tools.tableau_catalog import Text, allowed_views, registered_catalog
 
@@ -101,6 +102,7 @@ def _issue(code, path, message, requested, allowed=()) -> ValidationIssue:
     }
 
 
+@trace_tool_call(visualization_adapter)
 def validate_visualization(
     request: VisualizationRequest, *, state: State
 ) -> VisualizationResult:
