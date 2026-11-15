@@ -1108,6 +1108,388 @@ tbody tr:hover {
     height: 450px;
   }
 }
+/* 8. 평가: 지표 표와 선택한 지표의 사례·근거 */
+.evaluation-toolbar {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.evaluation-toolbar label {
+  flex: 1 1 220px;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+.evaluation-toolbar select,
+.evaluation-unit-choice select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--input-border);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 9px;
+  font-size: 16px;
+  min-height: 44px;
+}
+.evaluation-sample {
+  border-left: 4px solid #b47712;
+  background: #fff8e8;
+  color: #805200;
+  font-weight: 600;
+}
+.evaluation-summary {
+  margin: 12px 0;
+}
+.evaluation-context {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.evaluation-summary > .disclosure {
+  margin-top: 8px;
+}
+.evaluation-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+  margin: 14px 0;
+  padding-bottom: 8px;
+}
+.evaluation-kinds button {
+  border-color: transparent;
+  font-weight: 600;
+}
+.evaluation-kinds button[aria-pressed="true"],
+.evaluation-groups button[aria-pressed="true"],
+.evaluation-detail-tabs button[aria-pressed="true"],
+.evaluation-case-filters button[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.evaluation-unit-choice {
+  max-width: 520px;
+  margin-bottom: 14px;
+}
+.evaluation-unit-choice:empty {
+  display: none;
+}
+.evaluation-unit-choice label {
+  font-size: 14px;
+  color: var(--muted);
+}
+.evaluation-unit-choice select {
+  margin-top: 5px;
+}
+.evaluation-unit-head {
+  margin-bottom: 14px;
+}
+.evaluation-caption {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.evaluation-verdicts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+.evaluation-verdicts > span {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.evaluation-layout {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  align-items: start;
+  gap: 18px;
+}
+.evaluation-metrics,
+.evaluation-detail-slot {
+  min-width: 0;
+}
+.evaluation-metrics {
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 3px;
+  overscroll-behavior-inline: contain;
+}
+.evaluation-metric-table .badge {
+  white-space: normal;
+  text-align: center;
+}
+.evaluation-groups,
+.evaluation-detail-tabs,
+.evaluation-case-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.evaluation-groups {
+  margin-bottom: 10px;
+}
+.evaluation-groups button,
+.evaluation-detail-tabs button,
+.evaluation-case-filters button {
+  padding: 7px 10px;
+  font-size: 16px;
+}
+.evaluation-metric-table {
+  table-layout: fixed;
+  width: 100%;
+  border: 1px solid var(--strong-border);
+  background: var(--surface);
+  min-width: 440px;
+}
+.evaluation-metric-table th {
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.evaluation-metric-table th:first-child {
+  width: 36%;
+}
+.evaluation-metric-table th:nth-child(2) {
+  width: 28%;
+}
+.evaluation-metric-table th:nth-child(3) {
+  width: 23%;
+}
+.evaluation-metric-table th:last-child {
+  width: 13%;
+}
+.evaluation-metric-table th,
+.evaluation-metric-table td {
+  min-width: 0;
+  padding: 10px 9px;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+.evaluation-metric-table tr.is-selected {
+  background: var(--accent-soft);
+}
+.evaluation-metric-table tr.is-selected td:first-child {
+  box-shadow: inset 3px 0 var(--accent);
+}
+.evaluation-metric-button {
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.55;
+  text-align: left;
+  overflow-wrap: anywhere;
+  min-height: 44px;
+  width: 100%;
+}
+.evaluation-metric-button[aria-pressed="true"] {
+  color: var(--accent);
+}
+.evaluation-metric-button:hover {
+  text-decoration: underline;
+}
+.evaluation-measure {
+  font-variant-numeric: tabular-nums;
+}
+.evaluation-measure strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+}
+.evaluation-measure small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.evaluation-measure > div + div {
+  margin-top: 9px;
+}
+.evaluation-case-count {
+  text-align: center;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.evaluation-detail {
+  background: var(--surface);
+  border: 1px solid var(--strong-border);
+  border-radius: 10px;
+  overflow: hidden;
+  min-width: 0;
+}
+.evaluation-detail-head {
+  padding: 14px 16px;
+  background: var(--soft);
+  border-bottom: 1px solid var(--border);
+}
+.evaluation-detail-head > .evaluation-caption:first-child {
+  margin: 0 0 4px;
+}
+.evaluation-detail-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.evaluation-detail-value .evaluation-measure strong {
+  font-size: 28px;
+}
+.evaluation-detail-tabs {
+  padding: 10px 16px 0;
+}
+.evaluation-detail-body {
+  padding: 14px 16px 16px;
+  min-width: 0;
+}
+.evaluation-detail-body h4 {
+  margin-bottom: 4px;
+}
+.evaluation-case-filters {
+  margin: 10px 0;
+}
+.evaluation-case-list {
+  display: grid;
+  gap: 7px;
+}
+.evaluation-case-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  gap: 12px;
+  padding: 10px;
+  text-align: left;
+  flex-wrap: wrap;
+}
+.evaluation-case-button > span:first-child {
+  min-width: 0;
+}
+.evaluation-case-button strong,
+.evaluation-case-button small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.evaluation-case-button strong {
+  font-size: 16px;
+}
+.evaluation-case-button small {
+  color: var(--muted);
+  font-size: 14px;
+}
+.evaluation-case-button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.evaluation-case-detail {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  min-width: 0;
+}
+.evaluation-case-detail:empty {
+  display: none;
+}
+.evaluation-case-detail > .disclosure {
+  margin: 8px 0 0;
+}
+.evaluation-case-detail .disclosure-body {
+  padding: 10px;
+}
+.evaluation-fields {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  font-size: 16px;
+  min-width: 0;
+}
+.evaluation-fields dt {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.evaluation-fields dd {
+  margin: 0 0 10px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.evaluation-case-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 2px 0 12px;
+}
+.evaluation-case-comparison .evaluation-fields {
+  padding: 10px;
+  background: #f3f6fa;
+  align-content: start;
+}
+.evaluation-case-comparison dd {
+  margin-bottom: 0;
+}
+.evaluation-unit > .disclosure {
+  margin-top: 14px;
+}
+.evaluation-executions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.evaluation-executions > .evaluation-fields {
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 1100px) {
+  .evaluation-layout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 680px) {
+  .evaluation-executions {
+    grid-template-columns: 1fr;
+  }
+  .evaluation-case-comparison {
+    grid-template-columns: 1fr;
+  }
+  .evaluation-kinds button {
+    padding: 8px 10px;
+    font-size: 16px;
+  }
+  .evaluation-metric-table th,
+  .evaluation-metric-table td {
+    padding: 10px 6px;
+  }
+  .evaluation-metric-table .badge {
+    padding: 3px 5px;
+    white-space: normal;
+    text-align: center;
+  }
+  .evaluation-detail-head,
+  .evaluation-detail-body {
+    padding: 14px;
+  }
+  .evaluation-detail-tabs {
+    padding: 10px 14px 0;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;

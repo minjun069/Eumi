@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'">
+  <title>EUMI · 에이전트 실행 평가 결과 검토</title>
+  <link rel="stylesheet" href="styles.css?v=20261114-flow-ui">
+  <script src="../shared/record-names.js?v=20261113-quality" defer></script>
+  <script src="data.js?v=20261113-quality" defer></script>
+  <script src="../shared/lazy-results.js?v=20261114-auto" defer></script>
+  <script src="automatic.js?v=20261114-auto" defer></script>
+  <script src="scenarios.js?v=20261113-cases" defer></script>
+  <script src="scenario.js?v=20261114-flow-ui" defer></script>
+  <script src="structured-value.js?v=20261113-expanded" defer></script>
+  <script src="operational.js?v=20261113-operational" defer></script>
+  <script src="app.js?v=20261114-flow-ui" defer></script>
+  <script src="sidebar-resize.js?v=20261114-flow-ui" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">본문으로 이동</a>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">e</span><strong>EUMI</strong><span class="divider">/</span><span>에이전트 실행 평가 결과 검토</span></div>
+    <div class="file-actions">
+      <button type="button" id="sample-button" class="quiet">화면 샘플</button>
+      <input type="file" id="folder-input" webkitdirectory multiple hidden aria-label="에이전트 실행 평가 결과 폴더 선택">
+      <input type="file" id="files-input" accept=".json,.jsonl" multiple hidden aria-label="에이전트 실행 평가 결과 파일 선택">
+    </div>
+  </header>
+  <div id="notice" role="status" aria-live="polite" hidden></div>
+  <div id="sample-notice" class="sample-notice" hidden>화면 검토용 가상 자료입니다. 실제 실행·평가 결과가 아닙니다.</div>
+  <div id="load-issues" hidden></div>
+  <section id="welcome" class="welcome">
+    <div class="eyebrow">EUMI · 에이전트 실행 평가 결과 검토</div>
+    <h1>실행 결과와 근거를<br>한곳에서 검토하세요.</h1>
+    <p>저장된 에이전트 실행 평가 결과를 불러옵니다.<br>실행 기능·운영 지표와 최종 출력 품질, 원본 입출력을 각각 확인할 수 있습니다.</p>
+    <button type="button" id="welcome-open" class="primary">평가 결과 폴더 열기</button>
+    <div class="welcome-guide">
+      <div><span class="step">01</span><h2>결과 자동 불러오기</h2><p>기본 결과 폴더는 실행·채점 완료 후 자동 반영됩니다. 다른 위치의 결과는 위 버튼으로 폴더를 열 수 있습니다.</p></div>
+      <div><span class="step">02</span><h2>대상과 사례 탐색</h2><p>대상별 사례를 검색하고, 각 실행의 검사·지표와 입출력·기대결과를 확인하세요.</p></div>
+      <div><span class="step">03</span><h2>실행 단위 평가 확인</h2><p>채점 파일을 함께 열면 실행 연결 검사, 보고서 완성률과 시간·호출량·토큰·비용 통계를 확인할 수 있습니다.</p></div>
+    </div>
+    <p class="local-note">파일은 이 브라우저에서만 읽습니다. 모델 호출·채점·외부 전송은 하지 않습니다.</p>
+  </section>
+  <div id="application" class="application" hidden>
+    <aside id="sidebar" class="sidebar">
+      <div id="target-picker" class="target-picker">
+        <nav id="target-nav" aria-label="평가 대상"></nav>
+      </div>
+      <details id="case-list-picker" class="case-list-picker" open>
+        <summary class="sidebar-heading"><span>사례 목록</span><span class="disclosure-icon" aria-hidden="true">⌄</span></summary>
+        <section id="case-list" class="case-list" aria-label="사례 목록" tabindex="-1">
+            <div class="list-toolbar">
+              <label class="search-label"><span>사례·검사 검색</span><input type="search" id="case-search" placeholder="시나리오·설명·검사 검색"></label>
+              <details id="case-filters" class="case-filters">
+                <summary>필터 <span id="filter-count"></span><span class="disclosure-icon" aria-hidden="true">⌄</span></summary>
+                <div class="filter-fields">
+                  <label>실행 상태<select id="status-filter"><option value="all">모든 상태</option><option value="returned">반환됨</option><option value="error">실행 오류</option><option value="cancelled">취소됨</option><option value="running">진행 중</option></select></label>
+                  <label>사례 태그<select id="tag-filter"><option value="all">모든 태그</option></select></label>
+                  <label>필수 여부<select id="required-filter"><option value="all">모두</option><option value="yes">필수 사례</option><option value="no">선택 사례</option><option value="unknown">미기록</option></select></label>
+                  <p class="filter-note">목록 필터는 전체 집계에 적용되지 않습니다.</p>
+                </div>
+              </details>
+            </div>
+            <div class="table-scroll"><table class="cases-table"><caption class="sr-only">선택한 대상의 사례별 결과</caption><thead><tr><th>시나리오</th><th>실행</th></tr></thead><tbody id="case-rows"></tbody></table></div>
+            <div id="pagination" class="pagination"></div>
+        </section>
+      </details>
+    </aside>
+    <div id="sidebar-resizer" class="sidebar-resizer" role="separator" aria-orientation="vertical" aria-label="사이드바 너비 조절" aria-controls="sidebar" tabindex="0" title="드래그하거나 좌우 방향키로 너비 조절"></div>
+    <main id="workspace" class="workspace">
+      <div class="heading">
+        <div class="eyebrow" id="breadcrumb"></div>
+        <div class="heading-row"><h1 id="target-title"></h1><label class="batch-picker">평가 묶음<select id="batch-select" aria-label="평가 묶음"></select></label></div>
+      </div>
+      <nav class="page-tabs" aria-label="결과 화면">
+        <button type="button" data-page="cases" aria-pressed="true">사례별 결과</button>
+        <button type="button" data-page="aggregate" aria-pressed="false">전체 집계·통계</button>
+      </nav>
+      <details id="assessment-controls" class="assessment-controls" open>
+        <summary>채점 기록 선택</summary>
+        <div id="assessment-toolbar" class="assessment-toolbar"></div>
+      </details>
+      <section id="case-page" aria-label="사례와 상세">
+        <section id="case-detail" class="case-detail" aria-label="선택 사례 상세" tabindex="-1"></section>
+      </section>
+      <section id="aggregate-page" class="aggregate-page" hidden aria-label="전체 집계와 통계"></section>
+    </main>
+  </div>
+  <noscript>저장된 결과를 읽으려면 JavaScript가 필요합니다.</noscript>
+</body>
+</html>

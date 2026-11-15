@@ -1,11 +1,14 @@
-/* 화면 연결과 다섯 영역의 렌더링. 각 render 함수가 HTML의 같은 이름 영역을 담당합니다. */
+/* 화면 연결과 영역별 렌더링. 각 render 함수가 HTML의 같은 이름 영역을 담당합니다. */
 "use strict";
 
 (() => {
   const D = ReportData;
   const U = ReportUI;
+  const E = ReportEvaluation;
   const { $, el, button, badge, card, empty, details, code, json, table } = U;
   const reports = [];
+  const evaluations = [];
+  let evaluationId;
   let current = 0;
   let section = "overview";
   let inspection;
@@ -67,6 +70,8 @@
 
   function showSection(name, focus = false) {
     section = name;
+    $("welcome").hidden = !!currentReport() || name === "evaluation";
+    $("report-content").hidden = !currentReport() || name === "evaluation";
     for (const control of $("sections").querySelectorAll("button")) {
       const active = control.dataset.section === name;
       control.setAttribute("aria-pressed", String(active));
@@ -724,12 +729,61 @@
     );
   }
 
+  // 06. 평가 파일은 실행 기록과 분리해 보관하고 실행별 적용 범위로 연결합니다.
+  function ingestEvaluations(documents) {
+    const errors = [];
+    let added = 0;
+    for (const document of documents) {
+      try {
+        const value = E.normalize(document.value);
+        const index = evaluations.findIndex((item) => item.value.id === value.id);
+        const item = { name: document.name, value };
+        if (index < 0) evaluations.push(item);
+        else evaluations[index] = item;
+        evaluationId = value.id;
+        added++;
+      } catch (error) {
+        errors.push(`${document.name}: ${error.message}`);
+      }
+    }
+    return { errors, added };
+  }
+
+  function renderEvaluations() {
+    const panel = $("evaluation-content");
+    panel.replaceChildren();
+    const report = currentReport();
+    const runId = report?.state.execution.run_id;
+    const candidates = report ? evaluations.filter((item) => E.matches(item.value, runId)) : evaluations;
+    const picker = $("evaluation-select");
+    picker.replaceChildren();
+    picker.disabled = !candidates.length;
+    $("download-evaluation").disabled = !candidates.length;
+    if (!candidates.length) {
+      picker.append(el("option", "", "평가 파일 없음"));
+      panel.append(empty(report ? "현재 실행에 연결된 평가 결과가 없습니다. 평가 결과 JSON을 추가로 불러오세요." : "평가 결과 JSON을 불러오세요. 실행 기록 없이도 평가 파일을 확인할 수 있습니다."));
+      if (evaluations.length) panel.append(el("p", "notice", `불러온 평가 ${evaluations.length}개는 다른 실행을 대상으로 합니다. 해당 실행 기록을 선택하세요.`));
+      return;
+    }
+    if (!candidates.some((item) => item.value.id === evaluationId)) evaluationId = candidates[0].value.id;
+    for (const item of candidates) {
+      const option = el("option", "", `${item.value.sample ? "[임시] " : ""}${item.value.title}`);
+      option.value = item.value.id;
+      option.selected = option.value === evaluationId;
+      picker.append(option);
+    }
+    const selected = candidates.find((item) => item.value.id === evaluationId);
+    ReportEvaluationView.render(panel, selected.value, report, selected.name);
+  }
+
   function render() {
     renderSidebar();
     const report = currentReport();
     $("welcome").hidden = !!report;
     $("report-content").hidden = !report;
     $("download").disabled = !report;
+    renderEvaluations();
+    showSection(section);
     if (!report) return;
     inspection = D.inspect(report);
     searchIndex = new Map(
@@ -797,6 +851,38 @@
     }
     event.target.value = "";
   });
+  $("load-evaluation").addEventListener("click", () => $("evaluation-files").click());
+  $("evaluation-select").addEventListener("change", (event) => {
+    evaluationId = event.target.value;
+    renderEvaluations();
+  });
+  $("download-evaluation").addEventListener("click", () => {
+    const selected = evaluations.find((item) => item.value.id === evaluationId);
+    if (!selected) return;
+    const url = URL.createObjectURL(new Blob([JSON.stringify(selected.value, null, 2)], { type: "application/json" }));
+    const link = el("a");
+    link.href = url;
+    link.download = "evaluation.json";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+  $("evaluation-files").addEventListener("change", async (event) => {
+    const documents = [];
+    const errors = [];
+    for (const file of event.target.files) {
+      try {
+        if (file.size > 200 * 1024 * 1024) throw new Error("200MB 이하 파일을 선택해 주세요.");
+        documents.push({ name: file.name, value: JSON.parse((await file.text()).replace(/^\uFEFF/, "")) });
+      } catch (error) { errors.push(`${file.name}: ${error.message}`); }
+    }
+    const result = ingestEvaluations(documents);
+    errors.push(...result.errors);
+    $("evaluation-error").textContent = errors.join("\n");
+    $("evaluation-error").hidden = !errors.length;
+    renderEvaluations();
+    if (result.added) U.toast(`${result.added}개 평가 결과를 불러왔습니다.`);
+    event.target.value = "";
+  });
   try {
     const embedded = JSON.parse(
       $("report-data").textContent.replace("/*__REPORT_DATA__*/", ""),
@@ -810,5 +896,15 @@
     $("load-error").textContent =
       "보고서를 표시하지 못했습니다: " + error.message;
     $("load-error").hidden = false;
+  }
+  try {
+    const embedded = JSON.parse($("evaluation-data").textContent.replace("/*__EVALUATION_DATA__*/", ""));
+    const result = ingestEvaluations(embedded);
+    $("evaluation-error").textContent = result.errors.join("\n");
+    $("evaluation-error").hidden = !result.errors.length;
+    renderEvaluations();
+  } catch (error) {
+    $("evaluation-error").textContent = "평가 결과를 표시하지 못했습니다: " + error.message;
+    $("evaluation-error").hidden = false;
   }
 })();

@@ -4,6 +4,8 @@ import base64
 import hashlib
 import json
 import re
+import subprocess
+import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -31,7 +33,7 @@ class ReportDocument(HTMLParser):
         if tag == "script":
             self.script_ids.append(attrs.get("id"))
             self.data_id = attrs.get("id")
-            if self.data_id == "report-data":
+            if self.data_id in ("report-data", "evaluation-data"):
                 self.script_data[self.data_id] = []
             else:
                 self.data_id = None
@@ -81,30 +83,39 @@ def test_offline_bundle_preserves_payload_without_script_injection(tmp_path):
     assert document.payload("report-data") == [
         {"name": f"{tmp_path.name}/report.json", "value": value}
     ]
+    assert document.payload("evaluation-data") == []
     assert html.index('id="report-data"') < html.index("globalThis.ReportData")
     assert "script-src 'self'" not in html
 
 
 def test_render_preserves_existing_embedded_payload_text_and_hashes():
-    original = (
-        '\r\n  [{"name":"original/run.json", "value":'
-        '{"text":"\\u003c/script\\u003e & \\u0026",'
-        '"marker":"/*__REPORT_DATA__*/ []", "zero":0, "unknown":null}}]\n'
-    )
+    payloads = {
+        "report-data": (
+            '\r\n  [{"name":"original/run.json", "value":'
+            '{"text":"\\u003c/script\\u003e & \\u0026",'
+            '"marker":"/*__EVALUATION_DATA__*/ []", "zero":0, "unknown":null}}]\n'
+        ),
+        "evaluation-data": (
+            '\n[ {"name":"same/evaluation.json","value":{"id":"second", "value":1.00}},'
+            '{"name":"same/evaluation.json",'
+            '"value":{"id":"first", "sample":true}} ]\r\n'
+        ),
+    }
     document = ReportDocument()
-    document.feed(_render_report(original))
-    actual = "".join(document.script_data["report-data"])
-    assert actual == original
-    assert (
-        hashlib.sha256(actual.encode()).digest()
-        == hashlib.sha256(original.encode()).digest()
-    )
-    assert document.payload("report-data") == json.loads(original)
+    document.feed(_render_report(payloads["report-data"], payloads["evaluation-data"]))
+    for element_id, original in payloads.items():
+        actual = "".join(document.script_data[element_id])
+        assert actual == original
+        assert (
+            hashlib.sha256(actual.encode()).digest()
+            == hashlib.sha256(original.encode()).digest()
+        )
+        assert document.payload(element_id) == json.loads(original)
 
 
 def test_bundle_embeds_exact_font_bytes_and_license_with_offline_csp():
     document = ReportDocument()
-    document.feed(_render_report("[]"))
+    document.feed(_render_report("[]", "[]"))
     css = "".join(document.styles)
     urls = re.findall(r"url\(\s*['\"]?([^'\")\s]+)", css)
     font_urls = [url for url in urls if url.startswith("data:font/woff2;base64,")]
@@ -144,21 +155,61 @@ def test_license_text_cannot_escape_its_inert_template(tmp_path, monkeypatch):
     )
     for script in ("data", "components", "app"):
         (viewer / f"{script}.js").write_text("", encoding="utf-8")
+    evaluation_viewer = tmp_path / "eval" / "viewers" / "report"
+    evaluation_viewer.mkdir(parents=True)
+    for script in ("evaluation-catalog", "evaluation", "evaluation-view"):
+        (evaluation_viewer / f"{script}.js").write_text("", encoding="utf-8")
     (assets / "PretendardVariable.woff2").write_bytes(b"font fixture")
     license_text = '</template><script id="license-injection">& license text</script>\n'
     (assets / "Pretendard.LICENSE.txt").write_text(license_text, encoding="utf-8")
     monkeypatch.setattr(report_html, "__file__", str(tmp_path / "report_html.py"))
     document = ReportDocument()
-    document.feed(_render_report("[]"))
+    document.feed(_render_report("[]", "[]"))
     assert "license-injection" not in document.script_ids
     assert "".join(document.license_data) == license_text
+
+
+def test_evaluation_inputs_are_embedded_separately_and_safely(tmp_path):
+    report = tmp_path / "report.json"
+    report_value = {"state": {"request": {"goal": "/*__EVALUATION_DATA__*/ []"}}}
+    report.write_text(json.dumps(report_value), encoding="utf-8")
+    evaluation = tmp_path / "evaluation.json"
+    evaluation_value = {
+        "type": "evaluation",
+        "schema_version": 1,
+        "id": "sample",
+        "title": '</script><script id="injected-evaluation">&',
+        "sample": True,
+        "run_ids": [],
+        "units": [],
+    }
+    evaluation.write_text(json.dumps(evaluation_value), encoding="utf-8-sig")
+    output = tmp_path / "report.html"
+
+    build_report([report], output, [evaluation, evaluation])
+
+    html = output.read_text(encoding="utf-8")
+    document = ReportDocument()
+    document.feed(html)
+    assert not document.sources
+    assert "injected-evaluation" not in document.script_ids
+    assert document.script_ids.count("evaluation-data") == 1
+    assert document.payload("report-data") == [
+        {"name": f"{tmp_path.name}/report.json", "value": report_value}
+    ]
+    assert document.payload("evaluation-data") == [
+        {"name": f"{tmp_path.name}/evaluation.json", "value": evaluation_value}
+    ]
+    assert html.index('id="evaluation-data"') < html.index("globalThis.ReportData")
 
 
 def test_directory_inputs_only_discover_reports(tmp_path):
     directory = tmp_path / "run"
     directory.mkdir()
     (directory / "report.json").write_text('{"state": {}}', encoding="utf-8")
-    (directory / "other.json").write_text('{"type": "unrelated"}', encoding="utf-8")
+    (directory / "evaluation.json").write_text(
+        '{"type": "evaluation"}', encoding="utf-8"
+    )
     output = tmp_path / "report.html"
 
     build_report([tmp_path], output)
@@ -168,8 +219,45 @@ def test_directory_inputs_only_discover_reports(tmp_path):
     assert document.payload("report-data") == [
         {"name": "run/report.json", "value": {"state": {}}}
     ]
+    assert document.payload("evaluation-data") == []
 
 
 def test_no_report_inputs_still_require_a_report(tmp_path):
     with pytest.raises(ValueError, match="report.json"):
         build_report([tmp_path], tmp_path / "report.html")
+
+
+def test_cli_accepts_multiple_evaluation_files(tmp_path):
+    source = tmp_path / "report.json"
+    source.write_text('{"state": {}}', encoding="utf-8")
+    evaluations = [tmp_path / f"evaluation-{index}.json" for index in range(3)]
+    for index, evaluation in enumerate(evaluations):
+        evaluation.write_text(json.dumps({"id": str(index)}), encoding="utf-8")
+    output = tmp_path / "report.html"
+    builder = Path(__file__).resolve().parents[1] / "report_html.py"
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(builder),
+            str(source),
+            "--output",
+            str(output),
+            "--evaluation",
+            *map(str, evaluations[:2]),
+            "--evaluation",
+            str(evaluations[2]),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    document = ReportDocument()
+    document.feed(output.read_text(encoding="utf-8"))
+    assert [item["value"] for item in document.payload("evaluation-data")] == [
+        {"id": "0"},
+        {"id": "1"},
+        {"id": "2"},
+    ]
+    assert not document.sources

@@ -10,7 +10,10 @@
     <title>이음 · 실행 기록 검토</title>
     <link rel="stylesheet" href="report_viewer/styles.css" />
     <script defer src="report_viewer/data.js"></script>
+    <script defer src="eval/viewers/report/evaluation-catalog.js"></script>
+    <script defer src="eval/viewers/report/evaluation.js"></script>
     <script defer src="report_viewer/components.js"></script>
+    <script defer src="eval/viewers/report/evaluation-view.js"></script>
     <script defer src="report_viewer/app.js"></script>
   </head>
   <body>
@@ -86,6 +89,9 @@
             aria-controls="conversation"
           >
             이전 대화
+          </button>
+          <button data-section="evaluation" aria-pressed="false" aria-controls="evaluation">
+            평가
           </button>
         </nav>
         <div id="welcome" class="empty welcome">
@@ -172,12 +178,33 @@
             <div id="conversation-content"></div>
           </section>
         </div>
+        <section id="evaluation" class="panel" aria-labelledby="evaluation-title" hidden>
+          <div class="section-heading">
+            <div>
+              <h2 id="evaluation-title">평가 결과</h2>
+            </div>
+            <p>평가 단위별 지표와 성공·실패 사례</p>
+          </div>
+          <div class="evaluation-toolbar">
+            <button id="load-evaluation" type="button">＋ 평가 결과 불러오기</button>
+            <input id="evaluation-files" class="visually-hidden" type="file" accept=".json,application/json" multiple />
+            <label for="evaluation-select">평가 파일
+              <select id="evaluation-select" disabled></select>
+            </label>
+            <button id="download-evaluation" type="button" class="secondary" disabled>평가 JSON 저장 ↓</button>
+          </div>
+          <div id="evaluation-error" class="notice error" role="alert" hidden></div>
+          <div id="evaluation-content" aria-live="polite"></div>
+        </section>
         <footer>이음 · Agent 실행 모니터 <span>저장된 기록 기준</span></footer>
       </main>
     </div>
     <div id="toast" role="status" hidden></div>
     <script type="application/json" id="report-data">
       /*__REPORT_DATA__*/ []
+    </script>
+    <script type="application/json" id="evaluation-data">
+      /*__EVALUATION_DATA__*/ []
     </script>
   </body>
 </html>
