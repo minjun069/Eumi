@@ -29,10 +29,11 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src"] # 패키지 경로
+packages = ["src", "eval"] # 서비스 실행 코드와 평가 패키지
+exclude = ["eval/outputs", "eval/tests", "eval/.env*"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"] # 테스트 파일 경로
+testpaths = ["tests", "eval/tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 

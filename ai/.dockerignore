@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 outputs
+eval/outputs
+eval/tests
+eval/.env*
 **/__pycache__
 .pytest_cache
 .ruff_cache
