@@ -2,13 +2,13 @@
 
 수정일: 2026-11-09. 임시 파일 저장소·실제 모델·로컬 HTTP로 요청 접수부터 실행·저장·알림까지 확인하는 절차다. [공통 준비와 검증 한계](#3-공통)를 확인한 뒤 [사용자 요청](#1-사용자-요청) 또는 [보고서 생성](#2-보고서-생성) 절차를 실행한다. 명령은 `Eumi/ai/`에서 실행한다.
 
-API 계약과 운영 제약은 [AI 런타임 API](ai-runtime-api-20261029.md)를 따른다. 아래 자동 검사의 통과와 응답·보고서 내용의 정확성, 실제 서비스 연동 성공은 구분한다.
+API 계약과 운영 제약은 [AI 런타임 API](api.md)를 따른다. 아래 자동 검사의 통과와 응답·보고서 내용의 정확성, 실제 서비스 연동 성공은 구분한다.
 
 ## 1. 사용자 요청
 
 ### 1.1 검증 범위
 
-[사용자 요청 검증기](../experiments/api_roundtrip.py)는 [사용자 요청 API](ai-runtime-api-20261029.md#1-사용자-요청)의 접수·실행·저장·알림을 한 번 확인한다.
+[사용자 요청 검증기](../../experiments/api_roundtrip.py)는 [사용자 요청 API](api.md#1-사용자-요청)의 접수·실행·저장·알림을 한 번 확인한다.
 
 `질문 파일 생성 → 임시 호출자 POST → API 202 접수 → 실제 AI 실행 → 응답 파일 저장 → POST 알림 → 임시 수신자 재조회·204 응답`
 
@@ -56,7 +56,7 @@ uv run python -m experiments.api_roundtrip --file-db "$roundtripDir/messages.jso
 
 ```powershell
 $roundtripDir = "outputs/roundtrip-01"
-$traceFile = Get-ChildItem -LiteralPath $roundtripDir -Recurse -Filter trace.jsonl | Where-Object { $_.FullName -notmatch '[\\/](runtime/requests|batches|roundtrips)[\\/]' } | Select-Object -First 1
+$traceFile = Get-ChildItem -LiteralPath $roundtripDir -Recurse -Filter trace.jsonl | Where-Object { $_.FullName -notmatch '[\\/](requests|batches|roundtrips)[\\/]' } | Select-Object -First 1
 Get-Content -LiteralPath $traceFile.FullName -Encoding UTF8 -Tail 5 -Wait
 ```
 
@@ -77,7 +77,7 @@ Get-Content -LiteralPath "$roundtripDir/messages.json" -Encoding UTF8
 | 같은 폴더의 `report.json`·`report.html` | 최종 실행 상태와 상세 추적. HTML에서 요청·도구 결과·산출물·저장·알림 확인 |
 | `roundtrips/<검증 UUID>/evidence.json` | 실제 접수·알림 HTTP 요청과 응답, 수신자가 다시 조회한 저장 행 |
 
-알림 수신자는 저장소를 새로 열어 알림이 가리키는 행을 조회한다. 이 조회 결과는 검증마다 별도 `evidence.json`에 보존한다. 요청과 실행의 연결·버전 정보, 기록 형식은 [로컬 실행 증거](ai-agent-monitoring.md#4-로컬-실행-증거)를 따른다.
+알림 수신자는 저장소를 새로 열어 알림이 가리키는 행을 조회한다. 이 조회 결과는 검증마다 별도 `evidence.json`에 보존한다. 요청과 실행의 연결·버전 정보, 기록 형식은 [로컬 실행 증거](monitoring.md#4-로컬-실행-증거)를 따른다.
 
 자동 검사의 통과 조건은 `passed=true`와 종료 코드 0이다. 작업 상태가 `completed`이고, 실제 모델 HTTP 호출·실행 중 추적 기록 생성·파일 저장 후 알림·요청 질문 ID·저장 행 ID·알림의 연결이 확인되어야 한다. 정상 흐름의 접수 상태는 202, 알림 응답은 204다.
 
@@ -93,7 +93,7 @@ Get-Content -LiteralPath "$roundtripDir/messages.json" -Encoding UTF8
 
 ### 2.1 검증 범위
 
-[보고서 검증기](../experiments/report_roundtrip.py)는 로컬 HTTP로 [보고서 생성 API](ai-runtime-api-20261029.md#2-보고서-생성)의 `POST /internal/insight-reports/runs`를 호출하고, 실행이 끝나면 파일 저장과 상세 기록을 확인한다. 조회·저장 경계만 임시 JSON 파일로 대체한다. 실행 API·업무 노드·모델 호출·실행 상태는 서비스와 같으며, 완료 알림은 검증기가 띄운 로컬 수신기로 보내고 본문 없는 204 응답을 확인한다.
+[보고서 검증기](../../experiments/report_roundtrip.py)는 로컬 HTTP로 [보고서 생성 API](api.md#2-보고서-생성)의 `POST /internal/insight-reports/runs`를 호출하고, 실행이 끝나면 파일 저장과 상세 기록을 확인한다. 조회·저장 경계만 임시 JSON 파일로 대체한다. 실행 API·업무 노드·모델 호출·실행 상태는 서비스와 같으며, 완료 알림은 검증기가 띄운 로컬 수신기로 보내고 본문 없는 204 응답을 확인한다.
 
 `--file-db` 디렉터리가 없으면 요청 동·월의 최근 6개월 **합성 자료**로 새 DB를 만든다. 실제 통계·화면 수치와 비교하는 자료로 사용하지 않는다.
 
@@ -118,7 +118,7 @@ Get-Content -LiteralPath "$roundtripDir/messages.json" -Encoding UTF8
 | `--dong-codes` | 대상 동 변경. 기본 `1168066000` |
 | `--model` | 검증 모델 변경. 기본 `gpt-5.6-luna` |
 
-실행 한도는 [공통 실행 설정](../README.md#설치설정)을 그대로 따른다. 환경변수가 있으면 기본값보다 우선하며, 실행별 한도·사용량은 실행 상태에서 확인한다.
+실행 한도는 [공통 실행 설정](../../README.md#설치설정)을 그대로 따른다. 환경변수가 있으면 기본값보다 우선하며, 실행별 한도·사용량은 실행 상태에서 확인한다.
 
 ### 2.3 종료 후 확인
 
@@ -131,7 +131,7 @@ Get-Content -LiteralPath "$roundtripDir/messages.json" -Encoding UTF8
 | `<output>/batches/<요청 묶음 UUID>/request.json` | 요청한 동의 실행 목록, 전체 처리·완료 알림 결과와 소요 시간 |
 | `<output>/roundtrips/<검증 UUID>/evidence.json` | 실제 접수·INT-08 HTTP 요청과 응답, 검증기가 다시 조회한 저장 보고서 |
 
-검증기는 실행을 마친 뒤 파일 저장소를 새로 열어 저장된 보고서를 조회한다. 이 조회 결과는 검증마다 별도 `evidence.json`에 보존한다. 전체 완료 시간과 동별 대기·자료 확인·실행 시간을 읽는 방법은 [로컬 실행 증거](ai-agent-monitoring.md#4-로컬-실행-증거)를 따른다.
+검증기는 실행을 마친 뒤 파일 저장소를 새로 열어 저장된 보고서를 조회한다. 이 조회 결과는 검증마다 별도 `evidence.json`에 보존한다. 전체 완료 시간과 동별 대기·자료 확인·실행 시간을 읽는 방법은 [로컬 실행 증거](monitoring.md#4-로컬-실행-증거)를 따른다.
 
 202 접수 후 요청한 모든 동의 보고서 완료 상태, 파일 재조회 결과 일치, 모델 입력 기록과 닫힌 추적 기록, 로컬 완료 알림의 요청 ID·월·저장 건수·실패 동 목록을 확인해 `passed=true`·종료 코드 0을 반환한다. 성공 판정에는 이번 실행에서 새로 생성된 기록만 사용하고 이전 실행 기록은 보존한다. 이 검사는 설명의 정확성이나 Tableau 화면 표시를 판정하지 않는다.
 
@@ -145,7 +145,7 @@ Get-Content -LiteralPath "$roundtripDir/messages.json" -Encoding UTF8
 
 ### 3.1 준비
 
-PowerShell에서 `Eumi/ai`로 이동해 `uv sync --locked`를 실행한다. 기존 `.env`를 보존하고 `SETTINGS_API_KEY`에 사용할 API 키를 설정한다. 실제 모델을 호출할 수 있는 계정과 인터넷 연결이 필요하며 모델 호출 비용이 발생한다. 설정·컨테이너 명령은 [AI README](../README.md)를 따른다.
+PowerShell에서 `Eumi/ai`로 이동해 `uv sync --locked`를 실행한다. 기존 `.env`를 보존하고 `SETTINGS_API_KEY`에 사용할 API 키를 설정한다. 실제 모델을 호출할 수 있는 계정과 인터넷 연결이 필요하며 모델 호출 비용이 발생한다. 설정·컨테이너 명령은 [AI README](../../README.md)를 따른다.
 
 파일 모드에서는 DB 연결이 필요 없으며 백엔드 주소·토큰은 검증기가 로컬 수신기에 맞게 지정한다. 임시 API와 수신기는 `127.0.0.1`의 빈 포트에서 자동으로 시작하고 종료하므로 별도 백엔드·PostgreSQL·uvicorn 실행은 필요하지 않다.
 
@@ -153,4 +153,4 @@ PowerShell에서 `Eumi/ai`로 이동해 `uv sync --locked`를 실행한다. 기�
 
 ### 3.2 검증 한계
 
-위 절차는 임시 파일 DB와 로컬 HTTP 수신기를 사용한다. 실제 PostgreSQL의 트랜잭션·권한·제약·동시성, 운영 백엔드·프론트 조회, Tableau 브라우저 표시는 검증하지 않는다. 실제 모델·PostgreSQL·백엔드 왕복과 배포 환경의 미검증 사항은 [API 공통](ai-runtime-api-20261029.md#3-공통)에서 확인한다.
+위 절차는 임시 파일 DB와 로컬 HTTP 수신기를 사용한다. 실제 PostgreSQL의 트랜잭션·권한·제약·동시성, 운영 백엔드·프론트 조회, Tableau 브라우저 표시는 검증하지 않는다. 실제 모델·PostgreSQL·백엔드 왕복과 배포 환경의 미검증 사항은 [API 공통](api.md#3-공통)에서 확인한다.
