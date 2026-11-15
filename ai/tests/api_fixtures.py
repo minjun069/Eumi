@@ -36,7 +36,6 @@ class OfflineModel:
                 value = {
                     "request": {"goal": "시연용 D3 가구 자료를 조회하고 비교표로 설명"},
                     "reason": "시연 입력 확인",
-                    "needs_input": False,
                 }
             elif title == "Selection":
                 value = {
@@ -45,7 +44,15 @@ class OfflineModel:
                     "reason": "시연 자료 조회",
                 }
             elif title == "Decision":
-                value = {"next": "compose", "reason": "자료 조회 완료"}
+                records = section(messages, "작업 결과와 검증 이력")
+                available = any(
+                    r["decision"] == "call" and r["outcome"] == "success"
+                    for r in records
+                )
+                value = {
+                    "next": "compose" if available else "act",
+                    "reason": "자료 조회 완료" if available else "D3 가구 자료 필요",
+                }
             elif title == "Composition":
                 records = section(messages, "작업 결과와 검증 이력")
                 call = next(r for r in reversed(records) if r["decision"] == "call")

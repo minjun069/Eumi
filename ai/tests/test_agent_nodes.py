@@ -23,11 +23,110 @@ from tests.helpers import DONE, ScriptedModel, composition, initial, section, se
 pytestmark = pytest.mark.usefixtures("all_tableau_views")
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("event", ["user_request", "analysis_pipeline"])
+async def test_sufficient_existing_chart_goes_directly_to_composition(event):
+    state = initial(event)
+    artifact = validate_visualization(
+        {
+            "view_key": "Embed01VulnerabilityMap",
+            "parameters": {
+                "p_city": "51110",
+                "p_start": "2025-07-01",
+                "p_end": "2025-12-01",
+            },
+        },
+        state=state,
+    )["artifact"]
+    state["request"]["goal"] = "기존 차트의 표시 조건만 설명해줘"
+    state["response"] = {
+        "id": "previous-chart",
+        "kind": "final",
+        "label": "기존 차트",
+        "content": "춘천시의 2025년 7월~12월 표시 조건입니다.",
+        "artifacts": [artifact],
+    }
+    replies = (
+        [{"request": state["request"], "reason": "기존 표시 조건 설명 요청"}]
+        if event == "user_request"
+        else []
+    )
+    model = ScriptedModel(
+        [
+            *replies,
+            {"next": "compose", "reason": "기존 산출물에 설명할 표시 조건이 있다."},
+            {
+                "content": state["response"]["content"],
+                "artifact_ids": ["previous"],
+                "status": "completed",
+                "reason": "확인된 표시 조건 설명",
+            },
+        ]
+    )
+    graph = compile_graph(build_nodes(model, {}, [], role="request"), finish=finish)
+    result = await graph.ainvoke(state, {})
+    assert result["execution"]["status"] == "completed"
+    assert model.schemas == (
+        ["Interpretation", "Decision", "Composition"]
+        if event == "user_request"
+        else ["Decision", "Composition"]
+    )
+    assert result["response"]["artifacts"] == [artifact]
+    assert not any(item["node"] == "act" for item in result["results"])
+    for resource in ("tool_calls", "agent_calls"):
+        assert result["execution"]["budget"][resource]["used"] == 0
+
+
+@pytest.mark.asyncio
+async def test_restored_selection_receives_latest_progress_decision():
+    state = initial()
+    state["results"].append(
+        record(
+            "decide",
+            "decision",
+            "이전 판단",
+            output={"next": "compose", "reason": "이전 판단"},
+        )
+    )
+    need = "지역별 전체 가구 수와 독거가구 수가 필요하다."
+    nodes = build_nodes(
+        ScriptedModel([{"next": "act", "reason": need}]),
+        PROVIDERS,
+        CATALOG,
+        role="interpretation",
+    )
+    decided = deepcopy(state)
+    command = await nodes["decide"](decided, {})
+    decided["results"].extend(command.update["results"])
+    target = command.goto
+    assert target == "act"
+    restored = state_adapter.validate_json(state_adapter.dump_json(decided))
+
+    def choose(messages):
+        decision = section(messages, "이번 작업의 진행 판단")
+        assert len(decision) == 1
+        assert decision[0]["id"] == decided["results"][-1]["id"]
+        assert decision[0]["output"] == {"next": "act", "reason": need}
+        return selection("query_data", {"target": "D3"})
+
+    nodes = build_nodes(
+        ScriptedModel([choose]), PROVIDERS, CATALOG, role="interpretation"
+    )
+    executed = deepcopy(restored)
+    command = await nodes["act"](executed, {})
+    target = command.goto
+    assert target == "decide"
+    assert executed["results"][: len(decided["results"])] == decided["results"]
+    assert executed["results"][-1]["outcome"] == "success"
+    assert executed["results"][-1]["action"]["name"] == "query_data"
+
+
 @pytest.mark.parametrize(
     "role,name",
     [
         ("report", "validate_visualization"),
         ("interpretation", "visualization_agent"),
+        ("request", "none"),
     ],
 )
 @pytest.mark.asyncio
@@ -35,7 +134,12 @@ async def test_disallowed_selection_fails_before_work_and_preserves_results(role
     state = initial()
     previous = record("act", "call", "이전 자료", output={"data": {"rows": []}})
     state["results"].append(previous)
-    model = ScriptedModel([selection(name, {"goal": "허용되지 않은 작업"})])
+    model = ScriptedModel(
+        [
+            {"next": "act", "reason": "자료 확보 필요"},
+            selection(name, {"goal": "허용되지 않은 작업"}),
+        ]
+    )
     graph = compile_graph(
         build_nodes(model, PROVIDERS, CATALOG, role=role), finish=finish
     )
@@ -47,7 +151,7 @@ async def test_disallowed_selection_fails_before_work_and_preserves_results(role
     assert len([r for r in result["results"] if r["decision"] == "call"]) == 1
     assert result["execution"]["budget"]["agent_calls"]["used"] == 0
     assert result["execution"]["budget"]["tool_calls"]["used"] == 0
-    assert model.schemas == ["Selection"]
+    assert model.schemas == ["Decision", "Selection"]
 
 
 @pytest.mark.parametrize("target,status", [("D3", "partial"), ("unknown", "failed")])
@@ -56,14 +160,20 @@ async def test_later_model_failure_preserves_call_outcome(target, status):
     def unavailable(messages):
         raise ConnectionError("model unavailable")
 
-    model = ScriptedModel([selection("query_data", {"target": target}), unavailable])
+    model = ScriptedModel(
+        [
+            {"next": "act", "reason": "자료 확보 필요"},
+            selection("query_data", {"target": target}),
+            unavailable,
+        ]
+    )
     graph = compile_graph(
         build_nodes(model, PROVIDERS, CATALOG, role="interpretation"),
         finish=finish,
     )
     result = await graph.ainvoke(initial(), {})
     assert result["execution"]["status"] == status
-    assert model.schemas == ["Selection", "Decision"]
+    assert model.schemas == ["Decision", "Selection", "Decision"]
     called = next(r for r in result["results"] if r["decision"] == "call")
     assert (called["outcome"] == "success") == (target == "D3")
     assert not any(r["decision"] == "verification" for r in result["results"])
@@ -92,6 +202,7 @@ async def test_query_calculate_compose_and_restore_without_verification():
 
     model = ScriptedModel(
         [
+            {"next": "act", "reason": "지역별 가구 수와 독거가구 수 필요"},
             selection("query_data", {"target": "D3"}),
             {"next": "act", "reason": "계산 필요"},
             calculate,
@@ -111,6 +222,7 @@ async def test_query_calculate_compose_and_restore_without_verification():
     ]
     assert result["messages"][-1].content == result["response"]["content"]
     assert model.schemas == [
+        "Decision",
         "Selection",
         "Decision",
         "Selection",
@@ -142,7 +254,9 @@ async def test_query_calculate_compose_and_restore_without_verification():
 async def test_child_agent_returns_usable_results_without_parent_verification():
     model = ScriptedModel(
         [
+            {"next": "act", "reason": "전문 해석 필요"},
             selection("interpretation_agent", {"goal": "자료 조회"}),
+            {"next": "act", "reason": "해석에 필요한 자료 확보"},
             selection("query_data", {"target": "D3"}),
             DONE,
             composition,
@@ -158,7 +272,9 @@ async def test_child_agent_returns_usable_results_without_parent_verification():
     assert result["execution"]["status"] == "completed", result["results"]
     assert result["response"]["artifacts"]
     assert model.schemas == [
+        "Decision",
         "Selection",
+        "Decision",
         "Selection",
         "Decision",
         "Composition",
@@ -179,17 +295,15 @@ async def test_question_resume_preserves_actual_dialogue():
         assert "어느 지역인가요?" in messages[1].content
         return {
             "request": {"goal": "서울 자료"},
-            "needs_input": False,
             "reason": "답변 반영",
         }
 
     model = ScriptedModel(
         [
-            {"request": state["request"], "needs_input": True, "reason": "지역 필요"},
+            {"request": state["request"], "reason": "지역이 지정되지 않은 요청"},
             {"next": "ask", "reason": "지역 필요"},
             {"content": "어느 지역인가요?", "reason": "지역 필요"},
             reinterpret,
-            selection("none", {}),
             DONE,
             {
                 "content": "자료 없음",
@@ -215,7 +329,11 @@ async def test_question_resume_preserves_actual_dialogue():
 async def test_tableau_invalid_conditions_are_repaired_and_previous_is_preserved():
     valid = {
         "view_key": "Embed01VulnerabilityMap",
-        "parameters": {"p_city": "51110"},
+        "parameters": {
+            "p_city": "51110",
+            "p_start": "2025-07-01",
+            "p_end": "2025-12-01",
+        },
         "filters": {"읍면동": ["후평3동"]},
     }
     invalid = valid | {"filters": {"읍면동": ["역삼1동"]}}
@@ -232,6 +350,7 @@ async def test_tableau_invalid_conditions_are_repaired_and_previous_is_preserved
 
     model = ScriptedModel(
         [
+            {"next": "act", "reason": "요청한 표시 조건의 검증 필요"},
             selection("validate_visualization", invalid),
             {"next": "act", "reason": "조건 수정"},
             repair,
@@ -278,7 +397,7 @@ async def test_failed_calls_stop_at_shared_retry_limit():
         "reason": "한도",
     }
     choose = selection("query_data", {"target": "unknown"})
-    model = ScriptedModel([choose, retry, choose, retry, choose, failed])
+    model = ScriptedModel([retry, choose, retry, choose, retry, choose, failed])
     graph = compile_graph(
         build_nodes(model, PROVIDERS, CATALOG, role="interpretation"), finish=finish
     )

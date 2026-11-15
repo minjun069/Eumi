@@ -771,6 +771,7 @@ async def test_real_query_process_report_and_file_save_flow(tmp_path):
     review = {"accepted": True, "reason": "합성 근거 일치"}
     model = ScriptedModel(
         [
+            again,
             query(
                 "analysis.bh_region_contribution",
                 ["indicator_cd", "contribution"],

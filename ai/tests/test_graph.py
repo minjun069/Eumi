@@ -9,6 +9,7 @@ from langgraph.graph import END
 from langgraph.types import Command
 
 from experiments.fixtures import mock_nodes
+from src.execution import record
 from src.graph import compile_graph
 from src.settings import Settings
 from src.state import create_state, state_adapter
@@ -71,6 +72,22 @@ def test_scenarios_preserve_state_and_resume(scenario):
             and s["execution"]["status"] == "running"
             for s in snapshots
         )
+        # 중간 작성 이후의 추가 작업도 진행 판단을 반드시 거친다.
+        assert [item["node"] for item in result["results"]] == [
+            "interpret",
+            "decide",
+            "act",
+            "act",
+            "act",
+            "decide",
+            "compose",
+            "decide",
+            "act",
+            "act",
+            "act",
+            "decide",
+            "compose",
+        ]
 
 
 def response(kind="final", artifacts=None):
@@ -85,9 +102,14 @@ def response(kind="final", artifacts=None):
 
 def nodes():
     return {
-        "interpret": lambda s: Command(update={}, goto="act"),
-        "act": lambda s: Command(update={}, goto="decide"),
-        "decide": lambda s: Command(update={}, goto="compose"),
+        "interpret": lambda s: Command(update={}, goto="decide"),
+        "act": lambda s: Command(
+            update={"results": [record("act", "call", "자료 확보")]}, goto="decide"
+        ),
+        "decide": lambda s: Command(
+            update={},
+            goto="compose" if any(r["node"] == "act" for r in s["results"]) else "act",
+        ),
         "compose": lambda s: Command(update={"response": response()}, goto=END),
         "ask": lambda s: Command(
             update={"response": response("question")}, goto="wait"
@@ -99,13 +121,54 @@ def finish(state):
     return {"status": "completed", "error": None}
 
 
+@pytest.mark.parametrize("event", ["user_request", "analysis_pipeline"])
+@pytest.mark.parametrize("next_node", ["act", "compose", "ask"])
+def test_first_decision_precedes_work_or_routes_directly_to_response(event, next_node):
+    state = initial()
+    state["execution"]["event"] = event
+    visited = []
+    callbacks = nodes()
+
+    def decide(current):
+        visited.append("decide")
+        return Command(
+            update={},
+            goto=next_node if visited.count("decide") == 1 else "compose",
+        )
+
+    for name in ("interpret", "act", "compose", "ask"):
+        callback = callbacks[name]
+
+        def observe(current, name=name, callback=callback):
+            visited.append(name)
+            return callback(current)
+
+        callbacks[name] = observe
+    callbacks["decide"] = decide
+    graph = compile_graph(callbacks, finish=finish, checkpointer=InMemorySaver())
+    result = graph.invoke(
+        state, {"configurable": {"thread_id": f"{event}-{next_node}"}}
+    )
+    expected = (["interpret"] if event == "user_request" else []) + ["decide"]
+    expected += ["act", "decide", "compose"] if next_node == "act" else [next_node]
+    assert visited == expected
+    assert result["execution"]["status"] == (
+        "waiting_input" if next_node == "ask" else "completed"
+    )
+    assert result["execution"]["budget"]["steps"]["used"] == len(expected)
+
+
 @pytest.mark.parametrize(
     "name,command",
     [
+        ("interpret", Command(update={}, goto="act")),
         ("act", Command(update={"request": {"goal": "overwrite"}}, goto="decide")),
         ("act", Command(update={}, goto=END)),
         ("ask", Command(update={}, goto="wait")),
         ("compose", Command(update={"response": response("intermediate")}, goto=END)),
+        ("compose", Command(update={"response": response("intermediate")}, goto="act")),
+        ("compose", Command(update={"response": response("intermediate")}, goto="ask")),
+        ("compose", Command(update={"response": response("final")}, goto="decide")),
     ],
 )
 def test_rejects_invalid_node_updates(name, command):
@@ -118,6 +181,45 @@ def test_rejects_invalid_node_updates(name, command):
     assert result["execution"]["status"] == "failed"
     assert result["execution"]["error"]["code"] == "runtime_error"
     assert result["request"] == initial()["request"]
+
+
+@pytest.mark.parametrize("next_node", ["act", "compose", "ask"])
+def test_intermediate_response_returns_to_decision_before_continuing(next_node):
+    visited = []
+    callbacks = nodes()
+
+    def decide(state):
+        visited.append("decide")
+        after_draft = (state["response"] or {}).get("kind") == "intermediate"
+        target = (
+            next_node if after_draft and visited.count("decide") == 2 else "compose"
+        )
+        return Command(update={}, goto=target)
+
+    def compose(state):
+        visited.append("compose")
+        intermediate = visited.count("compose") == 1
+        return Command(
+            update={"response": response("intermediate" if intermediate else "final")},
+            goto="decide" if intermediate else END,
+        )
+
+    def act(state):
+        visited.append("act")
+        return Command(update={}, goto="decide")
+
+    callbacks.update(decide=decide, compose=compose, act=act)
+    graph = compile_graph(callbacks, finish=finish, checkpointer=InMemorySaver())
+    result = graph.invoke(initial(), {"configurable": {"thread_id": next_node}})
+    assert visited[:3] == ["decide", "compose", "decide"]
+    if next_node == "ask":
+        assert result["execution"]["status"] == "waiting_input"
+        assert result["response"]["kind"] == "question"
+    else:
+        assert visited[3:] == (
+            ["act", "decide", "compose"] if next_node == "act" else ["compose"]
+        )
+        assert result["execution"]["status"] == "completed"
 
 
 def test_progress_preserves_published_artifacts():

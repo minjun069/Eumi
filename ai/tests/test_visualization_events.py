@@ -21,7 +21,7 @@ from src.tools import tableau, tableau_catalog
 from src.tools.interface import create_tools
 from src.tools.tableau import validate_visualization
 from src.visualization_instructions import visualization_context
-from tests.helpers import ScriptedModel
+from tests.helpers import ScriptedModel, section
 
 MAP = "Embed01RiskMap"
 OTHER = "Embed03Vulnerability"
@@ -59,8 +59,8 @@ def selection(name="validate_visualization", **args):
 INTERPRET = {
     "request": {"goal": "이벤트별 시각화 검증"},
     "reason": "확인",
-    "needs_input": False,
 }
+ACT = {"next": "act", "reason": "요청한 표시 설정의 검증 필요"}
 DONE = {"next": "compose", "reason": "검사 완료"}
 COMPOSE = {
     "content": "검사 결과 안내",
@@ -82,10 +82,14 @@ class Model(ScriptedModel):
 
         async def invoke(messages, config):
             self.inputs.append(messages)
+            needs_work = schema["title"] == "Decision" and not any(
+                item["decision"] == "call"
+                for item in section(messages, "작업 결과와 검증 이력")
+            )
             reply = {
                 "Interpretation": INTERPRET,
                 "Selection": selection(view_key=MAP),
-                "Decision": DONE,
+                "Decision": ACT if needs_work else DONE,
                 "Composition": COMPOSE,
             }[schema["title"]]
             return {"raw": AIMessage(json.dumps(reply, ensure_ascii=False))}
@@ -225,7 +229,7 @@ async def test_shared_graph_keeps_concurrent_event_policies_separate(catalog):
         called = next(r["output"] for r in result["results"] if r["decision"] == "call")
         assert called["valid"] is (event == "analysis_pipeline")
         assert result["results"][0]["node"] == (
-            "act" if event == "analysis_pipeline" else "interpret"
+            "decide" if event == "analysis_pipeline" else "interpret"
         )
         assert result["execution"]["event"] == event
     for messages in model.messages:
@@ -244,7 +248,9 @@ async def test_child_inherits_event_and_cannot_call_other_event_view(catalog):
     event = "analysis_pipeline"
     model = Model(
         [
+            ACT,
             selection("visualization_agent", goal="시각화"),
+            ACT,
             selection(view_key=OTHER),
             DONE,
             COMPOSE,
@@ -267,7 +273,6 @@ async def test_rebuilt_graph_resumes_saved_event_without_scope_injection(catalog
         graph(
             Model(
                 [
-                    selection("none"),
                     {"next": "ask", "reason": "대상 필요"},
                     {"content": "대상을 알려주세요.", "reason": "대상 필요"},
                 ]
@@ -282,6 +287,7 @@ async def test_rebuilt_graph_resumes_saved_event_without_scope_injection(catalog
         Model(
             [
                 INTERPRET,
+                ACT,
                 selection(view_key=key),
                 DONE,
                 COMPOSE,

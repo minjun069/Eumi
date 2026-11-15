@@ -53,12 +53,11 @@ from src.tools.tableau_catalog import registered_catalog
 class Interpretation(TypedDict):
     request: Request
     reason: str
-    needs_input: bool
 
 
 def selection_schema(definitions):
     """이번 호출에 제공하는 작업 목록으로 응답·원문 검증의 허용값을 맞춘다."""
-    names = tuple(item["function"]["name"] for item in definitions) + ("none",)
+    names = tuple(item["function"]["name"] for item in definitions)
 
     @with_config(ConfigDict(extra="forbid"))
     class Selection(TypedDict):
@@ -67,8 +66,7 @@ def selection_schema(definitions):
             str,
             Field(
                 description="선택한 도구 명세에 맞는 인자 객체를 "
-                "JSON 문자열로 직렬화한다. "
-                "none이면 {}."
+                "JSON 문자열로 직렬화한다."
             ),
         ]
         reason: str
@@ -634,7 +632,7 @@ def build_nodes(
                             state, "intermediate", "뷰 선정 근거를 보완합니다."
                         ),
                     },
-                    goto="act",
+                    goto="decide",
                 )
             await write_report(state, config)
             publish_report(state)
@@ -665,12 +663,10 @@ def build_nodes(
                     )
                 ],
             },
-            goto="decide" if value["needs_input"] else "act",
+            goto="decide",
         )
 
     async def act(state, config):
-        if role == "report" and approved_report_selection(state):
-            return Command(update={"results": []}, goto="decide")
         tools = {t.name: t for t in create_tools(providers, state=state)}
         definitions = selection_tools(tools, role, state=state)
         # 노드 내부 판단도 같은 State 이력을 읽고, 반환할 때 새 기록만 전달한다.
@@ -692,8 +688,6 @@ def build_nodes(
             )
         )
         name = choice["name"]
-        if name == "none":
-            return Command(update={"results": records[first_record:]}, goto="decide")
         arguments = {}
         try:
             arguments = json.loads(choice["arguments_json"])
@@ -810,8 +804,6 @@ def build_nodes(
         return Command(update={"results": records[first_record:]}, goto="decide")
 
     async def decide(state, config):
-        if role == "report" and approved_report_selection(state):
-            return Command(update={"results": []}, goto="compose")
         value, usage = await call(
             state, Decision, lambda: decide_messages(state, role, catalog), config
         )

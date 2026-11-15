@@ -47,10 +47,10 @@ class Completion(TypedDict):
 
 # 허용 전이와 공개 응답 종류. 질문 대기는 실행 계층에서 처리한다.
 DESTINATIONS = {
-    "interpret": ("act", "decide"),
+    "interpret": ("decide",),
     "act": ("decide",),
     "decide": ("act", "compose", "ask"),
-    "compose": ("act", "ask", END),
+    "compose": ("decide", END),
     "ask": ("wait",),
 }
 RESPONSE_KINDS = {
@@ -309,9 +309,11 @@ def compile_graph(
     graph.add_conditional_edges(
         START,
         lambda state: (
-            "act" if state["execution"]["event"] == "analysis_pipeline" else "interpret"
+            "decide"
+            if state["execution"]["event"] == "analysis_pipeline"
+            else "interpret"
         ),
-        ["act", "interpret"],
+        ["decide", "interpret"],
     )
     # LangGraph superstep 수와 업무 단계는 다르다. State의 steps로 제한한다.
     return graph.compile(checkpointer=checkpointer).with_config(recursion_limit=maxsize)

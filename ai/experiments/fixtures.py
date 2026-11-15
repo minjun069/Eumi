@@ -1,7 +1,7 @@
 """공통 그래프에 공급할 임시 입력·모의 노드 출력.
 
-업무 노드가 미구현이므로 현재는 노드 출력을 대체한다.
-실제 업무 노드 연결 후에는 모델·외부 도구의 입출력 경계만 대체한다.
+공통 그래프 연결·상태 처리만 확인하기 위해 노드 출력을 대체한다.
+실제 업무 동작 검증은 업무 노드를 사용하고 모델·외부 도구의 입출력 경계만 대체한다.
 그래프 구성과 실행은 demo/demo.py 및 테스트가 src.graph를 사용해 수행한다.
 """
 
@@ -80,14 +80,11 @@ def mock_nodes(
 
     # 임시 업무 노드
     def interpret(state: State):
-        # 답변은 messages에 보존한다. 요청 재해석은 후속 모델 연결 시 구현한다.
-        resumed = any(r["node"] == "ask" for r in state["results"])
-        next_node = "decide" if resumed else "act"
         return Command(
             update={
                 "results": [_record("interpret", "요청 확인", output=state["request"])]
             },
-            goto=next_node,
+            goto="decide",
         )
 
     def act(state: State):
@@ -120,10 +117,15 @@ def mock_nodes(
         next_node = "compose"
         if scenario == "question" and not any(r["node"] == "ask" for r in history):
             next_node = "ask"
+        elif not any(r["decision"] == "임시 호출" for r in history):
+            next_node = "act"
         elif (
             scenario == "continue"
-            and sum(r["decision"] == "임시 호출" for r in history) < 2
-        ):
+            or (
+                scenario == "intermediate"
+                and any(r["node"] == "compose" for r in history)
+            )
+        ) and sum(r["decision"] == "임시 호출" for r in history) < 2:
             next_node = "act"
         return Command(
             update={"results": [_record("decide", f"다음 단계: {next_node}")]},
@@ -141,7 +143,7 @@ def mock_nodes(
             "임시 중간 결과. 다음 작업을 계속합니다."
             if intermediate
             else f"임시 실행 종료: {scenario}. 실제 분석 결과가 아닙니다.",
-            "act" if intermediate else END,
+            "decide" if intermediate else END,
         )
 
     def ask(state: State):

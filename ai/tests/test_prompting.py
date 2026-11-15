@@ -54,7 +54,9 @@ def test_each_node_selects_materials_without_mutating_state():
         assert isinstance(messages[1], HumanMessage)
         assert state["messages"][0].content in messages[1].content
         assert "data_catalog_sentinel" not in messages[1].content
-        assert "[시각화 목록과 입력 조건]" not in messages[1].content
+        assert ("[시각화 목록과 입력 조건]" in messages[1].content) == (
+            builder is decide_messages
+        )
         assert "[도구 명세]" not in messages[0].content
     tools = {tool.name: tool for tool in create_tools(PROVIDERS, state=state)}
     definitions = selection_tools(tools, role, state=state)
@@ -97,7 +99,7 @@ def test_decision_keeps_nested_call_results_without_model_verification():
 )
 @pytest.mark.asyncio
 async def test_selection_response_choices_match_provided_tools(role, expected):
-    model = ScriptedModel([selection("none", {})])
+    model = ScriptedModel([selection("query_data", {"target": "D3"})])
     command = await build_nodes(model, PROVIDERS, CATALOG, role=role)["act"](
         initial(), {}
     )
@@ -105,13 +107,13 @@ async def test_selection_response_choices_match_provided_tools(role, expected):
     provided = {item["function"]["name"] for item in definitions}
     schema = model.response_schemas[0]
     assert provided == expected
-    assert set(schema["properties"]["name"]["enum"]) == provided | {"none"}
+    assert set(schema["properties"]["name"]["enum"]) == provided
     assert set(schema["properties"]) == {"name", "arguments_json", "reason"}
     assert set(schema["required"]) == set(schema["properties"])
     assert schema["additionalProperties"] is False
     assert model.response_options[0]["strict"] is True
     assert command.goto == "decide"
-    assert [r["decision"] for r in command.update["results"]] == ["selection"]
+    assert [r["decision"] for r in command.update["results"]] == ["selection", "call"]
 
 
 @pytest.mark.parametrize(

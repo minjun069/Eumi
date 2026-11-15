@@ -77,7 +77,27 @@ class ReportModel:
                     }
                     self.forbidden_selection = None
             elif kind == "Decision":
-                value = {"next": "compose", "reason": "근거 확보"}
+                available = any(
+                    r["decision"] == "call" and r["outcome"] == "success"
+                    for r in records
+                )
+                rejected = next(
+                    (
+                        r
+                        for r in reversed(records)
+                        if r["decision"] == "verification"
+                        and (r["output"] or {}).get("accepted") is False
+                    ),
+                    None,
+                )
+                value = {
+                    "next": "compose" if available else "act",
+                    "reason": "월별 분석 결과가 필요하다."
+                    if not available
+                    else "추가 조회 없이 기존 근거로 검토 지적을 수정한다."
+                    if rejected
+                    else "근거 확보",
+                }
             elif kind == "ReportSelection":
                 evidence = next(r["id"] for r in records if r["decision"] == "call")
                 value = {
@@ -379,7 +399,7 @@ async def test_long_report_reselects_supported_scope_and_saves_partial(
             ]
         }
 
-    replies = []
+    replies = [{"next": "act", "reason": "후보 뷰의 기간별 근거 필요"}]
     for target, months in (
         ("public.region_result", range(7, 13)),
         ("analysis.bh_region_contribution", range(8, 13)),
@@ -414,7 +434,6 @@ async def test_long_report_reselects_supported_scope_and_saves_partial(
         [
             choose_views,
             {"accepted": False, "reason": rejection},
-            {"name": "none", "arguments_json": "{}", "reason": scope},
             {"next": "compose", "reason": scope},
             lambda messages: choose_views(messages, limited=True),
             review,
@@ -459,10 +478,9 @@ async def test_long_report_reselects_supported_scope_and_saves_partial(
     ]
     assert row["desc_1"] and row["desc_2"] and row["quick_insight"]
     assert row["desc_3"] is None
-    assert model.schemas[-12:] == [
+    assert model.schemas[-11:] == [
         "ReportSelection",
         "Verification",
-        "Selection",
         "Decision",
         "ReportSelection",
         "Verification",
@@ -475,7 +493,7 @@ async def test_long_report_reselects_supported_scope_and_saves_partial(
     ]
     records = section(model.inputs[-9], "작업 결과와 검증 이력")
     assert any(r["reason"] == rejection for r in records)
-    assert records[-1]["reason"] == scope
+    assert records[-1]["reason"] == rejection
     for messages in model.inputs[-7:]:
         records = json.loads(messages[1].content)["results"]
         selected = next(

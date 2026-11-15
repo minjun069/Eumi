@@ -67,6 +67,7 @@ async def test_progress_commit_then_notification_and_terminal_row(tmp_path):
     rows = [response_row(s) for s in db.saved]
     assert [r["content"] for r in rows[:-1]] == [
         "질문 이해",
+        "진행 판단",
         "자료 조회·작업 실행",
         "진행 판단",
         "답변 작성",
@@ -214,7 +215,6 @@ class WaitingModel(OfflineModel):
                 "Interpretation": {
                     "request": {"goal": "지역 확인"},
                     "reason": "지역 필요",
-                    "needs_input": True,
                 },
                 "Decision": {"next": "ask", "reason": "지역 필요"},
                 "Question": {"content": "어느 지역인가요?", "reason": "지역 필요"},
