@@ -15,7 +15,7 @@ from src.agent_nodes import (
 )
 from src.exceptions import ToolFailure
 from src.execution import accepted_outputs
-from src.graph import compile_graph
+from src.graph import compile_graph, run_node
 from src.state import state_adapter
 from src.tools.tableau import validate_visualization
 from tests.helpers import DONE, ScriptedModel, composition, initial, section, selection
@@ -95,10 +95,7 @@ async def test_restored_selection_receives_latest_progress_decision():
         CATALOG,
         role="interpretation",
     )
-    decided = deepcopy(state)
-    command = await nodes["decide"](decided, {})
-    decided["results"].extend(command.update["results"])
-    target = command.goto
+    decided, target = await run_node("decide", nodes["decide"], state, finish=finish)
     assert target == "act"
     restored = state_adapter.validate_json(state_adapter.dump_json(decided))
 
@@ -112,9 +109,7 @@ async def test_restored_selection_receives_latest_progress_decision():
     nodes = build_nodes(
         ScriptedModel([choose]), PROVIDERS, CATALOG, role="interpretation"
     )
-    executed = deepcopy(restored)
-    command = await nodes["act"](executed, {})
-    target = command.goto
+    executed, target = await run_node("act", nodes["act"], restored, finish=finish)
     assert target == "decide"
     assert executed["results"][: len(decided["results"])] == decided["results"]
     assert executed["results"][-1]["outcome"] == "success"

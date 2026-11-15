@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from typing import Annotated, Literal
 from uuid import uuid4
 
+from langchain_core.messages import BaseMessage
 from langgraph.graph import END
 from langgraph.types import Command
 from pydantic import ConfigDict, Field, TypeAdapter, ValidationError, with_config
@@ -21,7 +22,7 @@ from src.execution import (
     invoke_work,
     record,
 )
-from src.execution_trace import trace_span
+from src.execution_trace import trace_acall, trace_call
 from src.gemini import structured_call
 from src.graph import compile_graph
 from src.prompting import (
@@ -38,15 +39,18 @@ from src.prompting import compact as compact
 from src.runtime import run_graph
 from src.state import (
     Request,
+    ResultItem,
+    State,
     Text,
     ViewKey,
     create_child_state,
     report_input,
     report_row_adapter,
+    state_adapter,
 )
 from src.tool_specs import selection_tools
 from src.tools.interface import create_tools
-from src.tools.render import render_visualization
+from src.tools.render import render_adapter, render_visualization
 from src.tools.tableau_catalog import registered_catalog
 
 
@@ -127,6 +131,31 @@ class ReportArguments(TypedDict):
 report_arguments_adapter = TypeAdapter(ReportArguments)
 
 
+ReportStage = Literal[
+    "selection", "selection_review", "draft", "draft_review", "review_retry"
+]
+
+
+class NoModelCall(ValueError):
+    """현재 단계는 새 모델 응답 없이 서비스가 마무리하는 상태다."""
+
+
+class ModelCall(TypedDict):
+    schema: type
+    messages: list[BaseMessage]
+    strict: bool
+    stage: ReportStage | None
+
+
+class ReportCallPlan(TypedDict):
+    stage: ReportStage
+    decision: str
+    name: str
+    arguments: ReportArguments
+    reason: str
+    retry: ResultItem | None
+
+
 def response(state, kind, content, artifacts=None):
     return {
         "id": str(uuid4()),
@@ -141,7 +170,7 @@ def response(state, kind, content, artifacts=None):
     }
 
 
-def select_artifacts(state):
+def select_artifacts(state, *, renderer=None):
     ids = next(
         item["output"]["artifact_ids"]
         for item in reversed(state["results"])
@@ -187,20 +216,27 @@ def select_artifacts(state):
                 }
                 items = [{"type": "data", "data": {"dataset": output["data"]}}]
                 if not finalizing(state):
-                    with trace_span(
-                        "artifact", "render_comparison_table", table_input
-                    ) as span:
-                        table = invoke_local_tool(
+                    table = trace_call(
+                        "artifact",
+                        "render_comparison_table",
+                        table_input,
+                        lambda table_input=table_input: invoke_local_tool(
                             state,
                             "compose",
                             "render_visualization",
                             table_input,
-                            lambda table_input=table_input: render_visualization(
-                                table_input
+                            lambda table_input=table_input: trace_call(
+                                "tool",
+                                "render_visualization",
+                                {
+                                    "selected_arguments": table_input,
+                                    "resolved_arguments": table_input,
+                                    "input_schema": render_adapter.json_schema(),
+                                },
+                                lambda: (renderer or render_visualization)(table_input),
                             ),
-                        )
-                        if span:
-                            span.update(output=table)
+                        ),
+                    )
                     items[0]["data"]["spec"] = table["applied"]
                     items.insert(0, table["artifact"])
             else:
@@ -452,6 +488,179 @@ def consume_report_retry(state, previous):
     )
 
 
+def _report_call_plan(state: State, role: Role, stage=None) -> ReportCallPlan:
+    """현재 기록만으로 다음 보고서 호출의 대상과 입력을 정한다."""
+    if role not in REPORT_ROLES:
+        raise ValueError("보고서 호출에는 보고서 역할이 필요합니다.")
+    if finalizing(state):
+        raise NoModelCall("종료 정리 단계에는 보고서 모델 호출이 없습니다.")
+    previous = None
+    view_key = None
+    refs = []
+    if role == "report_selection":
+        if approved_report_selection(state):
+            raise NoModelCall("선정이 이미 승인되어 새 모델 호출이 없습니다.")
+        previous = next(
+            (
+                r
+                for r in reversed(state["results"])
+                if r["decision"] == "report_selection"
+            ),
+            None,
+        )
+        next_stage = (
+            "selection_review"
+            if previous
+            and previous["outcome"] == "success"
+            and not report_review(state, previous)
+            else "selection"
+        )
+    else:
+        target = report_draft_target(state, role)
+        if target is None:
+            selected = approved_report_selection(state)
+            quick = last_report_draft(state, None)
+            if selected and (
+                role == "report_description"
+                or not selected["output"]["views"]
+                or (quick and quick["id"] in accepted_outputs(state))
+                or report_draft_exhausted(state, None)
+            ):
+                raise NoModelCall("현재 역할에서 남은 보고서 모델 호출이 없습니다.")
+            raise ValueError("현재 State에 작성·검토할 보고서 대상이 없습니다.")
+        view_key, refs = target
+        previous = last_report_draft(state, view_key)
+        next_stage = (
+            "review_retry"
+            if previous
+            and previous["outcome"] == "success"
+            and not report_review(state, previous)
+            else "draft"
+        )
+    stage = stage or next_stage
+    if stage == "draft_review" and next_stage == "review_retry":
+        pass  # 기존 초안의 최초 검토도 동일 대상에서 독립적으로 준비할 수 있다.
+    elif stage != next_stage:
+        raise ValueError("지정한 보고서 호출에 필요한 기존 대상이 준비되지 않았습니다.")
+    if stage in {"selection_review", "draft_review", "review_retry"}:
+        return {
+            "stage": stage,
+            "decision": "verification",
+            "name": "review_report",
+            "arguments": {"view_key": view_key, "result_ids": [previous["id"]]},
+            "reason": (
+                "기존 선정의 검토 재실행"
+                if stage == "selection_review"
+                else "기존 초안의 검토 재실행"
+                if stage == "review_retry"
+                else "작성과 분리된 근거 대조"
+            ),
+            "retry": None,
+        }
+    if stage == "selection":
+        refs = list(accepted_outputs(state))
+    elif previous:
+        refs.append(previous["id"])
+        review = report_review(state, previous)
+        if review:
+            refs.append(review["id"])
+    return {
+        "stage": stage,
+        "decision": "report_selection" if stage == "selection" else "report_draft",
+        "name": "select_report_views" if stage == "selection" else "write_report",
+        "arguments": {"view_key": view_key, "result_ids": refs},
+        "reason": "근거가 있는 상세 뷰 선정"
+        if stage == "selection"
+        else "보고서 문장 작성",
+        "retry": previous,
+    }
+
+
+def _begin_planned_report_call(state: State, plan: ReportCallPlan):
+    if plan["retry"]:
+        consume_report_retry(state, plan["retry"])
+    begin_report_call(
+        state,
+        plan["decision"],
+        plan["name"],
+        plan["arguments"]["view_key"],
+        plan["arguments"]["result_ids"],
+        plan["reason"],
+    )
+
+
+def _pending_report_stage(state: State, role: Role, stage) -> ReportStage | None:
+    if not state["results"]:
+        return None
+    item = state["results"][-1]
+    if (
+        item["node"] != "compose"
+        or item["outcome"] != "failure"
+        or item["output"] is not None
+    ):
+        return None
+    action = item["action"] or {}
+    if action.get("name") not in {
+        "select_report_views",
+        "write_report",
+        "review_report",
+    }:
+        return None
+    args = report_arguments_adapter.validate_python(action.get("arguments"))
+    if (
+        action["name"] == "select_report_views"
+        and item["decision"] == "report_selection"
+    ):
+        actual = "selection"
+    elif action["name"] == "write_report" and item["decision"] == "report_draft":
+        actual = "draft"
+    elif action["name"] == "review_report" and item["decision"] == "verification":
+        targets = [r for r in state["results"][:-1] if r["id"] in args["result_ids"]]
+        if len(targets) != 1 or targets[0]["outcome"] != "success":
+            raise ValueError("보고서 검토에 필요한 기존 성공 기록이 없습니다.")
+        target = targets[0]
+        if target["action"]["arguments"]["view_key"] != args["view_key"]:
+            raise ValueError("보고서 검토 대상과 view_key가 다릅니다.")
+        if target["decision"] == "report_selection":
+            actual = "selection_review"
+        elif target["decision"] == "report_draft":
+            actual = (
+                "review_retry"
+                if item["reason"] == "기존 초안의 검토 재실행"
+                else "draft_review"
+            )
+        else:
+            raise ValueError("보고서 검토 대상은 기존 선정 또는 초안이어야 합니다.")
+    else:
+        raise ValueError("보고서 호출 기록의 작업과 판단이 일치하지 않습니다.")
+    if stage and stage != actual:
+        raise ValueError("준비된 보고서 호출과 지정한 호출 단계가 다릅니다.")
+    if (actual in {"selection", "selection_review"}) != (role == "report_selection"):
+        raise ValueError("보고서 호출 단계와 역할이 다릅니다.")
+    if role == "report_description" and args["view_key"] is None:
+        raise ValueError("설명 작성·검토에는 기존 뷰 대상이 필요합니다.")
+    if role == "report_insight" and args["view_key"] is not None:
+        raise ValueError("인사이트 작성·검토는 전체 보고서를 대상으로 합니다.")
+    return actual
+
+
+def prepare_report_call(
+    state: State, role: Role, stage: ReportStage | None = None
+) -> tuple[State, ReportStage]:
+    """원본을 바꾸지 않고 기존 기록에서 보고서 모델 입력 한 건을 준비한다."""
+    if role not in REPORT_ROLES:
+        raise ValueError("보고서 호출에는 보고서 역할이 필요합니다.")
+    if finalizing(state):
+        raise NoModelCall("종료 정리 단계에는 보고서 모델 호출이 없습니다.")
+    prepared = deepcopy(state)
+    pending = _pending_report_stage(prepared, role, stage)
+    if pending:
+        return prepared, pending
+    plan = _report_call_plan(prepared, role, stage)
+    _begin_planned_report_call(prepared, plan)
+    return prepared, plan["stage"]
+
+
 def publish_report(state):
     inputs = report_input(state)
     source = next(
@@ -552,29 +761,118 @@ def process_arguments(state, arguments):
     return actual
 
 
+def prepare_model_call(
+    node: str,
+    state: State,
+    *,
+    role: Role,
+    catalog=None,
+    tools=None,
+    report_stage: ReportStage | None = None,
+    definitions=None,
+) -> ModelCall:
+    """서비스가 사용하는 응답 명세와 실제 메시지만 구성한다. 모델은 호출하지 않는다."""
+    stage = None
+    if report_stage is not None and (node != "compose" or role not in REPORT_ROLES):
+        raise ValueError("보고서 호출 단계는 보고서 역할의 compose에서만 지정합니다.")
+    if node == "interpret":
+        schema, messages = Interpretation, interpret_messages(state, role)
+    elif node == "act":
+        if definitions is None:
+            if tools is None:
+                raise ValueError(
+                    "작업 선택 입력에는 현재 호출 가능한 도구 명세가 필요합니다."
+                )
+            definitions = selection_tools(tools, role, state=state)
+        schema = selection_schema(definitions)
+        messages = selection_messages(state, role, catalog, definitions=definitions)
+    elif node == "decide":
+        schema, messages = Decision, decide_messages(state, role, catalog)
+    elif node == "compose" and role in REPORT_ROLES:
+        prepared, stage = prepare_report_call(state, role, report_stage)
+        schema = (
+            ReportSelection
+            if stage == "selection"
+            else ReportText
+            if stage == "draft"
+            else Verification
+        )
+        messages = report_messages(prepared, stage, catalog, role=role)
+    elif node == "compose":
+        schema, messages = Composition, compose_messages(state, role)
+    elif node == "ask":
+        schema, messages = Question, ask_messages(state, role)
+    else:
+        raise ValueError(f"모델 호출이 없는 노드입니다: {node}")
+    return {
+        "schema": schema,
+        "messages": messages,
+        "strict": node == "act",
+        "stage": stage,
+    }
+
+
+async def _structured_model_call(model, prepared: ModelCall, config):
+    return await structured_call(
+        model,
+        prepared["schema"],
+        prepared["messages"],
+        config,
+        strict=prepared["strict"],
+    )
+
+
+async def select_work(model, tools, catalog, state, config=None, *, role: Role):
+    """실제 작업 선택을 기록해 반환한다. 선택한 도구·에이전트는 호출하지 않는다."""
+    definitions = selection_tools(tools, role, state=state)
+    choice, usage = await invoke_model(
+        state,
+        lambda: _structured_model_call(
+            model,
+            prepare_model_call(
+                "act", state, role=role, catalog=catalog, definitions=definitions
+            ),
+            config,
+        ),
+    )
+    state["results"].append(
+        record(
+            "act",
+            "selection",
+            choice["reason"],
+            output=choice | {"model_usage": usage},
+        )
+    )
+    return choice
+
+
 def build_nodes(
     model,
     providers,
     catalog,
     *,
     role: Role,
+    tool_runner=None,
+    agent_runner=None,
+    renderer=None,
 ):
-    async def call(state, schema, messages, config, *, strict=False):
+    async def call(state, node, config, *, stage=None):
         return await invoke_model(
             state,
-            lambda: structured_call(model, schema, messages(), config, strict=strict),
+            lambda: _structured_model_call(
+                model,
+                prepare_model_call(
+                    node, state, role=role, catalog=catalog, report_stage=stage
+                ),
+                config,
+            ),
         )
 
-    async def call_report(state, config, schema, stage):
+    async def call_report(state, config, stage):
         """호출 인자는 이미 State에 기록되어 있다. 결과도 다음 호출 전에 반영한다."""
         item = state["results"][-1]
         try:
-            value, usage = await call(
-                state,
-                schema,
-                lambda: report_messages(state, stage, catalog, role=role),
-                config,
-            )
+            value, usage = await call(state, "compose", config, stage=stage)
             item["output"] = value | {"model_usage": usage}
             item["outcome"] = "success"
             return item
@@ -596,7 +894,6 @@ def build_nodes(
         reviewed = await call_report(
             state,
             config=config,
-            schema=Verification,
             stage=stage,
         )
         reviewed["output"]["call_id"] = target["id"]
@@ -607,50 +904,21 @@ def build_nodes(
     async def select_report_views(state, config):
         if approved_report_selection(state):
             return True
-        previous = next(
-            (
-                r
-                for r in reversed(state["results"])
-                if r["decision"] == "report_selection"
-            ),
-            None,
-        )
-        if (
-            previous
-            and previous["outcome"] == "success"
-            and not report_review(state, previous)
-        ):
-            begin_report_call(
-                state,
-                "verification",
-                "review_report",
-                None,
-                [previous["id"]],
-                "기존 선정의 검토 재실행",
-            )
+        plan = _report_call_plan(state, role)
+        _begin_planned_report_call(state, plan)
+        if plan["stage"] == "selection_review":
+            # 선정문은 보존하고 실패한 검토 호출만 다시 실행한다.
             checked = await call_report(
                 state,
                 config=config,
-                schema=Verification,
                 stage="selection_review",
             )
-            checked["output"]["call_id"] = previous["id"]
+            checked["output"]["call_id"] = plan["arguments"]["result_ids"][0]
             checked["reason"] = checked["output"]["reason"]
             return checked["output"]["accepted"]
-        if previous:
-            consume_report_retry(state, previous)
-        begin_report_call(
-            state,
-            "report_selection",
-            "select_report_views",
-            None,
-            list(accepted_outputs(state)),
-            "근거가 있는 상세 뷰 선정",
-        )
         selection = await call_report(
             state,
             config=config,
-            schema=ReportSelection,
             stage="selection",
         )
         available = accepted_outputs(state)
@@ -683,23 +951,15 @@ def build_nodes(
 
     async def write_report(state, config):
         while (target := report_draft_target(state, role)) is not None:
-            view_key, refs = target
+            view_key, _ = target
             previous = last_report_draft(state, view_key)
-            review = report_review(state, previous) if previous else None
+            plan = _report_call_plan(state, role)
+            _begin_planned_report_call(state, plan)
             # 검토 호출만 실패한 경우 작성문은 보존하고 검토만 다시 한다.
-            if previous and previous["outcome"] == "success" and review is None:
-                begin_report_call(
-                    state,
-                    "verification",
-                    "review_report",
-                    view_key,
-                    [previous["id"]],
-                    "기존 초안의 검토 재실행",
-                )
+            if plan["stage"] == "review_retry":
                 checked = await call_report(
                     state,
                     config=config,
-                    schema=Verification,
                     stage="review_retry",
                 )
                 checked["output"]["call_id"] = previous["id"]
@@ -710,23 +970,9 @@ def build_nodes(
                         continue
                     return False
                 continue
-            if previous:
-                consume_report_retry(state, previous)
-                refs.append(previous["id"])
-                if review:
-                    refs.append(review["id"])
-            begin_report_call(
-                state,
-                "report_draft",
-                "write_report",
-                view_key,
-                refs,
-                "보고서 문장 작성",
-            )
             await call_report(
                 state,
                 config=config,
-                schema=ReportText,
                 stage="draft",
             )
             checked = await verify_report(
@@ -737,7 +983,7 @@ def build_nodes(
             if not checked["output"]["accepted"]:
                 if report_draft_exhausted(state, view_key):
                     continue
-                # 추가 근거 확보와 기존 근거로 재작성을 진행 판단에서 구분한다.
+                # 추가 작업과 바로 재작성을 구분하는 판단을 같은 역할의 decide가 한다.
                 return False
         return True
 
@@ -773,12 +1019,7 @@ def build_nodes(
         )
 
     async def interpret(state, config):
-        value, usage = await call(
-            state,
-            Interpretation,
-            lambda: interpret_messages(state, role),
-            config,
-        )
+        value, usage = await call(state, "interpret", config)
         return Command(
             update={
                 "request": value["request"],
@@ -796,25 +1037,10 @@ def build_nodes(
 
     async def act(state, config):
         tools = {t.name: t for t in create_tools(providers, state=state)}
-        definitions = selection_tools(tools, role, state=state)
         # 노드 내부 판단도 같은 State 이력을 읽고, 반환할 때 새 기록만 전달한다.
         first_record = len(state["results"])
-        choice, usage = await call(
-            state,
-            selection_schema(definitions),
-            lambda: selection_messages(state, role, catalog, definitions=definitions),
-            config,
-            strict=True,
-        )
+        choice = await select_work(model, tools, catalog, state, config, role=role)
         records = state["results"]
-        records.append(
-            record(
-                "act",
-                "selection",
-                choice["reason"],
-                output=choice | {"model_usage": usage},
-            )
-        )
         name = choice["name"]
         arguments = {}
         try:
@@ -836,11 +1062,27 @@ def build_nodes(
                         },
                         state,
                     )
-                    graph = compile_graph(
-                        build_nodes(model, providers, catalog, role=child_role),
-                        finish=finish,
-                    )
-                    with trace_span(
+
+                    async def execute_child():
+                        if agent_runner is not None:
+                            return state_adapter.validate_python(
+                                await agent_runner(child_role, child, config)
+                            )
+                        graph = compile_graph(
+                            build_nodes(
+                                model,
+                                providers,
+                                catalog,
+                                role=child_role,
+                                tool_runner=tool_runner,
+                                agent_runner=agent_runner,
+                                renderer=renderer,
+                            ),
+                            finish=finish,
+                        )
+                        return await run_graph(graph, child, config)
+
+                    result = await trace_acall(
                         "agent",
                         name,
                         {
@@ -848,10 +1090,8 @@ def build_nodes(
                             "catalog": catalog,
                             "role": child_role,
                         },
-                    ) as span:
-                        result = await run_graph(graph, child, config)
-                        if span:
-                            span.update(output=result)
+                        execute_child,
+                    )
                     return {k: result[k] for k in ("response", "results", "execution")}
                 if (
                     role == "interpretation" or role in REPORT_ROLES
@@ -860,7 +1100,7 @@ def build_nodes(
                 actual = deepcopy(arguments)
                 if name == "process_data":
                     actual = process_arguments(state, arguments)
-                with trace_span(
+                return await trace_acall(
                     "tool",
                     name,
                     {
@@ -868,11 +1108,12 @@ def build_nodes(
                         "resolved_arguments": actual,
                         "input_schema": tools[name].args_schema,
                     },
-                ) as span:
-                    output = await tools[name].ainvoke(actual, config)
-                    if span:
-                        span.update(output=output)
-                return output
+                    lambda: (
+                        tool_runner(tools[name], actual, config)
+                        if tool_runner is not None
+                        else tools[name].ainvoke(actual, config)
+                    ),
+                )
 
             invoked = await invoke_work(
                 state, "act", name, arguments, choice["reason"], execute
@@ -931,9 +1172,7 @@ def build_nodes(
         return Command(update={"results": records[first_record:]}, goto="decide")
 
     async def decide(state, config):
-        value, usage = await call(
-            state, Decision, lambda: decide_messages(state, role, catalog), config
-        )
+        value, usage = await call(state, "decide", config)
         target = value["next"]
         if role != "request" and target == "ask":
             target = "compose"
@@ -955,12 +1194,7 @@ def build_nodes(
         if role in REPORT_ROLES:
             return await compose_report(state, config)
         first_record = len(state["results"])
-        value, usage = await call(
-            state,
-            Composition,
-            lambda: compose_messages(state, role),
-            config,
-        )
+        value, usage = await call(state, "compose", config)
         state["results"].append(
             record(
                 "compose",
@@ -969,7 +1203,7 @@ def build_nodes(
                 output=value | {"model_usage": usage},
             )
         )
-        with trace_span(
+        artifacts = trace_call(
             "artifact",
             "select_artifacts",
             {
@@ -977,10 +1211,8 @@ def build_nodes(
                 "available_results": accepted_outputs(state),
                 "previous_response": state["response"],
             },
-        ) as span:
-            artifacts = select_artifacts(state)
-            if span:
-                span.update(output=artifacts)
+            lambda: select_artifacts(state, renderer=renderer),
+        )
         return Command(
             update={
                 "results": state["results"][first_record:],
@@ -990,9 +1222,7 @@ def build_nodes(
         )
 
     async def ask(state, config):
-        value, usage = await call(
-            state, Question, lambda: ask_messages(state, role), config
-        )
+        value, usage = await call(state, "ask", config)
         return Command(
             update={
                 "results": [

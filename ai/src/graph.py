@@ -10,6 +10,7 @@ from uuid import uuid4
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables import RunnableLambda
 from langgraph.graph import END, START, StateGraph
+from langgraph.graph.message import add_messages
 from langgraph.types import Command, interrupt
 from pydantic import ConfigDict, TypeAdapter, with_config
 from typing_extensions import TypedDict
@@ -292,6 +293,26 @@ def _receive_input(state: State):
         },
         goto="interpret",
     )
+
+
+async def run_node(
+    name: str,
+    fn: Node,
+    state: State,
+    *,
+    finish: Callable[[State], Completion],
+    config=None,
+) -> tuple[State, str]:
+    """공통 실행 경계로 한 노드만 실행하고 다음 경로는 실행하지 않는다."""
+    if name not in DESTINATIONS:
+        raise ValueError(f"Unknown business node: {name}")
+    original = deepcopy(state_adapter.validate_python(state))
+    command = await _wrap_node(name, fn, finish).ainvoke(original, config)
+    update = command.update
+    merged = original | update
+    if "messages" in update:
+        merged["messages"] = add_messages(original["messages"], update["messages"])
+    return state_adapter.validate_python(merged), command.goto
 
 
 def compile_graph(

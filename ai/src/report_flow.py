@@ -25,6 +25,9 @@ async def run_report_flow(
     providers,
     catalog,
     config=None,
+    tool_runner=None,
+    agent_runner=None,
+    renderer=None,
     publish=None,
 ):
     """동 State를 그대로 전달한다. 새 예산·하위 State·별도 산출물 캐시는 없다."""
@@ -62,6 +65,9 @@ async def run_report_flow(
                 providers,
                 catalog,
                 role=role,
+                tool_runner=tool_runner,
+                agent_runner=agent_runner,
+                renderer=renderer,
             ),
             finish=finish,
             publish=publish,
