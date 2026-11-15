@@ -47,6 +47,8 @@ docker run --rm --env-file .env -p 8000:8000 --memory=2g eumi-ai
 OpenAI 직접 연결이 기본이며 GMS를 사용하면 `SETTINGS_BASE_URL`을 지정한다.
 GMS의 Responses API·모델 호환성은 실제 키로 검증해야 한다.
 
+사용자 요청은 목적 파악 뒤 진행 판단을 거친다. 분석 완료 이벤트는 진행 판단으로 시작한다. 자료가 충분하면 추가 작업 없이 응답하고, 보완이 필요하면 진행 판단이 조회·가공 또는 재작성 여부를 정한다.
+
 작업 선택은 도구 명세를 시스템 프롬프트에 제공하고 선택 결과를 엄격한 JSON 형식으로 받는다. 입력 구성·응답 검증·실행 연결은 [컨텍스트 구성](docs/context-composition.md#api-설정과-응답-검증)을 따른다.
 
 보고서 작성·검토는 [보고서 생성 흐름](docs/temp/analysis-report-workflow.md)을 따른다.
