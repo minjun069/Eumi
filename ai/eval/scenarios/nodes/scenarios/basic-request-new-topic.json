@@ -1,0 +1,5465 @@
+{
+  "id": "basic-request-new_topic",
+  "title": "사용자 요청 처리 · 이전과 다른 새 주제",
+  "event": "user_request",
+  "family": "basic-request",
+  "axes": {
+    "conversation_condition": "new_topic"
+  },
+  "source_groups": [],
+  "steps": [
+    {
+      "step_id": "s001",
+      "node": "interpret",
+      "role": "request",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 0,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "entry",
+        "from_step": null
+      },
+      "model_outputs": [
+        {
+          "request": {
+            "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "constraints": {
+              "required": [
+                "요청한 동·월의 상세 지도를 제공한다.",
+                "설정 검사와 실제 표시 확인의 차이를 안내한다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다."
+        }
+      ],
+      "case_id": "path-interpret-0bfefd2132db8a94a59c",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "dec360fcfd545a3cb105cc78985e1958",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 1,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "decide"
+      ],
+      "input_ref": "interpret.json#/cases/2/initial",
+      "expectation_ref": "interpret.json#/cases/2/assessment"
+    },
+    {
+      "step_id": "s002",
+      "node": "decide",
+      "role": "request",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "dec360fcfd545a3cb105cc78985e1958",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 1,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s001"
+      },
+      "model_outputs": [
+        {
+          "next": "act",
+          "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다."
+        }
+      ],
+      "case_id": "path-decide-7b435f45d6a9a00e15a4",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "dec360fcfd545a3cb105cc78985e1958",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "acff413a407d5ff499d6c8ebfbe09956",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 2,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "act"
+      ],
+      "input_ref": "decide.json#/cases/6/initial",
+      "expectation_ref": "decide.json#/cases/6/assessment"
+    },
+    {
+      "step_id": "s003",
+      "node": "act",
+      "role": "request",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "dec360fcfd545a3cb105cc78985e1958",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "acff413a407d5ff499d6c8ebfbe09956",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 2,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s002"
+      },
+      "model_outputs": [
+        {
+          "name": "visualization_agent",
+          "arguments_json": "{\"goal\": \"강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.\"}",
+          "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다."
+        }
+      ],
+      "case_id": "path-act-2fce8d750257f5fb0b79",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "dec360fcfd545a3cb105cc78985e1958",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "acff413a407d5ff499d6c8ebfbe09956",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "fbf0966b79f6557483d93c76cc097483",
+            "node": "act",
+            "decision": "selection",
+            "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+            "action": null,
+            "output": {
+              "name": "visualization_agent",
+              "arguments_json": "{\"goal\": \"강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.\"}",
+              "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "c049ea7aa96757d985030fd7c769f5c6",
+            "node": "act",
+            "decision": "call",
+            "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+            "action": {
+              "name": "visualization_agent",
+              "arguments": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다."
+              }
+            },
+            "output": {
+              "response": {
+                "id": "496fd98d-6e7c-5d2a-ba0f-4407abcf5399",
+                "kind": "final",
+                "label": "final",
+                "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                "artifacts": [
+                  {
+                    "type": "tableau",
+                    "data": {
+                      "schema_version": 1,
+                      "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                      "catalog_revision": "tableau-public-20261110-v4",
+                      "view_key": "EmbedDetailMap",
+                      "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                      "title": "읍면동 100m 격자 행동 이상 지도",
+                      "period_mode": "end_month",
+                      "parameters": [
+                        {
+                          "name": "p_detail_adm",
+                          "data_type": "string",
+                          "value": "강남구 도곡1동"
+                        },
+                        {
+                          "name": "p_end",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        },
+                        {
+                          "name": "p_start",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        }
+                      ],
+                      "filters": [],
+                      "source": {
+                        "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                        "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                      },
+                      "validation_scope": "registered_configuration",
+                      "warnings": [
+                        "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                        "설정 등록 버전은 원자료 버전이 아닙니다.",
+                        "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                        "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "results": [
+                {
+                  "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+                  "node": "interpret",
+                  "decision": "interpretation",
+                  "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                  "action": null,
+                  "output": {
+                    "request": {
+                      "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                      "constraints": {
+                        "required": [
+                          "요청한 동·월의 상세 지도를 제공한다.",
+                          "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                        ],
+                        "preferred": [],
+                        "excluded": []
+                      }
+                    },
+                    "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "interpretation",
+                  "outcome": "success"
+                },
+                {
+                  "id": "907b91ee4b785b9d922b922bfa5fb991",
+                  "node": "decide",
+                  "decision": "decision",
+                  "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                  "action": null,
+                  "output": {
+                    "next": "act",
+                    "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "decision",
+                  "outcome": "success"
+                },
+                {
+                  "id": "e39bda3acfbe5fb8bafd29833598553b",
+                  "node": "act",
+                  "decision": "selection",
+                  "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                  "action": null,
+                  "output": {
+                    "name": "validate_visualization",
+                    "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+                    "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "selection",
+                  "outcome": "success"
+                },
+                {
+                  "id": "1fac9f80e9c85db2a148a080cbfd40c5",
+                  "node": "act",
+                  "decision": "call",
+                  "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                  "action": {
+                    "name": "validate_visualization",
+                    "arguments": {
+                      "view_key": "EmbedDetailMap",
+                      "parameters": {
+                        "p_start": "2025-12-01",
+                        "p_end": "2025-12-01",
+                        "p_detail_adm": "강남구 도곡1동"
+                      }
+                    }
+                  },
+                  "output": {
+                    "valid": true,
+                    "validation_scope": "registered_configuration",
+                    "catalog_revision": "tableau-public-20261110-v4",
+                    "issues": [],
+                    "artifact": {
+                      "type": "tableau",
+                      "data": {
+                        "schema_version": 1,
+                        "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                        "catalog_revision": "tableau-public-20261110-v4",
+                        "view_key": "EmbedDetailMap",
+                        "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                        "title": "읍면동 100m 격자 행동 이상 지도",
+                        "period_mode": "end_month",
+                        "parameters": [
+                          {
+                            "name": "p_detail_adm",
+                            "data_type": "string",
+                            "value": "강남구 도곡1동"
+                          },
+                          {
+                            "name": "p_end",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          },
+                          {
+                            "name": "p_start",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          }
+                        ],
+                        "filters": [],
+                        "source": {
+                          "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                          "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                        },
+                        "validation_scope": "registered_configuration",
+                        "warnings": [
+                          "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                          "설정 등록 버전은 원자료 버전이 아닙니다.",
+                          "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                          "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                        ]
+                      }
+                    }
+                  },
+                  "description": "call",
+                  "outcome": "success"
+                },
+                {
+                  "id": "8bd13fe14e8d50f8b3e44d00a151fd73",
+                  "node": "decide",
+                  "decision": "decision",
+                  "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                  "action": null,
+                  "output": {
+                    "next": "compose",
+                    "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "decision",
+                  "outcome": "success"
+                },
+                {
+                  "id": "8c1b7ccc30ce57e4b7bd175ec1b81cec",
+                  "node": "compose",
+                  "decision": "composition",
+                  "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                  "action": null,
+                  "output": {
+                    "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                    "artifact_ids": [
+                      "1fac9f80e9c85db2a148a080cbfd40c5"
+                    ],
+                    "status": "completed",
+                    "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "composition",
+                  "outcome": "success"
+                }
+              ],
+              "execution": {
+                "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+                "event": "user_request",
+                "status": "completed",
+                "version": "ai-api-v1",
+                "budget": {
+                  "steps": {
+                    "used": 8,
+                    "limit": 200
+                  },
+                  "tool_calls": {
+                    "used": 1,
+                    "limit": 100
+                  },
+                  "agent_calls": {
+                    "used": 1,
+                    "limit": 20
+                  },
+                  "retries": {
+                    "used": 0,
+                    "limit": 20
+                  },
+                  "active_seconds": {
+                    "used": 0,
+                    "limit": 3600.0
+                  },
+                  "final_model_calls": {
+                    "used": 0,
+                    "limit": 1
+                  },
+                  "final_active_seconds": {
+                    "used": 0,
+                    "limit": 30
+                  }
+                },
+                "error": null
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 8,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "decide"
+      ],
+      "input_ref": "act.json#/cases/5/initial",
+      "expectation_ref": "act.json#/cases/5/assessment"
+    },
+    {
+      "step_id": "s004",
+      "node": "interpret",
+      "role": "visualization",
+      "frame": "child-visualization",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [],
+        "response": null,
+        "execution": {
+          "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "call",
+        "from_step": "s003"
+      },
+      "model_outputs": [
+        {
+          "request": {
+            "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "constraints": {
+              "required": [
+                "요청한 동·월의 상세 지도를 제공한다.",
+                "설정 검사와 실제 표시 확인의 차이를 안내한다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다."
+        }
+      ],
+      "case_id": "path-interpret-a70ea2248107bb414265",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 4,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "decide"
+      ],
+      "input_ref": "interpret.json#/cases/3/initial",
+      "expectation_ref": "interpret.json#/cases/3/assessment"
+    },
+    {
+      "step_id": "s005",
+      "node": "decide",
+      "role": "visualization",
+      "frame": "child-visualization",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 4,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s004"
+      },
+      "model_outputs": [
+        {
+          "next": "act",
+          "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다."
+        }
+      ],
+      "case_id": "path-decide-c4584b0696ed431e1f9c",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "907b91ee4b785b9d922b922bfa5fb991",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 5,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "act"
+      ],
+      "input_ref": "decide.json#/cases/7/initial",
+      "expectation_ref": "decide.json#/cases/7/assessment"
+    },
+    {
+      "step_id": "s006",
+      "node": "act",
+      "role": "visualization",
+      "frame": "child-visualization",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "907b91ee4b785b9d922b922bfa5fb991",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 5,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s005"
+      },
+      "model_outputs": [
+        {
+          "name": "validate_visualization",
+          "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+          "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다."
+        }
+      ],
+      "case_id": "path-act-c34f04dbafdf14015bd4",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "907b91ee4b785b9d922b922bfa5fb991",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "e39bda3acfbe5fb8bafd29833598553b",
+            "node": "act",
+            "decision": "selection",
+            "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": null,
+            "output": {
+              "name": "validate_visualization",
+              "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+              "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "1fac9f80e9c85db2a148a080cbfd40c5",
+            "node": "act",
+            "decision": "call",
+            "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": {
+              "name": "validate_visualization",
+              "arguments": {
+                "view_key": "EmbedDetailMap",
+                "parameters": {
+                  "p_start": "2025-12-01",
+                  "p_end": "2025-12-01",
+                  "p_detail_adm": "강남구 도곡1동"
+                }
+              }
+            },
+            "output": {
+              "valid": true,
+              "validation_scope": "registered_configuration",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "issues": [],
+              "artifact": {
+                "type": "tableau",
+                "data": {
+                  "schema_version": 1,
+                  "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                  "catalog_revision": "tableau-public-20261110-v4",
+                  "view_key": "EmbedDetailMap",
+                  "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                  "title": "읍면동 100m 격자 행동 이상 지도",
+                  "period_mode": "end_month",
+                  "parameters": [
+                    {
+                      "name": "p_detail_adm",
+                      "data_type": "string",
+                      "value": "강남구 도곡1동"
+                    },
+                    {
+                      "name": "p_end",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    },
+                    {
+                      "name": "p_start",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    }
+                  ],
+                  "filters": [],
+                  "source": {
+                    "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                    "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                  },
+                  "validation_scope": "registered_configuration",
+                  "warnings": [
+                    "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                    "설정 등록 버전은 원자료 버전이 아닙니다.",
+                    "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                    "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                  ]
+                }
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 6,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "decide"
+      ],
+      "input_ref": "act.json#/cases/4/initial",
+      "expectation_ref": "act.json#/cases/4/assessment"
+    },
+    {
+      "step_id": "s007",
+      "node": "decide",
+      "role": "visualization",
+      "frame": "child-visualization",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "907b91ee4b785b9d922b922bfa5fb991",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "e39bda3acfbe5fb8bafd29833598553b",
+            "node": "act",
+            "decision": "selection",
+            "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": null,
+            "output": {
+              "name": "validate_visualization",
+              "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+              "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "1fac9f80e9c85db2a148a080cbfd40c5",
+            "node": "act",
+            "decision": "call",
+            "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": {
+              "name": "validate_visualization",
+              "arguments": {
+                "view_key": "EmbedDetailMap",
+                "parameters": {
+                  "p_start": "2025-12-01",
+                  "p_end": "2025-12-01",
+                  "p_detail_adm": "강남구 도곡1동"
+                }
+              }
+            },
+            "output": {
+              "valid": true,
+              "validation_scope": "registered_configuration",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "issues": [],
+              "artifact": {
+                "type": "tableau",
+                "data": {
+                  "schema_version": 1,
+                  "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                  "catalog_revision": "tableau-public-20261110-v4",
+                  "view_key": "EmbedDetailMap",
+                  "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                  "title": "읍면동 100m 격자 행동 이상 지도",
+                  "period_mode": "end_month",
+                  "parameters": [
+                    {
+                      "name": "p_detail_adm",
+                      "data_type": "string",
+                      "value": "강남구 도곡1동"
+                    },
+                    {
+                      "name": "p_end",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    },
+                    {
+                      "name": "p_start",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    }
+                  ],
+                  "filters": [],
+                  "source": {
+                    "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                    "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                  },
+                  "validation_scope": "registered_configuration",
+                  "warnings": [
+                    "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                    "설정 등록 버전은 원자료 버전이 아닙니다.",
+                    "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                    "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                  ]
+                }
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 6,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s006"
+      },
+      "model_outputs": [
+        {
+          "next": "compose",
+          "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다."
+        }
+      ],
+      "case_id": "path-decide-ecd59f41c45702ff2795",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "907b91ee4b785b9d922b922bfa5fb991",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "e39bda3acfbe5fb8bafd29833598553b",
+            "node": "act",
+            "decision": "selection",
+            "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": null,
+            "output": {
+              "name": "validate_visualization",
+              "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+              "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "1fac9f80e9c85db2a148a080cbfd40c5",
+            "node": "act",
+            "decision": "call",
+            "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": {
+              "name": "validate_visualization",
+              "arguments": {
+                "view_key": "EmbedDetailMap",
+                "parameters": {
+                  "p_start": "2025-12-01",
+                  "p_end": "2025-12-01",
+                  "p_detail_adm": "강남구 도곡1동"
+                }
+              }
+            },
+            "output": {
+              "valid": true,
+              "validation_scope": "registered_configuration",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "issues": [],
+              "artifact": {
+                "type": "tableau",
+                "data": {
+                  "schema_version": 1,
+                  "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                  "catalog_revision": "tableau-public-20261110-v4",
+                  "view_key": "EmbedDetailMap",
+                  "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                  "title": "읍면동 100m 격자 행동 이상 지도",
+                  "period_mode": "end_month",
+                  "parameters": [
+                    {
+                      "name": "p_detail_adm",
+                      "data_type": "string",
+                      "value": "강남구 도곡1동"
+                    },
+                    {
+                      "name": "p_end",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    },
+                    {
+                      "name": "p_start",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    }
+                  ],
+                  "filters": [],
+                  "source": {
+                    "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                    "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                  },
+                  "validation_scope": "registered_configuration",
+                  "warnings": [
+                    "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                    "설정 등록 버전은 원자료 버전이 아닙니다.",
+                    "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                    "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                  ]
+                }
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "8bd13fe14e8d50f8b3e44d00a151fd73",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 7,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "compose"
+      ],
+      "input_ref": "decide.json#/cases/8/initial",
+      "expectation_ref": "decide.json#/cases/8/assessment"
+    },
+    {
+      "step_id": "s008",
+      "node": "compose",
+      "role": "visualization",
+      "frame": "child-visualization",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "907b91ee4b785b9d922b922bfa5fb991",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "e39bda3acfbe5fb8bafd29833598553b",
+            "node": "act",
+            "decision": "selection",
+            "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": null,
+            "output": {
+              "name": "validate_visualization",
+              "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+              "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "1fac9f80e9c85db2a148a080cbfd40c5",
+            "node": "act",
+            "decision": "call",
+            "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": {
+              "name": "validate_visualization",
+              "arguments": {
+                "view_key": "EmbedDetailMap",
+                "parameters": {
+                  "p_start": "2025-12-01",
+                  "p_end": "2025-12-01",
+                  "p_detail_adm": "강남구 도곡1동"
+                }
+              }
+            },
+            "output": {
+              "valid": true,
+              "validation_scope": "registered_configuration",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "issues": [],
+              "artifact": {
+                "type": "tableau",
+                "data": {
+                  "schema_version": 1,
+                  "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                  "catalog_revision": "tableau-public-20261110-v4",
+                  "view_key": "EmbedDetailMap",
+                  "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                  "title": "읍면동 100m 격자 행동 이상 지도",
+                  "period_mode": "end_month",
+                  "parameters": [
+                    {
+                      "name": "p_detail_adm",
+                      "data_type": "string",
+                      "value": "강남구 도곡1동"
+                    },
+                    {
+                      "name": "p_end",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    },
+                    {
+                      "name": "p_start",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    }
+                  ],
+                  "filters": [],
+                  "source": {
+                    "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                    "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                  },
+                  "validation_scope": "registered_configuration",
+                  "warnings": [
+                    "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                    "설정 등록 버전은 원자료 버전이 아닙니다.",
+                    "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                    "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                  ]
+                }
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "8bd13fe14e8d50f8b3e44d00a151fd73",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 7,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s007"
+      },
+      "model_outputs": [
+        {
+          "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+          "artifact_ids": [
+            "1fac9f80e9c85db2a148a080cbfd40c5"
+          ],
+          "status": "completed",
+          "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다."
+        }
+      ],
+      "case_id": "path-compose-eb1bd9e04711b2390b81",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "4504e54c-1468-577c-97e2-2acc1ead028b"
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "1d2de332-62fa-5b1f-b13e-97816f3543b9",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "cbc632ff-838b-5c05-91fc-6efd4884db00"
+          },
+          {
+            "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "496fd98d-6e7c-5d2a-ba0f-4407abcf5399",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "907b91ee4b785b9d922b922bfa5fb991",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "e39bda3acfbe5fb8bafd29833598553b",
+            "node": "act",
+            "decision": "selection",
+            "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": null,
+            "output": {
+              "name": "validate_visualization",
+              "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+              "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "1fac9f80e9c85db2a148a080cbfd40c5",
+            "node": "act",
+            "decision": "call",
+            "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": {
+              "name": "validate_visualization",
+              "arguments": {
+                "view_key": "EmbedDetailMap",
+                "parameters": {
+                  "p_start": "2025-12-01",
+                  "p_end": "2025-12-01",
+                  "p_detail_adm": "강남구 도곡1동"
+                }
+              }
+            },
+            "output": {
+              "valid": true,
+              "validation_scope": "registered_configuration",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "issues": [],
+              "artifact": {
+                "type": "tableau",
+                "data": {
+                  "schema_version": 1,
+                  "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                  "catalog_revision": "tableau-public-20261110-v4",
+                  "view_key": "EmbedDetailMap",
+                  "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                  "title": "읍면동 100m 격자 행동 이상 지도",
+                  "period_mode": "end_month",
+                  "parameters": [
+                    {
+                      "name": "p_detail_adm",
+                      "data_type": "string",
+                      "value": "강남구 도곡1동"
+                    },
+                    {
+                      "name": "p_end",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    },
+                    {
+                      "name": "p_start",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    }
+                  ],
+                  "filters": [],
+                  "source": {
+                    "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                    "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                  },
+                  "validation_scope": "registered_configuration",
+                  "warnings": [
+                    "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                    "설정 등록 버전은 원자료 버전이 아닙니다.",
+                    "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                    "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                  ]
+                }
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "8bd13fe14e8d50f8b3e44d00a151fd73",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "8c1b7ccc30ce57e4b7bd175ec1b81cec",
+            "node": "compose",
+            "decision": "composition",
+            "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+            "action": null,
+            "output": {
+              "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+              "artifact_ids": [
+                "1fac9f80e9c85db2a148a080cbfd40c5"
+              ],
+              "status": "completed",
+              "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "composition",
+            "outcome": "success"
+          }
+        ],
+        "response": {
+          "id": "496fd98d-6e7c-5d2a-ba0f-4407abcf5399",
+          "kind": "final",
+          "label": "final",
+          "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+          "artifacts": [
+            {
+              "type": "tableau",
+              "data": {
+                "schema_version": 1,
+                "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                "catalog_revision": "tableau-public-20261110-v4",
+                "view_key": "EmbedDetailMap",
+                "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                "title": "읍면동 100m 격자 행동 이상 지도",
+                "period_mode": "end_month",
+                "parameters": [
+                  {
+                    "name": "p_detail_adm",
+                    "data_type": "string",
+                    "value": "강남구 도곡1동"
+                  },
+                  {
+                    "name": "p_end",
+                    "data_type": "date",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "name": "p_start",
+                    "data_type": "date",
+                    "value": "2025-12-01"
+                  }
+                ],
+                "filters": [],
+                "source": {
+                  "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                  "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                },
+                "validation_scope": "registered_configuration",
+                "warnings": [
+                  "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                  "설정 등록 버전은 원자료 버전이 아닙니다.",
+                  "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                  "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                ]
+              }
+            }
+          ]
+        },
+        "execution": {
+          "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+          "event": "user_request",
+          "status": "completed",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 8,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "__end__"
+      ],
+      "input_ref": "compose.json#/cases/2/initial",
+      "expectation_ref": "compose.json#/cases/2/assessment"
+    },
+    {
+      "step_id": "s009",
+      "node": "decide",
+      "role": "request",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "dec360fcfd545a3cb105cc78985e1958",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "acff413a407d5ff499d6c8ebfbe09956",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "fbf0966b79f6557483d93c76cc097483",
+            "node": "act",
+            "decision": "selection",
+            "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+            "action": null,
+            "output": {
+              "name": "visualization_agent",
+              "arguments_json": "{\"goal\": \"강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.\"}",
+              "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "c049ea7aa96757d985030fd7c769f5c6",
+            "node": "act",
+            "decision": "call",
+            "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+            "action": {
+              "name": "visualization_agent",
+              "arguments": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다."
+              }
+            },
+            "output": {
+              "response": {
+                "id": "496fd98d-6e7c-5d2a-ba0f-4407abcf5399",
+                "kind": "final",
+                "label": "final",
+                "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                "artifacts": [
+                  {
+                    "type": "tableau",
+                    "data": {
+                      "schema_version": 1,
+                      "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                      "catalog_revision": "tableau-public-20261110-v4",
+                      "view_key": "EmbedDetailMap",
+                      "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                      "title": "읍면동 100m 격자 행동 이상 지도",
+                      "period_mode": "end_month",
+                      "parameters": [
+                        {
+                          "name": "p_detail_adm",
+                          "data_type": "string",
+                          "value": "강남구 도곡1동"
+                        },
+                        {
+                          "name": "p_end",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        },
+                        {
+                          "name": "p_start",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        }
+                      ],
+                      "filters": [],
+                      "source": {
+                        "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                        "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                      },
+                      "validation_scope": "registered_configuration",
+                      "warnings": [
+                        "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                        "설정 등록 버전은 원자료 버전이 아닙니다.",
+                        "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                        "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "results": [
+                {
+                  "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+                  "node": "interpret",
+                  "decision": "interpretation",
+                  "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                  "action": null,
+                  "output": {
+                    "request": {
+                      "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                      "constraints": {
+                        "required": [
+                          "요청한 동·월의 상세 지도를 제공한다.",
+                          "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                        ],
+                        "preferred": [],
+                        "excluded": []
+                      }
+                    },
+                    "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "interpretation",
+                  "outcome": "success"
+                },
+                {
+                  "id": "907b91ee4b785b9d922b922bfa5fb991",
+                  "node": "decide",
+                  "decision": "decision",
+                  "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                  "action": null,
+                  "output": {
+                    "next": "act",
+                    "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "decision",
+                  "outcome": "success"
+                },
+                {
+                  "id": "e39bda3acfbe5fb8bafd29833598553b",
+                  "node": "act",
+                  "decision": "selection",
+                  "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                  "action": null,
+                  "output": {
+                    "name": "validate_visualization",
+                    "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+                    "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "selection",
+                  "outcome": "success"
+                },
+                {
+                  "id": "1fac9f80e9c85db2a148a080cbfd40c5",
+                  "node": "act",
+                  "decision": "call",
+                  "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                  "action": {
+                    "name": "validate_visualization",
+                    "arguments": {
+                      "view_key": "EmbedDetailMap",
+                      "parameters": {
+                        "p_start": "2025-12-01",
+                        "p_end": "2025-12-01",
+                        "p_detail_adm": "강남구 도곡1동"
+                      }
+                    }
+                  },
+                  "output": {
+                    "valid": true,
+                    "validation_scope": "registered_configuration",
+                    "catalog_revision": "tableau-public-20261110-v4",
+                    "issues": [],
+                    "artifact": {
+                      "type": "tableau",
+                      "data": {
+                        "schema_version": 1,
+                        "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                        "catalog_revision": "tableau-public-20261110-v4",
+                        "view_key": "EmbedDetailMap",
+                        "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                        "title": "읍면동 100m 격자 행동 이상 지도",
+                        "period_mode": "end_month",
+                        "parameters": [
+                          {
+                            "name": "p_detail_adm",
+                            "data_type": "string",
+                            "value": "강남구 도곡1동"
+                          },
+                          {
+                            "name": "p_end",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          },
+                          {
+                            "name": "p_start",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          }
+                        ],
+                        "filters": [],
+                        "source": {
+                          "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                          "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                        },
+                        "validation_scope": "registered_configuration",
+                        "warnings": [
+                          "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                          "설정 등록 버전은 원자료 버전이 아닙니다.",
+                          "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                          "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                        ]
+                      }
+                    }
+                  },
+                  "description": "call",
+                  "outcome": "success"
+                },
+                {
+                  "id": "8bd13fe14e8d50f8b3e44d00a151fd73",
+                  "node": "decide",
+                  "decision": "decision",
+                  "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                  "action": null,
+                  "output": {
+                    "next": "compose",
+                    "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "decision",
+                  "outcome": "success"
+                },
+                {
+                  "id": "8c1b7ccc30ce57e4b7bd175ec1b81cec",
+                  "node": "compose",
+                  "decision": "composition",
+                  "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                  "action": null,
+                  "output": {
+                    "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                    "artifact_ids": [
+                      "1fac9f80e9c85db2a148a080cbfd40c5"
+                    ],
+                    "status": "completed",
+                    "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "composition",
+                  "outcome": "success"
+                }
+              ],
+              "execution": {
+                "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+                "event": "user_request",
+                "status": "completed",
+                "version": "ai-api-v1",
+                "budget": {
+                  "steps": {
+                    "used": 8,
+                    "limit": 200
+                  },
+                  "tool_calls": {
+                    "used": 1,
+                    "limit": 100
+                  },
+                  "agent_calls": {
+                    "used": 1,
+                    "limit": 20
+                  },
+                  "retries": {
+                    "used": 0,
+                    "limit": 20
+                  },
+                  "active_seconds": {
+                    "used": 0,
+                    "limit": 3600.0
+                  },
+                  "final_model_calls": {
+                    "used": 0,
+                    "limit": 1
+                  },
+                  "final_active_seconds": {
+                    "used": 0,
+                    "limit": 30
+                  }
+                },
+                "error": null
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 8,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "return",
+        "from_step": "s003"
+      },
+      "model_outputs": [
+        {
+          "next": "compose",
+          "reason": "하위 반환에 요청한 동·월의 검사된 상세 지도 산출물과 표시 조건·확인 한계가 모두 있어 그대로 통합할 수 있다."
+        }
+      ],
+      "case_id": "path-decide-ee090b46f0193725db40",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "dec360fcfd545a3cb105cc78985e1958",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "acff413a407d5ff499d6c8ebfbe09956",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "fbf0966b79f6557483d93c76cc097483",
+            "node": "act",
+            "decision": "selection",
+            "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+            "action": null,
+            "output": {
+              "name": "visualization_agent",
+              "arguments_json": "{\"goal\": \"강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.\"}",
+              "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "c049ea7aa96757d985030fd7c769f5c6",
+            "node": "act",
+            "decision": "call",
+            "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+            "action": {
+              "name": "visualization_agent",
+              "arguments": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다."
+              }
+            },
+            "output": {
+              "response": {
+                "id": "496fd98d-6e7c-5d2a-ba0f-4407abcf5399",
+                "kind": "final",
+                "label": "final",
+                "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                "artifacts": [
+                  {
+                    "type": "tableau",
+                    "data": {
+                      "schema_version": 1,
+                      "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                      "catalog_revision": "tableau-public-20261110-v4",
+                      "view_key": "EmbedDetailMap",
+                      "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                      "title": "읍면동 100m 격자 행동 이상 지도",
+                      "period_mode": "end_month",
+                      "parameters": [
+                        {
+                          "name": "p_detail_adm",
+                          "data_type": "string",
+                          "value": "강남구 도곡1동"
+                        },
+                        {
+                          "name": "p_end",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        },
+                        {
+                          "name": "p_start",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        }
+                      ],
+                      "filters": [],
+                      "source": {
+                        "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                        "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                      },
+                      "validation_scope": "registered_configuration",
+                      "warnings": [
+                        "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                        "설정 등록 버전은 원자료 버전이 아닙니다.",
+                        "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                        "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "results": [
+                {
+                  "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+                  "node": "interpret",
+                  "decision": "interpretation",
+                  "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                  "action": null,
+                  "output": {
+                    "request": {
+                      "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                      "constraints": {
+                        "required": [
+                          "요청한 동·월의 상세 지도를 제공한다.",
+                          "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                        ],
+                        "preferred": [],
+                        "excluded": []
+                      }
+                    },
+                    "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "interpretation",
+                  "outcome": "success"
+                },
+                {
+                  "id": "907b91ee4b785b9d922b922bfa5fb991",
+                  "node": "decide",
+                  "decision": "decision",
+                  "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                  "action": null,
+                  "output": {
+                    "next": "act",
+                    "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "decision",
+                  "outcome": "success"
+                },
+                {
+                  "id": "e39bda3acfbe5fb8bafd29833598553b",
+                  "node": "act",
+                  "decision": "selection",
+                  "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                  "action": null,
+                  "output": {
+                    "name": "validate_visualization",
+                    "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+                    "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "selection",
+                  "outcome": "success"
+                },
+                {
+                  "id": "1fac9f80e9c85db2a148a080cbfd40c5",
+                  "node": "act",
+                  "decision": "call",
+                  "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                  "action": {
+                    "name": "validate_visualization",
+                    "arguments": {
+                      "view_key": "EmbedDetailMap",
+                      "parameters": {
+                        "p_start": "2025-12-01",
+                        "p_end": "2025-12-01",
+                        "p_detail_adm": "강남구 도곡1동"
+                      }
+                    }
+                  },
+                  "output": {
+                    "valid": true,
+                    "validation_scope": "registered_configuration",
+                    "catalog_revision": "tableau-public-20261110-v4",
+                    "issues": [],
+                    "artifact": {
+                      "type": "tableau",
+                      "data": {
+                        "schema_version": 1,
+                        "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                        "catalog_revision": "tableau-public-20261110-v4",
+                        "view_key": "EmbedDetailMap",
+                        "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                        "title": "읍면동 100m 격자 행동 이상 지도",
+                        "period_mode": "end_month",
+                        "parameters": [
+                          {
+                            "name": "p_detail_adm",
+                            "data_type": "string",
+                            "value": "강남구 도곡1동"
+                          },
+                          {
+                            "name": "p_end",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          },
+                          {
+                            "name": "p_start",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          }
+                        ],
+                        "filters": [],
+                        "source": {
+                          "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                          "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                        },
+                        "validation_scope": "registered_configuration",
+                        "warnings": [
+                          "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                          "설정 등록 버전은 원자료 버전이 아닙니다.",
+                          "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                          "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                        ]
+                      }
+                    }
+                  },
+                  "description": "call",
+                  "outcome": "success"
+                },
+                {
+                  "id": "8bd13fe14e8d50f8b3e44d00a151fd73",
+                  "node": "decide",
+                  "decision": "decision",
+                  "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                  "action": null,
+                  "output": {
+                    "next": "compose",
+                    "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "decision",
+                  "outcome": "success"
+                },
+                {
+                  "id": "8c1b7ccc30ce57e4b7bd175ec1b81cec",
+                  "node": "compose",
+                  "decision": "composition",
+                  "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                  "action": null,
+                  "output": {
+                    "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                    "artifact_ids": [
+                      "1fac9f80e9c85db2a148a080cbfd40c5"
+                    ],
+                    "status": "completed",
+                    "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "composition",
+                  "outcome": "success"
+                }
+              ],
+              "execution": {
+                "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+                "event": "user_request",
+                "status": "completed",
+                "version": "ai-api-v1",
+                "budget": {
+                  "steps": {
+                    "used": 8,
+                    "limit": 200
+                  },
+                  "tool_calls": {
+                    "used": 1,
+                    "limit": 100
+                  },
+                  "agent_calls": {
+                    "used": 1,
+                    "limit": 20
+                  },
+                  "retries": {
+                    "used": 0,
+                    "limit": 20
+                  },
+                  "active_seconds": {
+                    "used": 0,
+                    "limit": 3600.0
+                  },
+                  "final_model_calls": {
+                    "used": 0,
+                    "limit": 1
+                  },
+                  "final_active_seconds": {
+                    "used": 0,
+                    "limit": 30
+                  }
+                },
+                "error": null
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "764331fef2fb5d38853ea6b2c6e9869d",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "하위 반환에 요청한 동·월의 검사된 상세 지도 산출물과 표시 조건·확인 한계가 모두 있어 그대로 통합할 수 있다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "하위 반환에 요청한 동·월의 검사된 상세 지도 산출물과 표시 조건·확인 한계가 모두 있어 그대로 통합할 수 있다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 9,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "compose"
+      ],
+      "input_ref": "decide.json#/cases/9/initial",
+      "expectation_ref": "decide.json#/cases/9/assessment"
+    },
+    {
+      "step_id": "s010",
+      "node": "compose",
+      "role": "request",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "dec360fcfd545a3cb105cc78985e1958",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "acff413a407d5ff499d6c8ebfbe09956",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "fbf0966b79f6557483d93c76cc097483",
+            "node": "act",
+            "decision": "selection",
+            "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+            "action": null,
+            "output": {
+              "name": "visualization_agent",
+              "arguments_json": "{\"goal\": \"강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.\"}",
+              "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "c049ea7aa96757d985030fd7c769f5c6",
+            "node": "act",
+            "decision": "call",
+            "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+            "action": {
+              "name": "visualization_agent",
+              "arguments": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다."
+              }
+            },
+            "output": {
+              "response": {
+                "id": "496fd98d-6e7c-5d2a-ba0f-4407abcf5399",
+                "kind": "final",
+                "label": "final",
+                "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                "artifacts": [
+                  {
+                    "type": "tableau",
+                    "data": {
+                      "schema_version": 1,
+                      "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                      "catalog_revision": "tableau-public-20261110-v4",
+                      "view_key": "EmbedDetailMap",
+                      "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                      "title": "읍면동 100m 격자 행동 이상 지도",
+                      "period_mode": "end_month",
+                      "parameters": [
+                        {
+                          "name": "p_detail_adm",
+                          "data_type": "string",
+                          "value": "강남구 도곡1동"
+                        },
+                        {
+                          "name": "p_end",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        },
+                        {
+                          "name": "p_start",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        }
+                      ],
+                      "filters": [],
+                      "source": {
+                        "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                        "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                      },
+                      "validation_scope": "registered_configuration",
+                      "warnings": [
+                        "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                        "설정 등록 버전은 원자료 버전이 아닙니다.",
+                        "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                        "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "results": [
+                {
+                  "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+                  "node": "interpret",
+                  "decision": "interpretation",
+                  "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                  "action": null,
+                  "output": {
+                    "request": {
+                      "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                      "constraints": {
+                        "required": [
+                          "요청한 동·월의 상세 지도를 제공한다.",
+                          "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                        ],
+                        "preferred": [],
+                        "excluded": []
+                      }
+                    },
+                    "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "interpretation",
+                  "outcome": "success"
+                },
+                {
+                  "id": "907b91ee4b785b9d922b922bfa5fb991",
+                  "node": "decide",
+                  "decision": "decision",
+                  "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                  "action": null,
+                  "output": {
+                    "next": "act",
+                    "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "decision",
+                  "outcome": "success"
+                },
+                {
+                  "id": "e39bda3acfbe5fb8bafd29833598553b",
+                  "node": "act",
+                  "decision": "selection",
+                  "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                  "action": null,
+                  "output": {
+                    "name": "validate_visualization",
+                    "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+                    "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "selection",
+                  "outcome": "success"
+                },
+                {
+                  "id": "1fac9f80e9c85db2a148a080cbfd40c5",
+                  "node": "act",
+                  "decision": "call",
+                  "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                  "action": {
+                    "name": "validate_visualization",
+                    "arguments": {
+                      "view_key": "EmbedDetailMap",
+                      "parameters": {
+                        "p_start": "2025-12-01",
+                        "p_end": "2025-12-01",
+                        "p_detail_adm": "강남구 도곡1동"
+                      }
+                    }
+                  },
+                  "output": {
+                    "valid": true,
+                    "validation_scope": "registered_configuration",
+                    "catalog_revision": "tableau-public-20261110-v4",
+                    "issues": [],
+                    "artifact": {
+                      "type": "tableau",
+                      "data": {
+                        "schema_version": 1,
+                        "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                        "catalog_revision": "tableau-public-20261110-v4",
+                        "view_key": "EmbedDetailMap",
+                        "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                        "title": "읍면동 100m 격자 행동 이상 지도",
+                        "period_mode": "end_month",
+                        "parameters": [
+                          {
+                            "name": "p_detail_adm",
+                            "data_type": "string",
+                            "value": "강남구 도곡1동"
+                          },
+                          {
+                            "name": "p_end",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          },
+                          {
+                            "name": "p_start",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          }
+                        ],
+                        "filters": [],
+                        "source": {
+                          "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                          "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                        },
+                        "validation_scope": "registered_configuration",
+                        "warnings": [
+                          "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                          "설정 등록 버전은 원자료 버전이 아닙니다.",
+                          "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                          "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                        ]
+                      }
+                    }
+                  },
+                  "description": "call",
+                  "outcome": "success"
+                },
+                {
+                  "id": "8bd13fe14e8d50f8b3e44d00a151fd73",
+                  "node": "decide",
+                  "decision": "decision",
+                  "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                  "action": null,
+                  "output": {
+                    "next": "compose",
+                    "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "decision",
+                  "outcome": "success"
+                },
+                {
+                  "id": "8c1b7ccc30ce57e4b7bd175ec1b81cec",
+                  "node": "compose",
+                  "decision": "composition",
+                  "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                  "action": null,
+                  "output": {
+                    "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                    "artifact_ids": [
+                      "1fac9f80e9c85db2a148a080cbfd40c5"
+                    ],
+                    "status": "completed",
+                    "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "composition",
+                  "outcome": "success"
+                }
+              ],
+              "execution": {
+                "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+                "event": "user_request",
+                "status": "completed",
+                "version": "ai-api-v1",
+                "budget": {
+                  "steps": {
+                    "used": 8,
+                    "limit": 200
+                  },
+                  "tool_calls": {
+                    "used": 1,
+                    "limit": 100
+                  },
+                  "agent_calls": {
+                    "used": 1,
+                    "limit": 20
+                  },
+                  "retries": {
+                    "used": 0,
+                    "limit": 20
+                  },
+                  "active_seconds": {
+                    "used": 0,
+                    "limit": 3600.0
+                  },
+                  "final_model_calls": {
+                    "used": 0,
+                    "limit": 1
+                  },
+                  "final_active_seconds": {
+                    "used": 0,
+                    "limit": 30
+                  }
+                },
+                "error": null
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "764331fef2fb5d38853ea6b2c6e9869d",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "하위 반환에 요청한 동·월의 검사된 상세 지도 산출물과 표시 조건·확인 한계가 모두 있어 그대로 통합할 수 있다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "하위 반환에 요청한 동·월의 검사된 상세 지도 산출물과 표시 조건·확인 한계가 모두 있어 그대로 통합할 수 있다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 9,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s009"
+      },
+      "model_outputs": [
+        {
+          "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+          "artifact_ids": [
+            "c049ea7aa96757d985030fd7c769f5c6"
+          ],
+          "status": "completed",
+          "reason": "하위의 의미·출처·한계와 요청한 시각화 산출물을 보존해 최종 답변을 반환한다."
+        }
+      ],
+      "case_id": "path-compose-039f51720aff45dc5075",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "5306b51e-90d9-5773-868d-b77409667dc0"
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "5713fb2a-2b38-567c-8816-2b6dfdbad5b9",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "9375cb8a-6921-5a4f-ae90-315ba95c6743"
+          },
+          {
+            "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "02050a45-27fc-58ff-a736-7d69c9b7eae8",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          }
+        ],
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "dec360fcfd545a3cb105cc78985e1958",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·월의 상세 지도를 제공한다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "acff413a407d5ff499d6c8ebfbe09956",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "fbf0966b79f6557483d93c76cc097483",
+            "node": "act",
+            "decision": "selection",
+            "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+            "action": null,
+            "output": {
+              "name": "visualization_agent",
+              "arguments_json": "{\"goal\": \"강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.\"}",
+              "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "c049ea7aa96757d985030fd7c769f5c6",
+            "node": "act",
+            "decision": "call",
+            "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+            "action": {
+              "name": "visualization_agent",
+              "arguments": {
+                "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다."
+              }
+            },
+            "output": {
+              "response": {
+                "id": "496fd98d-6e7c-5d2a-ba0f-4407abcf5399",
+                "kind": "final",
+                "label": "final",
+                "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                "artifacts": [
+                  {
+                    "type": "tableau",
+                    "data": {
+                      "schema_version": 1,
+                      "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                      "catalog_revision": "tableau-public-20261110-v4",
+                      "view_key": "EmbedDetailMap",
+                      "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                      "title": "읍면동 100m 격자 행동 이상 지도",
+                      "period_mode": "end_month",
+                      "parameters": [
+                        {
+                          "name": "p_detail_adm",
+                          "data_type": "string",
+                          "value": "강남구 도곡1동"
+                        },
+                        {
+                          "name": "p_end",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        },
+                        {
+                          "name": "p_start",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        }
+                      ],
+                      "filters": [],
+                      "source": {
+                        "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                        "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                      },
+                      "validation_scope": "registered_configuration",
+                      "warnings": [
+                        "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                        "설정 등록 버전은 원자료 버전이 아닙니다.",
+                        "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                        "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                      ]
+                    }
+                  }
+                ]
+              },
+              "results": [
+                {
+                  "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+                  "node": "interpret",
+                  "decision": "interpretation",
+                  "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                  "action": null,
+                  "output": {
+                    "request": {
+                      "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                      "constraints": {
+                        "required": [
+                          "요청한 동·월의 상세 지도를 제공한다.",
+                          "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                        ],
+                        "preferred": [],
+                        "excluded": []
+                      }
+                    },
+                    "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "interpretation",
+                  "outcome": "success"
+                },
+                {
+                  "id": "907b91ee4b785b9d922b922bfa5fb991",
+                  "node": "decide",
+                  "decision": "decision",
+                  "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                  "action": null,
+                  "output": {
+                    "next": "act",
+                    "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "decision",
+                  "outcome": "success"
+                },
+                {
+                  "id": "e39bda3acfbe5fb8bafd29833598553b",
+                  "node": "act",
+                  "decision": "selection",
+                  "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                  "action": null,
+                  "output": {
+                    "name": "validate_visualization",
+                    "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+                    "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "selection",
+                  "outcome": "success"
+                },
+                {
+                  "id": "1fac9f80e9c85db2a148a080cbfd40c5",
+                  "node": "act",
+                  "decision": "call",
+                  "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                  "action": {
+                    "name": "validate_visualization",
+                    "arguments": {
+                      "view_key": "EmbedDetailMap",
+                      "parameters": {
+                        "p_start": "2025-12-01",
+                        "p_end": "2025-12-01",
+                        "p_detail_adm": "강남구 도곡1동"
+                      }
+                    }
+                  },
+                  "output": {
+                    "valid": true,
+                    "validation_scope": "registered_configuration",
+                    "catalog_revision": "tableau-public-20261110-v4",
+                    "issues": [],
+                    "artifact": {
+                      "type": "tableau",
+                      "data": {
+                        "schema_version": 1,
+                        "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                        "catalog_revision": "tableau-public-20261110-v4",
+                        "view_key": "EmbedDetailMap",
+                        "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                        "title": "읍면동 100m 격자 행동 이상 지도",
+                        "period_mode": "end_month",
+                        "parameters": [
+                          {
+                            "name": "p_detail_adm",
+                            "data_type": "string",
+                            "value": "강남구 도곡1동"
+                          },
+                          {
+                            "name": "p_end",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          },
+                          {
+                            "name": "p_start",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          }
+                        ],
+                        "filters": [],
+                        "source": {
+                          "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                          "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                        },
+                        "validation_scope": "registered_configuration",
+                        "warnings": [
+                          "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                          "설정 등록 버전은 원자료 버전이 아닙니다.",
+                          "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                          "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                        ]
+                      }
+                    }
+                  },
+                  "description": "call",
+                  "outcome": "success"
+                },
+                {
+                  "id": "8bd13fe14e8d50f8b3e44d00a151fd73",
+                  "node": "decide",
+                  "decision": "decision",
+                  "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                  "action": null,
+                  "output": {
+                    "next": "compose",
+                    "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "decision",
+                  "outcome": "success"
+                },
+                {
+                  "id": "8c1b7ccc30ce57e4b7bd175ec1b81cec",
+                  "node": "compose",
+                  "decision": "composition",
+                  "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                  "action": null,
+                  "output": {
+                    "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                    "artifact_ids": [
+                      "1fac9f80e9c85db2a148a080cbfd40c5"
+                    ],
+                    "status": "completed",
+                    "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                    "model_usage": {
+                      "model": "unknown",
+                      "tokens": {},
+                      "elapsed_seconds": 0.0
+                    }
+                  },
+                  "description": "composition",
+                  "outcome": "success"
+                }
+              ],
+              "execution": {
+                "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+                "event": "user_request",
+                "status": "completed",
+                "version": "ai-api-v1",
+                "budget": {
+                  "steps": {
+                    "used": 8,
+                    "limit": 200
+                  },
+                  "tool_calls": {
+                    "used": 1,
+                    "limit": 100
+                  },
+                  "agent_calls": {
+                    "used": 1,
+                    "limit": 20
+                  },
+                  "retries": {
+                    "used": 0,
+                    "limit": 20
+                  },
+                  "active_seconds": {
+                    "used": 0,
+                    "limit": 3600.0
+                  },
+                  "final_model_calls": {
+                    "used": 0,
+                    "limit": 1
+                  },
+                  "final_active_seconds": {
+                    "used": 0,
+                    "limit": 30
+                  }
+                },
+                "error": null
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "764331fef2fb5d38853ea6b2c6e9869d",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "하위 반환에 요청한 동·월의 검사된 상세 지도 산출물과 표시 조건·확인 한계가 모두 있어 그대로 통합할 수 있다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "하위 반환에 요청한 동·월의 검사된 상세 지도 산출물과 표시 조건·확인 한계가 모두 있어 그대로 통합할 수 있다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "ce98734741925c4397dead4abe371545",
+            "node": "compose",
+            "decision": "composition",
+            "reason": "하위의 의미·출처·한계와 요청한 시각화 산출물을 보존해 최종 답변을 반환한다.",
+            "action": null,
+            "output": {
+              "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+              "artifact_ids": [
+                "c049ea7aa96757d985030fd7c769f5c6"
+              ],
+              "status": "completed",
+              "reason": "하위의 의미·출처·한계와 요청한 시각화 산출물을 보존해 최종 답변을 반환한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "composition",
+            "outcome": "success"
+          }
+        ],
+        "response": {
+          "id": "02050a45-27fc-58ff-a736-7d69c9b7eae8",
+          "kind": "final",
+          "label": "final",
+          "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+          "artifacts": [
+            {
+              "type": "tableau",
+              "data": {
+                "schema_version": 1,
+                "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                "catalog_revision": "tableau-public-20261110-v4",
+                "view_key": "EmbedDetailMap",
+                "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                "title": "읍면동 100m 격자 행동 이상 지도",
+                "period_mode": "end_month",
+                "parameters": [
+                  {
+                    "name": "p_detail_adm",
+                    "data_type": "string",
+                    "value": "강남구 도곡1동"
+                  },
+                  {
+                    "name": "p_end",
+                    "data_type": "date",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "name": "p_start",
+                    "data_type": "date",
+                    "value": "2025-12-01"
+                  }
+                ],
+                "filters": [],
+                "source": {
+                  "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                  "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                },
+                "validation_scope": "registered_configuration",
+                "warnings": [
+                  "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                  "설정 등록 버전은 원자료 버전이 아닙니다.",
+                  "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                  "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                ]
+              }
+            }
+          ]
+        },
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "completed",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 10,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "__end__"
+      ],
+      "input_ref": "compose.json#/cases/3/initial",
+      "expectation_ref": "compose.json#/cases/3/assessment"
+    }
+  ],
+  "boundaries": [],
+  "events": [],
+  "history_provenance": "작성한 모델 응답으로 실제 노드를 실행해 구성한 기준 이력",
+  "scope": "agent",
+  "agent_role": "request",
+  "conversation_condition": "new_topic",
+  "region_code": "1168065500",
+  "expected_summary": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+  "task_rationale": {
+    "user_requirement": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+    "available_evidence": [
+      "대화에서 확정된 지역·월·시각화 목적",
+      "등록된 뷰·입력 프로필·허용값; 이번 요청 설정의 검사 결과는 아직 없음"
+    ],
+    "missing_evidence": [
+      "읍면동 100m 격자 행동 이상 지도의 요청 조건 검사와 유효한 산출물"
+    ],
+    "necessary_work": [
+      "표시 설정과 산출물 확보를 시각화 에이전트에 위임",
+      "요청 목적에 맞는 등록 뷰 선택",
+      "요청한 각 뷰의 표시 조건 검사",
+      "모든 요청 산출물과 설정 검사의 한계 반환"
+    ],
+    "excluded_work": [
+      "표시 설정 검사만으로 실제 화면 표시·자료 최신성 단정",
+      "불필요한 수치 조회·계산"
+    ]
+  },
+  "evidence_refs": [
+    {
+      "catalog": "src/tools/tableau_catalog.json",
+      "view_key": "EmbedDetailMap",
+      "parameters": {
+        "p_start": "2025-12-01",
+        "p_end": "2025-12-01",
+        "p_detail_adm": "강남구 도곡1동"
+      }
+    }
+  ],
+  "start_state": {
+    "messages": [
+      {
+        "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null
+      },
+      {
+        "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "ai",
+        "name": null,
+        "id": null,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null
+      }
+    ],
+    "request": {
+      "goal": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+      "constraints": {
+        "required": [
+          "요청한 동·월의 상세 지도를 제공한다.",
+          "설정 검사와 실제 표시 확인의 차이를 안내한다."
+        ],
+        "preferred": [],
+        "excluded": []
+      }
+    },
+    "results": [],
+    "response": null,
+    "execution": {
+      "run_id": "00000000-0000-0000-0000-000000000001",
+      "event": "user_request",
+      "status": "queued",
+      "version": "ai-api-v1",
+      "budget": {
+        "steps": {
+          "used": 0,
+          "limit": 200
+        },
+        "tool_calls": {
+          "used": 0,
+          "limit": 100
+        },
+        "agent_calls": {
+          "used": 0,
+          "limit": 20
+        },
+        "retries": {
+          "used": 0,
+          "limit": 20
+        },
+        "active_seconds": {
+          "used": 0,
+          "limit": 3600.0
+        },
+        "final_model_calls": {
+          "used": 0,
+          "limit": 1
+        },
+        "final_active_seconds": {
+          "used": 0,
+          "limit": 30
+        }
+      },
+      "error": null
+    }
+  },
+  "terminal": {
+    "status": "completed",
+    "state": {
+      "messages": [
+        {
+          "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "5306b51e-90d9-5773-868d-b77409667dc0"
+        },
+        {
+          "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": "5713fb2a-2b38-567c-8816-2b6dfdbad5b9",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        },
+        {
+          "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "9375cb8a-6921-5a4f-ae90-315ba95c6743"
+        },
+        {
+          "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": "02050a45-27fc-58ff-a736-7d69c9b7eae8",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        }
+      ],
+      "request": {
+        "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+        "constraints": {
+          "required": [
+            "요청한 동·월의 상세 지도를 제공한다.",
+            "설정 검사와 실제 표시 확인의 차이를 안내한다."
+          ],
+          "preferred": [],
+          "excluded": []
+        }
+      },
+      "results": [
+        {
+          "id": "dec360fcfd545a3cb105cc78985e1958",
+          "node": "interpret",
+          "decision": "interpretation",
+          "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+          "action": null,
+          "output": {
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "interpretation",
+          "outcome": "success"
+        },
+        {
+          "id": "acff413a407d5ff499d6c8ebfbe09956",
+          "node": "decide",
+          "decision": "decision",
+          "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+          "action": null,
+          "output": {
+            "next": "act",
+            "reason": "새 요청의 지역·월·상세 지도 목적은 확인됐지만 표시 조건 검사와 산출물이 없다. 시각화 전문 작업으로 보완해야 한다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "decision",
+          "outcome": "success"
+        },
+        {
+          "id": "fbf0966b79f6557483d93c76cc097483",
+          "node": "act",
+          "decision": "selection",
+          "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+          "action": null,
+          "output": {
+            "name": "visualization_agent",
+            "arguments_json": "{\"goal\": \"강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.\"}",
+            "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "selection",
+          "outcome": "success"
+        },
+        {
+          "id": "c049ea7aa96757d985030fd7c769f5c6",
+          "node": "act",
+          "decision": "call",
+          "reason": "확인된 동·월·상세 지도 목적과 적용 조건·한계 요구를 시각화 전문 에이전트에 전달한다.",
+          "action": {
+            "name": "visualization_agent",
+            "arguments": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다."
+            }
+          },
+          "output": {
+            "response": {
+              "id": "496fd98d-6e7c-5d2a-ba0f-4407abcf5399",
+              "kind": "final",
+              "label": "final",
+              "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+              "artifacts": [
+                {
+                  "type": "tableau",
+                  "data": {
+                    "schema_version": 1,
+                    "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                    "catalog_revision": "tableau-public-20261110-v4",
+                    "view_key": "EmbedDetailMap",
+                    "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                    "title": "읍면동 100m 격자 행동 이상 지도",
+                    "period_mode": "end_month",
+                    "parameters": [
+                      {
+                        "name": "p_detail_adm",
+                        "data_type": "string",
+                        "value": "강남구 도곡1동"
+                      },
+                      {
+                        "name": "p_end",
+                        "data_type": "date",
+                        "value": "2025-12-01"
+                      },
+                      {
+                        "name": "p_start",
+                        "data_type": "date",
+                        "value": "2025-12-01"
+                      }
+                    ],
+                    "filters": [],
+                    "source": {
+                      "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                      "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                    },
+                    "validation_scope": "registered_configuration",
+                    "warnings": [
+                      "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                      "설정 등록 버전은 원자료 버전이 아닙니다.",
+                      "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                      "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                    ]
+                  }
+                }
+              ]
+            },
+            "results": [
+              {
+                "id": "f8d572a1ed7a5ce7830d6f82e5f86d87",
+                "node": "interpret",
+                "decision": "interpretation",
+                "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                "action": null,
+                "output": {
+                  "request": {
+                    "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+                    "constraints": {
+                      "required": [
+                        "요청한 동·월의 상세 지도를 제공한다.",
+                        "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                      ],
+                      "preferred": [],
+                      "excluded": []
+                    }
+                  },
+                  "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                  "model_usage": {
+                    "model": "unknown",
+                    "tokens": {},
+                    "elapsed_seconds": 0.0
+                  }
+                },
+                "description": "interpretation",
+                "outcome": "success"
+              },
+              {
+                "id": "907b91ee4b785b9d922b922bfa5fb991",
+                "node": "decide",
+                "decision": "decision",
+                "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                "action": null,
+                "output": {
+                  "next": "act",
+                  "reason": "요청한 동·월·상세 지도 목적은 확정됐지만 이번 조건의 검사 결과와 산출물은 없다. 현재 요청 조건으로 표시 설정을 검사해야 한다.",
+                  "model_usage": {
+                    "model": "unknown",
+                    "tokens": {},
+                    "elapsed_seconds": 0.0
+                  }
+                },
+                "description": "decision",
+                "outcome": "success"
+              },
+              {
+                "id": "e39bda3acfbe5fb8bafd29833598553b",
+                "node": "act",
+                "decision": "selection",
+                "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                "action": null,
+                "output": {
+                  "name": "validate_visualization",
+                  "arguments_json": "{\"view_key\": \"EmbedDetailMap\", \"parameters\": {\"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\", \"p_detail_adm\": \"강남구 도곡1동\"}}",
+                  "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                  "model_usage": {
+                    "model": "unknown",
+                    "tokens": {},
+                    "elapsed_seconds": 0.0
+                  }
+                },
+                "description": "selection",
+                "outcome": "success"
+              },
+              {
+                "id": "1fac9f80e9c85db2a148a080cbfd40c5",
+                "node": "act",
+                "decision": "call",
+                "reason": "읍면동 100m 격자 행동 이상 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                "action": {
+                  "name": "validate_visualization",
+                  "arguments": {
+                    "view_key": "EmbedDetailMap",
+                    "parameters": {
+                      "p_start": "2025-12-01",
+                      "p_end": "2025-12-01",
+                      "p_detail_adm": "강남구 도곡1동"
+                    }
+                  }
+                },
+                "output": {
+                  "valid": true,
+                  "validation_scope": "registered_configuration",
+                  "catalog_revision": "tableau-public-20261110-v4",
+                  "issues": [],
+                  "artifact": {
+                    "type": "tableau",
+                    "data": {
+                      "schema_version": 1,
+                      "artifact_id": "tableau-71527e68b07524fcfe73253b",
+                      "catalog_revision": "tableau-public-20261110-v4",
+                      "view_key": "EmbedDetailMap",
+                      "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+                      "title": "읍면동 100m 격자 행동 이상 지도",
+                      "period_mode": "end_month",
+                      "parameters": [
+                        {
+                          "name": "p_detail_adm",
+                          "data_type": "string",
+                          "value": "강남구 도곡1동"
+                        },
+                        {
+                          "name": "p_end",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        },
+                        {
+                          "name": "p_start",
+                          "data_type": "date",
+                          "value": "2025-12-01"
+                        }
+                      ],
+                      "filters": [],
+                      "source": {
+                        "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                        "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+                      },
+                      "validation_scope": "registered_configuration",
+                      "warnings": [
+                        "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                        "설정 등록 버전은 원자료 버전이 아닙니다.",
+                        "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                        "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+                      ]
+                    }
+                  }
+                },
+                "description": "call",
+                "outcome": "success"
+              },
+              {
+                "id": "8bd13fe14e8d50f8b3e44d00a151fd73",
+                "node": "decide",
+                "decision": "decision",
+                "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                "action": null,
+                "output": {
+                  "next": "compose",
+                  "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                  "model_usage": {
+                    "model": "unknown",
+                    "tokens": {},
+                    "elapsed_seconds": 0.0
+                  }
+                },
+                "description": "decision",
+                "outcome": "success"
+              },
+              {
+                "id": "8c1b7ccc30ce57e4b7bd175ec1b81cec",
+                "node": "compose",
+                "decision": "composition",
+                "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                "action": null,
+                "output": {
+                  "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                  "artifact_ids": [
+                    "1fac9f80e9c85db2a148a080cbfd40c5"
+                  ],
+                  "status": "completed",
+                  "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                  "model_usage": {
+                    "model": "unknown",
+                    "tokens": {},
+                    "elapsed_seconds": 0.0
+                  }
+                },
+                "description": "composition",
+                "outcome": "success"
+              }
+            ],
+            "execution": {
+              "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+              "event": "user_request",
+              "status": "completed",
+              "version": "ai-api-v1",
+              "budget": {
+                "steps": {
+                  "used": 8,
+                  "limit": 200
+                },
+                "tool_calls": {
+                  "used": 1,
+                  "limit": 100
+                },
+                "agent_calls": {
+                  "used": 1,
+                  "limit": 20
+                },
+                "retries": {
+                  "used": 0,
+                  "limit": 20
+                },
+                "active_seconds": {
+                  "used": 0,
+                  "limit": 3600.0
+                },
+                "final_model_calls": {
+                  "used": 0,
+                  "limit": 1
+                },
+                "final_active_seconds": {
+                  "used": 0,
+                  "limit": 30
+                }
+              },
+              "error": null
+            }
+          },
+          "description": "call",
+          "outcome": "success"
+        },
+        {
+          "id": "764331fef2fb5d38853ea6b2c6e9869d",
+          "node": "decide",
+          "decision": "decision",
+          "reason": "하위 반환에 요청한 동·월의 검사된 상세 지도 산출물과 표시 조건·확인 한계가 모두 있어 그대로 통합할 수 있다.",
+          "action": null,
+          "output": {
+            "next": "compose",
+            "reason": "하위 반환에 요청한 동·월의 검사된 상세 지도 산출물과 표시 조건·확인 한계가 모두 있어 그대로 통합할 수 있다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "decision",
+          "outcome": "success"
+        },
+        {
+          "id": "ce98734741925c4397dead4abe371545",
+          "node": "compose",
+          "decision": "composition",
+          "reason": "하위의 의미·출처·한계와 요청한 시각화 산출물을 보존해 최종 답변을 반환한다.",
+          "action": null,
+          "output": {
+            "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+            "artifact_ids": [
+              "c049ea7aa96757d985030fd7c769f5c6"
+            ],
+            "status": "completed",
+            "reason": "하위의 의미·출처·한계와 요청한 시각화 산출물을 보존해 최종 답변을 반환한다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "composition",
+          "outcome": "success"
+        }
+      ],
+      "response": {
+        "id": "02050a45-27fc-58ff-a736-7d69c9b7eae8",
+        "kind": "final",
+        "label": "final",
+        "content": "강남구 도곡1동의 2025-12 읍면동 100m 격자 행동 이상 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+        "artifacts": [
+          {
+            "type": "tableau",
+            "data": {
+              "schema_version": 1,
+              "artifact_id": "tableau-71527e68b07524fcfe73253b",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "view_key": "EmbedDetailMap",
+              "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap",
+              "title": "읍면동 100m 격자 행동 이상 지도",
+              "period_mode": "end_month",
+              "parameters": [
+                {
+                  "name": "p_detail_adm",
+                  "data_type": "string",
+                  "value": "강남구 도곡1동"
+                },
+                {
+                  "name": "p_end",
+                  "data_type": "date",
+                  "value": "2025-12-01"
+                },
+                {
+                  "name": "p_start",
+                  "data_type": "date",
+                  "value": "2025-12-01"
+                }
+              ],
+              "filters": [],
+              "source": {
+                "label": "Tableau Public · 읍면동 100m 격자 행동 이상 지도",
+                "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/EmbedDetailMap"
+              },
+              "validation_scope": "registered_configuration",
+              "warnings": [
+                "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                "설정 등록 버전은 원자료 버전이 아닙니다.",
+                "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다.",
+                "읍면동은 p_detail_adm의 Tableau 표시값으로 선택합니다."
+              ]
+            }
+          }
+        ]
+      },
+      "execution": {
+        "run_id": "00000000-0000-0000-0000-000000000001",
+        "event": "user_request",
+        "status": "completed",
+        "version": "ai-api-v1",
+        "budget": {
+          "steps": {
+            "used": 10,
+            "limit": 200
+          },
+          "tool_calls": {
+            "used": 1,
+            "limit": 100
+          },
+          "agent_calls": {
+            "used": 1,
+            "limit": 20
+          },
+          "retries": {
+            "used": 0,
+            "limit": 20
+          },
+          "active_seconds": {
+            "used": 0,
+            "limit": 3600.0
+          },
+          "final_model_calls": {
+            "used": 0,
+            "limit": 1
+          },
+          "final_active_seconds": {
+            "used": 0,
+            "limit": 30
+          }
+        },
+        "error": null
+      }
+    }
+  }
+}

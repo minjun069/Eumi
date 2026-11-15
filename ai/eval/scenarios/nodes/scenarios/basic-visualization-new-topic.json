@@ -1,0 +1,3643 @@
+{
+  "id": "basic-visualization-new_topic",
+  "title": "데이터 시각화 · 이전과 다른 새 주제",
+  "event": "user_request",
+  "family": "basic-visualization",
+  "axes": {
+    "conversation_condition": "new_topic"
+  },
+  "source_groups": [],
+  "steps": [
+    {
+      "step_id": "s001",
+      "node": "interpret",
+      "role": "visualization",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "constraints": {
+            "required": [
+              "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+              "읍면동 필터로 지역 범위를 좁히지 않는다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [],
+        "response": null,
+        "execution": {
+          "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "entry",
+        "from_step": null
+      },
+      "model_outputs": [
+        {
+          "request": {
+            "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "constraints": {
+              "required": [
+                "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                "설정 검사와 실제 표시 확인의 차이를 안내한다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다."
+        }
+      ],
+      "case_id": "path-interpret-f3faa8b5e9429d64eec9",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "constraints": {
+            "required": [
+              "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+              "읍면동 필터로 지역 범위를 좁히지 않는다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "9a0ceca41dce5be9b36d9b395e41b212",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                "constraints": {
+                  "required": [
+                    "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                    "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 4,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "decide"
+      ],
+      "input_ref": "interpret.json#/cases/12/initial",
+      "expectation_ref": "interpret.json#/cases/12/assessment"
+    },
+    {
+      "step_id": "s002",
+      "node": "decide",
+      "role": "visualization",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "constraints": {
+            "required": [
+              "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+              "읍면동 필터로 지역 범위를 좁히지 않는다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "9a0ceca41dce5be9b36d9b395e41b212",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                "constraints": {
+                  "required": [
+                    "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                    "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 4,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s001"
+      },
+      "model_outputs": [
+        {
+          "next": "act",
+          "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다."
+        }
+      ],
+      "case_id": "path-decide-5f622d732d82136be357",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "constraints": {
+            "required": [
+              "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+              "읍면동 필터로 지역 범위를 좁히지 않는다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "9a0ceca41dce5be9b36d9b395e41b212",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                "constraints": {
+                  "required": [
+                    "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                    "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "32277405409551e48adb7fb2bd67bab8",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 5,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "act"
+      ],
+      "input_ref": "decide.json#/cases/33/initial",
+      "expectation_ref": "decide.json#/cases/33/assessment"
+    },
+    {
+      "step_id": "s003",
+      "node": "act",
+      "role": "visualization",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "constraints": {
+            "required": [
+              "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+              "읍면동 필터로 지역 범위를 좁히지 않는다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "9a0ceca41dce5be9b36d9b395e41b212",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                "constraints": {
+                  "required": [
+                    "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                    "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "32277405409551e48adb7fb2bd67bab8",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 5,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s002"
+      },
+      "model_outputs": [
+        {
+          "name": "validate_visualization",
+          "arguments_json": "{\"view_key\": \"Embed01VulnerabilityMap\", \"parameters\": {\"p_city\": \"11680\", \"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\"}}",
+          "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다."
+        }
+      ],
+      "case_id": "path-act-ffc9101db5fa484489cc",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "constraints": {
+            "required": [
+              "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+              "읍면동 필터로 지역 범위를 좁히지 않는다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "9a0ceca41dce5be9b36d9b395e41b212",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                "constraints": {
+                  "required": [
+                    "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                    "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "32277405409551e48adb7fb2bd67bab8",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "80dd2bd4c9e6569686fc1e9fc8e77666",
+            "node": "act",
+            "decision": "selection",
+            "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": null,
+            "output": {
+              "name": "validate_visualization",
+              "arguments_json": "{\"view_key\": \"Embed01VulnerabilityMap\", \"parameters\": {\"p_city\": \"11680\", \"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\"}}",
+              "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "56484d2a09965b04a49394434c882b37",
+            "node": "act",
+            "decision": "call",
+            "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": {
+              "name": "validate_visualization",
+              "arguments": {
+                "view_key": "Embed01VulnerabilityMap",
+                "parameters": {
+                  "p_city": "11680",
+                  "p_start": "2025-12-01",
+                  "p_end": "2025-12-01"
+                }
+              }
+            },
+            "output": {
+              "valid": true,
+              "validation_scope": "registered_configuration",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "issues": [],
+              "artifact": {
+                "type": "tableau",
+                "data": {
+                  "schema_version": 1,
+                  "artifact_id": "tableau-49abf8c7216440a0ab4f6c4c",
+                  "catalog_revision": "tableau-public-20261110-v4",
+                  "view_key": "Embed01VulnerabilityMap",
+                  "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap",
+                  "title": "배경 취약성 지도",
+                  "period_mode": "end_month",
+                  "parameters": [
+                    {
+                      "name": "p_city",
+                      "data_type": "string",
+                      "value": "11680"
+                    },
+                    {
+                      "name": "p_end",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    },
+                    {
+                      "name": "p_start",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "worksheet": "① 지도 · 배경 취약성",
+                      "field": "읍면동",
+                      "operation": "all",
+                      "values": []
+                    }
+                  ],
+                  "source": {
+                    "label": "Tableau Public · 배경 취약성 지도",
+                    "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap"
+                  },
+                  "validation_scope": "registered_configuration",
+                  "warnings": [
+                    "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                    "설정 등록 버전은 원자료 버전이 아닙니다.",
+                    "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+                  ]
+                }
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 6,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "decide"
+      ],
+      "input_ref": "act.json#/cases/21/initial",
+      "expectation_ref": "act.json#/cases/21/assessment"
+    },
+    {
+      "step_id": "s004",
+      "node": "decide",
+      "role": "visualization",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "constraints": {
+            "required": [
+              "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+              "읍면동 필터로 지역 범위를 좁히지 않는다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "9a0ceca41dce5be9b36d9b395e41b212",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                "constraints": {
+                  "required": [
+                    "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                    "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "32277405409551e48adb7fb2bd67bab8",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "80dd2bd4c9e6569686fc1e9fc8e77666",
+            "node": "act",
+            "decision": "selection",
+            "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": null,
+            "output": {
+              "name": "validate_visualization",
+              "arguments_json": "{\"view_key\": \"Embed01VulnerabilityMap\", \"parameters\": {\"p_city\": \"11680\", \"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\"}}",
+              "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "56484d2a09965b04a49394434c882b37",
+            "node": "act",
+            "decision": "call",
+            "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": {
+              "name": "validate_visualization",
+              "arguments": {
+                "view_key": "Embed01VulnerabilityMap",
+                "parameters": {
+                  "p_city": "11680",
+                  "p_start": "2025-12-01",
+                  "p_end": "2025-12-01"
+                }
+              }
+            },
+            "output": {
+              "valid": true,
+              "validation_scope": "registered_configuration",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "issues": [],
+              "artifact": {
+                "type": "tableau",
+                "data": {
+                  "schema_version": 1,
+                  "artifact_id": "tableau-49abf8c7216440a0ab4f6c4c",
+                  "catalog_revision": "tableau-public-20261110-v4",
+                  "view_key": "Embed01VulnerabilityMap",
+                  "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap",
+                  "title": "배경 취약성 지도",
+                  "period_mode": "end_month",
+                  "parameters": [
+                    {
+                      "name": "p_city",
+                      "data_type": "string",
+                      "value": "11680"
+                    },
+                    {
+                      "name": "p_end",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    },
+                    {
+                      "name": "p_start",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "worksheet": "① 지도 · 배경 취약성",
+                      "field": "읍면동",
+                      "operation": "all",
+                      "values": []
+                    }
+                  ],
+                  "source": {
+                    "label": "Tableau Public · 배경 취약성 지도",
+                    "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap"
+                  },
+                  "validation_scope": "registered_configuration",
+                  "warnings": [
+                    "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                    "설정 등록 버전은 원자료 버전이 아닙니다.",
+                    "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+                  ]
+                }
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 6,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s003"
+      },
+      "model_outputs": [
+        {
+          "next": "compose",
+          "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다."
+        }
+      ],
+      "case_id": "path-decide-b0e726e4ca7342224881",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "constraints": {
+            "required": [
+              "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+              "읍면동 필터로 지역 범위를 좁히지 않는다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "9a0ceca41dce5be9b36d9b395e41b212",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                "constraints": {
+                  "required": [
+                    "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                    "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "32277405409551e48adb7fb2bd67bab8",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "80dd2bd4c9e6569686fc1e9fc8e77666",
+            "node": "act",
+            "decision": "selection",
+            "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": null,
+            "output": {
+              "name": "validate_visualization",
+              "arguments_json": "{\"view_key\": \"Embed01VulnerabilityMap\", \"parameters\": {\"p_city\": \"11680\", \"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\"}}",
+              "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "56484d2a09965b04a49394434c882b37",
+            "node": "act",
+            "decision": "call",
+            "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": {
+              "name": "validate_visualization",
+              "arguments": {
+                "view_key": "Embed01VulnerabilityMap",
+                "parameters": {
+                  "p_city": "11680",
+                  "p_start": "2025-12-01",
+                  "p_end": "2025-12-01"
+                }
+              }
+            },
+            "output": {
+              "valid": true,
+              "validation_scope": "registered_configuration",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "issues": [],
+              "artifact": {
+                "type": "tableau",
+                "data": {
+                  "schema_version": 1,
+                  "artifact_id": "tableau-49abf8c7216440a0ab4f6c4c",
+                  "catalog_revision": "tableau-public-20261110-v4",
+                  "view_key": "Embed01VulnerabilityMap",
+                  "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap",
+                  "title": "배경 취약성 지도",
+                  "period_mode": "end_month",
+                  "parameters": [
+                    {
+                      "name": "p_city",
+                      "data_type": "string",
+                      "value": "11680"
+                    },
+                    {
+                      "name": "p_end",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    },
+                    {
+                      "name": "p_start",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "worksheet": "① 지도 · 배경 취약성",
+                      "field": "읍면동",
+                      "operation": "all",
+                      "values": []
+                    }
+                  ],
+                  "source": {
+                    "label": "Tableau Public · 배경 취약성 지도",
+                    "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap"
+                  },
+                  "validation_scope": "registered_configuration",
+                  "warnings": [
+                    "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                    "설정 등록 버전은 원자료 버전이 아닙니다.",
+                    "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+                  ]
+                }
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "c9dbaeb2e36b54ff8219cff0e3d0b268",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 7,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "compose"
+      ],
+      "input_ref": "decide.json#/cases/34/initial",
+      "expectation_ref": "decide.json#/cases/34/assessment"
+    },
+    {
+      "step_id": "s005",
+      "node": "compose",
+      "role": "visualization",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "constraints": {
+            "required": [
+              "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+              "읍면동 필터로 지역 범위를 좁히지 않는다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "9a0ceca41dce5be9b36d9b395e41b212",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                "constraints": {
+                  "required": [
+                    "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                    "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "32277405409551e48adb7fb2bd67bab8",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "80dd2bd4c9e6569686fc1e9fc8e77666",
+            "node": "act",
+            "decision": "selection",
+            "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": null,
+            "output": {
+              "name": "validate_visualization",
+              "arguments_json": "{\"view_key\": \"Embed01VulnerabilityMap\", \"parameters\": {\"p_city\": \"11680\", \"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\"}}",
+              "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "56484d2a09965b04a49394434c882b37",
+            "node": "act",
+            "decision": "call",
+            "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": {
+              "name": "validate_visualization",
+              "arguments": {
+                "view_key": "Embed01VulnerabilityMap",
+                "parameters": {
+                  "p_city": "11680",
+                  "p_start": "2025-12-01",
+                  "p_end": "2025-12-01"
+                }
+              }
+            },
+            "output": {
+              "valid": true,
+              "validation_scope": "registered_configuration",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "issues": [],
+              "artifact": {
+                "type": "tableau",
+                "data": {
+                  "schema_version": 1,
+                  "artifact_id": "tableau-49abf8c7216440a0ab4f6c4c",
+                  "catalog_revision": "tableau-public-20261110-v4",
+                  "view_key": "Embed01VulnerabilityMap",
+                  "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap",
+                  "title": "배경 취약성 지도",
+                  "period_mode": "end_month",
+                  "parameters": [
+                    {
+                      "name": "p_city",
+                      "data_type": "string",
+                      "value": "11680"
+                    },
+                    {
+                      "name": "p_end",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    },
+                    {
+                      "name": "p_start",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "worksheet": "① 지도 · 배경 취약성",
+                      "field": "읍면동",
+                      "operation": "all",
+                      "values": []
+                    }
+                  ],
+                  "source": {
+                    "label": "Tableau Public · 배경 취약성 지도",
+                    "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap"
+                  },
+                  "validation_scope": "registered_configuration",
+                  "warnings": [
+                    "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                    "설정 등록 버전은 원자료 버전이 아닙니다.",
+                    "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+                  ]
+                }
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "c9dbaeb2e36b54ff8219cff0e3d0b268",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 7,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s004"
+      },
+      "model_outputs": [
+        {
+          "content": "강남구 전체의 2025-12 배경 취약성 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+          "artifact_ids": [
+            "56484d2a09965b04a49394434c882b37"
+          ],
+          "status": "completed",
+          "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다."
+        }
+      ],
+      "case_id": "path-compose-7a90282498881924db5e",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "8a8e55c7-4ac5-5a93-9dff-7ea382141049"
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "a67dc799-63aa-5eeb-a2c5-500775362705",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "225423a3-8f70-5543-8650-5c8e92425b85"
+          },
+          {
+            "content": "강남구 전체의 2025-12 배경 취약성 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "f35b8475-b7cf-51e4-a5c9-0d910ae7da70",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          }
+        ],
+        "request": {
+          "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "constraints": {
+            "required": [
+              "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+              "읍면동 필터로 지역 범위를 좁히지 않는다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "9a0ceca41dce5be9b36d9b395e41b212",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                "constraints": {
+                  "required": [
+                    "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                    "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                    "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "32277405409551e48adb7fb2bd67bab8",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "80dd2bd4c9e6569686fc1e9fc8e77666",
+            "node": "act",
+            "decision": "selection",
+            "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": null,
+            "output": {
+              "name": "validate_visualization",
+              "arguments_json": "{\"view_key\": \"Embed01VulnerabilityMap\", \"parameters\": {\"p_city\": \"11680\", \"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\"}}",
+              "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "56484d2a09965b04a49394434c882b37",
+            "node": "act",
+            "decision": "call",
+            "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "action": {
+              "name": "validate_visualization",
+              "arguments": {
+                "view_key": "Embed01VulnerabilityMap",
+                "parameters": {
+                  "p_city": "11680",
+                  "p_start": "2025-12-01",
+                  "p_end": "2025-12-01"
+                }
+              }
+            },
+            "output": {
+              "valid": true,
+              "validation_scope": "registered_configuration",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "issues": [],
+              "artifact": {
+                "type": "tableau",
+                "data": {
+                  "schema_version": 1,
+                  "artifact_id": "tableau-49abf8c7216440a0ab4f6c4c",
+                  "catalog_revision": "tableau-public-20261110-v4",
+                  "view_key": "Embed01VulnerabilityMap",
+                  "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap",
+                  "title": "배경 취약성 지도",
+                  "period_mode": "end_month",
+                  "parameters": [
+                    {
+                      "name": "p_city",
+                      "data_type": "string",
+                      "value": "11680"
+                    },
+                    {
+                      "name": "p_end",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    },
+                    {
+                      "name": "p_start",
+                      "data_type": "date",
+                      "value": "2025-12-01"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "worksheet": "① 지도 · 배경 취약성",
+                      "field": "읍면동",
+                      "operation": "all",
+                      "values": []
+                    }
+                  ],
+                  "source": {
+                    "label": "Tableau Public · 배경 취약성 지도",
+                    "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap"
+                  },
+                  "validation_scope": "registered_configuration",
+                  "warnings": [
+                    "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                    "설정 등록 버전은 원자료 버전이 아닙니다.",
+                    "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+                  ]
+                }
+              }
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "c9dbaeb2e36b54ff8219cff0e3d0b268",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "0b456841f0d6500cb705e2c793b4fe54",
+            "node": "compose",
+            "decision": "composition",
+            "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+            "action": null,
+            "output": {
+              "content": "강남구 전체의 2025-12 배경 취약성 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+              "artifact_ids": [
+                "56484d2a09965b04a49394434c882b37"
+              ],
+              "status": "completed",
+              "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "composition",
+            "outcome": "success"
+          }
+        ],
+        "response": {
+          "id": "f35b8475-b7cf-51e4-a5c9-0d910ae7da70",
+          "kind": "final",
+          "label": "final",
+          "content": "강남구 전체의 2025-12 배경 취약성 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+          "artifacts": [
+            {
+              "type": "tableau",
+              "data": {
+                "schema_version": 1,
+                "artifact_id": "tableau-49abf8c7216440a0ab4f6c4c",
+                "catalog_revision": "tableau-public-20261110-v4",
+                "view_key": "Embed01VulnerabilityMap",
+                "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap",
+                "title": "배경 취약성 지도",
+                "period_mode": "end_month",
+                "parameters": [
+                  {
+                    "name": "p_city",
+                    "data_type": "string",
+                    "value": "11680"
+                  },
+                  {
+                    "name": "p_end",
+                    "data_type": "date",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "name": "p_start",
+                    "data_type": "date",
+                    "value": "2025-12-01"
+                  }
+                ],
+                "filters": [
+                  {
+                    "worksheet": "① 지도 · 배경 취약성",
+                    "field": "읍면동",
+                    "operation": "all",
+                    "values": []
+                  }
+                ],
+                "source": {
+                  "label": "Tableau Public · 배경 취약성 지도",
+                  "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap"
+                },
+                "validation_scope": "registered_configuration",
+                "warnings": [
+                  "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                  "설정 등록 버전은 원자료 버전이 아닙니다.",
+                  "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+                ]
+              }
+            }
+          ]
+        },
+        "execution": {
+          "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+          "event": "user_request",
+          "status": "completed",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 8,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "__end__"
+      ],
+      "input_ref": "compose.json#/cases/12/initial",
+      "expectation_ref": "compose.json#/cases/12/assessment"
+    }
+  ],
+  "boundaries": [],
+  "events": [],
+  "history_provenance": "작성한 모델 응답으로 실제 노드를 실행해 구성한 기준 이력",
+  "scope": "agent",
+  "agent_role": "visualization",
+  "conversation_condition": "new_topic",
+  "region_code": "11680",
+  "expected_summary": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+  "task_rationale": {
+    "user_requirement": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+    "available_evidence": [
+      "대화에서 확정된 지역·월·시각화 목적",
+      "등록된 뷰·입력 프로필·허용값; 이번 요청 설정의 검사 결과는 아직 없음"
+    ],
+    "missing_evidence": [
+      "배경 취약성 지도의 요청 조건 검사와 유효한 산출물"
+    ],
+    "necessary_work": [
+      "요청 목적에 맞는 등록 뷰 선택",
+      "요청한 각 뷰의 표시 조건 검사",
+      "모든 요청 산출물과 설정 검사의 한계 반환"
+    ],
+    "excluded_work": [
+      "표시 설정 검사만으로 실제 화면 표시·자료 최신성 단정",
+      "불필요한 수치 조회·계산"
+    ]
+  },
+  "evidence_refs": [
+    {
+      "catalog": "src/tools/tableau_catalog.json",
+      "view_key": "Embed01VulnerabilityMap",
+      "parameters": {
+        "p_city": "11680",
+        "p_start": "2025-12-01",
+        "p_end": "2025-12-01"
+      }
+    }
+  ],
+  "start_state": {
+    "messages": [
+      {
+        "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null
+      },
+      {
+        "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "ai",
+        "name": null,
+        "id": null,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null
+      }
+    ],
+    "request": {
+      "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+      "constraints": {
+        "required": [
+          "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+          "읍면동 필터로 지역 범위를 좁히지 않는다.",
+          "설정 검사와 실제 표시 확인의 차이를 안내한다."
+        ],
+        "preferred": [],
+        "excluded": []
+      }
+    },
+    "results": [],
+    "response": null,
+    "execution": {
+      "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+      "event": "user_request",
+      "status": "queued",
+      "version": "ai-api-v1",
+      "budget": {
+        "steps": {
+          "used": 3,
+          "limit": 200
+        },
+        "tool_calls": {
+          "used": 0,
+          "limit": 100
+        },
+        "agent_calls": {
+          "used": 1,
+          "limit": 20
+        },
+        "retries": {
+          "used": 0,
+          "limit": 20
+        },
+        "active_seconds": {
+          "used": 0,
+          "limit": 3600.0
+        },
+        "final_model_calls": {
+          "used": 0,
+          "limit": 1
+        },
+        "final_active_seconds": {
+          "used": 0,
+          "limit": 30
+        }
+      },
+      "error": null
+    }
+  },
+  "entry_transition": {
+    "kind": "agent_call",
+    "parent_role": "request",
+    "parent_start_state": {
+      "messages": [
+        {
+          "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": null
+        },
+        {
+          "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": null,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        },
+        {
+          "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": null
+        }
+      ],
+      "request": {
+        "goal": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+        "constraints": {
+          "required": [
+            "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+            "읍면동 필터로 지역 범위를 좁히지 않는다.",
+            "설정 검사와 실제 표시 확인의 차이를 안내한다."
+          ],
+          "preferred": [],
+          "excluded": []
+        }
+      },
+      "results": [],
+      "response": null,
+      "execution": {
+        "run_id": "00000000-0000-0000-0000-000000000001",
+        "event": "user_request",
+        "status": "queued",
+        "version": "ai-api-v1",
+        "budget": {
+          "steps": {
+            "used": 0,
+            "limit": 200
+          },
+          "tool_calls": {
+            "used": 0,
+            "limit": 100
+          },
+          "agent_calls": {
+            "used": 0,
+            "limit": 20
+          },
+          "retries": {
+            "used": 0,
+            "limit": 20
+          },
+          "active_seconds": {
+            "used": 0,
+            "limit": 3600.0
+          },
+          "final_model_calls": {
+            "used": 0,
+            "limit": 1
+          },
+          "final_active_seconds": {
+            "used": 0,
+            "limit": 30
+          }
+        },
+        "error": null
+      }
+    },
+    "parent_steps": [
+      {
+        "step_id": "s001",
+        "node": "interpret",
+        "role": "request",
+        "frame": "root",
+        "before_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "constraints": {
+              "required": [
+                "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                "설정 검사와 실제 표시 확인의 차이를 안내한다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "queued",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 0,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 0,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 0,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "boundary_before": {
+          "kind": "entry",
+          "from_step": null
+        },
+        "model_outputs": [
+          {
+            "request": {
+              "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "constraints": {
+                "required": [
+                  "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                  "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다."
+          }
+        ],
+        "after_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "constraints": {
+              "required": [
+                "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                "설정 검사와 실제 표시 확인의 차이를 안내한다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [
+            {
+              "id": "44c0235da8415849a1baaae964244b78",
+              "node": "interpret",
+              "decision": "interpretation",
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "action": null,
+              "output": {
+                "request": {
+                  "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                  "constraints": {
+                    "required": [
+                      "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                      "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                      "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                    ],
+                    "preferred": [],
+                    "excluded": []
+                  }
+                },
+                "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "interpretation",
+              "outcome": "success"
+            }
+          ],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "running",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 1,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 0,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 0,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "expected_next_nodes": [
+          "decide"
+        ]
+      },
+      {
+        "step_id": "s002",
+        "node": "decide",
+        "role": "request",
+        "frame": "root",
+        "before_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "constraints": {
+              "required": [
+                "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                "설정 검사와 실제 표시 확인의 차이를 안내한다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [
+            {
+              "id": "44c0235da8415849a1baaae964244b78",
+              "node": "interpret",
+              "decision": "interpretation",
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "action": null,
+              "output": {
+                "request": {
+                  "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                  "constraints": {
+                    "required": [
+                      "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                      "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                      "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                    ],
+                    "preferred": [],
+                    "excluded": []
+                  }
+                },
+                "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "interpretation",
+              "outcome": "success"
+            }
+          ],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "running",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 1,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 0,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 0,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "boundary_before": {
+          "kind": "next",
+          "from_step": "s001"
+        },
+        "model_outputs": [
+          {
+            "next": "act",
+            "reason": "요청한 지역·월과 시각화 목적은 확인됐지만 요청한 각 표시 설정의 검사 결과와 산출물이 없다. 시각화 전문 작업이 필요하다."
+          }
+        ],
+        "after_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "constraints": {
+              "required": [
+                "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                "설정 검사와 실제 표시 확인의 차이를 안내한다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [
+            {
+              "id": "44c0235da8415849a1baaae964244b78",
+              "node": "interpret",
+              "decision": "interpretation",
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "action": null,
+              "output": {
+                "request": {
+                  "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                  "constraints": {
+                    "required": [
+                      "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                      "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                      "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                    ],
+                    "preferred": [],
+                    "excluded": []
+                  }
+                },
+                "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "interpretation",
+              "outcome": "success"
+            },
+            {
+              "id": "eb13aaa7f5c55bad8529616bd9869a08",
+              "node": "decide",
+              "decision": "decision",
+              "reason": "요청한 지역·월과 시각화 목적은 확인됐지만 요청한 각 표시 설정의 검사 결과와 산출물이 없다. 시각화 전문 작업이 필요하다.",
+              "action": null,
+              "output": {
+                "next": "act",
+                "reason": "요청한 지역·월과 시각화 목적은 확인됐지만 요청한 각 표시 설정의 검사 결과와 산출물이 없다. 시각화 전문 작업이 필요하다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "decision",
+              "outcome": "success"
+            }
+          ],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "running",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 2,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 0,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 0,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "expected_next_nodes": [
+          "act"
+        ]
+      },
+      {
+        "step_id": "s003",
+        "node": "act",
+        "role": "request",
+        "frame": "root",
+        "before_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "constraints": {
+              "required": [
+                "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                "설정 검사와 실제 표시 확인의 차이를 안내한다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [
+            {
+              "id": "44c0235da8415849a1baaae964244b78",
+              "node": "interpret",
+              "decision": "interpretation",
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "action": null,
+              "output": {
+                "request": {
+                  "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                  "constraints": {
+                    "required": [
+                      "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                      "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                      "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                    ],
+                    "preferred": [],
+                    "excluded": []
+                  }
+                },
+                "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "interpretation",
+              "outcome": "success"
+            },
+            {
+              "id": "eb13aaa7f5c55bad8529616bd9869a08",
+              "node": "decide",
+              "decision": "decision",
+              "reason": "요청한 지역·월과 시각화 목적은 확인됐지만 요청한 각 표시 설정의 검사 결과와 산출물이 없다. 시각화 전문 작업이 필요하다.",
+              "action": null,
+              "output": {
+                "next": "act",
+                "reason": "요청한 지역·월과 시각화 목적은 확인됐지만 요청한 각 표시 설정의 검사 결과와 산출물이 없다. 시각화 전문 작업이 필요하다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "decision",
+              "outcome": "success"
+            }
+          ],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "running",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 2,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 0,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 0,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "boundary_before": {
+          "kind": "next",
+          "from_step": "s002"
+        },
+        "model_outputs": [
+          {
+            "name": "visualization_agent",
+            "arguments_json": "{\"goal\": \"강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.\"}",
+            "reason": "확정한 대상·기간·목적·조건을 해당 전문 에이전트에 전달해 부족한 근거와 요청 산출물을 확보한다."
+          }
+        ],
+        "after_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "constraints": {
+              "required": [
+                "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                "설정 검사와 실제 표시 확인의 차이를 안내한다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [
+            {
+              "id": "44c0235da8415849a1baaae964244b78",
+              "node": "interpret",
+              "decision": "interpretation",
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "action": null,
+              "output": {
+                "request": {
+                  "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                  "constraints": {
+                    "required": [
+                      "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                      "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                      "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                    ],
+                    "preferred": [],
+                    "excluded": []
+                  }
+                },
+                "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "interpretation",
+              "outcome": "success"
+            },
+            {
+              "id": "eb13aaa7f5c55bad8529616bd9869a08",
+              "node": "decide",
+              "decision": "decision",
+              "reason": "요청한 지역·월과 시각화 목적은 확인됐지만 요청한 각 표시 설정의 검사 결과와 산출물이 없다. 시각화 전문 작업이 필요하다.",
+              "action": null,
+              "output": {
+                "next": "act",
+                "reason": "요청한 지역·월과 시각화 목적은 확인됐지만 요청한 각 표시 설정의 검사 결과와 산출물이 없다. 시각화 전문 작업이 필요하다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "decision",
+              "outcome": "success"
+            },
+            {
+              "id": "178052b2822f5349b546333e8d94fc0e",
+              "node": "act",
+              "decision": "selection",
+              "reason": "확정한 대상·기간·목적·조건을 해당 전문 에이전트에 전달해 부족한 근거와 요청 산출물을 확보한다.",
+              "action": null,
+              "output": {
+                "name": "visualization_agent",
+                "arguments_json": "{\"goal\": \"강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.\"}",
+                "reason": "확정한 대상·기간·목적·조건을 해당 전문 에이전트에 전달해 부족한 근거와 요청 산출물을 확보한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "selection",
+              "outcome": "success"
+            },
+            {
+              "id": "0b4de73ead4551419f990046dc570e07",
+              "node": "act",
+              "decision": "call",
+              "reason": "확정한 대상·기간·목적·조건을 해당 전문 에이전트에 전달해 부족한 근거와 요청 산출물을 확보한다.",
+              "action": {
+                "name": "visualization_agent",
+                "arguments": {
+                  "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다."
+                }
+              },
+              "output": {
+                "response": {
+                  "id": "f35b8475-b7cf-51e4-a5c9-0d910ae7da70",
+                  "kind": "final",
+                  "label": "final",
+                  "content": "강남구 전체의 2025-12 배경 취약성 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                  "artifacts": [
+                    {
+                      "type": "tableau",
+                      "data": {
+                        "schema_version": 1,
+                        "artifact_id": "tableau-49abf8c7216440a0ab4f6c4c",
+                        "catalog_revision": "tableau-public-20261110-v4",
+                        "view_key": "Embed01VulnerabilityMap",
+                        "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap",
+                        "title": "배경 취약성 지도",
+                        "period_mode": "end_month",
+                        "parameters": [
+                          {
+                            "name": "p_city",
+                            "data_type": "string",
+                            "value": "11680"
+                          },
+                          {
+                            "name": "p_end",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          },
+                          {
+                            "name": "p_start",
+                            "data_type": "date",
+                            "value": "2025-12-01"
+                          }
+                        ],
+                        "filters": [
+                          {
+                            "worksheet": "① 지도 · 배경 취약성",
+                            "field": "읍면동",
+                            "operation": "all",
+                            "values": []
+                          }
+                        ],
+                        "source": {
+                          "label": "Tableau Public · 배경 취약성 지도",
+                          "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap"
+                        },
+                        "validation_scope": "registered_configuration",
+                        "warnings": [
+                          "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                          "설정 등록 버전은 원자료 버전이 아닙니다.",
+                          "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "results": [
+                  {
+                    "id": "9a0ceca41dce5be9b36d9b395e41b212",
+                    "node": "interpret",
+                    "decision": "interpretation",
+                    "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                    "action": null,
+                    "output": {
+                      "request": {
+                        "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+                        "constraints": {
+                          "required": [
+                            "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                            "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                            "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                          ],
+                          "preferred": [],
+                          "excluded": []
+                        }
+                      },
+                      "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                      "model_usage": {
+                        "model": "unknown",
+                        "tokens": {},
+                        "elapsed_seconds": 0.0
+                      }
+                    },
+                    "description": "interpretation",
+                    "outcome": "success"
+                  },
+                  {
+                    "id": "32277405409551e48adb7fb2bd67bab8",
+                    "node": "decide",
+                    "decision": "decision",
+                    "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+                    "action": null,
+                    "output": {
+                      "next": "act",
+                      "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+                      "model_usage": {
+                        "model": "unknown",
+                        "tokens": {},
+                        "elapsed_seconds": 0.0
+                      }
+                    },
+                    "description": "decision",
+                    "outcome": "success"
+                  },
+                  {
+                    "id": "80dd2bd4c9e6569686fc1e9fc8e77666",
+                    "node": "act",
+                    "decision": "selection",
+                    "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                    "action": null,
+                    "output": {
+                      "name": "validate_visualization",
+                      "arguments_json": "{\"view_key\": \"Embed01VulnerabilityMap\", \"parameters\": {\"p_city\": \"11680\", \"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\"}}",
+                      "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                      "model_usage": {
+                        "model": "unknown",
+                        "tokens": {},
+                        "elapsed_seconds": 0.0
+                      }
+                    },
+                    "description": "selection",
+                    "outcome": "success"
+                  },
+                  {
+                    "id": "56484d2a09965b04a49394434c882b37",
+                    "node": "act",
+                    "decision": "call",
+                    "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+                    "action": {
+                      "name": "validate_visualization",
+                      "arguments": {
+                        "view_key": "Embed01VulnerabilityMap",
+                        "parameters": {
+                          "p_city": "11680",
+                          "p_start": "2025-12-01",
+                          "p_end": "2025-12-01"
+                        }
+                      }
+                    },
+                    "output": {
+                      "valid": true,
+                      "validation_scope": "registered_configuration",
+                      "catalog_revision": "tableau-public-20261110-v4",
+                      "issues": [],
+                      "artifact": {
+                        "type": "tableau",
+                        "data": {
+                          "schema_version": 1,
+                          "artifact_id": "tableau-49abf8c7216440a0ab4f6c4c",
+                          "catalog_revision": "tableau-public-20261110-v4",
+                          "view_key": "Embed01VulnerabilityMap",
+                          "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap",
+                          "title": "배경 취약성 지도",
+                          "period_mode": "end_month",
+                          "parameters": [
+                            {
+                              "name": "p_city",
+                              "data_type": "string",
+                              "value": "11680"
+                            },
+                            {
+                              "name": "p_end",
+                              "data_type": "date",
+                              "value": "2025-12-01"
+                            },
+                            {
+                              "name": "p_start",
+                              "data_type": "date",
+                              "value": "2025-12-01"
+                            }
+                          ],
+                          "filters": [
+                            {
+                              "worksheet": "① 지도 · 배경 취약성",
+                              "field": "읍면동",
+                              "operation": "all",
+                              "values": []
+                            }
+                          ],
+                          "source": {
+                            "label": "Tableau Public · 배경 취약성 지도",
+                            "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap"
+                          },
+                          "validation_scope": "registered_configuration",
+                          "warnings": [
+                            "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                            "설정 등록 버전은 원자료 버전이 아닙니다.",
+                            "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+                          ]
+                        }
+                      }
+                    },
+                    "description": "call",
+                    "outcome": "success"
+                  },
+                  {
+                    "id": "c9dbaeb2e36b54ff8219cff0e3d0b268",
+                    "node": "decide",
+                    "decision": "decision",
+                    "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                    "action": null,
+                    "output": {
+                      "next": "compose",
+                      "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+                      "model_usage": {
+                        "model": "unknown",
+                        "tokens": {},
+                        "elapsed_seconds": 0.0
+                      }
+                    },
+                    "description": "decision",
+                    "outcome": "success"
+                  },
+                  {
+                    "id": "0b456841f0d6500cb705e2c793b4fe54",
+                    "node": "compose",
+                    "decision": "composition",
+                    "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                    "action": null,
+                    "output": {
+                      "content": "강남구 전체의 2025-12 배경 취약성 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+                      "artifact_ids": [
+                        "56484d2a09965b04a49394434c882b37"
+                      ],
+                      "status": "completed",
+                      "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+                      "model_usage": {
+                        "model": "unknown",
+                        "tokens": {},
+                        "elapsed_seconds": 0.0
+                      }
+                    },
+                    "description": "composition",
+                    "outcome": "success"
+                  }
+                ],
+                "execution": {
+                  "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+                  "event": "user_request",
+                  "status": "completed",
+                  "version": "ai-api-v1",
+                  "budget": {
+                    "steps": {
+                      "used": 8,
+                      "limit": 200
+                    },
+                    "tool_calls": {
+                      "used": 1,
+                      "limit": 100
+                    },
+                    "agent_calls": {
+                      "used": 1,
+                      "limit": 20
+                    },
+                    "retries": {
+                      "used": 0,
+                      "limit": 20
+                    },
+                    "active_seconds": {
+                      "used": 0,
+                      "limit": 3600.0
+                    },
+                    "final_model_calls": {
+                      "used": 0,
+                      "limit": 1
+                    },
+                    "final_active_seconds": {
+                      "used": 0,
+                      "limit": 30
+                    }
+                  },
+                  "error": null
+                }
+              },
+              "description": "call",
+              "outcome": "success"
+            }
+          ],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "running",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 8,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 1,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 1,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "expected_next_nodes": [
+          "decide"
+        ]
+      }
+    ],
+    "call_step_id": "s003",
+    "after_state": {
+      "messages": [
+        {
+          "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": null
+        },
+        {
+          "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": null,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        },
+        {
+          "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": null
+        }
+      ],
+      "request": {
+        "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+        "constraints": {
+          "required": [
+            "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+            "읍면동 필터로 지역 범위를 좁히지 않는다.",
+            "설정 검사와 실제 표시 확인의 차이를 안내한다."
+          ],
+          "preferred": [],
+          "excluded": []
+        }
+      },
+      "results": [],
+      "response": null,
+      "execution": {
+        "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+        "event": "user_request",
+        "status": "queued",
+        "version": "ai-api-v1",
+        "budget": {
+          "steps": {
+            "used": 3,
+            "limit": 200
+          },
+          "tool_calls": {
+            "used": 0,
+            "limit": 100
+          },
+          "agent_calls": {
+            "used": 1,
+            "limit": 20
+          },
+          "retries": {
+            "used": 0,
+            "limit": 20
+          },
+          "active_seconds": {
+            "used": 0,
+            "limit": 3600.0
+          },
+          "final_model_calls": {
+            "used": 0,
+            "limit": 1
+          },
+          "final_active_seconds": {
+            "used": 0,
+            "limit": 30
+          }
+        },
+        "error": null
+      }
+    },
+    "parent_return_record_id": "0b4de73ead4551419f990046dc570e07"
+  },
+  "terminal": {
+    "status": "completed",
+    "state": {
+      "messages": [
+        {
+          "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "8a8e55c7-4ac5-5a93-9dff-7ea382141049"
+        },
+        {
+          "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": "a67dc799-63aa-5eeb-a2c5-500775362705",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        },
+        {
+          "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "225423a3-8f70-5543-8650-5c8e92425b85"
+        },
+        {
+          "content": "강남구 전체의 2025-12 배경 취약성 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": "f35b8475-b7cf-51e4-a5c9-0d910ae7da70",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        }
+      ],
+      "request": {
+        "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+        "constraints": {
+          "required": [
+            "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+            "읍면동 필터로 지역 범위를 좁히지 않는다.",
+            "설정 검사와 실제 표시 확인의 차이를 안내한다."
+          ],
+          "preferred": [],
+          "excluded": []
+        }
+      },
+      "results": [
+        {
+          "id": "9a0ceca41dce5be9b36d9b395e41b212",
+          "node": "interpret",
+          "decision": "interpretation",
+          "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+          "action": null,
+          "output": {
+            "request": {
+              "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "constraints": {
+                "required": [
+                  "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                  "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "interpretation",
+          "outcome": "success"
+        },
+        {
+          "id": "32277405409551e48adb7fb2bd67bab8",
+          "node": "decide",
+          "decision": "decision",
+          "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+          "action": null,
+          "output": {
+            "next": "act",
+            "reason": "새 요청은 특정 동의 행동 상세 지도가 아니라 도시 전체의 현재 월 배경 취약성 지도이다. 대상·월·목적은 확정됐고 그 범위에 맞는 표시 조건 검사와 산출물이 필요하다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "decision",
+          "outcome": "success"
+        },
+        {
+          "id": "80dd2bd4c9e6569686fc1e9fc8e77666",
+          "node": "act",
+          "decision": "selection",
+          "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+          "action": null,
+          "output": {
+            "name": "validate_visualization",
+            "arguments_json": "{\"view_key\": \"Embed01VulnerabilityMap\", \"parameters\": {\"p_city\": \"11680\", \"p_start\": \"2025-12-01\", \"p_end\": \"2025-12-01\"}}",
+            "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "selection",
+          "outcome": "success"
+        },
+        {
+          "id": "56484d2a09965b04a49394434c882b37",
+          "node": "act",
+          "decision": "call",
+          "reason": "배경 취약성 지도 목적에 맞는 등록 뷰와 이번 지역·월의 표시 조건을 검사한다.",
+          "action": {
+            "name": "validate_visualization",
+            "arguments": {
+              "view_key": "Embed01VulnerabilityMap",
+              "parameters": {
+                "p_city": "11680",
+                "p_start": "2025-12-01",
+                "p_end": "2025-12-01"
+              }
+            }
+          },
+          "output": {
+            "valid": true,
+            "validation_scope": "registered_configuration",
+            "catalog_revision": "tableau-public-20261110-v4",
+            "issues": [],
+            "artifact": {
+              "type": "tableau",
+              "data": {
+                "schema_version": 1,
+                "artifact_id": "tableau-49abf8c7216440a0ab4f6c4c",
+                "catalog_revision": "tableau-public-20261110-v4",
+                "view_key": "Embed01VulnerabilityMap",
+                "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap",
+                "title": "배경 취약성 지도",
+                "period_mode": "end_month",
+                "parameters": [
+                  {
+                    "name": "p_city",
+                    "data_type": "string",
+                    "value": "11680"
+                  },
+                  {
+                    "name": "p_end",
+                    "data_type": "date",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "name": "p_start",
+                    "data_type": "date",
+                    "value": "2025-12-01"
+                  }
+                ],
+                "filters": [
+                  {
+                    "worksheet": "① 지도 · 배경 취약성",
+                    "field": "읍면동",
+                    "operation": "all",
+                    "values": []
+                  }
+                ],
+                "source": {
+                  "label": "Tableau Public · 배경 취약성 지도",
+                  "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap"
+                },
+                "validation_scope": "registered_configuration",
+                "warnings": [
+                  "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                  "설정 등록 버전은 원자료 버전이 아닙니다.",
+                  "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+                ]
+              }
+            }
+          },
+          "description": "call",
+          "outcome": "success"
+        },
+        {
+          "id": "c9dbaeb2e36b54ff8219cff0e3d0b268",
+          "node": "decide",
+          "decision": "decision",
+          "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+          "action": null,
+          "output": {
+            "next": "compose",
+            "reason": "요청한 모든 시각화의 지역·월 설정이 등록 기준에 적합하고 각각의 유효한 Tableau 산출물이 확보됐다. 실제 화면 표시나 자료 최신성을 확인한 것은 아니다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "decision",
+          "outcome": "success"
+        },
+        {
+          "id": "0b456841f0d6500cb705e2c793b4fe54",
+          "node": "compose",
+          "decision": "composition",
+          "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+          "action": null,
+          "output": {
+            "content": "강남구 전체의 2025-12 배경 취약성 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+            "artifact_ids": [
+              "56484d2a09965b04a49394434c882b37"
+            ],
+            "status": "completed",
+            "reason": "요청한 각 시각화의 유효한 산출물을 모두 선택하고 적용 조건·확인 한계를 반환한다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "composition",
+          "outcome": "success"
+        }
+      ],
+      "response": {
+        "id": "f35b8475-b7cf-51e4-a5c9-0d910ae7da70",
+        "kind": "final",
+        "label": "final",
+        "content": "강남구 전체의 2025-12 배경 취약성 지도 Tableau 표시 설정을 제공합니다. 등록된 표시 설정 검사이며 자료 존재·최신성·실제 화면 표시를 확인한 결과는 아니다.",
+        "artifacts": [
+          {
+            "type": "tableau",
+            "data": {
+              "schema_version": 1,
+              "artifact_id": "tableau-49abf8c7216440a0ab4f6c4c",
+              "catalog_revision": "tableau-public-20261110-v4",
+              "view_key": "Embed01VulnerabilityMap",
+              "src": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap",
+              "title": "배경 취약성 지도",
+              "period_mode": "end_month",
+              "parameters": [
+                {
+                  "name": "p_city",
+                  "data_type": "string",
+                  "value": "11680"
+                },
+                {
+                  "name": "p_end",
+                  "data_type": "date",
+                  "value": "2025-12-01"
+                },
+                {
+                  "name": "p_start",
+                  "data_type": "date",
+                  "value": "2025-12-01"
+                }
+              ],
+              "filters": [
+                {
+                  "worksheet": "① 지도 · 배경 취약성",
+                  "field": "읍면동",
+                  "operation": "all",
+                  "values": []
+                }
+              ],
+              "source": {
+                "label": "Tableau Public · 배경 취약성 지도",
+                "uri": "https://public.tableau.com/views/eumi_tableau_main_dashboard_v2_0_6_connection_map_fixed/Embed01VulnerabilityMap"
+              },
+              "validation_scope": "registered_configuration",
+              "warnings": [
+                "등록 설정 검사 결과입니다. 실제 데이터 유무·최신성·브라우저 표시 성공은 확인하지 않았습니다.",
+                "설정 등록 버전은 원자료 버전이 아닙니다.",
+                "종료 월의 결과이며 선택 기간의 평균·추이가 아닙니다."
+              ]
+            }
+          }
+        ]
+      },
+      "execution": {
+        "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+        "event": "user_request",
+        "status": "completed",
+        "version": "ai-api-v1",
+        "budget": {
+          "steps": {
+            "used": 8,
+            "limit": 200
+          },
+          "tool_calls": {
+            "used": 1,
+            "limit": 100
+          },
+          "agent_calls": {
+            "used": 1,
+            "limit": 20
+          },
+          "retries": {
+            "used": 0,
+            "limit": 20
+          },
+          "active_seconds": {
+            "used": 0,
+            "limit": 3600.0
+          },
+          "final_model_calls": {
+            "used": 0,
+            "limit": 1
+          },
+          "final_active_seconds": {
+            "used": 0,
+            "limit": 30
+          }
+        },
+        "error": null
+      }
+    }
+  }
+}

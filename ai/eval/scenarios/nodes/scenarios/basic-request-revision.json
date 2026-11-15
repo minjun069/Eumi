@@ -1,0 +1,1093 @@
+{
+  "id": "basic-request-revision",
+  "title": "사용자 요청 처리 · 기존 응답 수정",
+  "event": "user_request",
+  "family": "basic-request",
+  "axes": {
+    "conversation_condition": "revision"
+  },
+  "source_groups": [],
+  "steps": [
+    {
+      "step_id": "s001",
+      "node": "interpret",
+      "role": "request",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수가 무엇을 뜻하는지 설명해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "도곡1동의 행동 이상 점수는 학습 기준 행동과의 차이를 뜻합니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+          "constraints": {
+            "required": [
+              "이전 정의와 한계의 의미를 유지한다.",
+              "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 0,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "entry",
+        "from_step": null
+      },
+      "model_outputs": [
+        {
+          "request": {
+            "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+            "constraints": {
+              "required": [
+                "이전 정의와 한계의 의미를 유지한다.",
+                "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다."
+        }
+      ],
+      "case_id": "path-interpret-ac1fc3211326319b4283",
+      "after_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수가 무엇을 뜻하는지 설명해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "도곡1동의 행동 이상 점수는 학습 기준 행동과의 차이를 뜻합니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+          "constraints": {
+            "required": [
+              "이전 정의와 한계의 의미를 유지한다.",
+              "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "1182151bdd01567a9c9fa5d629f6e3cf",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "이전 정의와 한계의 의미를 유지한다.",
+                    "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 1,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "decide"
+      ],
+      "input_ref": "interpret.json#/cases/4/initial",
+      "expectation_ref": "interpret.json#/cases/4/assessment"
+    },
+    {
+      "step_id": "s002",
+      "node": "decide",
+      "role": "request",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수가 무엇을 뜻하는지 설명해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "도곡1동의 행동 이상 점수는 학습 기준 행동과의 차이를 뜻합니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+          "constraints": {
+            "required": [
+              "이전 정의와 한계의 의미를 유지한다.",
+              "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "1182151bdd01567a9c9fa5d629f6e3cf",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "이전 정의와 한계의 의미를 유지한다.",
+                    "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 1,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s001"
+      },
+      "model_outputs": [
+        {
+          "next": "compose",
+          "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다."
+        }
+      ],
+      "case_id": "path-decide-72f73130dab9676fd567",
+      "after_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수가 무엇을 뜻하는지 설명해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "도곡1동의 행동 이상 점수는 학습 기준 행동과의 차이를 뜻합니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+          "constraints": {
+            "required": [
+              "이전 정의와 한계의 의미를 유지한다.",
+              "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "1182151bdd01567a9c9fa5d629f6e3cf",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "이전 정의와 한계의 의미를 유지한다.",
+                    "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "9a7115c8f3f45ca4b8c1e1ebcd967a78",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 2,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "compose"
+      ],
+      "input_ref": "decide.json#/cases/10/initial",
+      "expectation_ref": "decide.json#/cases/10/assessment"
+    },
+    {
+      "step_id": "s003",
+      "node": "compose",
+      "role": "request",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수가 무엇을 뜻하는지 설명해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "도곡1동의 행동 이상 점수는 학습 기준 행동과의 차이를 뜻합니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+          "constraints": {
+            "required": [
+              "이전 정의와 한계의 의미를 유지한다.",
+              "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "1182151bdd01567a9c9fa5d629f6e3cf",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "이전 정의와 한계의 의미를 유지한다.",
+                    "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "9a7115c8f3f45ca4b8c1e1ebcd967a78",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 2,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s002"
+      },
+      "model_outputs": [
+        {
+          "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+          "artifact_ids": [],
+          "status": "completed",
+          "reason": "이전 대화에 있는 정의·한계를 쉬운 두 문장으로 줄이고 새 사실이나 수치를 추가하지 않는다."
+        }
+      ],
+      "case_id": "path-compose-18374f01fe083118a1c7",
+      "after_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수가 무엇을 뜻하는지 설명해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "e1663ee8-c751-586d-842a-0763e3f9a25a"
+          },
+          {
+            "content": "도곡1동의 행동 이상 점수는 학습 기준 행동과의 차이를 뜻합니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "069edbbb-890e-5d14-93a6-62d14fc959a2",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "8c2b47de-4f15-5131-ba21-e7ae8df2d8ca"
+          },
+          {
+            "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "52f260de-7693-5f89-9c90-9b98deda9cf6",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          }
+        ],
+        "request": {
+          "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+          "constraints": {
+            "required": [
+              "이전 정의와 한계의 의미를 유지한다.",
+              "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "1182151bdd01567a9c9fa5d629f6e3cf",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "이전 정의와 한계의 의미를 유지한다.",
+                    "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "9a7115c8f3f45ca4b8c1e1ebcd967a78",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "2810a1f5d7905c69b907a21c7f0fa3a7",
+            "node": "compose",
+            "decision": "composition",
+            "reason": "이전 대화에 있는 정의·한계를 쉬운 두 문장으로 줄이고 새 사실이나 수치를 추가하지 않는다.",
+            "action": null,
+            "output": {
+              "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+              "artifact_ids": [],
+              "status": "completed",
+              "reason": "이전 대화에 있는 정의·한계를 쉬운 두 문장으로 줄이고 새 사실이나 수치를 추가하지 않는다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "composition",
+            "outcome": "success"
+          }
+        ],
+        "response": {
+          "id": "52f260de-7693-5f89-9c90-9b98deda9cf6",
+          "kind": "final",
+          "label": "final",
+          "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+          "artifacts": []
+        },
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "completed",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "__end__"
+      ],
+      "input_ref": "compose.json#/cases/4/initial",
+      "expectation_ref": "compose.json#/cases/4/assessment"
+    }
+  ],
+  "boundaries": [],
+  "events": [],
+  "history_provenance": "작성한 모델 응답으로 실제 노드를 실행해 구성한 기준 이력",
+  "scope": "agent",
+  "agent_role": "request",
+  "conversation_condition": "revision",
+  "region_code": "1168065500",
+  "expected_summary": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+  "task_rationale": {
+    "user_requirement": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+    "available_evidence": [
+      "실제 이전 답변에 있는 점수 정의와 해석 한계",
+      "추가 분석 없이 표현만 수정하라는 현재 요청"
+    ],
+    "missing_evidence": [],
+    "necessary_work": [
+      "이전 대화의 정의·한계를 쉬운 두 문장으로 재작성"
+    ],
+    "excluded_work": [
+      "자료 조회",
+      "계산",
+      "전문 에이전트 위임",
+      "새 수치·원인·비교 추가"
+    ]
+  },
+  "evidence_refs": [
+    {
+      "conversation": "start_state.messages",
+      "message_index": 1,
+      "meaning": "이전 AI 답변의 정의·해석 한계"
+    }
+  ],
+  "start_state": {
+    "messages": [
+      {
+        "content": "도곡1동의 행동 이상 점수가 무엇을 뜻하는지 설명해 주세요.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null
+      },
+      {
+        "content": "도곡1동의 행동 이상 점수는 학습 기준 행동과의 차이를 뜻합니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "ai",
+        "name": null,
+        "id": null,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null
+      }
+    ],
+    "request": {
+      "goal": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+      "constraints": {
+        "required": [
+          "이전 정의와 한계의 의미를 유지한다.",
+          "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+        ],
+        "preferred": [],
+        "excluded": []
+      }
+    },
+    "results": [],
+    "response": null,
+    "execution": {
+      "run_id": "00000000-0000-0000-0000-000000000001",
+      "event": "user_request",
+      "status": "queued",
+      "version": "ai-api-v1",
+      "budget": {
+        "steps": {
+          "used": 0,
+          "limit": 200
+        },
+        "tool_calls": {
+          "used": 0,
+          "limit": 100
+        },
+        "agent_calls": {
+          "used": 0,
+          "limit": 20
+        },
+        "retries": {
+          "used": 0,
+          "limit": 20
+        },
+        "active_seconds": {
+          "used": 0,
+          "limit": 3600.0
+        },
+        "final_model_calls": {
+          "used": 0,
+          "limit": 1
+        },
+        "final_active_seconds": {
+          "used": 0,
+          "limit": 30
+        }
+      },
+      "error": null
+    }
+  },
+  "terminal": {
+    "status": "completed",
+    "state": {
+      "messages": [
+        {
+          "content": "도곡1동의 행동 이상 점수가 무엇을 뜻하는지 설명해 주세요.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "e1663ee8-c751-586d-842a-0763e3f9a25a"
+        },
+        {
+          "content": "도곡1동의 행동 이상 점수는 학습 기준 행동과의 차이를 뜻합니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": "069edbbb-890e-5d14-93a6-62d14fc959a2",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        },
+        {
+          "content": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "8c2b47de-4f15-5131-ba21-e7ae8df2d8ca"
+        },
+        {
+          "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": "52f260de-7693-5f89-9c90-9b98deda9cf6",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        }
+      ],
+      "request": {
+        "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+        "constraints": {
+          "required": [
+            "이전 정의와 한계의 의미를 유지한다.",
+            "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+          ],
+          "preferred": [],
+          "excluded": []
+        }
+      },
+      "results": [
+        {
+          "id": "1182151bdd01567a9c9fa5d629f6e3cf",
+          "node": "interpret",
+          "decision": "interpretation",
+          "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+          "action": null,
+          "output": {
+            "request": {
+              "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+              "constraints": {
+                "required": [
+                  "이전 정의와 한계의 의미를 유지한다.",
+                  "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "reason": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "interpretation",
+          "outcome": "success"
+        },
+        {
+          "id": "9a7115c8f3f45ca4b8c1e1ebcd967a78",
+          "node": "decide",
+          "decision": "decision",
+          "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+          "action": null,
+          "output": {
+            "next": "compose",
+            "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "decision",
+          "outcome": "success"
+        },
+        {
+          "id": "2810a1f5d7905c69b907a21c7f0fa3a7",
+          "node": "compose",
+          "decision": "composition",
+          "reason": "이전 대화에 있는 정의·한계를 쉬운 두 문장으로 줄이고 새 사실이나 수치를 추가하지 않는다.",
+          "action": null,
+          "output": {
+            "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+            "artifact_ids": [],
+            "status": "completed",
+            "reason": "이전 대화에 있는 정의·한계를 쉬운 두 문장으로 줄이고 새 사실이나 수치를 추가하지 않는다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "composition",
+          "outcome": "success"
+        }
+      ],
+      "response": {
+        "id": "52f260de-7693-5f89-9c90-9b98deda9cf6",
+        "kind": "final",
+        "label": "final",
+        "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+        "artifacts": []
+      },
+      "execution": {
+        "run_id": "00000000-0000-0000-0000-000000000001",
+        "event": "user_request",
+        "status": "completed",
+        "version": "ai-api-v1",
+        "budget": {
+          "steps": {
+            "used": 3,
+            "limit": 200
+          },
+          "tool_calls": {
+            "used": 0,
+            "limit": 100
+          },
+          "agent_calls": {
+            "used": 0,
+            "limit": 20
+          },
+          "retries": {
+            "used": 0,
+            "limit": 20
+          },
+          "active_seconds": {
+            "used": 0,
+            "limit": 3600.0
+          },
+          "final_model_calls": {
+            "used": 0,
+            "limit": 1
+          },
+          "final_active_seconds": {
+            "used": 0,
+            "limit": 30
+          }
+        },
+        "error": null
+      }
+    }
+  }
+}

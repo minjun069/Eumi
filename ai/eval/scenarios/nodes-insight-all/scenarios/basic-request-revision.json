@@ -1,0 +1,1140 @@
+{
+  "id": "basic-request-revision",
+  "title": "사용자 요청 처리 · 기존 응답 수정",
+  "event": "user_request",
+  "family": "basic-request",
+  "axes": {
+    "conversation_condition": "revision"
+  },
+  "source_groups": [],
+  "steps": [
+    {
+      "step_id": "s001",
+      "node": "interpret",
+      "role": "request",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수는 무슨 뜻인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "행동 이상 점수는 학습 기준 행동과의 차이입니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "현재 선택 지역: 강남구 도곡1동(행정동 코드 1168065500). 화면 기준 월: 2025-12.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "좀 더 쉽게 두 문장으로 줄여주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "좀 더 쉽게 두 문장으로 줄여주세요.",
+          "constraints": {
+            "required": [
+              "같은 뜻의 쉬운 두 문장"
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 0,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "entry",
+        "from_step": null
+      },
+      "model_outputs": [
+        {
+          "request": {
+            "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+            "constraints": {
+              "required": [
+                "같은 뜻의 쉬운 두 문장"
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다."
+        }
+      ],
+      "case_id": "path-interpret-ee3892d13cd6b153b609",
+      "after_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수는 무슨 뜻인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "행동 이상 점수는 학습 기준 행동과의 차이입니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "현재 선택 지역: 강남구 도곡1동(행정동 코드 1168065500). 화면 기준 월: 2025-12.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "좀 더 쉽게 두 문장으로 줄여주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+          "constraints": {
+            "required": [
+              "같은 뜻의 쉬운 두 문장"
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "a751eb48b1465bafb115ddaded41622a",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+                "constraints": {
+                  "required": [
+                    "같은 뜻의 쉬운 두 문장"
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 1,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "decide"
+      ],
+      "input_ref": "interpret.json#/cases/4/initial",
+      "expectation_ref": "interpret.json#/cases/4/assessment"
+    },
+    {
+      "step_id": "s002",
+      "node": "decide",
+      "role": "request",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수는 무슨 뜻인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "행동 이상 점수는 학습 기준 행동과의 차이입니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "현재 선택 지역: 강남구 도곡1동(행정동 코드 1168065500). 화면 기준 월: 2025-12.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "좀 더 쉽게 두 문장으로 줄여주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+          "constraints": {
+            "required": [
+              "같은 뜻의 쉬운 두 문장"
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "a751eb48b1465bafb115ddaded41622a",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+                "constraints": {
+                  "required": [
+                    "같은 뜻의 쉬운 두 문장"
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 1,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s001"
+      },
+      "model_outputs": [
+        {
+          "next": "compose",
+          "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다."
+        }
+      ],
+      "case_id": "path-decide-36018543f6ae066fc3ce",
+      "after_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수는 무슨 뜻인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "행동 이상 점수는 학습 기준 행동과의 차이입니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "현재 선택 지역: 강남구 도곡1동(행정동 코드 1168065500). 화면 기준 월: 2025-12.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "좀 더 쉽게 두 문장으로 줄여주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+          "constraints": {
+            "required": [
+              "같은 뜻의 쉬운 두 문장"
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "a751eb48b1465bafb115ddaded41622a",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+                "constraints": {
+                  "required": [
+                    "같은 뜻의 쉬운 두 문장"
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "2ea12311c33853e1b4254beb6e7ba98d",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 2,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "compose"
+      ],
+      "input_ref": "decide.json#/cases/14/initial",
+      "expectation_ref": "decide.json#/cases/14/assessment"
+    },
+    {
+      "step_id": "s003",
+      "node": "compose",
+      "role": "request",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수는 무슨 뜻인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "행동 이상 점수는 학습 기준 행동과의 차이입니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "현재 선택 지역: 강남구 도곡1동(행정동 코드 1168065500). 화면 기준 월: 2025-12.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "좀 더 쉽게 두 문장으로 줄여주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+          "constraints": {
+            "required": [
+              "같은 뜻의 쉬운 두 문장"
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "a751eb48b1465bafb115ddaded41622a",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+                "constraints": {
+                  "required": [
+                    "같은 뜻의 쉬운 두 문장"
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "2ea12311c33853e1b4254beb6e7ba98d",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 2,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s002"
+      },
+      "model_outputs": [
+        {
+          "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+          "artifact_ids": [],
+          "status": "completed",
+          "reason": "이전 대화에 있는 정의·한계를 쉬운 두 문장으로 줄이고 새 사실이나 수치를 추가하지 않는다."
+        }
+      ],
+      "case_id": "path-compose-4eafe8c4b4bfdb3fb0ab",
+      "after_state": {
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수는 무슨 뜻인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "8c9c2480-f0c9-5244-8d41-8b5240f908df"
+          },
+          {
+            "content": "행동 이상 점수는 학습 기준 행동과의 차이입니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "14e5d880-7bdb-5252-af84-cd4688a37410",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "현재 선택 지역: 강남구 도곡1동(행정동 코드 1168065500). 화면 기준 월: 2025-12.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": "d51b7dfe-e5b3-500a-8f17-2c66d051a1dc"
+          },
+          {
+            "content": "좀 더 쉽게 두 문장으로 줄여주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "67c4ee49-441d-5725-8f16-2e70400fc022"
+          },
+          {
+            "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "77f52a47-507f-5228-a690-b22a4566fa21",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          }
+        ],
+        "request": {
+          "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+          "constraints": {
+            "required": [
+              "같은 뜻의 쉬운 두 문장"
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "a751eb48b1465bafb115ddaded41622a",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+                "constraints": {
+                  "required": [
+                    "같은 뜻의 쉬운 두 문장"
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "2ea12311c33853e1b4254beb6e7ba98d",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "b244a11a57125b35ab3a24dba219e476",
+            "node": "compose",
+            "decision": "composition",
+            "reason": "이전 대화에 있는 정의·한계를 쉬운 두 문장으로 줄이고 새 사실이나 수치를 추가하지 않는다.",
+            "action": null,
+            "output": {
+              "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+              "artifact_ids": [],
+              "status": "completed",
+              "reason": "이전 대화에 있는 정의·한계를 쉬운 두 문장으로 줄이고 새 사실이나 수치를 추가하지 않는다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "composition",
+            "outcome": "success"
+          }
+        ],
+        "response": {
+          "id": "77f52a47-507f-5228-a690-b22a4566fa21",
+          "kind": "final",
+          "label": "final",
+          "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+          "artifacts": []
+        },
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "completed",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "__end__"
+      ],
+      "input_ref": "compose.json#/cases/4/initial",
+      "expectation_ref": "compose.json#/cases/4/assessment"
+    }
+  ],
+  "boundaries": [],
+  "events": [],
+  "history_provenance": "역할·대화 조건은 현행 12개 분류를 유지한다. 이전 발화는 작성한 대화 사례이며 현재 선택 문맥은 snapshot.selection에서 가져왔다. 최초 질문에 평가 기준·출처·확인 절차를 넣지 않았다. 실제 노드와 조회·가공·시각화 검사를 실행했다.",
+  "scope": "agent",
+  "agent_role": "request",
+  "conversation_condition": "revision",
+  "region_code": "1168065500",
+  "expected_summary": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+  "task_rationale": {
+    "user_requirement": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+    "available_evidence": [
+      "실제 이전 대화",
+      "현재 질문과 선택 화면의 지역·기준 월"
+    ],
+    "missing_evidence": [],
+    "necessary_work": [
+      "이전 정의·한계를 쉬운 두 문장으로 재서술"
+    ],
+    "excluded_work": [
+      "조회·가공·위임",
+      "새 수치·해석 추가"
+    ]
+  },
+  "evidence_refs": [
+    {
+      "conversation": "start_state.messages",
+      "message_index": 1,
+      "meaning": "이전 AI 답변의 정의·해석 한계"
+    }
+  ],
+  "start_state": {
+    "messages": [
+      {
+        "content": "도곡1동의 행동 이상 점수는 무슨 뜻인가요?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null
+      },
+      {
+        "content": "행동 이상 점수는 학습 기준 행동과의 차이입니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "ai",
+        "name": null,
+        "id": null,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "현재 선택 지역: 강남구 도곡1동(행정동 코드 1168065500). 화면 기준 월: 2025-12.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "system",
+        "name": null,
+        "id": null
+      },
+      {
+        "content": "좀 더 쉽게 두 문장으로 줄여주세요.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null
+      }
+    ],
+    "request": {
+      "goal": "좀 더 쉽게 두 문장으로 줄여주세요.",
+      "constraints": {
+        "required": [
+          "같은 뜻의 쉬운 두 문장"
+        ],
+        "preferred": [],
+        "excluded": []
+      }
+    },
+    "results": [],
+    "response": null,
+    "execution": {
+      "run_id": "00000000-0000-0000-0000-000000000001",
+      "event": "user_request",
+      "status": "queued",
+      "version": "ai-api-v1",
+      "budget": {
+        "steps": {
+          "used": 0,
+          "limit": 200
+        },
+        "tool_calls": {
+          "used": 0,
+          "limit": 100
+        },
+        "agent_calls": {
+          "used": 0,
+          "limit": 20
+        },
+        "retries": {
+          "used": 0,
+          "limit": 20
+        },
+        "active_seconds": {
+          "used": 0,
+          "limit": 3600.0
+        },
+        "final_model_calls": {
+          "used": 0,
+          "limit": 1
+        },
+        "final_active_seconds": {
+          "used": 0,
+          "limit": 30
+        }
+      },
+      "error": null
+    }
+  },
+  "terminal": {
+    "status": "completed",
+    "state": {
+      "messages": [
+        {
+          "content": "도곡1동의 행동 이상 점수는 무슨 뜻인가요?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "8c9c2480-f0c9-5244-8d41-8b5240f908df"
+        },
+        {
+          "content": "행동 이상 점수는 학습 기준 행동과의 차이입니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": "14e5d880-7bdb-5252-af84-cd4688a37410",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        },
+        {
+          "content": "현재 선택 지역: 강남구 도곡1동(행정동 코드 1168065500). 화면 기준 월: 2025-12.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "system",
+          "name": null,
+          "id": "d51b7dfe-e5b3-500a-8f17-2c66d051a1dc"
+        },
+        {
+          "content": "좀 더 쉽게 두 문장으로 줄여주세요.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "67c4ee49-441d-5725-8f16-2e70400fc022"
+        },
+        {
+          "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": "77f52a47-507f-5228-a690-b22a4566fa21",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        }
+      ],
+      "request": {
+        "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+        "constraints": {
+          "required": [
+            "같은 뜻의 쉬운 두 문장"
+          ],
+          "preferred": [],
+          "excluded": []
+        }
+      },
+      "results": [
+        {
+          "id": "a751eb48b1465bafb115ddaded41622a",
+          "node": "interpret",
+          "decision": "interpretation",
+          "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+          "action": null,
+          "output": {
+            "request": {
+              "goal": "이전 설명을 같은 뜻의 쉬운 두 문장으로 줄여주세요.",
+              "constraints": {
+                "required": [
+                  "같은 뜻의 쉬운 두 문장"
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "reason": "이전 설명의 의미를 유지하는 쉬운 두 문장 재서술이다. 새 분석은 요청하지 않았다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "interpretation",
+          "outcome": "success"
+        },
+        {
+          "id": "2ea12311c33853e1b4254beb6e7ba98d",
+          "node": "decide",
+          "decision": "decision",
+          "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+          "action": null,
+          "output": {
+            "next": "compose",
+            "reason": "이전 실제 답변에 점수의 정의와 개인 상태를 판단할 수 없다는 한계가 모두 있다. 사용자는 같은 의미의 짧은 재작성만 요청했고 새 수치·비교를 제외했으므로 추가 근거가 필요하지 않다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "decision",
+          "outcome": "success"
+        },
+        {
+          "id": "b244a11a57125b35ab3a24dba219e476",
+          "node": "compose",
+          "decision": "composition",
+          "reason": "이전 대화에 있는 정의·한계를 쉬운 두 문장으로 줄이고 새 사실이나 수치를 추가하지 않는다.",
+          "action": null,
+          "output": {
+            "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+            "artifact_ids": [],
+            "status": "completed",
+            "reason": "이전 대화에 있는 정의·한계를 쉬운 두 문장으로 줄이고 새 사실이나 수치를 추가하지 않는다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "composition",
+          "outcome": "success"
+        }
+      ],
+      "response": {
+        "id": "77f52a47-507f-5228-a690-b22a4566fa21",
+        "kind": "final",
+        "label": "final",
+        "content": "행동 이상 점수는 기준으로 학습한 행동과 다른 정도를 보여줍니다. 실제 활동량이나 개인의 고립 상태를 확인한 값은 아닙니다.",
+        "artifacts": []
+      },
+      "execution": {
+        "run_id": "00000000-0000-0000-0000-000000000001",
+        "event": "user_request",
+        "status": "completed",
+        "version": "ai-api-v1",
+        "budget": {
+          "steps": {
+            "used": 3,
+            "limit": 200
+          },
+          "tool_calls": {
+            "used": 0,
+            "limit": 100
+          },
+          "agent_calls": {
+            "used": 0,
+            "limit": 20
+          },
+          "retries": {
+            "used": 0,
+            "limit": 20
+          },
+          "active_seconds": {
+            "used": 0,
+            "limit": 3600.0
+          },
+          "final_model_calls": {
+            "used": 0,
+            "limit": 1
+          },
+          "final_active_seconds": {
+            "used": 0,
+            "limit": 30
+          }
+        },
+        "error": null
+      }
+    }
+  }
+}

@@ -1,0 +1,5802 @@
+{
+  "schema_version": "evaluation-suite-v1",
+  "id": "node-basic-interpret-v1",
+  "data_source": "prepared",
+  "datasets": {
+    "public.region_result": {
+      "reference": {
+        "id": "public.region_result",
+        "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9"
+      },
+      "as_of": "2026-11-03T10:42:36.824797",
+      "sources": [
+        {
+          "label": "파이프라인 읍면동 월별 분석 결과",
+          "uri": "db://public/region_result"
+        }
+      ],
+      "columns": [
+        {
+          "name": "period_start",
+          "kind": "string",
+          "unit": "기준월 첫날",
+          "spatial_unit": "행정동",
+          "temporal_unit": "월",
+          "denominator": "해당 없음"
+        },
+        {
+          "name": "adm_cd10",
+          "kind": "string",
+          "unit": "행정동코드",
+          "spatial_unit": "행정동",
+          "temporal_unit": "월",
+          "denominator": "해당 없음"
+        },
+        {
+          "name": "bg_score",
+          "kind": "number",
+          "unit": "배경 점수",
+          "spatial_unit": "행정동",
+          "temporal_unit": "월",
+          "denominator": "해당 없음"
+        },
+        {
+          "name": "bg_grade",
+          "kind": "integer",
+          "unit": "단계(1~5)",
+          "spatial_unit": "행정동",
+          "temporal_unit": "월",
+          "denominator": "해당 없음"
+        },
+        {
+          "name": "bh_score",
+          "kind": "number",
+          "unit": "행동 점수",
+          "spatial_unit": "행정동",
+          "temporal_unit": "월",
+          "denominator": "해당 없음"
+        },
+        {
+          "name": "bh_grade",
+          "kind": "integer",
+          "unit": "단계(1~5)",
+          "spatial_unit": "행정동",
+          "temporal_unit": "월",
+          "denominator": "해당 없음"
+        },
+        {
+          "name": "risk_grade",
+          "kind": "integer",
+          "unit": "단계(1~5)",
+          "spatial_unit": "행정동",
+          "temporal_unit": "월",
+          "denominator": "해당 없음"
+        },
+        {
+          "name": "updated_at",
+          "kind": "string",
+          "unit": "분석 수정 시각(한국 시간)",
+          "spatial_unit": "행정동",
+          "temporal_unit": "월",
+          "denominator": "해당 없음"
+        }
+      ],
+      "rows": [
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168051000",
+          "bg_score": 34.12,
+          "bg_grade": 2,
+          "bh_score": 53.4,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168052100",
+          "bg_score": 44.4,
+          "bg_grade": 3,
+          "bh_score": 53.86,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168053100",
+          "bg_score": 35.42,
+          "bg_grade": 2,
+          "bh_score": 53.62,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168054500",
+          "bg_score": 27.75,
+          "bg_grade": 2,
+          "bh_score": 53.75,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168056500",
+          "bg_score": 29.07,
+          "bg_grade": 2,
+          "bh_score": 53.26,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168058000",
+          "bg_score": 31.32,
+          "bg_grade": 2,
+          "bh_score": 59.88,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168059000",
+          "bg_score": 29.68,
+          "bg_grade": 2,
+          "bh_score": 52.12,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168060000",
+          "bg_score": 15.38,
+          "bg_grade": 1,
+          "bh_score": 49.21,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168061000",
+          "bg_score": 29.42,
+          "bg_grade": 2,
+          "bh_score": 56.86,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168063000",
+          "bg_score": 37.68,
+          "bg_grade": 3,
+          "bh_score": 54.53,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168064000",
+          "bg_score": 44.48,
+          "bg_grade": 3,
+          "bh_score": 55.59,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065000",
+          "bg_score": 19.99,
+          "bg_grade": 1,
+          "bh_score": 49.76,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "bg_score": 7.35,
+          "bg_grade": 1,
+          "bh_score": 47.48,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065600",
+          "bg_score": 14.13,
+          "bg_grade": 1,
+          "bh_score": 44.62,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168066000",
+          "bg_score": 24.15,
+          "bg_grade": 2,
+          "bh_score": 55.48,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168067000",
+          "bg_score": 0.06,
+          "bg_grade": 1,
+          "bh_score": 50.36,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168067500",
+          "bg_score": 31.42,
+          "bg_grade": 2,
+          "bh_score": 53.82,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168069000",
+          "bg_score": 33.82,
+          "bg_grade": 2,
+          "bh_score": 53.16,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168070000",
+          "bg_score": 25.2,
+          "bg_grade": 2,
+          "bh_score": 52.4,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168072000",
+          "bg_score": 22.13,
+          "bg_grade": 2,
+          "bh_score": 53.57,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168073000",
+          "bg_score": 41.15,
+          "bg_grade": 3,
+          "bh_score": 50.78,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168075000",
+          "bg_score": 36.38,
+          "bg_grade": 3,
+          "bh_score": 55.21,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111025000",
+          "bg_score": 64.36,
+          "bg_grade": 2,
+          "bh_score": 60.37,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111031000",
+          "bg_score": 43.68,
+          "bg_grade": 2,
+          "bh_score": 55.62,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111032000",
+          "bg_score": 89.99,
+          "bg_grade": 3,
+          "bh_score": 63.05,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111033000",
+          "bg_score": 73.0,
+          "bg_grade": 2,
+          "bh_score": 62.83,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111034000",
+          "bg_score": 91.3,
+          "bg_grade": 3,
+          "bh_score": 62.03,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111035000",
+          "bg_score": 78.43,
+          "bg_grade": 3,
+          "bh_score": 64.07,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111036000",
+          "bg_score": 76.03,
+          "bg_grade": 2,
+          "bh_score": 61.0,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111038000",
+          "bg_score": 99.13,
+          "bg_grade": 3,
+          "bh_score": 65.9,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111039000",
+          "bg_score": 45.9,
+          "bg_grade": 2,
+          "bh_score": 55.09,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111040000",
+          "bg_score": 83.0,
+          "bg_grade": 3,
+          "bh_score": 62.82,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111052000",
+          "bg_score": 68.83,
+          "bg_grade": 2,
+          "bh_score": 58.84,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111053000",
+          "bg_score": 53.93,
+          "bg_grade": 2,
+          "bh_score": 53.4,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111054500",
+          "bg_score": 25.94,
+          "bg_grade": 1,
+          "bh_score": 53.1,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111057000",
+          "bg_score": 39.21,
+          "bg_grade": 2,
+          "bh_score": 58.17,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111058000",
+          "bg_score": 34.79,
+          "bg_grade": 2,
+          "bh_score": 51.87,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111060000",
+          "bg_score": 46.9,
+          "bg_grade": 2,
+          "bh_score": 52.26,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111061000",
+          "bg_score": 25.09,
+          "bg_grade": 1,
+          "bh_score": 48.98,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111061100",
+          "bg_score": 26.34,
+          "bg_grade": 1,
+          "bh_score": 50.45,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111062000",
+          "bg_score": 36.8,
+          "bg_grade": 2,
+          "bh_score": 52.76,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111063000",
+          "bg_score": 62.93,
+          "bg_grade": 2,
+          "bh_score": 54.93,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111064000",
+          "bg_score": 56.55,
+          "bg_grade": 2,
+          "bh_score": 53.88,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111065000",
+          "bg_score": 28.26,
+          "bg_grade": 1,
+          "bh_score": 46.83,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111066000",
+          "bg_score": 26.87,
+          "bg_grade": 1,
+          "bh_score": 43.42,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111067500",
+          "bg_score": 28.37,
+          "bg_grade": 1,
+          "bh_score": 50.35,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111070500",
+          "bg_score": 36.83,
+          "bg_grade": 2,
+          "bh_score": 54.67,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:22.199904"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168051000",
+          "bg_score": 33.92,
+          "bg_grade": 2,
+          "bh_score": 53.43,
+          "bh_grade": 1,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168052100",
+          "bg_score": 44.41,
+          "bg_grade": 3,
+          "bh_score": 55.23,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168053100",
+          "bg_score": 35.47,
+          "bg_grade": 2,
+          "bh_score": 58.04,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168054500",
+          "bg_score": 27.57,
+          "bg_grade": 2,
+          "bh_score": 55.73,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168056500",
+          "bg_score": 29.24,
+          "bg_grade": 2,
+          "bh_score": 53.18,
+          "bh_grade": 1,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168058000",
+          "bg_score": 31.43,
+          "bg_grade": 2,
+          "bh_score": 56.93,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168059000",
+          "bg_score": 29.77,
+          "bg_grade": 2,
+          "bh_score": 55.46,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168060000",
+          "bg_score": 15.5,
+          "bg_grade": 1,
+          "bh_score": 55.92,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168061000",
+          "bg_score": 29.43,
+          "bg_grade": 2,
+          "bh_score": 56.97,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168063000",
+          "bg_score": 37.66,
+          "bg_grade": 3,
+          "bh_score": 55.48,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168064000",
+          "bg_score": 44.53,
+          "bg_grade": 3,
+          "bh_score": 57.29,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065000",
+          "bg_score": 19.94,
+          "bg_grade": 1,
+          "bh_score": 49.93,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "bg_score": 7.34,
+          "bg_grade": 1,
+          "bh_score": 51.85,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065600",
+          "bg_score": 14.12,
+          "bg_grade": 1,
+          "bh_score": 48.78,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168066000",
+          "bg_score": 24.25,
+          "bg_grade": 2,
+          "bh_score": 58.74,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168067000",
+          "bg_score": 0.02,
+          "bg_grade": 1,
+          "bh_score": 53.83,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168067500",
+          "bg_score": 31.46,
+          "bg_grade": 2,
+          "bh_score": 56.35,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168069000",
+          "bg_score": 33.89,
+          "bg_grade": 2,
+          "bh_score": 53.45,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168070000",
+          "bg_score": 25.22,
+          "bg_grade": 2,
+          "bh_score": 55.3,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168072000",
+          "bg_score": 22.1,
+          "bg_grade": 2,
+          "bh_score": 54.84,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168073000",
+          "bg_score": 41.34,
+          "bg_grade": 3,
+          "bh_score": 53.67,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168075000",
+          "bg_score": 36.65,
+          "bg_grade": 3,
+          "bh_score": 55.6,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111025000",
+          "bg_score": 64.36,
+          "bg_grade": 2,
+          "bh_score": 60.59,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111031000",
+          "bg_score": 43.77,
+          "bg_grade": 2,
+          "bh_score": 58.98,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111032000",
+          "bg_score": 89.63,
+          "bg_grade": 3,
+          "bh_score": 63.72,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111033000",
+          "bg_score": 73.43,
+          "bg_grade": 2,
+          "bh_score": 58.47,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111034000",
+          "bg_score": 92.32,
+          "bg_grade": 3,
+          "bh_score": 63.72,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111035000",
+          "bg_score": 78.5,
+          "bg_grade": 3,
+          "bh_score": 63.55,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111036000",
+          "bg_score": 76.58,
+          "bg_grade": 2,
+          "bh_score": 63.33,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111038000",
+          "bg_score": 98.94,
+          "bg_grade": 3,
+          "bh_score": 63.89,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111039000",
+          "bg_score": 46.0,
+          "bg_grade": 2,
+          "bh_score": 57.0,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111040000",
+          "bg_score": 82.86,
+          "bg_grade": 3,
+          "bh_score": 63.05,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111052000",
+          "bg_score": 69.0,
+          "bg_grade": 2,
+          "bh_score": 62.48,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111053000",
+          "bg_score": 54.0,
+          "bg_grade": 2,
+          "bh_score": 56.14,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111054500",
+          "bg_score": 25.99,
+          "bg_grade": 1,
+          "bh_score": 56.55,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111057000",
+          "bg_score": 39.49,
+          "bg_grade": 2,
+          "bh_score": 60.58,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111058000",
+          "bg_score": 34.59,
+          "bg_grade": 2,
+          "bh_score": 54.49,
+          "bh_grade": 1,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111060000",
+          "bg_score": 46.88,
+          "bg_grade": 2,
+          "bh_score": 57.4,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111061000",
+          "bg_score": 25.19,
+          "bg_grade": 1,
+          "bh_score": 50.73,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111061100",
+          "bg_score": 26.58,
+          "bg_grade": 1,
+          "bh_score": 53.85,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111062000",
+          "bg_score": 36.33,
+          "bg_grade": 2,
+          "bh_score": 53.24,
+          "bh_grade": 1,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111063000",
+          "bg_score": 63.02,
+          "bg_grade": 2,
+          "bh_score": 60.45,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111064000",
+          "bg_score": 56.59,
+          "bg_grade": 2,
+          "bh_score": 59.71,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111065000",
+          "bg_score": 28.21,
+          "bg_grade": 1,
+          "bh_score": 54.65,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111066000",
+          "bg_score": 26.88,
+          "bg_grade": 1,
+          "bh_score": 49.59,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111067500",
+          "bg_score": 28.36,
+          "bg_grade": 1,
+          "bh_score": 55.72,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111070500",
+          "bg_score": 36.8,
+          "bg_grade": 2,
+          "bh_score": 57.31,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:23.920979"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168051000",
+          "bg_score": 33.96,
+          "bg_grade": 2,
+          "bh_score": 52.25,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168052100",
+          "bg_score": 44.42,
+          "bg_grade": 3,
+          "bh_score": 54.66,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168053100",
+          "bg_score": 35.46,
+          "bg_grade": 2,
+          "bh_score": 56.88,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168054500",
+          "bg_score": 27.65,
+          "bg_grade": 2,
+          "bh_score": 53.01,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168056500",
+          "bg_score": 29.29,
+          "bg_grade": 2,
+          "bh_score": 52.4,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168058000",
+          "bg_score": 31.52,
+          "bg_grade": 2,
+          "bh_score": 59.73,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168059000",
+          "bg_score": 29.74,
+          "bg_grade": 2,
+          "bh_score": 54.56,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168060000",
+          "bg_score": 15.41,
+          "bg_grade": 1,
+          "bh_score": 47.23,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168061000",
+          "bg_score": 29.5,
+          "bg_grade": 2,
+          "bh_score": 57.19,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168063000",
+          "bg_score": 37.55,
+          "bg_grade": 3,
+          "bh_score": 55.36,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168064000",
+          "bg_score": 44.69,
+          "bg_grade": 3,
+          "bh_score": 56.53,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065000",
+          "bg_score": 20.06,
+          "bg_grade": 1,
+          "bh_score": 51.01,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "bg_score": 7.1,
+          "bg_grade": 1,
+          "bh_score": 47.72,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065600",
+          "bg_score": 14.19,
+          "bg_grade": 1,
+          "bh_score": 44.93,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168066000",
+          "bg_score": 24.35,
+          "bg_grade": 2,
+          "bh_score": 54.58,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168067000",
+          "bg_score": -0.02,
+          "bg_grade": 1,
+          "bh_score": 50.05,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168067500",
+          "bg_score": 31.55,
+          "bg_grade": 2,
+          "bh_score": 54.16,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168069000",
+          "bg_score": 33.83,
+          "bg_grade": 2,
+          "bh_score": 52.16,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168070000",
+          "bg_score": 25.27,
+          "bg_grade": 2,
+          "bh_score": 52.87,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168072000",
+          "bg_score": 22.11,
+          "bg_grade": 2,
+          "bh_score": 54.16,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168073000",
+          "bg_score": 41.28,
+          "bg_grade": 3,
+          "bh_score": 54.48,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168075000",
+          "bg_score": 36.68,
+          "bg_grade": 3,
+          "bh_score": 55.51,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111025000",
+          "bg_score": 64.35,
+          "bg_grade": 2,
+          "bh_score": 61.07,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111031000",
+          "bg_score": 43.6,
+          "bg_grade": 2,
+          "bh_score": 58.59,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111032000",
+          "bg_score": 89.73,
+          "bg_grade": 3,
+          "bh_score": 65.08,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111033000",
+          "bg_score": 73.41,
+          "bg_grade": 2,
+          "bh_score": 62.69,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111034000",
+          "bg_score": 92.1,
+          "bg_grade": 3,
+          "bh_score": 65.08,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111035000",
+          "bg_score": 79.08,
+          "bg_grade": 3,
+          "bh_score": 64.74,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111036000",
+          "bg_score": 77.14,
+          "bg_grade": 2,
+          "bh_score": 61.72,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111038000",
+          "bg_score": 100.01,
+          "bg_grade": 3,
+          "bh_score": 65.08,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111039000",
+          "bg_score": 45.75,
+          "bg_grade": 2,
+          "bh_score": 58.3,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111040000",
+          "bg_score": 82.97,
+          "bg_grade": 3,
+          "bh_score": 65.08,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111052000",
+          "bg_score": 69.14,
+          "bg_grade": 2,
+          "bh_score": 60.83,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111053000",
+          "bg_score": 53.72,
+          "bg_grade": 2,
+          "bh_score": 58.79,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111054500",
+          "bg_score": 25.7,
+          "bg_grade": 1,
+          "bh_score": 60.02,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111057000",
+          "bg_score": 39.41,
+          "bg_grade": 2,
+          "bh_score": 64.11,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111058000",
+          "bg_score": 33.65,
+          "bg_grade": 2,
+          "bh_score": 59.68,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111060000",
+          "bg_score": 47.02,
+          "bg_grade": 2,
+          "bh_score": 56.16,
+          "bh_grade": 1,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111061000",
+          "bg_score": 25.28,
+          "bg_grade": 1,
+          "bh_score": 47.13,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111061100",
+          "bg_score": 26.84,
+          "bg_grade": 1,
+          "bh_score": 48.71,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111062000",
+          "bg_score": 36.24,
+          "bg_grade": 2,
+          "bh_score": 58.79,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111063000",
+          "bg_score": 62.96,
+          "bg_grade": 2,
+          "bh_score": 62.93,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111064000",
+          "bg_score": 56.73,
+          "bg_grade": 2,
+          "bh_score": 57.67,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111065000",
+          "bg_score": 28.28,
+          "bg_grade": 1,
+          "bh_score": 45.58,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111066000",
+          "bg_score": 27.04,
+          "bg_grade": 1,
+          "bh_score": 45.05,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111067500",
+          "bg_score": 28.38,
+          "bg_grade": 1,
+          "bh_score": 59.71,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111070500",
+          "bg_score": 36.94,
+          "bg_grade": 2,
+          "bh_score": 60.34,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.010996"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168051000",
+          "bg_score": 33.94,
+          "bg_grade": 2,
+          "bh_score": 52.81,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168052100",
+          "bg_score": 44.39,
+          "bg_grade": 3,
+          "bh_score": 55.01,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168053100",
+          "bg_score": 35.63,
+          "bg_grade": 2,
+          "bh_score": 56.8,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168054500",
+          "bg_score": 27.72,
+          "bg_grade": 2,
+          "bh_score": 53.66,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168056500",
+          "bg_score": 29.6,
+          "bg_grade": 2,
+          "bh_score": 53.7,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168058000",
+          "bg_score": 31.53,
+          "bg_grade": 2,
+          "bh_score": 59.2,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168059000",
+          "bg_score": 29.69,
+          "bg_grade": 2,
+          "bh_score": 55.0,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168060000",
+          "bg_score": 15.42,
+          "bg_grade": 1,
+          "bh_score": 50.85,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168061000",
+          "bg_score": 29.66,
+          "bg_grade": 2,
+          "bh_score": 57.04,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168063000",
+          "bg_score": 37.71,
+          "bg_grade": 3,
+          "bh_score": 58.56,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168064000",
+          "bg_score": 44.76,
+          "bg_grade": 3,
+          "bh_score": 56.34,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065000",
+          "bg_score": 20.1,
+          "bg_grade": 1,
+          "bh_score": 52.8,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "bg_score": 7.25,
+          "bg_grade": 1,
+          "bh_score": 47.82,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065600",
+          "bg_score": 14.18,
+          "bg_grade": 1,
+          "bh_score": 46.23,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168066000",
+          "bg_score": 24.51,
+          "bg_grade": 2,
+          "bh_score": 51.59,
+          "bh_grade": 1,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168067000",
+          "bg_score": 0.09,
+          "bg_grade": 1,
+          "bh_score": 49.0,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168067500",
+          "bg_score": 31.37,
+          "bg_grade": 2,
+          "bh_score": 54.26,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168069000",
+          "bg_score": 33.78,
+          "bg_grade": 2,
+          "bh_score": 52.28,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168070000",
+          "bg_score": 25.29,
+          "bg_grade": 2,
+          "bh_score": 53.3,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168072000",
+          "bg_score": 22.15,
+          "bg_grade": 2,
+          "bh_score": 55.94,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168073000",
+          "bg_score": 41.36,
+          "bg_grade": 3,
+          "bh_score": 56.04,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168075000",
+          "bg_score": 36.81,
+          "bg_grade": 3,
+          "bh_score": 54.95,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111025000",
+          "bg_score": 64.17,
+          "bg_grade": 2,
+          "bh_score": 60.07,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111031000",
+          "bg_score": 43.63,
+          "bg_grade": 2,
+          "bh_score": 56.94,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111032000",
+          "bg_score": 90.62,
+          "bg_grade": 3,
+          "bh_score": 64.41,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111033000",
+          "bg_score": 73.47,
+          "bg_grade": 2,
+          "bh_score": 62.38,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111034000",
+          "bg_score": 92.42,
+          "bg_grade": 3,
+          "bh_score": 64.5,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111035000",
+          "bg_score": 78.87,
+          "bg_grade": 3,
+          "bh_score": 64.74,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111036000",
+          "bg_score": 77.09,
+          "bg_grade": 2,
+          "bh_score": 58.07,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111038000",
+          "bg_score": 99.44,
+          "bg_grade": 3,
+          "bh_score": 64.69,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111039000",
+          "bg_score": 45.69,
+          "bg_grade": 2,
+          "bh_score": 55.32,
+          "bh_grade": 1,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111040000",
+          "bg_score": 82.76,
+          "bg_grade": 3,
+          "bh_score": 64.02,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111052000",
+          "bg_score": 69.41,
+          "bg_grade": 2,
+          "bh_score": 60.89,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111053000",
+          "bg_score": 53.62,
+          "bg_grade": 2,
+          "bh_score": 59.3,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111054500",
+          "bg_score": 25.44,
+          "bg_grade": 1,
+          "bh_score": 56.91,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111057000",
+          "bg_score": 39.4,
+          "bg_grade": 2,
+          "bh_score": 61.32,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111058000",
+          "bg_score": 33.99,
+          "bg_grade": 2,
+          "bh_score": 57.43,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111060000",
+          "bg_score": 47.06,
+          "bg_grade": 2,
+          "bh_score": 56.05,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111061000",
+          "bg_score": 25.24,
+          "bg_grade": 1,
+          "bh_score": 47.52,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111061100",
+          "bg_score": 26.8,
+          "bg_grade": 1,
+          "bh_score": 49.7,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111062000",
+          "bg_score": 36.38,
+          "bg_grade": 2,
+          "bh_score": 57.87,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111063000",
+          "bg_score": 63.02,
+          "bg_grade": 2,
+          "bh_score": 58.68,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111064000",
+          "bg_score": 56.8,
+          "bg_grade": 2,
+          "bh_score": 57.24,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111065000",
+          "bg_score": 28.4,
+          "bg_grade": 1,
+          "bh_score": 45.47,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111066000",
+          "bg_score": 27.06,
+          "bg_grade": 1,
+          "bh_score": 44.1,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111067500",
+          "bg_score": 28.56,
+          "bg_grade": 2,
+          "bh_score": 57.78,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111070500",
+          "bg_score": 37.03,
+          "bg_grade": 2,
+          "bh_score": 56.86,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:41:24.102960"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168051000",
+          "bg_score": 34.11,
+          "bg_grade": 2,
+          "bh_score": 54.46,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168052100",
+          "bg_score": 44.32,
+          "bg_grade": 3,
+          "bh_score": 54.99,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168053100",
+          "bg_score": 35.69,
+          "bg_grade": 2,
+          "bh_score": 57.08,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168054500",
+          "bg_score": 27.72,
+          "bg_grade": 2,
+          "bh_score": 55.43,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168056500",
+          "bg_score": 29.97,
+          "bg_grade": 2,
+          "bh_score": 52.51,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168058000",
+          "bg_score": 31.33,
+          "bg_grade": 2,
+          "bh_score": 59.59,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168059000",
+          "bg_score": 29.59,
+          "bg_grade": 2,
+          "bh_score": 54.55,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168060000",
+          "bg_score": 15.52,
+          "bg_grade": 1,
+          "bh_score": 49.91,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168061000",
+          "bg_score": 29.51,
+          "bg_grade": 2,
+          "bh_score": 57.83,
+          "bh_grade": 3,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168063000",
+          "bg_score": 37.7,
+          "bg_grade": 3,
+          "bh_score": 54.31,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168064000",
+          "bg_score": 44.8,
+          "bg_grade": 3,
+          "bh_score": 56.77,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065000",
+          "bg_score": 20.15,
+          "bg_grade": 1,
+          "bh_score": 50.75,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "bg_score": 7.09,
+          "bg_grade": 1,
+          "bh_score": 53.06,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065600",
+          "bg_score": 14.26,
+          "bg_grade": 1,
+          "bh_score": 49.79,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168066000",
+          "bg_score": 24.5,
+          "bg_grade": 2,
+          "bh_score": 55.13,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168067000",
+          "bg_score": 0.18,
+          "bg_grade": 1,
+          "bh_score": 47.73,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168067500",
+          "bg_score": 31.21,
+          "bg_grade": 2,
+          "bh_score": 52.23,
+          "bh_grade": 1,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168069000",
+          "bg_score": 33.75,
+          "bg_grade": 2,
+          "bh_score": 54.65,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168070000",
+          "bg_score": 25.22,
+          "bg_grade": 2,
+          "bh_score": 54.27,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168072000",
+          "bg_score": 22.19,
+          "bg_grade": 2,
+          "bh_score": 54.34,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168073000",
+          "bg_score": 41.06,
+          "bg_grade": 3,
+          "bh_score": 54.41,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168075000",
+          "bg_score": 36.7,
+          "bg_grade": 3,
+          "bh_score": 54.24,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111025000",
+          "bg_score": 64.54,
+          "bg_grade": 2,
+          "bh_score": 61.66,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111031000",
+          "bg_score": 43.62,
+          "bg_grade": 2,
+          "bh_score": 56.64,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111032000",
+          "bg_score": 90.41,
+          "bg_grade": 3,
+          "bh_score": 63.93,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111033000",
+          "bg_score": 73.82,
+          "bg_grade": 2,
+          "bh_score": 61.71,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111034000",
+          "bg_score": 91.57,
+          "bg_grade": 3,
+          "bh_score": 63.65,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111035000",
+          "bg_score": 78.98,
+          "bg_grade": 3,
+          "bh_score": 64.65,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111036000",
+          "bg_score": 77.41,
+          "bg_grade": 3,
+          "bh_score": 63.2,
+          "bh_grade": 2,
+          "risk_grade": 4,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111038000",
+          "bg_score": 99.24,
+          "bg_grade": 3,
+          "bh_score": 64.32,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111039000",
+          "bg_score": 45.54,
+          "bg_grade": 2,
+          "bh_score": 56.72,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111040000",
+          "bg_score": 82.9,
+          "bg_grade": 3,
+          "bh_score": 64.82,
+          "bh_grade": 3,
+          "risk_grade": 5,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111052000",
+          "bg_score": 69.18,
+          "bg_grade": 2,
+          "bh_score": 60.97,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111053000",
+          "bg_score": 53.64,
+          "bg_grade": 2,
+          "bh_score": 56.45,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111054500",
+          "bg_score": 25.82,
+          "bg_grade": 1,
+          "bh_score": 58.77,
+          "bh_grade": 2,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111057000",
+          "bg_score": 39.26,
+          "bg_grade": 2,
+          "bh_score": 62.28,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111058000",
+          "bg_score": 33.6,
+          "bg_grade": 2,
+          "bh_score": 55.9,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111060000",
+          "bg_score": 47.36,
+          "bg_grade": 2,
+          "bh_score": 56.45,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111061000",
+          "bg_score": 25.14,
+          "bg_grade": 1,
+          "bh_score": 47.06,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111061100",
+          "bg_score": 27.12,
+          "bg_grade": 1,
+          "bh_score": 46.94,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111062000",
+          "bg_score": 36.91,
+          "bg_grade": 2,
+          "bh_score": 53.02,
+          "bh_grade": 1,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111063000",
+          "bg_score": 63.04,
+          "bg_grade": 2,
+          "bh_score": 59.04,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111064000",
+          "bg_score": 56.79,
+          "bg_grade": 2,
+          "bh_score": 54.69,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111065000",
+          "bg_score": 28.52,
+          "bg_grade": 2,
+          "bh_score": 46.3,
+          "bh_grade": 1,
+          "risk_grade": 2,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111066000",
+          "bg_score": 27.11,
+          "bg_grade": 1,
+          "bh_score": 45.12,
+          "bh_grade": 1,
+          "risk_grade": 1,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111067500",
+          "bg_score": 28.71,
+          "bg_grade": 2,
+          "bh_score": 57.96,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111070500",
+          "bg_score": 36.81,
+          "bg_grade": 2,
+          "bh_score": 56.84,
+          "bh_grade": 2,
+          "risk_grade": 3,
+          "updated_at": "2026-11-03T10:42:36.824797"
+        }
+      ]
+    }
+  },
+  "catalog": {
+    "public.region_result": "실제 DB의 읍면동 월별 분석 결과. period_start(월 첫날), adm_cd10(행정동코드), bg_score/bg_grade(배경 점수/단계), bh_score/bh_grade(행동 점수/단계), risk_grade(종합 단계), updated_at(분석 수정 시각). 단계는 1~5이며 5가 가장 높다. 점수 산식·원인·개인 위험은 이 자료만으로 확인할 수 없다. 월·지역 필터로 대상과 비교 자료를 조회한다. V01은 해당 동의 월별 bh_score 추이를 설명할 수 있다. 도시 중앙 50% 범위는 계산된 근거가 없으면 설명하지 않는다. V06의 요인별 기여도는 현재 공급 자료에 없다. 배경 점수로 기여도를 추측하지 않는다. 평가용 실제 DB 조회 스냅샷. 제공 기간은 2025-12, 2025-11, 2025-10, 2025-09, 2025-08."
+  },
+  "cases": [
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-5cf570ff0288c4e913d7",
+      "unit": "node",
+      "target": "interpret",
+      "role": "request",
+      "initial": {
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+          "constraints": {
+            "required": [
+              "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+              "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 0,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-request",
+        "scenario:basic-request-none"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-bd4e38e05fd9dd4c7bc5",
+      "unit": "node",
+      "target": "interpret",
+      "role": "interpretation",
+      "initial": {
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+          "constraints": {
+            "required": [
+              "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+              "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "b0856b36-be73-506c-a90e-059f340c4326",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-request",
+        "scenario:basic-request-none"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-0bfefd2132db8a94a59c",
+      "unit": "node",
+      "target": "interpret",
+      "role": "request",
+      "initial": {
+        "request": {
+          "goal": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 0,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-request",
+        "scenario:basic-request-new_topic"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-a70ea2248107bb414265",
+      "unit": "node",
+      "target": "interpret",
+      "role": "visualization",
+      "initial": {
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "b798fa2a-bbf2-56ae-97b6-1fd3b75ca81a",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-request",
+        "scenario:basic-request-new_topic"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+            "allowed_scope": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+            "request": {
+              "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+              "constraints": {
+                "required": [
+                  "이전 정의와 한계의 의미를 유지한다.",
+                  "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+            "allowed_scope": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+            "request": {
+              "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+              "constraints": {
+                "required": [
+                  "이전 정의와 한계의 의미를 유지한다.",
+                  "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+            "allowed_scope": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+            "request": {
+              "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+              "constraints": {
+                "required": [
+                  "이전 정의와 한계의 의미를 유지한다.",
+                  "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+            "allowed_scope": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+            "request": {
+              "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+              "constraints": {
+                "required": [
+                  "이전 정의와 한계의 의미를 유지한다.",
+                  "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+            "allowed_scope": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+            "request": {
+              "goal": "이전 답변의 도곡1동 행동 이상 점수 정의와 개인 상태를 판단할 수 없다는 한계를 같은 의미의 쉬운 두 문장으로 다시 쓴다. 새 수치·비교·해석은 추가하지 않는다.",
+              "constraints": {
+                "required": [
+                  "이전 정의와 한계의 의미를 유지한다.",
+                  "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-ac1fc3211326319b4283",
+      "unit": "node",
+      "target": "interpret",
+      "role": "request",
+      "initial": {
+        "request": {
+          "goal": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+          "constraints": {
+            "required": [
+              "이전 정의와 한계의 의미를 유지한다.",
+              "쉬운 두 문장으로 줄이고 새 수치·비교·해석을 추가하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수가 무엇을 뜻하는지 설명해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "도곡1동의 행동 이상 점수는 학습 기준 행동과의 차이를 뜻합니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "그 설명의 정의와 한계는 유지하고 쉬운 두 문장으로 짧게 다시 써 주세요. 새 수치나 비교·해석은 추가하지 마세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 0,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "이전 답변의 정의·한계를 가리키는 수정 요청이다. 표현만 쉽게 줄이고 새 분석을 추가하지 않는 조건을 유지한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-request",
+        "scenario:basic-request-revision"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-75f6430f45e14bce3ceb",
+      "unit": "node",
+      "target": "interpret",
+      "role": "request",
+      "initial": {
+        "request": {
+          "goal": "강남구 도곡1동(1168065500), 2025-12로 해 주세요.",
+          "constraints": {
+            "required": [
+              "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+              "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "행동 이상 점수를 전월과 비교하고 차이·출처·해석 한계를 설명해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "어느 지역의 몇 년 몇 월을 기준으로 할까요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "강남구 도곡1동(1168065500), 2025-12로 해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "00000000-0000-0000-0000-000000000001",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 0,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-request",
+        "scenario:basic-request-clarification_complete"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-1ea3a1eee4456bdcad8a",
+      "unit": "node",
+      "target": "interpret",
+      "role": "interpretation",
+      "initial": {
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+          "constraints": {
+            "required": [
+              "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+              "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "행동 이상 점수를 전월과 비교하고 차이·출처·해석 한계를 설명해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "어느 지역의 몇 년 몇 월을 기준으로 할까요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "강남구 도곡1동(1168065500), 2025-12로 해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "37fff143-3694-59b2-b8e7-95662512327d",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-request",
+        "scenario:basic-request-clarification_complete"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-271a35365e9ced9f0847",
+      "unit": "node",
+      "target": "interpret",
+      "role": "interpretation",
+      "initial": {
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+          "constraints": {
+            "required": [
+              "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+              "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "01a79dca-8bc4-56bd-a3ae-7f636fccfb89",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-interpretation",
+        "scenario:basic-interpretation-none"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                  "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                  "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                  "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                  "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                  "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-eb17a804a70ee3692f52",
+      "unit": "node",
+      "target": "interpret",
+      "role": "interpretation",
+      "initial": {
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "constraints": {
+            "required": [
+              "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+              "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-interpretation",
+        "scenario:basic-interpretation-new_topic"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "이전 답변의 정의·한계를 유지하고 같은 동의 두 달 실제 점수·차이·출처를 추가하는 수정 요청으로 정리한다.",
+            "allowed_scope": "이전 답변의 점수 정의·해석 한계를 유지하면서 도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "이전 답변의 점수 정의·해석 한계를 유지하면서 도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다.",
+                  "이전 답변의 점수 정의와 해석 한계를 유지한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "이전 답변의 정의·한계를 유지하고 같은 동의 두 달 실제 점수·차이·출처를 추가하는 수정 요청으로 정리한다.",
+            "allowed_scope": "이전 답변의 점수 정의·해석 한계를 유지하면서 도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "이전 답변의 점수 정의·해석 한계를 유지하면서 도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다.",
+                  "이전 답변의 점수 정의와 해석 한계를 유지한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "이전 답변의 정의·한계를 유지하고 같은 동의 두 달 실제 점수·차이·출처를 추가하는 수정 요청으로 정리한다.",
+            "allowed_scope": "이전 답변의 점수 정의·해석 한계를 유지하면서 도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "이전 답변의 점수 정의·해석 한계를 유지하면서 도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다.",
+                  "이전 답변의 점수 정의와 해석 한계를 유지한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "이전 답변의 정의·한계를 유지하고 같은 동의 두 달 실제 점수·차이·출처를 추가하는 수정 요청으로 정리한다.",
+            "allowed_scope": "이전 답변의 점수 정의·해석 한계를 유지하면서 도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "이전 답변의 점수 정의·해석 한계를 유지하면서 도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다.",
+                  "이전 답변의 점수 정의와 해석 한계를 유지한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "이전 답변의 정의·한계를 유지하고 같은 동의 두 달 실제 점수·차이·출처를 추가하는 수정 요청으로 정리한다.",
+            "allowed_scope": "이전 답변의 점수 정의·해석 한계를 유지하면서 도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "이전 답변의 점수 정의·해석 한계를 유지하면서 도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다.",
+                  "이전 답변의 점수 정의와 해석 한계를 유지한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-48434b6a88f3d36776ce",
+      "unit": "node",
+      "target": "interpret",
+      "role": "interpretation",
+      "initial": {
+        "request": {
+          "goal": "이전 답변의 점수 정의·해석 한계를 유지하면서 도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+          "constraints": {
+            "required": [
+              "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+              "관측한 점수 변화·출처·해석 한계를 함께 설명한다.",
+              "이전 답변의 점수 정의와 해석 한계를 유지한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "도곡1동의 행동 이상 점수가 무엇을 뜻하는지 설명해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "도곡1동의 행동 이상 점수는 학습 기준 행동과의 차이를 뜻합니다. 실제 활동량이나 개인의 고립 상태를 뜻하지 않습니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "그 설명의 정의와 한계는 유지하고 같은 동의 2025-12와 2025-11 실제 행동 이상 점수·차이·출처를 추가해서 답변을 수정해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "a6907e75-e6b3-5585-8660-171b4c7c1771",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "이전 답변의 정의·한계를 유지하고 같은 동의 두 달 실제 점수·차이·출처를 추가하는 수정 요청으로 정리한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-interpretation",
+        "scenario:basic-interpretation-revision"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+            "allowed_scope": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+              "constraints": {
+                "required": [
+                  "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+                  "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-92e90f73962e1c57a558",
+      "unit": "node",
+      "target": "interpret",
+      "role": "interpretation",
+      "initial": {
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수를 2025-11와 비교하고 점수 차이·출처·해석 한계를 설명한다.",
+          "constraints": {
+            "required": [
+              "같은 행정동의 두 달 행동 이상 점수를 비교한다.",
+              "관측한 점수 변화·출처·해석 한계를 함께 설명한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "행동 이상 점수를 전월과 비교하고 차이·출처·해석 한계를 설명해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "어느 지역의 몇 년 몇 월을 기준으로 할까요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "강남구 도곡1동(1168065500), 2025-12로 해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "e723ef6b-aafa-539c-9c1b-c88566cfa564",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "이전 발화의 전월 비교 목적과 추가 답변의 행정동·기준 월을 결합한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-interpretation",
+        "scenario:basic-interpretation-clarification_complete"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-47c2dfd94611061ed521",
+      "unit": "node",
+      "target": "interpret",
+      "role": "visualization",
+      "initial": {
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "f3679276-da4d-5d08-aa6f-b3ec3d6fb77f",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "현재 발화에 명시한 대상·월·작업 목적을 요청으로 정리한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-visualization",
+        "scenario:basic-visualization-none"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "request": {
+              "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "constraints": {
+                "required": [
+                  "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                  "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "request": {
+              "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "constraints": {
+                "required": [
+                  "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                  "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "request": {
+              "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "constraints": {
+                "required": [
+                  "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                  "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "request": {
+              "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "constraints": {
+                "required": [
+                  "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                  "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "allowed_scope": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "request": {
+              "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+              "constraints": {
+                "required": [
+                  "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+                  "읍면동 필터로 지역 범위를 좁히지 않는다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-f3faa8b5e9429d64eec9",
+      "unit": "node",
+      "target": "interpret",
+      "role": "visualization",
+      "initial": {
+        "request": {
+          "goal": "강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+          "constraints": {
+            "required": [
+              "도시 전체의 종료월 배경 취약성 지도를 제공한다.",
+              "읍면동 필터로 지역 범위를 좁히지 않는다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 강남구(11680) 전체의 2025-12 배경 취약성 지도를 보여 주고 적용 조건·확인 한계를 설명한다. 특정 동으로 좁히지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "442a4cd0-11ef-5305-bf27-8a42f62da91d",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-visualization",
+        "scenario:basic-visualization-new_topic"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "이전 대화의 동과 상세 지도 목적을 유지하고 사용자가 바꾼 월만 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [
+                  "현재 화면 선택 지역: 도곡1동(1168065500)",
+                  "현재 화면 선택 월: 2025-11"
+                ],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "이전 대화의 동과 상세 지도 목적을 유지하고 사용자가 바꾼 월만 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [
+                  "현재 화면 선택 지역: 도곡1동(1168065500)",
+                  "현재 화면 선택 월: 2025-11"
+                ],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "이전 대화의 동과 상세 지도 목적을 유지하고 사용자가 바꾼 월만 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [
+                  "현재 화면 선택 지역: 도곡1동(1168065500)",
+                  "현재 화면 선택 월: 2025-11"
+                ],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "이전 대화의 동과 상세 지도 목적을 유지하고 사용자가 바꾼 월만 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [
+                  "현재 화면 선택 지역: 도곡1동(1168065500)",
+                  "현재 화면 선택 월: 2025-11"
+                ],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "이전 대화의 동과 상세 지도 목적을 유지하고 사용자가 바꾼 월만 반영한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [
+                  "현재 화면 선택 지역: 도곡1동(1168065500)",
+                  "현재 화면 선택 월: 2025-11"
+                ],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-c87b24416b3e957f8d17",
+      "unit": "node",
+      "target": "interpret",
+      "role": "visualization",
+      "initial": {
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [
+              "현재 화면 선택 지역: 도곡1동(1168065500)",
+              "현재 화면 선택 월: 2025-11"
+            ],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "도곡1동의 2025-11 상세 지도를 보여 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "도곡1동의 2025-11 상세 지도 표시 조건을 안내했습니다. 실제 화면 표시 성공은 별도로 확인해야 합니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "같은 동을 유지하고 기간을 2025-12로 바꿔서 상세 지도 표시 조건을 수정해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "f9382387-7035-5e2a-9a42-ec594bc2827e",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "이전 대화의 동과 상세 지도 목적을 유지하고 사용자가 바꾼 월만 반영한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-visualization",
+        "scenario:basic-visualization-revision"
+      ]
+    },
+    {
+      "providers": [
+        "public.region_result"
+      ],
+      "assessment": {
+        "checks": [
+          "N-F.1",
+          "N-B.1",
+          "N-B.2",
+          "N01-O.2",
+          "N01-O.1"
+        ],
+        "reference": {
+          "N-F.1": {
+            "expected_behavior": "이전 발화의 상세 지도와 행동 지표 기여도 차트 두 목적을 유지하고 추가 답변의 동·월을 결합한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도와 행동 지표 기여도 차트를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도와 행동 지표 기여도 차트를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도와 행동 지표 기여도 차트를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.1": {
+            "expected_behavior": "이전 발화의 상세 지도와 행동 지표 기여도 차트 두 목적을 유지하고 추가 답변의 동·월을 결합한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도와 행동 지표 기여도 차트를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도와 행동 지표 기여도 차트를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도와 행동 지표 기여도 차트를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N-B.2": {
+            "expected_behavior": "이전 발화의 상세 지도와 행동 지표 기여도 차트 두 목적을 유지하고 추가 답변의 동·월을 결합한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도와 행동 지표 기여도 차트를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도와 행동 지표 기여도 차트를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도와 행동 지표 기여도 차트를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.2": {
+            "expected_behavior": "이전 발화의 상세 지도와 행동 지표 기여도 차트 두 목적을 유지하고 추가 답변의 동·월을 결합한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도와 행동 지표 기여도 차트를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도와 행동 지표 기여도 차트를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도와 행동 지표 기여도 차트를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          },
+          "N01-O.1": {
+            "expected_behavior": "이전 발화의 상세 지도와 행동 지표 기여도 차트 두 목적을 유지하고 추가 답변의 동·월을 결합한다.",
+            "allowed_scope": "강남구 도곡1동(1168065500)의 2025-12 상세 지도와 행동 지표 기여도 차트를 표시할 설정과 적용 조건·한계를 제공한다.",
+            "request": {
+              "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도와 행동 지표 기여도 차트를 표시할 설정과 적용 조건·한계를 제공한다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·월의 상세 지도와 행동 지표 기여도 차트를 제공한다.",
+                  "설정 검사와 실제 표시 확인의 차이를 안내한다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "comparison": "대상·기간·목적·조건을 보존하는 같은 의미의 표현을 허용한다."
+          }
+        },
+        "expected": {
+          "schema_version": "node-expectations-v1",
+          "items": [
+            {
+              "id": "N-F.1",
+              "check": "N-F.1",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N-B.1",
+              "check": "N-B.1",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "이 노드 반환에는 자료 호출·근거 ID 선택이 없다."
+            },
+            {
+              "id": "N-B.2",
+              "check": "N-B.2",
+              "node": "interpret",
+              "occurrence": 1,
+              "applicable": false,
+              "reason": "실제 모델 입력에 자료 속 지시를 주입하지 않은 기준 사례다."
+            },
+            {
+              "id": "N01-O.2",
+              "check": "N01-O.2",
+              "node": "interpret",
+              "occurrence": 1
+            },
+            {
+              "id": "N01-O.1",
+              "check": "N01-O.1",
+              "node": "interpret",
+              "occurrence": 1
+            }
+          ]
+        }
+      },
+      "id": "path-interpret-aa002da53f8bed0da01b",
+      "unit": "node",
+      "target": "interpret",
+      "role": "visualization",
+      "initial": {
+        "request": {
+          "goal": "강남구 도곡1동(1168065500)의 2025-12 상세 지도와 행동 지표 기여도 차트를 표시할 설정과 적용 조건·한계를 제공한다.",
+          "constraints": {
+            "required": [
+              "요청한 동·월의 상세 지도와 행동 지표 기여도 차트를 제공한다.",
+              "설정 검사와 실제 표시 확인의 차이를 안내한다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "messages": [
+          {
+            "content": "상세 지도와 행동 지표 기여도 차트를 함께 보여 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "어느 지역의 몇 년 몇 월을 기준으로 할까요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "강남구 도곡1동(1168065500), 2025-12로 해 주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "results": [],
+        "response": null,
+        "event": "user_request",
+        "execution": {
+          "run_id": "8c27cb97-c4b2-5935-b003-48e51f1aa696",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "purpose": "이전 발화의 상세 지도와 행동 지표 기여도 차트 두 목적을 유지하고 추가 답변의 동·월을 결합한다.",
+      "tags": [
+        "complete-path",
+        "family:basic-visualization",
+        "scenario:basic-visualization-clarification_complete"
+      ]
+    }
+  ]
+}

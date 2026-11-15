@@ -1,0 +1,18 @@
+{
+  "schema_version": "dataset-archive-v1",
+  "scope": "previous extended dataset, excluded from the current basic batch",
+  "files_sha256": {
+    "act.json": "261ad6e2eed2e39be948534d341e7bce1e7e91cbe20693162287c108e682c6e4",
+    "ask.json": "8ba9501db55e59479db7277e53a2941b75e597e1714def8c10c508009ca3b2ec",
+    "capture_snapshot.py": "c9a4d582b04fb033159190ee94fb26e841af12edee52a012d69fadacfca45153",
+    "compose.json": "00c539ab1d1e7a8c8d7afa3ad57630555fcfaf27826ccc91c4b25d9913dba853",
+    "coverage.json": "a09a6ca49b905f8f2278d02476626d037080fc027502c58d39942cdc36d90e33",
+    "decide.json": "7a260c263db510ed16049a35f320a54fabc0c681b23bdf0cbbb46247bbffad36",
+    "interpret.json": "e9448fd28c238eda2c4946840e98626353f13c56e1676228d625ea1746b2510a",
+    "README.md": "bddf7525a38e34f68b219721eddd92d3960cdb1f088d901d303eafacfe6d8e9f",
+    "scenarios.json": "0337a6a96efd64288827703fc497d6001df6a8b5860523b89d10701792d084ea",
+    "validation.json": "7e7ccd43911ce36dac49630daac0278e72846a4581b99b2bd6f7a55ba45f2f25",
+    "snapshots/data.json": "ce8bfcfba7909cb259a1cf6c579f8af1e086b7bc8a198984c4485911c17ce820",
+    "snapshots/raw-query-results.json": "96e83baede17d4896973b578aa483aa6d399f533a558ac862d86eb380283aed2"
+  }
+}

@@ -1,0 +1,4714 @@
+{
+  "schema_version": "node-scenarios-v4",
+  "summary": {
+    "complete_scenario_count": 21,
+    "unique_node_case_count": 253,
+    "path_node_execution_count": 253,
+    "preparation_node_execution_count": 24,
+    "partial_group_count": 0,
+    "partial_only_node_case_count": 0,
+    "shared_node_case_count": 0,
+    "runtime_only_node_case_count": 0,
+    "path_runtime_only_execution_count": 0,
+    "by_node": {
+      "interpret": 15,
+      "decide": 119,
+      "act": 95,
+      "compose": 24
+    },
+    "by_role": {
+      "request": 18,
+      "interpretation": 106,
+      "visualization": 27,
+      "report_selection": 90,
+      "report_description": 6,
+      "report_insight": 6
+    },
+    "by_event": {
+      "user_request": 151,
+      "analysis_pipeline": 102
+    },
+    "scenarios_by_event": {
+      "user_request": 12,
+      "analysis_pipeline": 9
+    }
+  },
+  "scenarios": [
+    {
+      "id": "insight-request-none",
+      "title": "사용자 요청 처리 · 전월 대비 종합판단",
+      "file": "scenarios/insight-request-none.json"
+    },
+    {
+      "id": "basic-request-new_topic",
+      "title": "사용자 요청 처리 · 이전과 다른 새 주제",
+      "file": "scenarios/basic-request-new-topic.json"
+    },
+    {
+      "id": "basic-request-revision",
+      "title": "사용자 요청 처리 · 기존 응답 수정",
+      "file": "scenarios/basic-request-revision.json"
+    },
+    {
+      "id": "basic-request-clarification_complete",
+      "title": "사용자 요청 처리 · AI 추가 질문에 충분한 답변",
+      "file": "scenarios/basic-request-clarification-complete.json"
+    },
+    {
+      "id": "basic-interpretation-none",
+      "title": "데이터 분석 결과 해석 · 이전 대화 없음",
+      "file": "scenarios/basic-interpretation-none.json"
+    },
+    {
+      "id": "basic-interpretation-new_topic",
+      "title": "데이터 분석 결과 해석 · 이전과 다른 새 주제",
+      "file": "scenarios/basic-interpretation-new-topic.json"
+    },
+    {
+      "id": "basic-interpretation-revision",
+      "title": "데이터 분석 결과 해석 · 기존 응답 수정",
+      "file": "scenarios/basic-interpretation-revision.json"
+    },
+    {
+      "id": "basic-interpretation-clarification_complete",
+      "title": "데이터 분석 결과 해석 · AI 추가 질문에 충분한 답변",
+      "file": "scenarios/basic-interpretation-clarification-complete.json"
+    },
+    {
+      "id": "basic-visualization-none",
+      "title": "데이터 시각화 · 이전 대화 없음",
+      "file": "scenarios/basic-visualization-none.json"
+    },
+    {
+      "id": "basic-visualization-new_topic",
+      "title": "데이터 시각화 · 이전과 다른 새 주제",
+      "file": "scenarios/basic-visualization-new-topic.json"
+    },
+    {
+      "id": "basic-visualization-revision",
+      "title": "데이터 시각화 · 기존 응답 수정",
+      "file": "scenarios/basic-visualization-revision.json"
+    },
+    {
+      "id": "basic-visualization-clarification_complete",
+      "title": "데이터 시각화 · AI 추가 질문에 충분한 답변",
+      "file": "scenarios/basic-visualization-clarification-complete.json"
+    },
+    {
+      "id": "candidate-report_selection-1168065500",
+      "title": "도곡1동 2025-12 시각화 선정 인사이트 개선 후보",
+      "file": "scenarios/candidate-report-selection-1168065500.json"
+    },
+    {
+      "id": "candidate-report_description-1168065500",
+      "title": "도곡1동 2025-12 시각화 설명 인사이트 개선 후보",
+      "file": "scenarios/candidate-report-description-1168065500.json"
+    },
+    {
+      "id": "candidate-report_insight-1168065500",
+      "title": "도곡1동 2025-12 퀵 인사이트 인사이트 개선 후보",
+      "file": "scenarios/candidate-report-insight-1168065500.json"
+    },
+    {
+      "id": "candidate-report_selection-1168063000",
+      "title": "대치4동 2025-12 시각화 선정 인사이트 개선 후보",
+      "file": "scenarios/candidate-report-selection-1168063000.json"
+    },
+    {
+      "id": "candidate-report_description-1168063000",
+      "title": "대치4동 2025-12 시각화 설명 인사이트 개선 후보",
+      "file": "scenarios/candidate-report-description-1168063000.json"
+    },
+    {
+      "id": "candidate-report_insight-1168063000",
+      "title": "대치4동 2025-12 퀵 인사이트 인사이트 개선 후보",
+      "file": "scenarios/candidate-report-insight-1168063000.json"
+    },
+    {
+      "id": "candidate-report_selection-5111062000",
+      "title": "효자1동 2025-12 시각화 선정 인사이트 개선 후보",
+      "file": "scenarios/candidate-report-selection-5111062000.json"
+    },
+    {
+      "id": "candidate-report_description-5111062000",
+      "title": "효자1동 2025-12 시각화 설명 인사이트 개선 후보",
+      "file": "scenarios/candidate-report-description-5111062000.json"
+    },
+    {
+      "id": "candidate-report_insight-5111062000",
+      "title": "효자1동 2025-12 퀵 인사이트 인사이트 개선 후보",
+      "file": "scenarios/candidate-report-insight-5111062000.json"
+    }
+  ],
+  "partial_groups": [],
+  "case_index": {
+    "path-interpret-f3989f7a0f5280852fff": {
+      "node": "interpret",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/0/initial",
+      "expectation_ref": "interpret.json#/cases/0/assessment"
+    },
+    "path-decide-3ff44e85e2df55b61d9a": {
+      "node": "decide",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/0/initial",
+      "expectation_ref": "decide.json#/cases/0/assessment"
+    },
+    "path-interpret-3cbdf2aeed838835a144": {
+      "node": "interpret",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/1/initial",
+      "expectation_ref": "interpret.json#/cases/1/assessment"
+    },
+    "path-decide-698353a27324dd0042f5": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/1/initial",
+      "expectation_ref": "decide.json#/cases/1/assessment"
+    },
+    "path-act-2f9c41b4992302b1e9f2": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s006"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/0/initial",
+      "expectation_ref": "act.json#/cases/0/assessment"
+    },
+    "path-decide-d15ae68832876ca45f93": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s007"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/2/initial",
+      "expectation_ref": "decide.json#/cases/2/assessment"
+    },
+    "path-act-70251d2909a18b5f5480": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s008"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/1/initial",
+      "expectation_ref": "act.json#/cases/1/assessment"
+    },
+    "path-decide-0d6a71fa2f7da5699e94": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s009"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/3/initial",
+      "expectation_ref": "decide.json#/cases/3/assessment"
+    },
+    "path-act-6d1093b3aced773d6417": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s010"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/2/initial",
+      "expectation_ref": "act.json#/cases/2/assessment"
+    },
+    "path-decide-6677745d86e387bde9da": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s011"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/4/initial",
+      "expectation_ref": "decide.json#/cases/4/assessment"
+    },
+    "path-act-cbc9ebaa3b6ea974ce18": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s012"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/3/initial",
+      "expectation_ref": "act.json#/cases/3/assessment"
+    },
+    "path-decide-e36e1e38fc7b62c83d7c": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s013"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/5/initial",
+      "expectation_ref": "decide.json#/cases/5/assessment"
+    },
+    "path-act-04107173aef1f830eba4": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s014"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/4/initial",
+      "expectation_ref": "act.json#/cases/4/assessment"
+    },
+    "path-decide-dc0d34ce131c4131d6c3": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s015"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/6/initial",
+      "expectation_ref": "decide.json#/cases/6/assessment"
+    },
+    "path-act-0596e16761eef3671362": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s016"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/5/initial",
+      "expectation_ref": "act.json#/cases/5/assessment"
+    },
+    "path-decide-e4b9ed665db1c2a1f89c": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s017"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/7/initial",
+      "expectation_ref": "decide.json#/cases/7/assessment"
+    },
+    "path-act-089417ceb6b92868b04c": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s018"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/6/initial",
+      "expectation_ref": "act.json#/cases/6/assessment"
+    },
+    "path-decide-c764a19ae563e92c6a10": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s019"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/8/initial",
+      "expectation_ref": "decide.json#/cases/8/assessment"
+    },
+    "path-compose-981740c6becde418103f": {
+      "node": "compose",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s020"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/0/initial",
+      "expectation_ref": "compose.json#/cases/0/assessment"
+    },
+    "path-act-aee9ba96e16d8a378945": {
+      "node": "act",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/7/initial",
+      "expectation_ref": "act.json#/cases/7/assessment"
+    },
+    "path-decide-34c0b32b1da2dd2bd55e": {
+      "node": "decide",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s021"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/9/initial",
+      "expectation_ref": "decide.json#/cases/9/assessment"
+    },
+    "path-compose-48db9c7797bee3de963e": {
+      "node": "compose",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "insight-request-none",
+          "step_id": "s022"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/1/initial",
+      "expectation_ref": "compose.json#/cases/1/assessment"
+    },
+    "path-interpret-3c9765ec5d060b145958": {
+      "node": "interpret",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-new_topic",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/2/initial",
+      "expectation_ref": "interpret.json#/cases/2/assessment"
+    },
+    "path-decide-0c5289c1384f8348b938": {
+      "node": "decide",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-new_topic",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/10/initial",
+      "expectation_ref": "decide.json#/cases/10/assessment"
+    },
+    "path-interpret-e13ae27994c305c9bbd7": {
+      "node": "interpret",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-request-new_topic",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/3/initial",
+      "expectation_ref": "interpret.json#/cases/3/assessment"
+    },
+    "path-decide-67015296d2586fa0c0e6": {
+      "node": "decide",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-request-new_topic",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/11/initial",
+      "expectation_ref": "decide.json#/cases/11/assessment"
+    },
+    "path-act-0f64e9b5fd01c4c6d419": {
+      "node": "act",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-request-new_topic",
+          "step_id": "s006"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/8/initial",
+      "expectation_ref": "act.json#/cases/8/assessment"
+    },
+    "path-decide-35c88987a496879e299a": {
+      "node": "decide",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-request-new_topic",
+          "step_id": "s007"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/12/initial",
+      "expectation_ref": "decide.json#/cases/12/assessment"
+    },
+    "path-compose-bf8bdddd84319c2c3c59": {
+      "node": "compose",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-request-new_topic",
+          "step_id": "s008"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/2/initial",
+      "expectation_ref": "compose.json#/cases/2/assessment"
+    },
+    "path-act-1db9b3ef3c811d4a4576": {
+      "node": "act",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-new_topic",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/9/initial",
+      "expectation_ref": "act.json#/cases/9/assessment"
+    },
+    "path-decide-bf7de142c8f84552b8c7": {
+      "node": "decide",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-new_topic",
+          "step_id": "s009"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/13/initial",
+      "expectation_ref": "decide.json#/cases/13/assessment"
+    },
+    "path-compose-31e72dbde279ab1db593": {
+      "node": "compose",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-new_topic",
+          "step_id": "s010"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/3/initial",
+      "expectation_ref": "compose.json#/cases/3/assessment"
+    },
+    "path-interpret-ee3892d13cd6b153b609": {
+      "node": "interpret",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-revision",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/4/initial",
+      "expectation_ref": "interpret.json#/cases/4/assessment"
+    },
+    "path-decide-36018543f6ae066fc3ce": {
+      "node": "decide",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-revision",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/14/initial",
+      "expectation_ref": "decide.json#/cases/14/assessment"
+    },
+    "path-compose-4eafe8c4b4bfdb3fb0ab": {
+      "node": "compose",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-revision",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/4/initial",
+      "expectation_ref": "compose.json#/cases/4/assessment"
+    },
+    "path-interpret-0795938f0ff10b4a0e7d": {
+      "node": "interpret",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/5/initial",
+      "expectation_ref": "interpret.json#/cases/5/assessment"
+    },
+    "path-decide-75ec9d7ed4c13db5f340": {
+      "node": "decide",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/15/initial",
+      "expectation_ref": "decide.json#/cases/15/assessment"
+    },
+    "path-interpret-3e8aad5d4ea07c58a2d2": {
+      "node": "interpret",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/6/initial",
+      "expectation_ref": "interpret.json#/cases/6/assessment"
+    },
+    "path-decide-a0c03bebd65aae120e87": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/16/initial",
+      "expectation_ref": "decide.json#/cases/16/assessment"
+    },
+    "path-act-e1264a42d744a08083d0": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s006"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/10/initial",
+      "expectation_ref": "act.json#/cases/10/assessment"
+    },
+    "path-decide-43eae9adeec2a9f9a2e0": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s007"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/17/initial",
+      "expectation_ref": "decide.json#/cases/17/assessment"
+    },
+    "path-act-e6d484327dedc1d976df": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s008"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/11/initial",
+      "expectation_ref": "act.json#/cases/11/assessment"
+    },
+    "path-decide-f12d1352cfa053e6dd03": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s009"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/18/initial",
+      "expectation_ref": "decide.json#/cases/18/assessment"
+    },
+    "path-act-cca18faf5c7aa18ddb5f": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s010"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/12/initial",
+      "expectation_ref": "act.json#/cases/12/assessment"
+    },
+    "path-decide-32d3caf78691da5fd590": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s011"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/19/initial",
+      "expectation_ref": "decide.json#/cases/19/assessment"
+    },
+    "path-act-ca6028d335c48236b11e": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s012"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/13/initial",
+      "expectation_ref": "act.json#/cases/13/assessment"
+    },
+    "path-decide-7aa103468175ac3e9b59": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s013"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/20/initial",
+      "expectation_ref": "decide.json#/cases/20/assessment"
+    },
+    "path-act-a6eb6431b33f2e30e6ad": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s014"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/14/initial",
+      "expectation_ref": "act.json#/cases/14/assessment"
+    },
+    "path-decide-60ca61795709c0fc0baf": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s015"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/21/initial",
+      "expectation_ref": "decide.json#/cases/21/assessment"
+    },
+    "path-act-262e2494dd3239e271f0": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s016"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/15/initial",
+      "expectation_ref": "act.json#/cases/15/assessment"
+    },
+    "path-decide-ffb0b472d3a7f07905cd": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s017"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/22/initial",
+      "expectation_ref": "decide.json#/cases/22/assessment"
+    },
+    "path-act-a6da5bee1cc0ed55b63a": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s018"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/16/initial",
+      "expectation_ref": "act.json#/cases/16/assessment"
+    },
+    "path-decide-812434535f9ce29bc14d": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s019"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/23/initial",
+      "expectation_ref": "decide.json#/cases/23/assessment"
+    },
+    "path-act-1e15da9fd361318532a2": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s020"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/17/initial",
+      "expectation_ref": "act.json#/cases/17/assessment"
+    },
+    "path-decide-179daff6bb533019a9cb": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s021"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/24/initial",
+      "expectation_ref": "decide.json#/cases/24/assessment"
+    },
+    "path-act-1faecc06c374174ff83e": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s022"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/18/initial",
+      "expectation_ref": "act.json#/cases/18/assessment"
+    },
+    "path-decide-9a8a9ee486347171a12c": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s023"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/25/initial",
+      "expectation_ref": "decide.json#/cases/25/assessment"
+    },
+    "path-compose-bdae817f839ce60eee0a": {
+      "node": "compose",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s024"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/5/initial",
+      "expectation_ref": "compose.json#/cases/5/assessment"
+    },
+    "path-act-30a2b48cc5b0d3341ad9": {
+      "node": "act",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/19/initial",
+      "expectation_ref": "act.json#/cases/19/assessment"
+    },
+    "path-decide-ad8b0ad806aafbc81377": {
+      "node": "decide",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s025"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/26/initial",
+      "expectation_ref": "decide.json#/cases/26/assessment"
+    },
+    "path-compose-5ab462a6ed365e5e5d9b": {
+      "node": "compose",
+      "role": "request",
+      "usages": [
+        {
+          "scenario_id": "basic-request-clarification_complete",
+          "step_id": "s026"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/6/initial",
+      "expectation_ref": "compose.json#/cases/6/assessment"
+    },
+    "path-interpret-6f3ea1e9a8f370fcf6c4": {
+      "node": "interpret",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/7/initial",
+      "expectation_ref": "interpret.json#/cases/7/assessment"
+    },
+    "path-decide-32f0bac1b1efac69cdf8": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/27/initial",
+      "expectation_ref": "decide.json#/cases/27/assessment"
+    },
+    "path-act-3aaff52674bcee456895": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/20/initial",
+      "expectation_ref": "act.json#/cases/20/assessment"
+    },
+    "path-decide-8b6dfdb844509c9697e1": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/28/initial",
+      "expectation_ref": "decide.json#/cases/28/assessment"
+    },
+    "path-act-152d481899d90a8294a2": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/21/initial",
+      "expectation_ref": "act.json#/cases/21/assessment"
+    },
+    "path-decide-05e4241a58586503ccce": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s006"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/29/initial",
+      "expectation_ref": "decide.json#/cases/29/assessment"
+    },
+    "path-act-60f07bc1589007115667": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s007"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/22/initial",
+      "expectation_ref": "act.json#/cases/22/assessment"
+    },
+    "path-decide-4cea5e3819ad5968d8b0": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s008"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/30/initial",
+      "expectation_ref": "decide.json#/cases/30/assessment"
+    },
+    "path-act-64416175d175e454039d": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s009"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/23/initial",
+      "expectation_ref": "act.json#/cases/23/assessment"
+    },
+    "path-decide-72645e53f21c2341e86a": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s010"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/31/initial",
+      "expectation_ref": "decide.json#/cases/31/assessment"
+    },
+    "path-act-a94688c635bf18c8efe4": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s011"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/24/initial",
+      "expectation_ref": "act.json#/cases/24/assessment"
+    },
+    "path-decide-57a1e1b5c5a96970938a": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s012"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/32/initial",
+      "expectation_ref": "decide.json#/cases/32/assessment"
+    },
+    "path-act-7ebd733eda2c88ca14b0": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s013"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/25/initial",
+      "expectation_ref": "act.json#/cases/25/assessment"
+    },
+    "path-decide-1e554fcdbc434b64b365": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s014"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/33/initial",
+      "expectation_ref": "decide.json#/cases/33/assessment"
+    },
+    "path-act-092cfce30cbde3262a7d": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s015"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/26/initial",
+      "expectation_ref": "act.json#/cases/26/assessment"
+    },
+    "path-decide-caa26e54a375fb7862db": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s016"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/34/initial",
+      "expectation_ref": "decide.json#/cases/34/assessment"
+    },
+    "path-act-3608419b46f4b5503a85": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s017"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/27/initial",
+      "expectation_ref": "act.json#/cases/27/assessment"
+    },
+    "path-decide-4538550ab2f1a1202b04": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s018"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/35/initial",
+      "expectation_ref": "decide.json#/cases/35/assessment"
+    },
+    "path-act-777fd7decb62afdd0379": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s019"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/28/initial",
+      "expectation_ref": "act.json#/cases/28/assessment"
+    },
+    "path-decide-91b38556f3c5aca2efca": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s020"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/36/initial",
+      "expectation_ref": "decide.json#/cases/36/assessment"
+    },
+    "path-compose-ad8ac7d153eb849fc699": {
+      "node": "compose",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-none",
+          "step_id": "s021"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/7/initial",
+      "expectation_ref": "compose.json#/cases/7/assessment"
+    },
+    "path-interpret-7e280a75bcbd62654b3c": {
+      "node": "interpret",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-new_topic",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/8/initial",
+      "expectation_ref": "interpret.json#/cases/8/assessment"
+    },
+    "path-decide-bfd83f8419e2c6710575": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-new_topic",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/37/initial",
+      "expectation_ref": "decide.json#/cases/37/assessment"
+    },
+    "path-act-0e8850150a8fe2f13825": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-new_topic",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/29/initial",
+      "expectation_ref": "act.json#/cases/29/assessment"
+    },
+    "path-decide-eee0583e02d003fd592c": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-new_topic",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/38/initial",
+      "expectation_ref": "decide.json#/cases/38/assessment"
+    },
+    "path-compose-598605178cd8cdb02928": {
+      "node": "compose",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-new_topic",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/8/initial",
+      "expectation_ref": "compose.json#/cases/8/assessment"
+    },
+    "path-interpret-2d4cb71b7e4eaa90f4e9": {
+      "node": "interpret",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/9/initial",
+      "expectation_ref": "interpret.json#/cases/9/assessment"
+    },
+    "path-decide-c240886da26a06d65c35": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/39/initial",
+      "expectation_ref": "decide.json#/cases/39/assessment"
+    },
+    "path-act-9532a3db136352785d8d": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/30/initial",
+      "expectation_ref": "act.json#/cases/30/assessment"
+    },
+    "path-decide-5822483ceafd7ac58dbf": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/40/initial",
+      "expectation_ref": "decide.json#/cases/40/assessment"
+    },
+    "path-act-0eab776d6deaeeb90c3d": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/31/initial",
+      "expectation_ref": "act.json#/cases/31/assessment"
+    },
+    "path-decide-de99ffaa969f52b353ba": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s006"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/41/initial",
+      "expectation_ref": "decide.json#/cases/41/assessment"
+    },
+    "path-act-81c945bfcf4205d4b9b8": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s007"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/32/initial",
+      "expectation_ref": "act.json#/cases/32/assessment"
+    },
+    "path-decide-f41ea8ba63c8708f1e71": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s008"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/42/initial",
+      "expectation_ref": "decide.json#/cases/42/assessment"
+    },
+    "path-act-d2d563051e9096da1846": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s009"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/33/initial",
+      "expectation_ref": "act.json#/cases/33/assessment"
+    },
+    "path-decide-1df00a9ca2081105caa7": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s010"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/43/initial",
+      "expectation_ref": "decide.json#/cases/43/assessment"
+    },
+    "path-act-be7a5cb646dda9bb557e": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s011"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/34/initial",
+      "expectation_ref": "act.json#/cases/34/assessment"
+    },
+    "path-decide-57f991eeb8c848b78d16": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s012"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/44/initial",
+      "expectation_ref": "decide.json#/cases/44/assessment"
+    },
+    "path-act-297b9bcfdd8440b4d182": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s013"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/35/initial",
+      "expectation_ref": "act.json#/cases/35/assessment"
+    },
+    "path-decide-4d91f326ab4bc2537b27": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s014"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/45/initial",
+      "expectation_ref": "decide.json#/cases/45/assessment"
+    },
+    "path-act-0ed5fd0ff616ffb46aec": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s015"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/36/initial",
+      "expectation_ref": "act.json#/cases/36/assessment"
+    },
+    "path-decide-494831671553ef607787": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s016"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/46/initial",
+      "expectation_ref": "decide.json#/cases/46/assessment"
+    },
+    "path-act-c9ce081d4c72249692a7": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s017"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/37/initial",
+      "expectation_ref": "act.json#/cases/37/assessment"
+    },
+    "path-decide-765c3f9ac19b92b70492": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s018"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/47/initial",
+      "expectation_ref": "decide.json#/cases/47/assessment"
+    },
+    "path-act-fae6f63b17e62c3bffca": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s019"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/38/initial",
+      "expectation_ref": "act.json#/cases/38/assessment"
+    },
+    "path-decide-cf2d8ae0b6c096bfd74d": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s020"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/48/initial",
+      "expectation_ref": "decide.json#/cases/48/assessment"
+    },
+    "path-compose-b61f2eea28b33cb3d4d5": {
+      "node": "compose",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-revision",
+          "step_id": "s021"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/9/initial",
+      "expectation_ref": "compose.json#/cases/9/assessment"
+    },
+    "path-interpret-5ec7adf2960eb86c2c89": {
+      "node": "interpret",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/10/initial",
+      "expectation_ref": "interpret.json#/cases/10/assessment"
+    },
+    "path-decide-e932aa0c4b7ca4647c24": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/49/initial",
+      "expectation_ref": "decide.json#/cases/49/assessment"
+    },
+    "path-act-f7eb34767b2a92481771": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/39/initial",
+      "expectation_ref": "act.json#/cases/39/assessment"
+    },
+    "path-decide-ce78b7d06af8f2ac3aed": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/50/initial",
+      "expectation_ref": "decide.json#/cases/50/assessment"
+    },
+    "path-act-d05607e8a4fbfef45452": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/40/initial",
+      "expectation_ref": "act.json#/cases/40/assessment"
+    },
+    "path-decide-c857f10a47bb762d765b": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s006"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/51/initial",
+      "expectation_ref": "decide.json#/cases/51/assessment"
+    },
+    "path-act-a95d1b01edcb3e66bcb2": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s007"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/41/initial",
+      "expectation_ref": "act.json#/cases/41/assessment"
+    },
+    "path-decide-aa032ff1d07a3382365d": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s008"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/52/initial",
+      "expectation_ref": "decide.json#/cases/52/assessment"
+    },
+    "path-act-bdbde12a638a2e4d7748": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s009"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/42/initial",
+      "expectation_ref": "act.json#/cases/42/assessment"
+    },
+    "path-decide-5ec5764ebe907a31fc46": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s010"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/53/initial",
+      "expectation_ref": "decide.json#/cases/53/assessment"
+    },
+    "path-act-45e8d8672106253b4faa": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s011"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/43/initial",
+      "expectation_ref": "act.json#/cases/43/assessment"
+    },
+    "path-decide-dd28e479bb37a973df9e": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s012"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/54/initial",
+      "expectation_ref": "decide.json#/cases/54/assessment"
+    },
+    "path-act-e43c7623c9d65fd4ab12": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s013"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/44/initial",
+      "expectation_ref": "act.json#/cases/44/assessment"
+    },
+    "path-decide-9e28873fa0eea7f95337": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s014"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/55/initial",
+      "expectation_ref": "decide.json#/cases/55/assessment"
+    },
+    "path-act-0e5387ea6f4a8c87df75": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s015"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/45/initial",
+      "expectation_ref": "act.json#/cases/45/assessment"
+    },
+    "path-decide-e7715e9c7996646daaa0": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s016"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/56/initial",
+      "expectation_ref": "decide.json#/cases/56/assessment"
+    },
+    "path-act-ba4753da5fe0a33843d2": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s017"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/46/initial",
+      "expectation_ref": "act.json#/cases/46/assessment"
+    },
+    "path-decide-eb7003ebf353625f0b3a": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s018"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/57/initial",
+      "expectation_ref": "decide.json#/cases/57/assessment"
+    },
+    "path-act-89741d0bcd1b7c3f2432": {
+      "node": "act",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s019"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/47/initial",
+      "expectation_ref": "act.json#/cases/47/assessment"
+    },
+    "path-decide-2cf792e70b811c0cd61c": {
+      "node": "decide",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s020"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/58/initial",
+      "expectation_ref": "decide.json#/cases/58/assessment"
+    },
+    "path-compose-beedb15895867a2f79ba": {
+      "node": "compose",
+      "role": "interpretation",
+      "usages": [
+        {
+          "scenario_id": "basic-interpretation-clarification_complete",
+          "step_id": "s021"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/10/initial",
+      "expectation_ref": "compose.json#/cases/10/assessment"
+    },
+    "path-interpret-9b9523e504bf2d9823b0": {
+      "node": "interpret",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-none",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/11/initial",
+      "expectation_ref": "interpret.json#/cases/11/assessment"
+    },
+    "path-decide-da6c1a386613ba8bdee9": {
+      "node": "decide",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-none",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/59/initial",
+      "expectation_ref": "decide.json#/cases/59/assessment"
+    },
+    "path-act-ecb080b84aeed7c57907": {
+      "node": "act",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-none",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/48/initial",
+      "expectation_ref": "act.json#/cases/48/assessment"
+    },
+    "path-decide-26ab1ba8661f9c9cdd54": {
+      "node": "decide",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-none",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/60/initial",
+      "expectation_ref": "decide.json#/cases/60/assessment"
+    },
+    "path-compose-a6895c9bdc149cbd5000": {
+      "node": "compose",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-none",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/11/initial",
+      "expectation_ref": "compose.json#/cases/11/assessment"
+    },
+    "path-interpret-c791b9da33738cf80e62": {
+      "node": "interpret",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-new_topic",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/12/initial",
+      "expectation_ref": "interpret.json#/cases/12/assessment"
+    },
+    "path-decide-b827609744fe2c1ffb0f": {
+      "node": "decide",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-new_topic",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/61/initial",
+      "expectation_ref": "decide.json#/cases/61/assessment"
+    },
+    "path-act-a4e1c93115eba21c4641": {
+      "node": "act",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-new_topic",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/49/initial",
+      "expectation_ref": "act.json#/cases/49/assessment"
+    },
+    "path-decide-0934fde31785280351e4": {
+      "node": "decide",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-new_topic",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/62/initial",
+      "expectation_ref": "decide.json#/cases/62/assessment"
+    },
+    "path-compose-4512ae1a5545a16f3bad": {
+      "node": "compose",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-new_topic",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/12/initial",
+      "expectation_ref": "compose.json#/cases/12/assessment"
+    },
+    "path-interpret-99c3af3ff514c21fff70": {
+      "node": "interpret",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-revision",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/13/initial",
+      "expectation_ref": "interpret.json#/cases/13/assessment"
+    },
+    "path-decide-2e4dcea0080fe4f5aee2": {
+      "node": "decide",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-revision",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/63/initial",
+      "expectation_ref": "decide.json#/cases/63/assessment"
+    },
+    "path-act-0e9f5a06ecb626aaf7f1": {
+      "node": "act",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-revision",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/50/initial",
+      "expectation_ref": "act.json#/cases/50/assessment"
+    },
+    "path-decide-2e09665ebcd575b8a3fb": {
+      "node": "decide",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-revision",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/64/initial",
+      "expectation_ref": "decide.json#/cases/64/assessment"
+    },
+    "path-compose-b16ea0fdb74664d8dfcf": {
+      "node": "compose",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-revision",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/13/initial",
+      "expectation_ref": "compose.json#/cases/13/assessment"
+    },
+    "path-interpret-a1668533b4e59389f6ae": {
+      "node": "interpret",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-clarification_complete",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "interpret.json#/cases/14/initial",
+      "expectation_ref": "interpret.json#/cases/14/assessment"
+    },
+    "path-decide-a9100a869ced325a1890": {
+      "node": "decide",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-clarification_complete",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/65/initial",
+      "expectation_ref": "decide.json#/cases/65/assessment"
+    },
+    "path-act-19a0ba2cc14a431d6225": {
+      "node": "act",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-clarification_complete",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/51/initial",
+      "expectation_ref": "act.json#/cases/51/assessment"
+    },
+    "path-decide-83f7180b71a170cddbe5": {
+      "node": "decide",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-clarification_complete",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/66/initial",
+      "expectation_ref": "decide.json#/cases/66/assessment"
+    },
+    "path-act-64b00d2e40a67f05444c": {
+      "node": "act",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-clarification_complete",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/52/initial",
+      "expectation_ref": "act.json#/cases/52/assessment"
+    },
+    "path-decide-f58556ad5812919db7ad": {
+      "node": "decide",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-clarification_complete",
+          "step_id": "s006"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/67/initial",
+      "expectation_ref": "decide.json#/cases/67/assessment"
+    },
+    "path-compose-bae24d70240006252015": {
+      "node": "compose",
+      "role": "visualization",
+      "usages": [
+        {
+          "scenario_id": "basic-visualization-clarification_complete",
+          "step_id": "s007"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "compose.json#/cases/14/initial",
+      "expectation_ref": "compose.json#/cases/14/assessment"
+    },
+    "path-decide-0c89217f8cd89dc98aac": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/68/initial",
+      "expectation_ref": "decide.json#/cases/68/assessment"
+    },
+    "path-act-c915d05f8e6c314f3a7e": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/53/initial",
+      "expectation_ref": "act.json#/cases/53/assessment"
+    },
+    "path-decide-db0a31b7268435329cdd": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/69/initial",
+      "expectation_ref": "decide.json#/cases/69/assessment"
+    },
+    "path-act-77d1b6af374513e55e30": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/54/initial",
+      "expectation_ref": "act.json#/cases/54/assessment"
+    },
+    "path-decide-a52c34d1c70ca04bfc20": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/70/initial",
+      "expectation_ref": "decide.json#/cases/70/assessment"
+    },
+    "path-act-92f0a268a062f7cc01bd": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s006"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/55/initial",
+      "expectation_ref": "act.json#/cases/55/assessment"
+    },
+    "path-decide-76e9c1ffc435132c10ee": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s007"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/71/initial",
+      "expectation_ref": "decide.json#/cases/71/assessment"
+    },
+    "path-act-1ce61af021fed4fac2e5": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s008"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/56/initial",
+      "expectation_ref": "act.json#/cases/56/assessment"
+    },
+    "path-decide-b4dd380b65f30f89bd07": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s009"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/72/initial",
+      "expectation_ref": "decide.json#/cases/72/assessment"
+    },
+    "path-act-5eb5478d2c0859ac3fff": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s010"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/57/initial",
+      "expectation_ref": "act.json#/cases/57/assessment"
+    },
+    "path-decide-113c5dd5c32033ee9ae1": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s011"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/73/initial",
+      "expectation_ref": "decide.json#/cases/73/assessment"
+    },
+    "path-act-1644b08349510e01fe49": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s012"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/58/initial",
+      "expectation_ref": "act.json#/cases/58/assessment"
+    },
+    "path-decide-8618aba688d41f44cd23": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s013"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/74/initial",
+      "expectation_ref": "decide.json#/cases/74/assessment"
+    },
+    "path-act-3591694d7fc5e25f218b": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s014"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/59/initial",
+      "expectation_ref": "act.json#/cases/59/assessment"
+    },
+    "path-decide-3bad3d9354e577fd5bdf": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s015"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/75/initial",
+      "expectation_ref": "decide.json#/cases/75/assessment"
+    },
+    "path-act-d8bab4088d11c7627a11": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s016"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/60/initial",
+      "expectation_ref": "act.json#/cases/60/assessment"
+    },
+    "path-decide-c8c60b8554e2369adfcd": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s017"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/76/initial",
+      "expectation_ref": "decide.json#/cases/76/assessment"
+    },
+    "path-act-cd3e6ec0a942a4936d3f": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s018"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/61/initial",
+      "expectation_ref": "act.json#/cases/61/assessment"
+    },
+    "path-decide-8a07d418fe36b5de96da": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s019"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/77/initial",
+      "expectation_ref": "decide.json#/cases/77/assessment"
+    },
+    "path-act-a5c4da735dc59f892c0f": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s020"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/62/initial",
+      "expectation_ref": "act.json#/cases/62/assessment"
+    },
+    "path-decide-1bb9dd12c03aa5dc1020": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s021"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/78/initial",
+      "expectation_ref": "decide.json#/cases/78/assessment"
+    },
+    "path-act-cf5c845ea2ed1398e127": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s022"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/63/initial",
+      "expectation_ref": "act.json#/cases/63/assessment"
+    },
+    "path-decide-983993e26e06f54bea9b": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s023"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/79/initial",
+      "expectation_ref": "decide.json#/cases/79/assessment"
+    },
+    "path-act-74cdc9e72f3adec33798": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s024"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/64/initial",
+      "expectation_ref": "act.json#/cases/64/assessment"
+    },
+    "path-decide-d1173017550bca1634db": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s025"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/80/initial",
+      "expectation_ref": "decide.json#/cases/80/assessment"
+    },
+    "path-act-b140a7e20ea7cafbd597": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s026"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/65/initial",
+      "expectation_ref": "act.json#/cases/65/assessment"
+    },
+    "path-decide-94400d40c40e5e04ffdf": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s027"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/81/initial",
+      "expectation_ref": "decide.json#/cases/81/assessment"
+    },
+    "path-act-c03c756a2c2717c0ff9a": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s028"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/66/initial",
+      "expectation_ref": "act.json#/cases/66/assessment"
+    },
+    "path-decide-c8416037a346819385b5": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s029"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/82/initial",
+      "expectation_ref": "decide.json#/cases/82/assessment"
+    },
+    "path-compose-cbaf6b6203aff8cfd3fe": {
+      "node": "compose",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168065500",
+          "step_id": "s030"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        2
+      ],
+      "model_call_count": 2,
+      "input_ref": "compose.json#/cases/15/initial",
+      "expectation_ref": "compose.json#/cases/15/assessment"
+    },
+    "path-decide-b9a8e9e0411211070aa8": {
+      "node": "decide",
+      "role": "report_description",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_description-1168065500",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/83/initial",
+      "expectation_ref": "decide.json#/cases/83/assessment"
+    },
+    "path-compose-9bb34dfb79076ee7965d": {
+      "node": "compose",
+      "role": "report_description",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_description-1168065500",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        6
+      ],
+      "model_call_count": 6,
+      "input_ref": "compose.json#/cases/16/initial",
+      "expectation_ref": "compose.json#/cases/16/assessment"
+    },
+    "path-decide-32ad4a41cc28edfd9f2f": {
+      "node": "decide",
+      "role": "report_insight",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_insight-1168065500",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/84/initial",
+      "expectation_ref": "decide.json#/cases/84/assessment"
+    },
+    "path-compose-f81c24633d34627709ca": {
+      "node": "compose",
+      "role": "report_insight",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_insight-1168065500",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        2
+      ],
+      "model_call_count": 2,
+      "input_ref": "compose.json#/cases/17/initial",
+      "expectation_ref": "compose.json#/cases/17/assessment"
+    },
+    "path-decide-c624aca47de575397aac": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/85/initial",
+      "expectation_ref": "decide.json#/cases/85/assessment"
+    },
+    "path-act-4e327998c93a4030dfd0": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/67/initial",
+      "expectation_ref": "act.json#/cases/67/assessment"
+    },
+    "path-decide-d5de61793e82e242fcab": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/86/initial",
+      "expectation_ref": "decide.json#/cases/86/assessment"
+    },
+    "path-act-fa82c3999400badce06e": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/68/initial",
+      "expectation_ref": "act.json#/cases/68/assessment"
+    },
+    "path-decide-3659cc6be911d9c1a2a3": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/87/initial",
+      "expectation_ref": "decide.json#/cases/87/assessment"
+    },
+    "path-act-e1438bf5d40c5bac4dbb": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s006"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/69/initial",
+      "expectation_ref": "act.json#/cases/69/assessment"
+    },
+    "path-decide-3eac5e8e2aff7623ea25": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s007"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/88/initial",
+      "expectation_ref": "decide.json#/cases/88/assessment"
+    },
+    "path-act-38db1254b5423f0c8346": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s008"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/70/initial",
+      "expectation_ref": "act.json#/cases/70/assessment"
+    },
+    "path-decide-a8658cfcc530988c3819": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s009"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/89/initial",
+      "expectation_ref": "decide.json#/cases/89/assessment"
+    },
+    "path-act-372e9e939d976dfd594c": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s010"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/71/initial",
+      "expectation_ref": "act.json#/cases/71/assessment"
+    },
+    "path-decide-cce1eef29c78e4da718e": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s011"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/90/initial",
+      "expectation_ref": "decide.json#/cases/90/assessment"
+    },
+    "path-act-0de632303391ef8e9ba2": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s012"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/72/initial",
+      "expectation_ref": "act.json#/cases/72/assessment"
+    },
+    "path-decide-6f7e9897eb362d6ffa4c": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s013"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/91/initial",
+      "expectation_ref": "decide.json#/cases/91/assessment"
+    },
+    "path-act-4397d7f9560a13eef6eb": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s014"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/73/initial",
+      "expectation_ref": "act.json#/cases/73/assessment"
+    },
+    "path-decide-40ac225232df0a24f6f2": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s015"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/92/initial",
+      "expectation_ref": "decide.json#/cases/92/assessment"
+    },
+    "path-act-b0890fbd4e3322e36d58": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s016"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/74/initial",
+      "expectation_ref": "act.json#/cases/74/assessment"
+    },
+    "path-decide-29456c1c7bda859a47db": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s017"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/93/initial",
+      "expectation_ref": "decide.json#/cases/93/assessment"
+    },
+    "path-act-13f5ef037d7492772a75": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s018"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/75/initial",
+      "expectation_ref": "act.json#/cases/75/assessment"
+    },
+    "path-decide-74ad7be502c52c8febbe": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s019"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/94/initial",
+      "expectation_ref": "decide.json#/cases/94/assessment"
+    },
+    "path-act-4bb7fb6534ae55ea4c0a": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s020"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/76/initial",
+      "expectation_ref": "act.json#/cases/76/assessment"
+    },
+    "path-decide-453405aae39e4e64e025": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s021"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/95/initial",
+      "expectation_ref": "decide.json#/cases/95/assessment"
+    },
+    "path-act-fd7efeb118a5521e3a3a": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s022"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/77/initial",
+      "expectation_ref": "act.json#/cases/77/assessment"
+    },
+    "path-decide-95a720ed4793e7a9a388": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s023"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/96/initial",
+      "expectation_ref": "decide.json#/cases/96/assessment"
+    },
+    "path-act-1752b3505542ba4245a7": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s024"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/78/initial",
+      "expectation_ref": "act.json#/cases/78/assessment"
+    },
+    "path-decide-1788837f932c3aad996e": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s025"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/97/initial",
+      "expectation_ref": "decide.json#/cases/97/assessment"
+    },
+    "path-act-fb126e25ed61c871a9ef": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s026"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/79/initial",
+      "expectation_ref": "act.json#/cases/79/assessment"
+    },
+    "path-decide-1e9e57f11463941a5bcb": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s027"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/98/initial",
+      "expectation_ref": "decide.json#/cases/98/assessment"
+    },
+    "path-act-56ecb31c2bb0d8cf3209": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s028"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/80/initial",
+      "expectation_ref": "act.json#/cases/80/assessment"
+    },
+    "path-decide-096c5a81f16a7b5944d9": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s029"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/99/initial",
+      "expectation_ref": "decide.json#/cases/99/assessment"
+    },
+    "path-compose-24f08a1276d6d036d489": {
+      "node": "compose",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-1168063000",
+          "step_id": "s030"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        2
+      ],
+      "model_call_count": 2,
+      "input_ref": "compose.json#/cases/18/initial",
+      "expectation_ref": "compose.json#/cases/18/assessment"
+    },
+    "path-decide-9a1eff8a2456a6769db5": {
+      "node": "decide",
+      "role": "report_description",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_description-1168063000",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/100/initial",
+      "expectation_ref": "decide.json#/cases/100/assessment"
+    },
+    "path-compose-2dd6b65330a80de7cf6c": {
+      "node": "compose",
+      "role": "report_description",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_description-1168063000",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        6
+      ],
+      "model_call_count": 6,
+      "input_ref": "compose.json#/cases/19/initial",
+      "expectation_ref": "compose.json#/cases/19/assessment"
+    },
+    "path-decide-b6d810828d189b9d91d6": {
+      "node": "decide",
+      "role": "report_insight",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_insight-1168063000",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/101/initial",
+      "expectation_ref": "decide.json#/cases/101/assessment"
+    },
+    "path-compose-7c3ed921b7349606878c": {
+      "node": "compose",
+      "role": "report_insight",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_insight-1168063000",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        2
+      ],
+      "model_call_count": 2,
+      "input_ref": "compose.json#/cases/20/initial",
+      "expectation_ref": "compose.json#/cases/20/assessment"
+    },
+    "path-decide-2ffce893904d7df446da": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/102/initial",
+      "expectation_ref": "decide.json#/cases/102/assessment"
+    },
+    "path-act-ebd2d90b41d18e2ac70c": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/81/initial",
+      "expectation_ref": "act.json#/cases/81/assessment"
+    },
+    "path-decide-d5aebd1008d30bfaf021": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s003"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/103/initial",
+      "expectation_ref": "decide.json#/cases/103/assessment"
+    },
+    "path-act-a6b117dec3fac6cf6bba": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s004"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/82/initial",
+      "expectation_ref": "act.json#/cases/82/assessment"
+    },
+    "path-decide-8e97f20958fbb8093319": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s005"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/104/initial",
+      "expectation_ref": "decide.json#/cases/104/assessment"
+    },
+    "path-act-10dc8b604803e36578a0": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s006"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/83/initial",
+      "expectation_ref": "act.json#/cases/83/assessment"
+    },
+    "path-decide-0f740eb1f6bbe5b9a057": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s007"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/105/initial",
+      "expectation_ref": "decide.json#/cases/105/assessment"
+    },
+    "path-act-afb23cdb6035b4008721": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s008"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/84/initial",
+      "expectation_ref": "act.json#/cases/84/assessment"
+    },
+    "path-decide-8296a4f5ec947b789300": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s009"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/106/initial",
+      "expectation_ref": "decide.json#/cases/106/assessment"
+    },
+    "path-act-2b3910b4c655c6c5a928": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s010"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/85/initial",
+      "expectation_ref": "act.json#/cases/85/assessment"
+    },
+    "path-decide-cabcc142a1d12024308f": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s011"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/107/initial",
+      "expectation_ref": "decide.json#/cases/107/assessment"
+    },
+    "path-act-21cdbd5ff1471edafe9f": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s012"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/86/initial",
+      "expectation_ref": "act.json#/cases/86/assessment"
+    },
+    "path-decide-6177d857d01e148db9fd": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s013"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/108/initial",
+      "expectation_ref": "decide.json#/cases/108/assessment"
+    },
+    "path-act-de41840fea0cac009c99": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s014"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/87/initial",
+      "expectation_ref": "act.json#/cases/87/assessment"
+    },
+    "path-decide-919abb804783ec7ee70b": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s015"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/109/initial",
+      "expectation_ref": "decide.json#/cases/109/assessment"
+    },
+    "path-act-a5d381040eaf95c04da1": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s016"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/88/initial",
+      "expectation_ref": "act.json#/cases/88/assessment"
+    },
+    "path-decide-e41975f67a322a897d9f": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s017"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/110/initial",
+      "expectation_ref": "decide.json#/cases/110/assessment"
+    },
+    "path-act-68f8644750e3fabf88c4": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s018"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/89/initial",
+      "expectation_ref": "act.json#/cases/89/assessment"
+    },
+    "path-decide-065bfa9ac43ea2ce256b": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s019"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/111/initial",
+      "expectation_ref": "decide.json#/cases/111/assessment"
+    },
+    "path-act-e028a4f9b39726cca385": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s020"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/90/initial",
+      "expectation_ref": "act.json#/cases/90/assessment"
+    },
+    "path-decide-f67a8389468e8e3f0007": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s021"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/112/initial",
+      "expectation_ref": "decide.json#/cases/112/assessment"
+    },
+    "path-act-ed19c8f468b693d49810": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s022"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/91/initial",
+      "expectation_ref": "act.json#/cases/91/assessment"
+    },
+    "path-decide-a3ef3fb247c156de4572": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s023"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/113/initial",
+      "expectation_ref": "decide.json#/cases/113/assessment"
+    },
+    "path-act-da41b647ae3ecfda1cf4": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s024"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/92/initial",
+      "expectation_ref": "act.json#/cases/92/assessment"
+    },
+    "path-decide-fad09088f803e7e471e4": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s025"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/114/initial",
+      "expectation_ref": "decide.json#/cases/114/assessment"
+    },
+    "path-act-9176f6124f7e58d16979": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s026"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/93/initial",
+      "expectation_ref": "act.json#/cases/93/assessment"
+    },
+    "path-decide-a6a8eecc7ec23968bfb3": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s027"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/115/initial",
+      "expectation_ref": "decide.json#/cases/115/assessment"
+    },
+    "path-act-8c683aed7db79090c862": {
+      "node": "act",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s028"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "act.json#/cases/94/initial",
+      "expectation_ref": "act.json#/cases/94/assessment"
+    },
+    "path-decide-893577b8f15a349a1ba8": {
+      "node": "decide",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s029"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/116/initial",
+      "expectation_ref": "decide.json#/cases/116/assessment"
+    },
+    "path-compose-4da3c31999179912e787": {
+      "node": "compose",
+      "role": "report_selection",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_selection-5111062000",
+          "step_id": "s030"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        2
+      ],
+      "model_call_count": 2,
+      "input_ref": "compose.json#/cases/21/initial",
+      "expectation_ref": "compose.json#/cases/21/assessment"
+    },
+    "path-decide-0b47d189af4121b94796": {
+      "node": "decide",
+      "role": "report_description",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_description-5111062000",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/117/initial",
+      "expectation_ref": "decide.json#/cases/117/assessment"
+    },
+    "path-compose-1498a4ed06c4dc648fc0": {
+      "node": "compose",
+      "role": "report_description",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_description-5111062000",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        6
+      ],
+      "model_call_count": 6,
+      "input_ref": "compose.json#/cases/22/initial",
+      "expectation_ref": "compose.json#/cases/22/assessment"
+    },
+    "path-decide-6f9d98cb61670b270be6": {
+      "node": "decide",
+      "role": "report_insight",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_insight-5111062000",
+          "step_id": "s001"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        1
+      ],
+      "model_call_count": 1,
+      "input_ref": "decide.json#/cases/118/initial",
+      "expectation_ref": "decide.json#/cases/118/assessment"
+    },
+    "path-compose-014d04fdfda9cdceb8ed": {
+      "node": "compose",
+      "role": "report_insight",
+      "usages": [
+        {
+          "scenario_id": "candidate-report_insight-5111062000",
+          "step_id": "s002"
+        }
+      ],
+      "partial_usages": [],
+      "aliases": [],
+      "model_call_counts": [
+        2
+      ],
+      "model_call_count": 2,
+      "input_ref": "compose.json#/cases/23/initial",
+      "expectation_ref": "compose.json#/cases/23/assessment"
+    }
+  },
+  "dataset_scope": "all-current-insight-copy",
+  "source_dataset": "../nodes/scenarios.json",
+  "approved_pilot": "../nodes-insight-review/scenarios.json",
+  "source_snapshot": "snapshots/data.json",
+  "source_snapshot_sha256": "a48ffc395b2a2b88ddccfa63d32f724ed977c565a2b03190a9ecc19b804be18b",
+  "measurement_snapshot_sha256": "ce8bfcfba7909cb259a1cf6c579f8af1e086b7bc8a198984c4485911c17ce820",
+  "supplemental_evidence": [
+    "snapshots/definitions.json",
+    "snapshots/activity-evidence.json"
+  ],
+  "input_contract": "evaluation-suite-v1: independent initial input, separate assessment",
+  "history_contract": "Authored example model responses executed through current production nodes and prepared-data tools. No external model evaluation.",
+  "flow_contract": "12 complete user paths and 9 report role paths, with actual specialist boundaries and sequential approved report handoffs.",
+  "model_output_contract": "Examples are not exact-string answers. Assess supported interpretations, permitted alternatives and case-specific failure conditions."
+}

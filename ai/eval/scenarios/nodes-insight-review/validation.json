@@ -1,0 +1,69 @@
+{
+  "valid": true,
+  "original_files_unchanged": 40,
+  "original_integrity_reference": "original-hashes-action-revision.json",
+  "review_input_files_unchanged": 5,
+  "review_input_integrity_reference": "before-action-revision/input-hashes.json",
+  "original_measurement_datasets_unchanged": true,
+  "previous_user_request_and_response_unchanged": true,
+  "supplemental_activity_rows": 6,
+  "activity_detail_rows": 0,
+  "supplemental_definition_rows": 13,
+  "criteria_sha256": {
+    "docs/eval/nodes/common.json": "9c27e19b5daef62199dc3d8b5c0eff033b871fa3a32f0d52588a061900c7faab",
+    "docs/eval/nodes/interpret.json": "17313330ae00ef854d9ae6bcbb934da1e09d994606fb8f6efc3fe57fb02925f7",
+    "docs/eval/nodes/decide.json": "9f01f0d33e1b555d14a0391ffdc178c48481365042e2dadda571dd42a9736470",
+    "docs/eval/nodes/act.json": "222d0e19a71d427f9d7bf0b1ff330ced678b907977daa1f5743633aa1dae51fb",
+    "docs/eval/nodes/compose.json": "09676146d31ef251ecaa06559847571d8eb8f82f2ee6fdb92a759452395419a8",
+    "docs/eval/nodes/ask.json": "53d9108010ace311365de7562e398592390f953c99d048cfc892bcf892d53b03"
+  },
+  "suite_schema_errors": 0,
+  "authored_response_numeric_checks_passed": 15,
+  "report_model_calls": {
+    "purpose": "같은 보고서의 내부 모델 호출 10개를 각각 독립 평가하는 중복 관점 묶음",
+    "model_calls": 10,
+    "first_compose_overlaps": 3,
+    "additional_internal_calls": 7,
+    "new_scenario_paths": 0,
+    "overlap_note": "선정·첫 설명·인사이트 작성 3개는 compose.json의 최초 호출과 중복하므로 노드 경로 수에 합산하지 않는다.",
+    "future_results_in_input": false,
+    "model_preparation_checked": 10,
+    "authored_numeric_checks_passed": 11,
+    "external_model_evaluation": "not_run"
+  },
+  "path_errors": [],
+  "summary": {
+    "complete_scenario_count": 4,
+    "unique_node_case_count": 56,
+    "path_node_execution_count": 56,
+    "preparation_node_execution_count": 0,
+    "partial_group_count": 0,
+    "partial_only_node_case_count": 0,
+    "shared_node_case_count": 0,
+    "runtime_only_node_case_count": 0,
+    "path_runtime_only_execution_count": 0,
+    "by_node": {
+      "interpret": 2,
+      "decide": 27,
+      "act": 22,
+      "compose": 5
+    },
+    "by_role": {
+      "request": 5,
+      "interpretation": 17,
+      "report_selection": 30,
+      "report_description": 2,
+      "report_insight": 2
+    },
+    "by_event": {
+      "user_request": 22,
+      "analysis_pipeline": 34
+    },
+    "scenarios_by_event": {
+      "user_request": 1,
+      "analysis_pipeline": 3
+    }
+  },
+  "external_model_evaluation": "not_run",
+  "semantic_quality": "The user-provided final wording is preserved. V07 explains the six-month context; V02 distinguishes conditional interpretations of relative gender change; V08 supplements the current distribution with August-December history for the same grids and November-December score changes. Ranks use one plus the number of strictly higher scores, including ties. Selection and reviews distinguish persistent high levels from the largest recent increase and retain the residence condition for field checks. Each view is not forced to add an operational action. Numeric and structural checks do not establish autonomous model quality. External model evaluation not run."
+}

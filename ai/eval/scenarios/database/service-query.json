@@ -1,0 +1,1778 @@
+{
+  "schema_version": "evaluation-suite-v1",
+  "id": "database-service-query-v1",
+  "data_source": "database",
+  "database_fixture": {
+    "public.dim_region": [
+      {
+        "adm_cd10": "1168066000",
+        "adm_cd8": "00000001",
+        "adm_nm": "합성 평가동 A",
+        "sgg_nm": "합성 평가시 A",
+        "geom": null,
+        "updated_at": "2025-10-01T09:00:00"
+      },
+      {
+        "adm_cd10": "5111061100",
+        "adm_cd8": "00000002",
+        "adm_nm": "합성 평가동 B",
+        "sgg_nm": "합성 평가시 B",
+        "geom": null,
+        "updated_at": "2025-10-01T09:00:00"
+      }
+    ],
+    "public.region_result": [
+      {
+        "period_start": "2025-10-01",
+        "adm_cd10": "1168066000",
+        "bg_score": 30.25,
+        "bg_grade": 2,
+        "bh_score": 40.5,
+        "bh_grade": 3,
+        "risk_grade": 3,
+        "updated_at": "2025-11-02T09:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "adm_cd10": "5111061100",
+        "bg_score": 60.75,
+        "bg_grade": 4,
+        "bh_score": 20.25,
+        "bh_grade": 2,
+        "risk_grade": 3,
+        "updated_at": "2025-11-02T10:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "adm_cd10": "1168066000",
+        "bg_score": 35.5,
+        "bg_grade": 3,
+        "bh_score": 50.75,
+        "bh_grade": 4,
+        "risk_grade": 4,
+        "updated_at": "2025-12-02T09:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "adm_cd10": "5111061100",
+        "bg_score": 65.0,
+        "bg_grade": 4,
+        "bh_score": 25.0,
+        "bh_grade": 2,
+        "risk_grade": 4,
+        "updated_at": "2025-12-02T10:00:00"
+      }
+    ],
+    "analysis.dim_grid100": [
+      {
+        "grid_cd": "EVAL000001",
+        "gx": 1000,
+        "gy": 1000,
+        "updated_at": "2025-10-01T09:00:00",
+        "adm_cd10": "1168066000"
+      },
+      {
+        "grid_cd": "EVAL000002",
+        "gx": 1100,
+        "gy": 1000,
+        "updated_at": "2025-10-01T09:00:00",
+        "adm_cd10": "1168066000"
+      },
+      {
+        "grid_cd": "EVAL000003",
+        "gx": 2000,
+        "gy": 2000,
+        "updated_at": "2025-10-01T09:00:00",
+        "adm_cd10": "5111061100"
+      }
+    ],
+    "analysis.bh_region_contribution": [
+      {
+        "period_start": "2025-10-01",
+        "adm_cd10": "1168066000",
+        "indicator_cd": "h12_evening_day_ratio",
+        "contribution": 1.25,
+        "updated_at": "2025-11-03T09:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "adm_cd10": "1168066000",
+        "indicator_cd": "h13_commute_ratio",
+        "contribution": -0.5,
+        "updated_at": "2025-11-03T10:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "adm_cd10": "5111061100",
+        "indicator_cd": "h12_evening_day_ratio",
+        "contribution": 2.5,
+        "updated_at": "2025-11-03T11:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "adm_cd10": "1168066000",
+        "indicator_cd": "h12_evening_day_ratio",
+        "contribution": 3.75,
+        "updated_at": "2025-12-03T09:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "adm_cd10": "1168066000",
+        "indicator_cd": "h13_commute_ratio",
+        "contribution": 0.25,
+        "updated_at": "2025-12-03T10:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "adm_cd10": "5111061100",
+        "indicator_cd": "h12_evening_day_ratio",
+        "contribution": -1.25,
+        "updated_at": "2025-12-03T11:00:00"
+      }
+    ],
+    "analysis.bh_grid_anomaly": [
+      {
+        "period_start": "2025-10-01",
+        "grid_cd": "EVAL000001",
+        "anomaly_score": 12.5,
+        "updated_at": "2025-11-04T09:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "grid_cd": "EVAL000002",
+        "anomaly_score": null,
+        "updated_at": "2025-11-04T10:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "grid_cd": "EVAL000003",
+        "anomaly_score": 27.75,
+        "updated_at": "2025-11-04T11:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "grid_cd": "EVAL000001",
+        "anomaly_score": 30.0,
+        "updated_at": "2025-12-04T09:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "grid_cd": "EVAL000003",
+        "anomaly_score": 15.25,
+        "updated_at": "2025-12-04T11:00:00"
+      }
+    ],
+    "analysis.flow_detail": [
+      {
+        "period_start": "2025-10-01",
+        "dim_type": "hour",
+        "dim_value": "08",
+        "grid_cd": "EVAL000001",
+        "flow_sum": 300.0,
+        "day_count": 30,
+        "updated_at": "2025-11-04T09:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "dim_type": "hour",
+        "dim_value": "08",
+        "grid_cd": "EVAL000002",
+        "flow_sum": 620.0,
+        "day_count": 31,
+        "updated_at": "2025-11-04T10:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "dim_type": "hour",
+        "dim_value": "09",
+        "grid_cd": "EVAL000001",
+        "flow_sum": 150.0,
+        "day_count": 30,
+        "updated_at": "2025-11-04T09:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "dim_type": "hour",
+        "dim_value": "09",
+        "grid_cd": "EVAL000002",
+        "flow_sum": 0.0,
+        "day_count": 30,
+        "updated_at": "2025-11-04T10:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "dim_type": "weekday",
+        "dim_value": "MON",
+        "grid_cd": "EVAL000001",
+        "flow_sum": 40.0,
+        "day_count": 4,
+        "updated_at": "2025-11-04T09:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "dim_type": "weekday",
+        "dim_value": "MON",
+        "grid_cd": "EVAL000002",
+        "flow_sum": 60.0,
+        "day_count": 4,
+        "updated_at": "2025-11-04T10:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "dim_type": "sex_age",
+        "dim_value": "M_60P",
+        "grid_cd": "EVAL000001",
+        "flow_sum": 90.0,
+        "day_count": 30,
+        "updated_at": "2025-11-04T09:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "dim_type": "sex_age",
+        "dim_value": "M_60P",
+        "grid_cd": "EVAL000002",
+        "flow_sum": 120.0,
+        "day_count": 30,
+        "updated_at": "2025-11-04T10:00:00"
+      },
+      {
+        "period_start": "2025-10-01",
+        "dim_type": "hour",
+        "dim_value": "08",
+        "grid_cd": "EVAL000003",
+        "flow_sum": 150.0,
+        "day_count": 30,
+        "updated_at": "2025-11-04T11:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "dim_type": "hour",
+        "dim_value": "08",
+        "grid_cd": "EVAL000001",
+        "flow_sum": 60.0,
+        "day_count": 30,
+        "updated_at": "2025-12-04T09:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "dim_type": "hour",
+        "dim_value": "08",
+        "grid_cd": "EVAL000002",
+        "flow_sum": 90.0,
+        "day_count": 30,
+        "updated_at": "2025-12-04T10:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "dim_type": "weekday",
+        "dim_value": "MON",
+        "grid_cd": "EVAL000001",
+        "flow_sum": 40.0,
+        "day_count": 0,
+        "updated_at": "2025-12-04T11:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "dim_type": "weekday",
+        "dim_value": "MON",
+        "grid_cd": "EVAL000002",
+        "flow_sum": 80.0,
+        "day_count": 4,
+        "updated_at": "2025-12-04T12:00:00"
+      },
+      {
+        "period_start": "2025-11-01",
+        "dim_type": "sex_age",
+        "dim_value": "F_60P",
+        "grid_cd": "EVAL000003",
+        "flow_sum": null,
+        "day_count": 30,
+        "updated_at": "2025-12-04T13:00:00"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "DB-T01-01",
+      "unit": "tool",
+      "target": "query_data",
+      "purpose": "동·월별 분석 결과와 실제 DB 자료 참조를 조회한다.",
+      "arguments": {
+        "target": "public.region_result"
+      },
+      "assessment": {
+        "required": true,
+        "checks": [
+          "T-I.1",
+          "T-O.1",
+          "T-O.2",
+          "T-O.5"
+        ],
+        "reference": {
+          "fixture": "service-query.json#/database_fixture",
+          "calculation": "generate_service_query.py: 고정 행·격자 소속·별도 그룹 계산표",
+          "source": "public.region_result",
+          "source_version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3"
+        },
+        "expected": {
+          "schema_version": "tool-expectations-v1",
+          "items": [
+            {
+              "check": "T-I.1",
+              "path": "/observations/provider_calls",
+              "value": 1
+            },
+            {
+              "check": "T-I.1",
+              "path": "/output/applied",
+              "value": {
+                "target": "public.region_result",
+                "version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3",
+                "as_of": "2025-12-02T10:00:00",
+                "fields": [
+                  "period_start",
+                  "adm_cd10",
+                  "bg_score",
+                  "bg_grade",
+                  "bh_score",
+                  "bh_grade",
+                  "risk_grade",
+                  "updated_at"
+                ],
+                "filters": [],
+                "sort": [],
+                "offset": 0,
+                "limit": 100
+              }
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/rows",
+              "value": [
+                {
+                  "period_start": "2025-10-01",
+                  "adm_cd10": "1168066000",
+                  "bg_score": 30.25,
+                  "bg_grade": 2,
+                  "bh_score": 40.5,
+                  "bh_grade": 3,
+                  "risk_grade": 3,
+                  "updated_at": "2025-11-02T09:00:00"
+                },
+                {
+                  "period_start": "2025-10-01",
+                  "adm_cd10": "5111061100",
+                  "bg_score": 60.75,
+                  "bg_grade": 4,
+                  "bh_score": 20.25,
+                  "bh_grade": 2,
+                  "risk_grade": 3,
+                  "updated_at": "2025-11-02T10:00:00"
+                },
+                {
+                  "period_start": "2025-11-01",
+                  "adm_cd10": "1168066000",
+                  "bg_score": 35.5,
+                  "bg_grade": 3,
+                  "bh_score": 50.75,
+                  "bh_grade": 4,
+                  "risk_grade": 4,
+                  "updated_at": "2025-12-02T09:00:00"
+                },
+                {
+                  "period_start": "2025-11-01",
+                  "adm_cd10": "5111061100",
+                  "bg_score": 65.0,
+                  "bg_grade": 4,
+                  "bh_score": 25.0,
+                  "bh_grade": 2,
+                  "risk_grade": 4,
+                  "updated_at": "2025-12-02T10:00:00"
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/columns",
+              "value": [
+                {
+                  "name": "period_start",
+                  "kind": "string",
+                  "unit": "기준월 첫날",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "adm_cd10",
+                  "kind": "string",
+                  "unit": "행정동코드",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bg_score",
+                  "kind": "number",
+                  "unit": "배경 점수",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bg_grade",
+                  "kind": "integer",
+                  "unit": "단계(1~5)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bh_score",
+                  "kind": "number",
+                  "unit": "행동 점수",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bh_grade",
+                  "kind": "integer",
+                  "unit": "단계(1~5)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "risk_grade",
+                  "kind": "integer",
+                  "unit": "단계(1~5)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "updated_at",
+                  "kind": "string",
+                  "unit": "분석 수정 시각(한국 시간)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/total",
+              "value": 4
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/returned",
+              "value": 4
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/next_offset",
+              "value": null
+            },
+            {
+              "check": "T-O.2",
+              "path": "/run/status",
+              "value": "returned"
+            },
+            {
+              "check": "T-O.2",
+              "path": "/failure",
+              "value": null
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/inputs",
+              "value": [
+                {
+                  "id": "public.region_result",
+                  "version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3"
+                }
+              ]
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/as_of",
+              "value": "2025-12-02T10:00:00"
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/sources/0/uri",
+              "value": "db://public/region_result"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "DB-T01-02",
+      "unit": "tool",
+      "target": "query_data",
+      "purpose": "10월 평가동 A의 지표 기여도를 내림차순으로 선택한다.",
+      "arguments": {
+        "target": "analysis.bh_region_contribution",
+        "filters": [
+          {
+            "field": "period_start",
+            "operator": "eq",
+            "value": "2025-10-01"
+          },
+          {
+            "field": "adm_cd10",
+            "operator": "eq",
+            "value": "1168066000"
+          }
+        ],
+        "sort": [
+          {
+            "field": "contribution",
+            "descending": true
+          }
+        ],
+        "fields": [
+          "indicator_cd",
+          "contribution"
+        ]
+      },
+      "assessment": {
+        "required": true,
+        "checks": [
+          "T-I.1",
+          "T-O.1",
+          "T-O.2",
+          "T-O.5"
+        ],
+        "reference": {
+          "fixture": "service-query.json#/database_fixture",
+          "calculation": "generate_service_query.py: 고정 행·격자 소속·별도 그룹 계산표",
+          "source": "analysis.bh_region_contribution",
+          "source_version": "ff8caed7de334566f844cb276a6e74cca593206616473c58fbd1655a4fc698ca"
+        },
+        "expected": {
+          "schema_version": "tool-expectations-v1",
+          "items": [
+            {
+              "check": "T-I.1",
+              "path": "/observations/provider_calls",
+              "value": 1
+            },
+            {
+              "check": "T-I.1",
+              "path": "/output/applied",
+              "value": {
+                "target": "analysis.bh_region_contribution",
+                "version": "ff8caed7de334566f844cb276a6e74cca593206616473c58fbd1655a4fc698ca",
+                "as_of": "2025-12-03T11:00:00",
+                "fields": [
+                  "indicator_cd",
+                  "contribution"
+                ],
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-10-01"
+                  },
+                  {
+                    "field": "adm_cd10",
+                    "operator": "eq",
+                    "value": "1168066000"
+                  }
+                ],
+                "sort": [
+                  {
+                    "field": "contribution",
+                    "descending": true
+                  }
+                ],
+                "offset": 0,
+                "limit": 100
+              }
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/rows",
+              "value": [
+                {
+                  "indicator_cd": "h12_evening_day_ratio",
+                  "contribution": 1.25
+                },
+                {
+                  "indicator_cd": "h13_commute_ratio",
+                  "contribution": -0.5
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/columns",
+              "value": [
+                {
+                  "name": "indicator_cd",
+                  "kind": "string",
+                  "unit": "행동 지표 코드",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "contribution",
+                  "kind": "number",
+                  "unit": "행동 점수",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/total",
+              "value": 2
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/returned",
+              "value": 2
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/next_offset",
+              "value": null
+            },
+            {
+              "check": "T-O.2",
+              "path": "/run/status",
+              "value": "returned"
+            },
+            {
+              "check": "T-O.2",
+              "path": "/failure",
+              "value": null
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/inputs",
+              "value": [
+                {
+                  "id": "analysis.bh_region_contribution",
+                  "version": "ff8caed7de334566f844cb276a6e74cca593206616473c58fbd1655a4fc698ca"
+                }
+              ]
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/as_of",
+              "value": "2025-12-03T11:00:00"
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/sources/0/uri",
+              "value": "db://analysis/bh_region_contribution"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "DB-T01-03",
+      "unit": "tool",
+      "target": "query_data",
+      "purpose": "격자 소속을 결합해 동·월·구분별 일평균 활동량과 결측을 조회한다.",
+      "arguments": {
+        "target": "analysis.flow_detail"
+      },
+      "assessment": {
+        "required": true,
+        "checks": [
+          "T-I.1",
+          "T-O.1",
+          "T-O.2",
+          "T-O.5"
+        ],
+        "reference": {
+          "fixture": "service-query.json#/database_fixture",
+          "calculation": "generate_service_query.py: 고정 행·격자 소속·별도 그룹 계산표",
+          "source": "analysis.flow_detail",
+          "source_version": "784936974e558a7cb0d2ecd25ff1ad44474271d47503063194aaf90be2b26b88"
+        },
+        "expected": {
+          "schema_version": "tool-expectations-v1",
+          "items": [
+            {
+              "check": "T-I.1",
+              "path": "/observations/provider_calls",
+              "value": 1
+            },
+            {
+              "check": "T-I.1",
+              "path": "/output/applied",
+              "value": {
+                "target": "analysis.flow_detail",
+                "version": "784936974e558a7cb0d2ecd25ff1ad44474271d47503063194aaf90be2b26b88",
+                "as_of": "2025-12-04T13:00:00",
+                "fields": [
+                  "period_start",
+                  "adm_cd10",
+                  "dim_type",
+                  "dim_value",
+                  "activity_daily",
+                  "updated_at"
+                ],
+                "filters": [],
+                "sort": [],
+                "offset": 0,
+                "limit": 100
+              }
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/rows",
+              "value": [
+                {
+                  "period_start": "2025-10-01",
+                  "adm_cd10": "1168066000",
+                  "dim_type": "hour",
+                  "dim_value": "08",
+                  "activity_daily": 30.0,
+                  "updated_at": "2025-11-04T10:00:00"
+                },
+                {
+                  "period_start": "2025-10-01",
+                  "adm_cd10": "1168066000",
+                  "dim_type": "hour",
+                  "dim_value": "09",
+                  "activity_daily": 5.0,
+                  "updated_at": "2025-11-04T10:00:00"
+                },
+                {
+                  "period_start": "2025-10-01",
+                  "adm_cd10": "1168066000",
+                  "dim_type": "sex_age",
+                  "dim_value": "M_60P",
+                  "activity_daily": 7.0,
+                  "updated_at": "2025-11-04T10:00:00"
+                },
+                {
+                  "period_start": "2025-10-01",
+                  "adm_cd10": "1168066000",
+                  "dim_type": "weekday",
+                  "dim_value": "MON",
+                  "activity_daily": 25.0,
+                  "updated_at": "2025-11-04T10:00:00"
+                },
+                {
+                  "period_start": "2025-10-01",
+                  "adm_cd10": "5111061100",
+                  "dim_type": "hour",
+                  "dim_value": "08",
+                  "activity_daily": 5.0,
+                  "updated_at": "2025-11-04T11:00:00"
+                },
+                {
+                  "period_start": "2025-11-01",
+                  "adm_cd10": "1168066000",
+                  "dim_type": "hour",
+                  "dim_value": "08",
+                  "activity_daily": 5.0,
+                  "updated_at": "2025-12-04T10:00:00"
+                },
+                {
+                  "period_start": "2025-11-01",
+                  "adm_cd10": "1168066000",
+                  "dim_type": "weekday",
+                  "dim_value": "MON",
+                  "activity_daily": null,
+                  "updated_at": "2025-12-04T12:00:00"
+                },
+                {
+                  "period_start": "2025-11-01",
+                  "adm_cd10": "5111061100",
+                  "dim_type": "sex_age",
+                  "dim_value": "F_60P",
+                  "activity_daily": null,
+                  "updated_at": "2025-12-04T13:00:00"
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/columns",
+              "value": [
+                {
+                  "name": "period_start",
+                  "kind": "string",
+                  "unit": "기준월 첫날",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "adm_cd10",
+                  "kind": "string",
+                  "unit": "행정동코드",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "dim_type",
+                  "kind": "string",
+                  "unit": "구분",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "dim_value",
+                  "kind": "string",
+                  "unit": "구분값",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "activity_daily",
+                  "kind": "number",
+                  "unit": "일평균 추정 활동량",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "updated_at",
+                  "kind": "string",
+                  "unit": "분석 수정 시각",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/total",
+              "value": 8
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/returned",
+              "value": 8
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/next_offset",
+              "value": null
+            },
+            {
+              "check": "T-O.2",
+              "path": "/run/status",
+              "value": "returned"
+            },
+            {
+              "check": "T-O.2",
+              "path": "/failure",
+              "value": null
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/inputs",
+              "value": [
+                {
+                  "id": "analysis.flow_detail",
+                  "version": "784936974e558a7cb0d2ecd25ff1ad44474271d47503063194aaf90be2b26b88"
+                }
+              ]
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/as_of",
+              "value": "2025-12-04T13:00:00"
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/sources/0/uri",
+              "value": "db://analysis/flow_detail"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "DB-T01-04",
+      "unit": "tool",
+      "target": "query_data",
+      "purpose": "행정동이 원시 행에 없는 격자 이상 점수에 소속 동을 결합한다.",
+      "arguments": {
+        "target": "analysis.bh_grid_anomaly"
+      },
+      "assessment": {
+        "required": true,
+        "checks": [
+          "T-I.1",
+          "T-O.1",
+          "T-O.2",
+          "T-O.5"
+        ],
+        "reference": {
+          "fixture": "service-query.json#/database_fixture",
+          "calculation": "generate_service_query.py: 고정 행·격자 소속·별도 그룹 계산표",
+          "source": "analysis.bh_grid_anomaly",
+          "source_version": "ede77839b42203c2ace7871999a52d43364ff3e29a565a4bba32dab8dc865c52"
+        },
+        "expected": {
+          "schema_version": "tool-expectations-v1",
+          "items": [
+            {
+              "check": "T-I.1",
+              "path": "/observations/provider_calls",
+              "value": 1
+            },
+            {
+              "check": "T-I.1",
+              "path": "/output/applied",
+              "value": {
+                "target": "analysis.bh_grid_anomaly",
+                "version": "ede77839b42203c2ace7871999a52d43364ff3e29a565a4bba32dab8dc865c52",
+                "as_of": "2025-12-04T11:00:00",
+                "fields": [
+                  "period_start",
+                  "adm_cd10",
+                  "grid_cd",
+                  "anomaly_score",
+                  "updated_at"
+                ],
+                "filters": [],
+                "sort": [],
+                "offset": 0,
+                "limit": 100
+              }
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/rows",
+              "value": [
+                {
+                  "period_start": "2025-10-01",
+                  "adm_cd10": "1168066000",
+                  "grid_cd": "EVAL000001",
+                  "anomaly_score": 12.5,
+                  "updated_at": "2025-11-04T09:00:00"
+                },
+                {
+                  "period_start": "2025-10-01",
+                  "adm_cd10": "1168066000",
+                  "grid_cd": "EVAL000002",
+                  "anomaly_score": null,
+                  "updated_at": "2025-11-04T10:00:00"
+                },
+                {
+                  "period_start": "2025-10-01",
+                  "adm_cd10": "5111061100",
+                  "grid_cd": "EVAL000003",
+                  "anomaly_score": 27.75,
+                  "updated_at": "2025-11-04T11:00:00"
+                },
+                {
+                  "period_start": "2025-11-01",
+                  "adm_cd10": "1168066000",
+                  "grid_cd": "EVAL000001",
+                  "anomaly_score": 30.0,
+                  "updated_at": "2025-12-04T09:00:00"
+                },
+                {
+                  "period_start": "2025-11-01",
+                  "adm_cd10": "5111061100",
+                  "grid_cd": "EVAL000003",
+                  "anomaly_score": 15.25,
+                  "updated_at": "2025-12-04T11:00:00"
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/columns",
+              "value": [
+                {
+                  "name": "period_start",
+                  "kind": "string",
+                  "unit": "기준월 첫날",
+                  "spatial_unit": "100m 격자",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "adm_cd10",
+                  "kind": "string",
+                  "unit": "행정동코드",
+                  "spatial_unit": "100m 격자",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "grid_cd",
+                  "kind": "string",
+                  "unit": "격자코드",
+                  "spatial_unit": "100m 격자",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "anomaly_score",
+                  "kind": "number",
+                  "unit": "행동 이상 점수",
+                  "spatial_unit": "100m 격자",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "updated_at",
+                  "kind": "string",
+                  "unit": "분석 수정 시각",
+                  "spatial_unit": "100m 격자",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/total",
+              "value": 5
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/returned",
+              "value": 5
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/next_offset",
+              "value": null
+            },
+            {
+              "check": "T-O.2",
+              "path": "/run/status",
+              "value": "returned"
+            },
+            {
+              "check": "T-O.2",
+              "path": "/failure",
+              "value": null
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/inputs",
+              "value": [
+                {
+                  "id": "analysis.bh_grid_anomaly",
+                  "version": "ede77839b42203c2ace7871999a52d43364ff3e29a565a4bba32dab8dc865c52"
+                }
+              ]
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/as_of",
+              "value": "2025-12-04T11:00:00"
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/sources/0/uri",
+              "value": "db://analysis/bh_grid_anomaly"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "DB-T01-05",
+      "unit": "tool",
+      "target": "query_data",
+      "purpose": "적재하지 않은 월은 오류 없이 정상 0건으로 반환한다.",
+      "arguments": {
+        "target": "public.region_result",
+        "filters": [
+          {
+            "field": "period_start",
+            "operator": "eq",
+            "value": "2026-01-01"
+          }
+        ]
+      },
+      "assessment": {
+        "required": true,
+        "checks": [
+          "T-I.1",
+          "T-O.1",
+          "T-O.2",
+          "T-O.5"
+        ],
+        "reference": {
+          "fixture": "service-query.json#/database_fixture",
+          "calculation": "generate_service_query.py: 고정 행·격자 소속·별도 그룹 계산표",
+          "source": "public.region_result",
+          "source_version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3"
+        },
+        "expected": {
+          "schema_version": "tool-expectations-v1",
+          "items": [
+            {
+              "check": "T-I.1",
+              "path": "/observations/provider_calls",
+              "value": 1
+            },
+            {
+              "check": "T-I.1",
+              "path": "/output/applied",
+              "value": {
+                "target": "public.region_result",
+                "version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3",
+                "as_of": "2025-12-02T10:00:00",
+                "fields": [
+                  "period_start",
+                  "adm_cd10",
+                  "bg_score",
+                  "bg_grade",
+                  "bh_score",
+                  "bh_grade",
+                  "risk_grade",
+                  "updated_at"
+                ],
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2026-01-01"
+                  }
+                ],
+                "sort": [],
+                "offset": 0,
+                "limit": 100
+              }
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/rows",
+              "value": []
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/columns",
+              "value": [
+                {
+                  "name": "period_start",
+                  "kind": "string",
+                  "unit": "기준월 첫날",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "adm_cd10",
+                  "kind": "string",
+                  "unit": "행정동코드",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bg_score",
+                  "kind": "number",
+                  "unit": "배경 점수",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bg_grade",
+                  "kind": "integer",
+                  "unit": "단계(1~5)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bh_score",
+                  "kind": "number",
+                  "unit": "행동 점수",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bh_grade",
+                  "kind": "integer",
+                  "unit": "단계(1~5)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "risk_grade",
+                  "kind": "integer",
+                  "unit": "단계(1~5)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "updated_at",
+                  "kind": "string",
+                  "unit": "분석 수정 시각(한국 시간)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/total",
+              "value": 0
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/returned",
+              "value": 0
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/next_offset",
+              "value": null
+            },
+            {
+              "check": "T-O.2",
+              "path": "/run/status",
+              "value": "returned"
+            },
+            {
+              "check": "T-O.2",
+              "path": "/failure",
+              "value": null
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/inputs",
+              "value": [
+                {
+                  "id": "public.region_result",
+                  "version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3"
+                }
+              ]
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/as_of",
+              "value": "2025-12-02T10:00:00"
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/sources/0/uri",
+              "value": "db://public/region_result"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "DB-T01-06",
+      "unit": "tool",
+      "target": "query_data",
+      "purpose": "11월 두 동을 행동 점수 내림차순으로 정렬하고 지정 열만 반환한다.",
+      "arguments": {
+        "target": "public.region_result",
+        "filters": [
+          {
+            "field": "period_start",
+            "operator": "eq",
+            "value": "2025-11-01"
+          }
+        ],
+        "sort": [
+          {
+            "field": "bh_score",
+            "descending": true
+          }
+        ],
+        "fields": [
+          "adm_cd10",
+          "bh_score",
+          "risk_grade"
+        ]
+      },
+      "assessment": {
+        "required": true,
+        "checks": [
+          "T-I.1",
+          "T-O.1",
+          "T-O.2",
+          "T-O.5"
+        ],
+        "reference": {
+          "fixture": "service-query.json#/database_fixture",
+          "calculation": "generate_service_query.py: 고정 행·격자 소속·별도 그룹 계산표",
+          "source": "public.region_result",
+          "source_version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3"
+        },
+        "expected": {
+          "schema_version": "tool-expectations-v1",
+          "items": [
+            {
+              "check": "T-I.1",
+              "path": "/observations/provider_calls",
+              "value": 1
+            },
+            {
+              "check": "T-I.1",
+              "path": "/output/applied",
+              "value": {
+                "target": "public.region_result",
+                "version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3",
+                "as_of": "2025-12-02T10:00:00",
+                "fields": [
+                  "adm_cd10",
+                  "bh_score",
+                  "risk_grade"
+                ],
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-11-01"
+                  }
+                ],
+                "sort": [
+                  {
+                    "field": "bh_score",
+                    "descending": true
+                  }
+                ],
+                "offset": 0,
+                "limit": 100
+              }
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/rows",
+              "value": [
+                {
+                  "adm_cd10": "1168066000",
+                  "bh_score": 50.75,
+                  "risk_grade": 4
+                },
+                {
+                  "adm_cd10": "5111061100",
+                  "bh_score": 25.0,
+                  "risk_grade": 4
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/columns",
+              "value": [
+                {
+                  "name": "adm_cd10",
+                  "kind": "string",
+                  "unit": "행정동코드",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bh_score",
+                  "kind": "number",
+                  "unit": "행동 점수",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "risk_grade",
+                  "kind": "integer",
+                  "unit": "단계(1~5)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/total",
+              "value": 2
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/returned",
+              "value": 2
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/next_offset",
+              "value": null
+            },
+            {
+              "check": "T-O.2",
+              "path": "/run/status",
+              "value": "returned"
+            },
+            {
+              "check": "T-O.2",
+              "path": "/failure",
+              "value": null
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/inputs",
+              "value": [
+                {
+                  "id": "public.region_result",
+                  "version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3"
+                }
+              ]
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/as_of",
+              "value": "2025-12-02T10:00:00"
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/sources/0/uri",
+              "value": "db://public/region_result"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "DB-T01-07",
+      "unit": "tool",
+      "target": "query_data",
+      "purpose": "배경 점수 내림차순의 첫 두 행과 다음 페이지 위치를 반환한다.",
+      "arguments": {
+        "target": "public.region_result",
+        "sort": [
+          {
+            "field": "bg_score",
+            "descending": true
+          }
+        ],
+        "fields": [
+          "adm_cd10",
+          "period_start",
+          "bg_score"
+        ],
+        "limit": 2
+      },
+      "assessment": {
+        "required": true,
+        "checks": [
+          "T-I.1",
+          "T-O.1",
+          "T-O.2",
+          "T-O.5"
+        ],
+        "reference": {
+          "fixture": "service-query.json#/database_fixture",
+          "calculation": "generate_service_query.py: 고정 행·격자 소속·별도 그룹 계산표",
+          "source": "public.region_result",
+          "source_version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3"
+        },
+        "expected": {
+          "schema_version": "tool-expectations-v1",
+          "items": [
+            {
+              "check": "T-I.1",
+              "path": "/observations/provider_calls",
+              "value": 1
+            },
+            {
+              "check": "T-I.1",
+              "path": "/output/applied",
+              "value": {
+                "target": "public.region_result",
+                "version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3",
+                "as_of": "2025-12-02T10:00:00",
+                "fields": [
+                  "adm_cd10",
+                  "period_start",
+                  "bg_score"
+                ],
+                "filters": [],
+                "sort": [
+                  {
+                    "field": "bg_score",
+                    "descending": true
+                  }
+                ],
+                "offset": 0,
+                "limit": 2
+              }
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/rows",
+              "value": [
+                {
+                  "adm_cd10": "5111061100",
+                  "period_start": "2025-11-01",
+                  "bg_score": 65.0
+                },
+                {
+                  "adm_cd10": "5111061100",
+                  "period_start": "2025-10-01",
+                  "bg_score": 60.75
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/columns",
+              "value": [
+                {
+                  "name": "adm_cd10",
+                  "kind": "string",
+                  "unit": "행정동코드",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "period_start",
+                  "kind": "string",
+                  "unit": "기준월 첫날",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bg_score",
+                  "kind": "number",
+                  "unit": "배경 점수",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/total",
+              "value": 4
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/returned",
+              "value": 2
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/next_offset",
+              "value": 2
+            },
+            {
+              "check": "T-O.2",
+              "path": "/run/status",
+              "value": "returned"
+            },
+            {
+              "check": "T-O.2",
+              "path": "/failure",
+              "value": null
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/inputs",
+              "value": [
+                {
+                  "id": "public.region_result",
+                  "version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3"
+                }
+              ]
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/as_of",
+              "value": "2025-12-02T10:00:00"
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/sources/0/uri",
+              "value": "db://public/region_result"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "DB-T01-08",
+      "unit": "tool",
+      "target": "query_data",
+      "purpose": "독립 스냅샷 버전으로 같은 정렬의 다음 페이지를 조회한다.",
+      "arguments": {
+        "target": "public.region_result",
+        "version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3",
+        "sort": [
+          {
+            "field": "bg_score",
+            "descending": true
+          }
+        ],
+        "fields": [
+          "adm_cd10",
+          "period_start",
+          "bg_score"
+        ],
+        "offset": 2,
+        "limit": 2
+      },
+      "assessment": {
+        "required": true,
+        "checks": [
+          "T-I.1",
+          "T-O.1",
+          "T-O.2",
+          "T-O.5"
+        ],
+        "reference": {
+          "fixture": "service-query.json#/database_fixture",
+          "calculation": "generate_service_query.py: 고정 행·격자 소속·별도 그룹 계산표",
+          "source": "public.region_result",
+          "source_version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3"
+        },
+        "expected": {
+          "schema_version": "tool-expectations-v1",
+          "items": [
+            {
+              "check": "T-I.1",
+              "path": "/observations/provider_calls",
+              "value": 1
+            },
+            {
+              "check": "T-I.1",
+              "path": "/output/applied",
+              "value": {
+                "target": "public.region_result",
+                "version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3",
+                "as_of": "2025-12-02T10:00:00",
+                "fields": [
+                  "adm_cd10",
+                  "period_start",
+                  "bg_score"
+                ],
+                "filters": [],
+                "sort": [
+                  {
+                    "field": "bg_score",
+                    "descending": true
+                  }
+                ],
+                "offset": 2,
+                "limit": 2
+              }
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/rows",
+              "value": [
+                {
+                  "adm_cd10": "1168066000",
+                  "period_start": "2025-11-01",
+                  "bg_score": 35.5
+                },
+                {
+                  "adm_cd10": "1168066000",
+                  "period_start": "2025-10-01",
+                  "bg_score": 30.25
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/data/columns",
+              "value": [
+                {
+                  "name": "adm_cd10",
+                  "kind": "string",
+                  "unit": "행정동코드",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "period_start",
+                  "kind": "string",
+                  "unit": "기준월 첫날",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bg_score",
+                  "kind": "number",
+                  "unit": "배경 점수",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                }
+              ]
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/total",
+              "value": 4
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/returned",
+              "value": 2
+            },
+            {
+              "check": "T-O.1",
+              "path": "/output/next_offset",
+              "value": null
+            },
+            {
+              "check": "T-O.2",
+              "path": "/run/status",
+              "value": "returned"
+            },
+            {
+              "check": "T-O.2",
+              "path": "/failure",
+              "value": null
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/inputs",
+              "value": [
+                {
+                  "id": "public.region_result",
+                  "version": "da0dbf4cd6ee0ab93046fa086f6922a1c0ac070f6425f830fb5df8fd11111bb3"
+                }
+              ]
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/as_of",
+              "value": "2025-12-02T10:00:00"
+            },
+            {
+              "check": "T-O.5",
+              "path": "/output/data/sources/0/uri",
+              "value": "db://public/region_result"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

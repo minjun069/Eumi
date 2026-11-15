@@ -1,0 +1,1485 @@
+{
+  "schema_version": "query-fixtures-v1",
+  "description": "도구 조회 평가만을 위한 합성 원본. 실제 지역의 관측값이나 사회적 고립 위험 결과가 아니다.",
+  "datasets": {
+    "activity": {
+      "reference": {
+        "id": "activity",
+        "version": "activity-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "조회 평가용 합성 자료 · activity",
+          "uri": "evaluation/scenarios/tools/query-data.json#/datasets/activity"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "name",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "month",
+          "kind": "string",
+          "unit": "YYYY-MM",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "age_group",
+          "kind": "string",
+          "unit": "years",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "activity_count",
+          "kind": "integer",
+          "unit": "activity_count",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "signal_score",
+          "kind": "number",
+          "unit": "points",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "quality_ok",
+          "kind": "boolean",
+          "unit": "boolean",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "A01",
+          "area": "시험동A",
+          "month": "2025-10",
+          "age_group": "20-39",
+          "activity_count": 0,
+          "signal_score": 0,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A02",
+          "area": "시험동A",
+          "month": "2025-10",
+          "age_group": "40-64",
+          "activity_count": 20,
+          "signal_score": 0.25,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A03",
+          "area": "시험동A",
+          "month": "2025-10",
+          "age_group": "65+",
+          "activity_count": 20,
+          "signal_score": 0.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A04",
+          "area": "시험동A",
+          "month": "2025-11",
+          "age_group": "20-39",
+          "activity_count": 40,
+          "signal_score": 0.75,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A05",
+          "area": "시험동A",
+          "month": "2025-11",
+          "age_group": "40-64",
+          "activity_count": null,
+          "signal_score": 1,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A06",
+          "area": "시험동A",
+          "month": "2025-11",
+          "age_group": "65+",
+          "activity_count": 60,
+          "signal_score": null,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A07",
+          "area": "시험동A",
+          "month": "2025-12",
+          "age_group": "20-39",
+          "activity_count": 70,
+          "signal_score": 0.25,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A08",
+          "area": "시험동A",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 80,
+          "signal_score": 0.5,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A09",
+          "area": "시험동A",
+          "month": "2025-12",
+          "age_group": "65+",
+          "activity_count": 90,
+          "signal_score": 0.75,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A10",
+          "area": "시험동B",
+          "month": "2025-10",
+          "age_group": "20-39",
+          "activity_count": 100,
+          "signal_score": 1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A11",
+          "area": "시험동B",
+          "month": "2025-10",
+          "age_group": "40-64",
+          "activity_count": 110,
+          "signal_score": 0,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A12",
+          "area": "시험동B",
+          "month": "2025-10",
+          "age_group": "65+",
+          "activity_count": 120,
+          "signal_score": 0.25,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A13",
+          "area": "시험동B",
+          "month": "2025-11",
+          "age_group": "20-39",
+          "activity_count": 130,
+          "signal_score": 0.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A14",
+          "area": "시험동B",
+          "month": "2025-11",
+          "age_group": "40-64",
+          "activity_count": 140,
+          "signal_score": 0.75,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A15",
+          "area": "시험동B",
+          "month": "2025-11",
+          "age_group": "65+",
+          "activity_count": 140,
+          "signal_score": 1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A16",
+          "area": "시험동B",
+          "month": "2025-12",
+          "age_group": "20-39",
+          "activity_count": 160,
+          "signal_score": 0,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A17",
+          "area": "시험동B",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 170,
+          "signal_score": 0.25,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A18",
+          "area": "시험동B",
+          "month": "2025-12",
+          "age_group": "65+",
+          "activity_count": 180,
+          "signal_score": 0.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A19",
+          "area": "시험동C",
+          "month": "2025-10",
+          "age_group": "20-39",
+          "activity_count": 190,
+          "signal_score": 0.75,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A20",
+          "area": "시험동C",
+          "month": "2025-10",
+          "age_group": "40-64",
+          "activity_count": 200,
+          "signal_score": 1,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A21",
+          "area": "시험동C",
+          "month": "2025-10",
+          "age_group": "65+",
+          "activity_count": 210,
+          "signal_score": 0,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A22",
+          "area": "시험동C",
+          "month": "2025-11",
+          "age_group": "20-39",
+          "activity_count": 220,
+          "signal_score": 0.25,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A23",
+          "area": "시험동C",
+          "month": "2025-11",
+          "age_group": "40-64",
+          "activity_count": 230,
+          "signal_score": 0.5,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A24",
+          "area": "시험동C",
+          "month": "2025-11",
+          "age_group": "65+",
+          "activity_count": 240,
+          "signal_score": 0.75,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A25",
+          "area": "시험동C",
+          "month": "2025-12",
+          "age_group": "20-39",
+          "activity_count": 250,
+          "signal_score": null,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A26",
+          "area": "시험동C",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 260,
+          "signal_score": 0,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A27",
+          "area": "시험동C",
+          "month": "2025-12",
+          "age_group": "65+",
+          "activity_count": 270,
+          "signal_score": 0.25,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A28",
+          "area": "시험동D",
+          "month": "2025-10",
+          "age_group": "20-39",
+          "activity_count": 280,
+          "signal_score": 0.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A29",
+          "area": "시험동D",
+          "month": "2025-10",
+          "age_group": "40-64",
+          "activity_count": null,
+          "signal_score": 0.75,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A30",
+          "area": "시험동D",
+          "month": "2025-10",
+          "age_group": "65+",
+          "activity_count": 300,
+          "signal_score": 1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A31",
+          "area": "시험동D",
+          "month": "2025-11",
+          "age_group": "20-39",
+          "activity_count": 310,
+          "signal_score": 0,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A32",
+          "area": "시험동D",
+          "month": "2025-11",
+          "age_group": "40-64",
+          "activity_count": 320,
+          "signal_score": 0.25,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A33",
+          "area": "시험동D",
+          "month": "2025-11",
+          "age_group": "65+",
+          "activity_count": 330,
+          "signal_score": 0.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A34",
+          "area": "시험동D",
+          "month": "2025-12",
+          "age_group": "20-39",
+          "activity_count": 340,
+          "signal_score": 0.75,
+          "quality_ok": true
+        },
+        {
+          "record_id": "A35",
+          "area": "시험동D",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 350,
+          "signal_score": 1,
+          "quality_ok": false
+        },
+        {
+          "record_id": "A36",
+          "area": "시험동D",
+          "month": "2025-12",
+          "age_group": "65+",
+          "activity_count": 360,
+          "signal_score": 0,
+          "quality_ok": true
+        }
+      ]
+    },
+    "activity_pages": {
+      "reference": {
+        "id": "activity_pages",
+        "version": "activity_pages-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "조회 평가용 합성 자료 · activity_pages",
+          "uri": "evaluation/scenarios/tools/query-data.json#/datasets/activity_pages"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "name",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "month",
+          "kind": "string",
+          "unit": "YYYY-MM",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "age_group",
+          "kind": "string",
+          "unit": "years",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "activity_count",
+          "kind": "integer",
+          "unit": "activity_count",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "signal_score",
+          "kind": "number",
+          "unit": "points",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "quality_ok",
+          "kind": "boolean",
+          "unit": "boolean",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "P001",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 1,
+          "signal_score": 0.1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P002",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 2,
+          "signal_score": 0.2,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P003",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 3,
+          "signal_score": 0.3,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P004",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 4,
+          "signal_score": 0.4,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P005",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 5,
+          "signal_score": 0.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P006",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 6,
+          "signal_score": 0.6,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P007",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 7,
+          "signal_score": 0.7,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P008",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 8,
+          "signal_score": 0.8,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P009",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 9,
+          "signal_score": 0.9,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P010",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 10,
+          "signal_score": 1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P011",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 11,
+          "signal_score": 1.1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P012",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 12,
+          "signal_score": 1.2,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P013",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 13,
+          "signal_score": 1.3,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P014",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 14,
+          "signal_score": 1.4,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P015",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 15,
+          "signal_score": 1.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P016",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 16,
+          "signal_score": 1.6,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P017",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 17,
+          "signal_score": 1.7,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P018",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 18,
+          "signal_score": 1.8,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P019",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 19,
+          "signal_score": 1.9,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P020",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 20,
+          "signal_score": 2,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P021",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 21,
+          "signal_score": 2.1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P022",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 22,
+          "signal_score": 2.2,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P023",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 23,
+          "signal_score": 2.3,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P024",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 24,
+          "signal_score": 2.4,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P025",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 25,
+          "signal_score": 2.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P026",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 26,
+          "signal_score": 2.6,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P027",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 27,
+          "signal_score": 2.7,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P028",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 28,
+          "signal_score": 2.8,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P029",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 29,
+          "signal_score": 2.9,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P030",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 30,
+          "signal_score": 3,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P031",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 31,
+          "signal_score": 3.1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P032",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 32,
+          "signal_score": 3.2,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P033",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 33,
+          "signal_score": 3.3,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P034",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 34,
+          "signal_score": 3.4,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P035",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 35,
+          "signal_score": 3.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P036",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 36,
+          "signal_score": 3.6,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P037",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 37,
+          "signal_score": 3.7,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P038",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 38,
+          "signal_score": 3.8,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P039",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 39,
+          "signal_score": 3.9,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P040",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 40,
+          "signal_score": 4,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P041",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 41,
+          "signal_score": 4.1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P042",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 42,
+          "signal_score": 4.2,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P043",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 43,
+          "signal_score": 4.3,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P044",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 44,
+          "signal_score": 4.4,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P045",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 45,
+          "signal_score": 4.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P046",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 46,
+          "signal_score": 4.6,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P047",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 47,
+          "signal_score": 4.7,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P048",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 48,
+          "signal_score": 4.8,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P049",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 49,
+          "signal_score": 4.9,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P050",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 50,
+          "signal_score": 5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P051",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 51,
+          "signal_score": 5.1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P052",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 52,
+          "signal_score": 5.2,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P053",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 53,
+          "signal_score": 5.3,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P054",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 54,
+          "signal_score": 5.4,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P055",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 55,
+          "signal_score": 5.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P056",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 56,
+          "signal_score": 5.6,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P057",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 57,
+          "signal_score": 5.7,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P058",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 58,
+          "signal_score": 5.8,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P059",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 59,
+          "signal_score": 5.9,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P060",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 60,
+          "signal_score": 6,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P061",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 61,
+          "signal_score": 6.1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P062",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 62,
+          "signal_score": 6.2,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P063",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 63,
+          "signal_score": 6.3,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P064",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 64,
+          "signal_score": 6.4,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P065",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 65,
+          "signal_score": 6.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P066",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 66,
+          "signal_score": 6.6,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P067",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 67,
+          "signal_score": 6.7,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P068",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 68,
+          "signal_score": 6.8,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P069",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 69,
+          "signal_score": 6.9,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P070",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 70,
+          "signal_score": 7,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P071",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 71,
+          "signal_score": 7.1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P072",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 72,
+          "signal_score": 7.2,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P073",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 73,
+          "signal_score": 7.3,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P074",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 74,
+          "signal_score": 7.4,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P075",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 75,
+          "signal_score": 7.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P076",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 76,
+          "signal_score": 7.6,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P077",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 77,
+          "signal_score": 7.7,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P078",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 78,
+          "signal_score": 7.8,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P079",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 79,
+          "signal_score": 7.9,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P080",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 80,
+          "signal_score": 8,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P081",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 81,
+          "signal_score": 8.1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P082",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 82,
+          "signal_score": 8.2,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P083",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 83,
+          "signal_score": 8.3,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P084",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 84,
+          "signal_score": 8.4,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P085",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 85,
+          "signal_score": 8.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P086",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 86,
+          "signal_score": 8.6,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P087",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 87,
+          "signal_score": 8.7,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P088",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 88,
+          "signal_score": 8.8,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P089",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 89,
+          "signal_score": 8.9,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P090",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 90,
+          "signal_score": 9,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P091",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 91,
+          "signal_score": 9.1,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P092",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 92,
+          "signal_score": 9.2,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P093",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 93,
+          "signal_score": 9.3,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P094",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 94,
+          "signal_score": 9.4,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P095",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 95,
+          "signal_score": 9.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P096",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 96,
+          "signal_score": 9.6,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P097",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 97,
+          "signal_score": 9.7,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P098",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 98,
+          "signal_score": 9.8,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P099",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 99,
+          "signal_score": 9.9,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P100",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 100,
+          "signal_score": 10,
+          "quality_ok": true
+        },
+        {
+          "record_id": "P101",
+          "area": "페이지시험동",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 101,
+          "signal_score": 10.1,
+          "quality_ok": true
+        }
+      ]
+    },
+    "comparison": {
+      "reference": {
+        "id": "comparison",
+        "version": "comparison-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "조회 평가용 합성 자료 · comparison",
+          "uri": "evaluation/scenarios/tools/query-data.json#/datasets/comparison"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "name",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "month",
+          "kind": "string",
+          "unit": "YYYY-MM",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "age_group",
+          "kind": "string",
+          "unit": "years",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "activity_count",
+          "kind": "integer",
+          "unit": "activity_count",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "signal_score",
+          "kind": "number",
+          "unit": "points",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        },
+        {
+          "name": "quality_ok",
+          "kind": "boolean",
+          "unit": "boolean",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "지역·월·연령집단"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "C01",
+          "area": "시험동A",
+          "month": "2025-12",
+          "age_group": "20-39",
+          "activity_count": 80,
+          "signal_score": 0.5,
+          "quality_ok": true
+        },
+        {
+          "record_id": "C02",
+          "area": "시험동B",
+          "month": "2025-12",
+          "age_group": "40-64",
+          "activity_count": 120,
+          "signal_score": 1,
+          "quality_ok": false
+        },
+        {
+          "record_id": "C03",
+          "area": "시험동C",
+          "month": "2025-12",
+          "age_group": "65+",
+          "activity_count": null,
+          "signal_score": null,
+          "quality_ok": false
+        }
+      ]
+    }
+  }
+}

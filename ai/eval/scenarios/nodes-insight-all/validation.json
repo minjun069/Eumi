@@ -1,0 +1,142 @@
+{
+  "valid": true,
+  "protected_original_pilot_and_runtime_files": 145,
+  "approved_pilot_wording_preserved": true,
+  "original_measurement_datasets_unchanged": true,
+  "supplemental_activity_rows": 18,
+  "activity_detail_rows": 0,
+  "suite_schema_errors": 0,
+  "path_errors": [],
+  "summary": {
+    "complete_scenario_count": 21,
+    "unique_node_case_count": 253,
+    "path_node_execution_count": 253,
+    "preparation_node_execution_count": 24,
+    "partial_group_count": 0,
+    "partial_only_node_case_count": 0,
+    "shared_node_case_count": 0,
+    "runtime_only_node_case_count": 0,
+    "path_runtime_only_execution_count": 0,
+    "by_node": {
+      "interpret": 15,
+      "decide": 119,
+      "act": 95,
+      "compose": 24
+    },
+    "by_role": {
+      "request": 18,
+      "interpretation": 106,
+      "visualization": 27,
+      "report_selection": 90,
+      "report_description": 6,
+      "report_insight": 6
+    },
+    "by_event": {
+      "user_request": 151,
+      "analysis_pipeline": 102
+    },
+    "scenarios_by_event": {
+      "user_request": 12,
+      "analysis_pipeline": 9
+    }
+  },
+  "authored_numeric_checks_passed": 42,
+  "report_sentence_checks": [
+    {
+      "scenario_id": "candidate-report_description-1168065500",
+      "sentence_counts": [
+        2
+      ]
+    },
+    {
+      "scenario_id": "candidate-report_description-1168065500",
+      "sentence_counts": [
+        3
+      ]
+    },
+    {
+      "scenario_id": "candidate-report_description-1168065500",
+      "sentence_counts": [
+        3
+      ]
+    },
+    {
+      "scenario_id": "candidate-report_insight-1168065500",
+      "sentence_counts": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "scenario_id": "candidate-report_description-1168063000",
+      "sentence_counts": [
+        2
+      ]
+    },
+    {
+      "scenario_id": "candidate-report_description-1168063000",
+      "sentence_counts": [
+        2
+      ]
+    },
+    {
+      "scenario_id": "candidate-report_description-1168063000",
+      "sentence_counts": [
+        3
+      ]
+    },
+    {
+      "scenario_id": "candidate-report_insight-1168063000",
+      "sentence_counts": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "scenario_id": "candidate-report_description-5111062000",
+      "sentence_counts": [
+        2
+      ]
+    },
+    {
+      "scenario_id": "candidate-report_description-5111062000",
+      "sentence_counts": [
+        3
+      ]
+    },
+    {
+      "scenario_id": "candidate-report_description-5111062000",
+      "sentence_counts": [
+        3
+      ]
+    },
+    {
+      "scenario_id": "candidate-report_insight-5111062000",
+      "sentence_counts": [
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "input_boundary_and_data_replay_errors": 0,
+  "report_model_calls": {
+    "purpose": "세 지역 보고서의 내부 모델 호출을 지역당 10개씩 각각 독립 평가하는 중복 관점 묶음",
+    "model_calls": 30,
+    "first_compose_overlaps": 9,
+    "additional_internal_calls": 21,
+    "new_scenario_paths": 0,
+    "overlap_note": "지역별 선정·첫 설명·인사이트 작성은 compose.json의 최초 호출과 중복하므로 노드 경로 수에 합산하지 않는다.",
+    "future_results_in_input": false,
+    "model_preparation_checked": 30,
+    "authored_numeric_checks_passed": 42,
+    "external_model_evaluation": "not_run"
+  },
+  "external_model_evaluation": "not_run",
+  "quality_scope": "Case-specific observations, interpretations and conditional field checks are authored evaluation requirements; numeric and structural checks are not an autonomous model quality result."
+}

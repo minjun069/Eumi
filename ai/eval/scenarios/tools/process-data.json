@@ -1,0 +1,1370 @@
+{
+  "schema_version": "process-fixtures-v1",
+  "description": "가공 도구 평가용 합성 원본. 실제 지역의 관측값이나 위험지수 산출모델이 아니며 수치·결측·단위·결합 조건을 통제한다.",
+  "datasets": {
+    "calc_positive": {
+      "reference": {
+        "id": "calc_positive",
+        "version": "calc_positive-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · calc_positive",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/calc_positive"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "before",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "after",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "R1",
+          "area": "시험동A",
+          "before": 100,
+          "after": 125
+        },
+        {
+          "record_id": "R2",
+          "area": "시험동B",
+          "before": 80,
+          "after": 100
+        },
+        {
+          "record_id": "R3",
+          "area": "시험동C",
+          "before": 50,
+          "after": 50
+        }
+      ]
+    },
+    "calc_mixed": {
+      "reference": {
+        "id": "calc_mixed",
+        "version": "calc_mixed-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · calc_mixed",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/calc_mixed"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "before",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "after",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "N1",
+          "area": "시험동A",
+          "before": 80,
+          "after": 60
+        },
+        {
+          "record_id": "N2",
+          "area": "시험동B",
+          "before": 40,
+          "after": 0
+        },
+        {
+          "record_id": "N3",
+          "area": "시험동C",
+          "before": -20,
+          "after": -10
+        }
+      ]
+    },
+    "aggregate_values": {
+      "reference": {
+        "id": "aggregate_values",
+        "version": "aggregate_values-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · aggregate_values",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/aggregate_values"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "value",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "G1",
+          "area": "시험동A",
+          "value": 10
+        },
+        {
+          "record_id": "G2",
+          "area": "시험동A",
+          "value": 20
+        },
+        {
+          "record_id": "G3",
+          "area": "시험동A",
+          "value": 30
+        },
+        {
+          "record_id": "G4",
+          "area": "시험동B",
+          "value": 5
+        },
+        {
+          "record_id": "G5",
+          "area": "시험동B",
+          "value": 15
+        },
+        {
+          "record_id": "G6",
+          "area": "시험동B",
+          "value": 25
+        }
+      ]
+    },
+    "calc_missing": {
+      "reference": {
+        "id": "calc_missing",
+        "version": "calc_missing-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · calc_missing",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/calc_missing"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "before",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "after",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "M1",
+          "area": "시험동A",
+          "before": 100,
+          "after": 125
+        },
+        {
+          "record_id": "M2",
+          "area": "시험동B",
+          "before": 80,
+          "after": null
+        },
+        {
+          "record_id": "M3",
+          "area": "시험동C",
+          "before": null,
+          "after": 60
+        },
+        {
+          "record_id": "M4",
+          "area": "시험동D",
+          "before": 50,
+          "after": 50
+        }
+      ]
+    },
+    "aggregate_missing": {
+      "reference": {
+        "id": "aggregate_missing",
+        "version": "aggregate_missing-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · aggregate_missing",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/aggregate_missing"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "value",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "G1",
+          "area": "시험동A",
+          "value": 10
+        },
+        {
+          "record_id": "G2",
+          "area": "시험동A",
+          "value": null
+        },
+        {
+          "record_id": "G3",
+          "area": "시험동A",
+          "value": 30
+        },
+        {
+          "record_id": "G4",
+          "area": "시험동B",
+          "value": 5
+        },
+        {
+          "record_id": "G5",
+          "area": "시험동B",
+          "value": 15
+        },
+        {
+          "record_id": "G6",
+          "area": "시험동B",
+          "value": 25
+        }
+      ]
+    },
+    "zero_values": {
+      "reference": {
+        "id": "zero_values",
+        "version": "zero_values-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · zero_values",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/zero_values"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "before",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "after",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "Z1",
+          "area": "시험동A",
+          "before": 0,
+          "after": 10
+        },
+        {
+          "record_id": "Z2",
+          "area": "시험동B",
+          "before": 10,
+          "after": 5
+        },
+        {
+          "record_id": "Z3",
+          "area": "시험동C",
+          "before": 20,
+          "after": 40
+        },
+        {
+          "record_id": "Z4",
+          "area": "시험동D",
+          "before": 0,
+          "after": 0
+        }
+      ]
+    },
+    "incompatible_unit": {
+      "reference": {
+        "id": "incompatible_unit",
+        "version": "incompatible_unit-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · incompatible_unit",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/incompatible_unit"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "before",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "after",
+          "kind": "number",
+          "unit": "people",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "R1",
+          "area": "시험동A",
+          "before": 100,
+          "after": 125
+        },
+        {
+          "record_id": "R2",
+          "area": "시험동B",
+          "before": 80,
+          "after": 100
+        },
+        {
+          "record_id": "R3",
+          "area": "시험동C",
+          "before": 50,
+          "after": 50
+        }
+      ]
+    },
+    "incompatible_spatial": {
+      "reference": {
+        "id": "incompatible_spatial",
+        "version": "incompatible_spatial-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · incompatible_spatial",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/incompatible_spatial"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "before",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "after",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "구",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "R1",
+          "area": "시험동A",
+          "before": 100,
+          "after": 125
+        },
+        {
+          "record_id": "R2",
+          "area": "시험동B",
+          "before": 80,
+          "after": 100
+        },
+        {
+          "record_id": "R3",
+          "area": "시험동C",
+          "before": 50,
+          "after": 50
+        }
+      ]
+    },
+    "incompatible_temporal": {
+      "reference": {
+        "id": "incompatible_temporal",
+        "version": "incompatible_temporal-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · incompatible_temporal",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/incompatible_temporal"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "before",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "after",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "분기",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "R1",
+          "area": "시험동A",
+          "before": 100,
+          "after": 125
+        },
+        {
+          "record_id": "R2",
+          "area": "시험동B",
+          "before": 80,
+          "after": 100
+        },
+        {
+          "record_id": "R3",
+          "area": "시험동C",
+          "before": 50,
+          "after": 50
+        }
+      ]
+    },
+    "incompatible_denominator": {
+      "reference": {
+        "id": "incompatible_denominator",
+        "version": "incompatible_denominator-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · incompatible_denominator",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/incompatible_denominator"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "before",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "after",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "전체 인구"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "R1",
+          "area": "시험동A",
+          "before": 100,
+          "after": 125
+        },
+        {
+          "record_id": "R2",
+          "area": "시험동B",
+          "before": 80,
+          "after": 100
+        },
+        {
+          "record_id": "R3",
+          "area": "시험동C",
+          "before": 50,
+          "after": 50
+        }
+      ]
+    },
+    "join_left": {
+      "reference": {
+        "id": "join_left",
+        "version": "join_left-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · join_left",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/join_left"
+        }
+      ],
+      "columns": [
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "month",
+          "kind": "string",
+          "unit": "YYYY-MM",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "value",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "area": "시험동A",
+          "month": "2025-12",
+          "value": 10
+        },
+        {
+          "area": "시험동B",
+          "month": "2025-12",
+          "value": 20
+        },
+        {
+          "area": "시험동C",
+          "month": "2025-12",
+          "value": 30
+        }
+      ]
+    },
+    "join_right": {
+      "reference": {
+        "id": "join_right",
+        "version": "join_right-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · join_right",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/join_right"
+        }
+      ],
+      "columns": [
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "month",
+          "kind": "string",
+          "unit": "YYYY-MM",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "benchmark",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "area": "시험동A",
+          "month": "2025-12",
+          "benchmark": 100
+        },
+        {
+          "area": "시험동C",
+          "month": "2025-12",
+          "benchmark": 300
+        },
+        {
+          "area": "시험동D",
+          "month": "2025-12",
+          "benchmark": 400
+        }
+      ]
+    },
+    "join_right_duplicate": {
+      "reference": {
+        "id": "join_right_duplicate",
+        "version": "join_right_duplicate-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · join_right_duplicate",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/join_right_duplicate"
+        }
+      ],
+      "columns": [
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "month",
+          "kind": "string",
+          "unit": "YYYY-MM",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "benchmark",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "area": "시험동A",
+          "month": "2025-12",
+          "benchmark": 100
+        },
+        {
+          "area": "시험동C",
+          "month": "2025-12",
+          "benchmark": 300
+        },
+        {
+          "area": "시험동D",
+          "month": "2025-12",
+          "benchmark": 400
+        },
+        {
+          "area": "시험동A",
+          "month": "2025-12",
+          "benchmark": 900
+        }
+      ]
+    },
+    "join_right_missing": {
+      "reference": {
+        "id": "join_right_missing",
+        "version": "join_right_missing-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · join_right_missing",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/join_right_missing"
+        }
+      ],
+      "columns": [
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "month",
+          "kind": "string",
+          "unit": "YYYY-MM",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "benchmark",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "area": null,
+          "month": "2025-12",
+          "benchmark": 100
+        },
+        {
+          "area": "시험동C",
+          "month": "2025-12",
+          "benchmark": 300
+        },
+        {
+          "area": "시험동D",
+          "month": "2025-12",
+          "benchmark": 400
+        }
+      ]
+    },
+    "join_left_missing": {
+      "reference": {
+        "id": "join_left_missing",
+        "version": "join_left_missing-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · join_left_missing",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/join_left_missing"
+        }
+      ],
+      "columns": [
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "month",
+          "kind": "string",
+          "unit": "YYYY-MM",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "value",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "area": "시험동A",
+          "month": "2025-12",
+          "value": 10
+        },
+        {
+          "area": null,
+          "month": "2025-12",
+          "value": 20
+        },
+        {
+          "area": "시험동C",
+          "month": "2025-12",
+          "value": 30
+        }
+      ]
+    },
+    "join_right_type": {
+      "reference": {
+        "id": "join_right_type",
+        "version": "join_right_type-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · join_right_type",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/join_right_type"
+        }
+      ],
+      "columns": [
+        {
+          "name": "area",
+          "kind": "integer",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "month",
+          "kind": "string",
+          "unit": "YYYY-MM",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "benchmark",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "area": 1,
+          "month": "2025-12",
+          "benchmark": 100
+        },
+        {
+          "area": 2,
+          "month": "2025-12",
+          "benchmark": 300
+        },
+        {
+          "area": 3,
+          "month": "2025-12",
+          "benchmark": 400
+        }
+      ]
+    },
+    "join_right_time": {
+      "reference": {
+        "id": "join_right_time",
+        "version": "join_right_time-v1"
+      },
+      "as_of": "2025-11-30",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · join_right_time",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/join_right_time"
+        }
+      ],
+      "columns": [
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "month",
+          "kind": "string",
+          "unit": "YYYY-MM",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "benchmark",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "area": "시험동A",
+          "month": "2025-12",
+          "benchmark": 100
+        },
+        {
+          "area": "시험동C",
+          "month": "2025-12",
+          "benchmark": 300
+        },
+        {
+          "area": "시험동D",
+          "month": "2025-12",
+          "benchmark": 400
+        }
+      ]
+    },
+    "round_ties": {
+      "reference": {
+        "id": "round_ties",
+        "version": "round_ties-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · round_ties",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/round_ties"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "before",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "after",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "T1",
+          "area": "시험동A",
+          "before": 0,
+          "after": 2.5
+        },
+        {
+          "record_id": "T2",
+          "area": "시험동B",
+          "before": 0,
+          "after": 3.5
+        },
+        {
+          "record_id": "T3",
+          "area": "시험동C",
+          "before": 0,
+          "after": 2.5
+        },
+        {
+          "record_id": "T4",
+          "area": "시험동C",
+          "before": 0,
+          "after": 2.5
+        },
+        {
+          "record_id": "T5",
+          "area": "시험동D",
+          "before": 0,
+          "after": -2.5
+        }
+      ]
+    },
+    "round_precise": {
+      "reference": {
+        "id": "round_precise",
+        "version": "round_precise-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · round_precise",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/round_precise"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "area",
+          "kind": "string",
+          "unit": "code",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "before",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "after",
+          "kind": "number",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "P1",
+          "area": "시험동A",
+          "before": 1,
+          "after": 1.2345678912344
+        },
+        {
+          "record_id": "P2",
+          "area": "시험동B",
+          "before": 1,
+          "after": 2.3456789123456
+        },
+        {
+          "record_id": "P3",
+          "area": "시험동C",
+          "before": 1,
+          "after": -1.2345678912346
+        }
+      ]
+    },
+    "cast_number": {
+      "reference": {
+        "id": "cast_number",
+        "version": "cast_number-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · cast_number",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/cast_number"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "text_value",
+          "kind": "string",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "C1",
+          "text_value": "12.5"
+        },
+        {
+          "record_id": "C2",
+          "text_value": "0"
+        },
+        {
+          "record_id": "C3",
+          "text_value": "-3.25"
+        }
+      ]
+    },
+    "cast_integer": {
+      "reference": {
+        "id": "cast_integer",
+        "version": "cast_integer-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · cast_integer",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/cast_integer"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "text_value",
+          "kind": "string",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "I1",
+          "text_value": "9007199254740993"
+        },
+        {
+          "record_id": "I2",
+          "text_value": "42.0"
+        },
+        {
+          "record_id": "I3",
+          "text_value": "-7"
+        }
+      ]
+    },
+    "cast_invalid": {
+      "reference": {
+        "id": "cast_invalid",
+        "version": "cast_invalid-v1"
+      },
+      "as_of": "2025-12-31",
+      "sources": [
+        {
+          "label": "가공 평가용 합성 원본 · cast_invalid",
+          "uri": "evaluation/scenarios/tools/process-data.json#/datasets/cast_invalid"
+        }
+      ],
+      "columns": [
+        {
+          "name": "record_id",
+          "kind": "string",
+          "unit": "record",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        },
+        {
+          "name": "text_value",
+          "kind": "string",
+          "unit": "index",
+          "spatial_unit": "동",
+          "temporal_unit": "월",
+          "denominator": "동·월별 지표"
+        }
+      ],
+      "rows": [
+        {
+          "record_id": "B1",
+          "text_value": "not-a-number"
+        },
+        {
+          "record_id": "B2",
+          "text_value": "12"
+        }
+      ]
+    }
+  }
+}

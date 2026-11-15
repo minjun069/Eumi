@@ -1,0 +1,7 @@
+{
+  "evaluation/scenarios/nodes/README.md": {
+    "observed_sha256": "27c75e06ed5fc930ddf7124ae0b02a9193361a14fb8b8648fc7e4e2bde651393",
+    "observed_modified_local": "2026-11-13T09:01:30+09:00",
+    "note": "사본 작업에서 수정하지 않은 기존 안내문이 작업 중 별도로 갱신됨을 관측했다. 최초 해시는 original-hashes.json에 보존한다. 원본 시나리오 JSON·스냅샷·보호 대상 코드에는 이 예외를 적용하지 않는다."
+  }
+}

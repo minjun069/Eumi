@@ -1,0 +1,293 @@
+{
+  "reference": {
+    "id": "analysis.bh_region_indicator",
+    "version": "8363bd81962e961083009ba6ada80e62198bebcb972429f4861273a2203b8832"
+  },
+  "as_of": "2026-11-03T09:46:03.421050",
+  "sources": [
+    {
+      "label": "서비스 DB의 읍면동 행동 원지표·활동 합계",
+      "uri": "db://analysis/bh_region_indicator"
+    },
+    {
+      "label": "읽기 전용 원본 조회 SQL·조건·정확소수·수집시점·출처 (SHA-256 27aaa12524ffa83ab661acd9d88f913daa213a2d66d55046c10cf8f5bbe10f9e)",
+      "uri": "file:///C:/ssafy/free_proj/Eumi/ai/evaluation/scenarios/nodes-insight-review/snapshots/activity-evidence.json"
+    },
+    {
+      "label": "24시간대 평균의 실제 SQL 조회·정의·Decimal 대조",
+      "uri": "file:///C:/ssafy/free_proj/Eumi/ai/evaluation/scenarios/nodes-insight-review/snapshots/activity-evidence.json#/queries/activity_hourly_mean"
+    },
+    {
+      "label": "활동 합계·동별 집계 정의 (SHA-256 3b42f939a177b111f6341ba2c2d865f2e162088c61dcd5e9a78430c36e2b813a)",
+      "uri": "file:///C:/ssafy/free_proj/Eumi/data/pipeline/common/bh_indicators.py"
+    },
+    {
+      "label": "활동 합계·동별 집계 정의 (SHA-256 fd4c2064fda00699461ad924def3539874c630cc9a6dbbee2766822a58e581f1)",
+      "uri": "file:///C:/ssafy/free_proj/Eumi/data/pipeline/m3_indicator/batch_bh_region_indicators.py"
+    }
+  ],
+  "columns": [
+    {
+      "name": "period_start",
+      "kind": "string",
+      "unit": "기준월 첫날",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "해당 없음"
+    },
+    {
+      "name": "adm_cd10",
+      "kind": "string",
+      "unit": "행정동코드",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "해당 없음"
+    },
+    {
+      "name": "activity_daily",
+      "kind": "number",
+      "unit": "일평균 추정 활동량의 24시간대 합",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "해당 없음"
+    },
+    {
+      "name": "h12_evening_day_ratio",
+      "kind": "number",
+      "unit": "배율",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "09~17시 일평균 활동값의 평균"
+    },
+    {
+      "name": "h13_commute_ratio",
+      "kind": "number",
+      "unit": "배율",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "10~16시 일평균 활동값의 평균"
+    },
+    {
+      "name": "h14_hour_entropy",
+      "kind": "number",
+      "unit": "nat",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "24시간대 활동값 합계"
+    },
+    {
+      "name": "h15_weekday_entropy",
+      "kind": "number",
+      "unit": "nat",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "7요일별 일평균 활동값 합계"
+    },
+    {
+      "name": "h18_senior_male_share",
+      "kind": "number",
+      "unit": "비율",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "60세 이상 남녀 활동값 합계"
+    },
+    {
+      "name": "h19_age_entropy",
+      "kind": "number",
+      "unit": "nat",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "6개 연령대 활동값 합계"
+    },
+    {
+      "name": "h20_senior_representation",
+      "kind": "number",
+      "unit": "배율",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "60세 이상 주민 비율"
+    },
+    {
+      "name": "h21_male50plus_representation",
+      "kind": "number",
+      "unit": "배율",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "50세 이상 남성 주민 비율"
+    },
+    {
+      "name": "h26_weekend_weekday_change_gap",
+      "kind": "number",
+      "unit": "%p",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "주말·주중 각각의 전월 활동값"
+    },
+    {
+      "name": "h29_senior_gender_change_gap",
+      "kind": "number",
+      "unit": "%p",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "60세 이상 남녀 각각의 전월 활동값"
+    },
+    {
+      "name": "h30_hour_profile_distance",
+      "kind": "number",
+      "unit": "거리",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "당월·전월 각각의 24시간대 활동값 합계"
+    },
+    {
+      "name": "h31_weekday_profile_distance",
+      "kind": "number",
+      "unit": "거리",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "당월·전월 각각의 7요일 활동값 합계"
+    },
+    {
+      "name": "activity_hourly_mean",
+      "kind": "number",
+      "unit": "시간대별 일평균 추정 활동값의 평균",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "24시간대"
+    },
+    {
+      "name": "updated_at",
+      "kind": "string",
+      "unit": "분석 수정 시각",
+      "spatial_unit": "행정동",
+      "temporal_unit": "월",
+      "denominator": "해당 없음"
+    }
+  ],
+  "rows": [
+    {
+      "period_start": "2025-07-01",
+      "adm_cd10": "1168065500",
+      "activity_daily": 139904.65,
+      "h12_evening_day_ratio": 0.80111,
+      "h13_commute_ratio": 0.907214,
+      "h14_hour_entropy": 2.943272,
+      "h15_weekday_entropy": 1.93333,
+      "h18_senior_male_share": 0.517387,
+      "h19_age_entropy": 1.75616,
+      "h20_senior_representation": 0.921806,
+      "h21_male50plus_representation": 1.131452,
+      "h26_weekend_weekday_change_gap": null,
+      "h29_senior_gender_change_gap": null,
+      "h30_hour_profile_distance": null,
+      "h31_weekday_profile_distance": null,
+      "updated_at": "2026-11-03T09:45:30.560791",
+      "activity_hourly_mean": 5829.360416666666
+    },
+    {
+      "period_start": "2025-08-01",
+      "adm_cd10": "1168065500",
+      "activity_daily": 131675.13,
+      "h12_evening_day_ratio": 0.804715,
+      "h13_commute_ratio": 0.884516,
+      "h14_hour_entropy": 2.949447,
+      "h15_weekday_entropy": 1.93295,
+      "h18_senior_male_share": 0.5159,
+      "h19_age_entropy": 1.758164,
+      "h20_senior_representation": 0.932571,
+      "h21_male50plus_representation": 1.129356,
+      "h26_weekend_weekday_change_gap": 0.026975,
+      "h29_senior_gender_change_gap": -0.567539,
+      "h30_hour_profile_distance": 0.010732,
+      "h31_weekday_profile_distance": 0.015888,
+      "updated_at": "2026-11-03T09:45:34.139278",
+      "activity_hourly_mean": 5486.46375
+    },
+    {
+      "period_start": "2025-09-01",
+      "adm_cd10": "1168065500",
+      "activity_daily": 140789.47,
+      "h12_evening_day_ratio": 0.782104,
+      "h13_commute_ratio": 0.896555,
+      "h14_hour_entropy": 2.935829,
+      "h15_weekday_entropy": 1.935337,
+      "h18_senior_male_share": 0.516233,
+      "h19_age_entropy": 1.753298,
+      "h20_senior_representation": 0.938122,
+      "h21_male50plus_representation": 1.138562,
+      "h26_weekend_weekday_change_gap": 4.075469,
+      "h29_senior_gender_change_gap": 0.143577,
+      "h30_hour_profile_distance": 0.017409,
+      "h31_weekday_profile_distance": 0.018247,
+      "updated_at": "2026-11-03T09:45:41.015466",
+      "activity_hourly_mean": 5866.227916666667
+    },
+    {
+      "period_start": "2025-10-01",
+      "adm_cd10": "1168065500",
+      "activity_daily": 138564.46,
+      "h12_evening_day_ratio": 0.764356,
+      "h13_commute_ratio": 0.845155,
+      "h14_hour_entropy": 2.943103,
+      "h15_weekday_entropy": 1.935755,
+      "h18_senior_male_share": 0.513169,
+      "h19_age_entropy": 1.75553,
+      "h20_senior_representation": 0.947717,
+      "h21_male50plus_representation": 1.136875,
+      "h26_weekend_weekday_change_gap": 0.7748,
+      "h29_senior_gender_change_gap": -1.223561,
+      "h30_hour_profile_distance": 0.017781,
+      "h31_weekday_profile_distance": 0.013893,
+      "updated_at": "2026-11-03T09:45:48.170583",
+      "activity_hourly_mean": 5773.519166666667
+    },
+    {
+      "period_start": "2025-11-01",
+      "adm_cd10": "1168065500",
+      "activity_daily": 139126.22,
+      "h12_evening_day_ratio": 0.773011,
+      "h13_commute_ratio": 0.869284,
+      "h14_hour_entropy": 2.939571,
+      "h15_weekday_entropy": 1.935775,
+      "h18_senior_male_share": 0.515927,
+      "h19_age_entropy": 1.758392,
+      "h20_senior_representation": 0.933216,
+      "h21_male50plus_representation": 1.128117,
+      "h26_weekend_weekday_change_gap": -0.186318,
+      "h29_senior_gender_change_gap": 1.09267,
+      "h30_hour_profile_distance": 0.008688,
+      "h31_weekday_profile_distance": 0.014944,
+      "updated_at": "2026-11-03T09:45:55.896242",
+      "activity_hourly_mean": 5796.925833333334
+    },
+    {
+      "period_start": "2025-12-01",
+      "adm_cd10": "1168065500",
+      "activity_daily": 134596.5,
+      "h12_evening_day_ratio": 0.77439,
+      "h13_commute_ratio": 0.857709,
+      "h14_hour_entropy": 2.941062,
+      "h15_weekday_entropy": 1.935603,
+      "h18_senior_male_share": 0.522478,
+      "h19_age_entropy": 1.756884,
+      "h20_senior_representation": 0.942123,
+      "h21_male50plus_representation": 1.160773,
+      "h26_weekend_weekday_change_gap": 0.218456,
+      "h29_senior_gender_change_gap": 2.57658,
+      "h30_hour_profile_distance": 0.008097,
+      "h31_weekday_profile_distance": 0.009369,
+      "updated_at": "2026-11-03T09:46:03.421050",
+      "activity_hourly_mean": 5608.1875
+    }
+  ],
+  "inputs": [
+    {
+      "id": "activity-evidence:region_indicators",
+      "version": "22dca16c5ff48d36c9aee01149e90563c7e0cea226ce4c6480a6aec3fa440b01"
+    },
+    {
+      "id": "activity-evidence:activity_hourly_mean",
+      "version": "8594398f43023adbdfc0bda3bf23e9bf43828336e4df4a6de30e1cda5f6db214"
+    }
+  ]
+}

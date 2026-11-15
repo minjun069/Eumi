@@ -1,0 +1,393 @@
+{
+  "checks": [
+    {
+      "검사 ID": "N05-O.3",
+      "평가 축": "필수 내용 충족",
+      "검사 항목": "필수 질문 포함",
+      "검사 내용": "사용자에게 확인해야 할 미확보 필수 정보를 빠짐없이 질문했는지 확인한다.",
+      "적용 조건": "항상",
+      "평가 방식": "LLM 기반",
+      "평가 입력": "- 실행 당시 입력: 모델 호출 입력<br>- 검사 대상 결과: 모델 반환값",
+      "측정 방법": "요청·대화·작업 이력에서 사용자에게 확인할 미확보 필수 정보를 찾고, 질문 본문에 각 정보를 요청하는 의미가 있는지 대조한다.",
+      "성공 기준": "사용자만 제공할 수 있는 미확보 필수 정보를 질문 본문에서 빠뜨리지 않고 묻는다."
+    },
+    {
+      "검사 ID": "N05-O.2",
+      "평가 축": "필수 내용 충족",
+      "검사 항목": "답변 대상 명시",
+      "검사 내용": "질문만으로 사용자가 답할 값·대상을 알 수 있고, 선택 질문에는 필요한 후보가 구체적으로 제시되는지 확인한다.",
+      "적용 조건": "항상",
+      "평가 방식": "LLM 기반",
+      "평가 입력": "- 실행 당시 입력: 모델 호출 입력<br>- 검사 대상 결과: 모델 반환값",
+      "측정 방법": "질문 본문만으로 답할 대상·값을 식별할 수 있는지 확인하고, 선택 질문에는 필요한 후보를 구별할 내용이 있는지 확인한다.<br>후보 내용의 정확성, 필수 질문 누락·불필요한 질문·재질문은 별도 검사 대상이다.",
+      "성공 기준": "질문 본문에 답할 값·대상을 알 수 있는 의미를 담는다.<br>후보 선택이 필요하거나 실제로 선택을 요청한 경우, 선택 대상과 후보를 구별할 내용을 제시한다."
+    },
+    {
+      "검사 ID": "N05-O.1",
+      "평가 축": "내용 정확성",
+      "검사 항목": "질문 정보 선정",
+      "검사 내용": "질문 대상과 질문 이유가 실제 부족한 필수 정보에 맞고 불필요한 질문·재질문이 없는지 확인한다.",
+      "적용 조건": "항상",
+      "평가 방식": "LLM 기반",
+      "평가 입력": "- 실행 당시 입력: 모델 호출 입력<br>- 검사 대상 결과: 모델 반환값",
+      "측정 방법": "각 질문 대상·이유와 제시한 후보를 요청·대화·작업 이력과 대조한다.",
+      "성공 기준": "현재 요청에 필요하고 사용자만 제공할 수 있는 미확보 필수 정보만 질문한다.<br>이미 확보한 값은 다시 묻지 않는다.<br>질문 이유와 제시한 후보의 내용은 요청·대화·작업 이력과 일치한다."
+    }
+  ],
+  "bindings": [
+    {
+      "row": 0,
+      "row_id": "N05-O.3/general",
+      "when": {},
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order",
+          "clause_ids": [
+            "required-content",
+            "required-content-boundary",
+            "no-invented-format"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict",
+          "clause_ids": [
+            "verdicts",
+            "applicability",
+            "missing-evidence",
+            "allowed-alternatives",
+            "evidence-only"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "llm-procedure",
+          "clause_ids": [
+            "untrusted-data",
+            "evidence"
+          ]
+        }
+      ],
+      "judge_fields": {
+        "적용 조건": {
+          "text_sha256": "f1d42a32366087dde8c32369179ac3783f7fec5033694ec9cf21eb6a10f3078c",
+          "clauses": [
+            {
+              "id": "applicability",
+              "start": 0,
+              "end": 2,
+              "section": "평가 대상과 적용 조건",
+              "group": 1
+            }
+          ]
+        },
+        "측정 방법": {
+          "text_sha256": "bfbed22ecc4f378132f2a21dda0383edbceb4eb6b4c63a186ce86134b288ade6",
+          "clauses": [
+            {
+              "id": "measurement-1",
+              "start": 0,
+              "end": 70,
+              "section": "대조할 기준",
+              "group": 1
+            }
+          ]
+        },
+        "성공 기준": {
+          "text_sha256": "125eb9bbfe9dca1bec28f493722e5737b780811343ee5855e4a976b2182945cc",
+          "clauses": [
+            {
+              "id": "success-1",
+              "start": 0,
+              "end": 45,
+              "section": "대조할 기준",
+              "group": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "row": 1,
+      "row_id": "N05-O.2/general",
+      "when": {},
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order",
+          "clause_ids": [
+            "required-content",
+            "required-content-boundary",
+            "no-invented-format"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict",
+          "clause_ids": [
+            "verdicts",
+            "applicability",
+            "missing-evidence",
+            "allowed-alternatives",
+            "evidence-only"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "llm-procedure",
+          "clause_ids": [
+            "untrusted-data",
+            "evidence"
+          ]
+        }
+      ],
+      "judge_fields": {
+        "적용 조건": {
+          "text_sha256": "f1d42a32366087dde8c32369179ac3783f7fec5033694ec9cf21eb6a10f3078c",
+          "clauses": [
+            {
+              "id": "applicability",
+              "start": 0,
+              "end": 2,
+              "section": "평가 대상과 적용 조건",
+              "group": 1
+            }
+          ]
+        },
+        "측정 방법": {
+          "text_sha256": "fe981fe173a1f74cbeb55721c43b9525a4e3efc7d4e5fea2c9976b3af6c5ce10",
+          "clauses": [
+            {
+              "id": "measurement-1",
+              "start": 0,
+              "end": 67,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "measurement-2",
+              "start": 71,
+              "end": 116,
+              "section": "담당 범위",
+              "group": 1
+            }
+          ]
+        },
+        "성공 기준": {
+          "text_sha256": "2ecf373c8f144bed69608f934637294ace8ebb6e0a295668e2b090c07defc9df",
+          "clauses": [
+            {
+              "id": "success-1",
+              "start": 0,
+              "end": 31,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "success-2",
+              "start": 35,
+              "end": 88,
+              "section": "대조할 기준",
+              "group": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "row": 2,
+      "row_id": "N05-O.1/general",
+      "when": {},
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order",
+          "clause_ids": [
+            "no-invented-format"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict",
+          "clause_ids": [
+            "verdicts",
+            "applicability",
+            "missing-evidence",
+            "allowed-alternatives",
+            "evidence-only"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "llm-procedure",
+          "clause_ids": [
+            "untrusted-data",
+            "explicit-values",
+            "evidence"
+          ]
+        }
+      ],
+      "judge_fields": {
+        "적용 조건": {
+          "text_sha256": "f1d42a32366087dde8c32369179ac3783f7fec5033694ec9cf21eb6a10f3078c",
+          "clauses": [
+            {
+              "id": "applicability",
+              "start": 0,
+              "end": 2,
+              "section": "평가 대상과 적용 조건",
+              "group": 1
+            }
+          ]
+        },
+        "측정 방법": {
+          "text_sha256": "34a8f7aee0a7a4a08a9d56e43d27aab9d9ea3552dc5514b434d1ae754c84690e",
+          "clauses": [
+            {
+              "id": "measurement-1",
+              "start": 0,
+              "end": 38,
+              "section": "대조할 기준",
+              "group": 1
+            }
+          ]
+        },
+        "성공 기준": {
+          "text_sha256": "2af21d7443b08350411635bd60033087b105f01213da47960d8c6e287a5aa830",
+          "clauses": [
+            {
+              "id": "success-1",
+              "start": 0,
+              "end": 42,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "success-2",
+              "start": 46,
+              "end": 66,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "success-3",
+              "start": 70,
+              "end": 107,
+              "section": "대조할 기준",
+              "group": 1
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "principles": [
+    {
+      "key": "output-format",
+      "title": "출력 형식",
+      "text": "N-F.1은 아래 형식과 [공통 형식 기준](common.md#출력-형식의-공통-기준)을 적용한다.\n\n| 필드 | 자료형 | 필수 여부 | 형식 기준 |\n| --- | --- | --- | --- |\n| `content` | 문자열 | 필수 | 사용자에게 보여 줄 질문 본문이다. |\n| `reason` | 문자열 | 필수 | 해당 정보를 요청하는 이유다. |\n\n별도 질문 수·문장 수·선택지 개수는 요구하지 않는다.\n필요한 질문·선택지가 포함됐는지는 N05-O.2, N05-O.3에서 판정한다.",
+      "classification": "judgment",
+      "selection": {
+        "text_sha256": "bf4e62d1107469a690e45d93fa091df137e19c0c168b0736d7bd69aa003d0714",
+        "clauses": [
+          {
+            "id": "common-format",
+            "start": 0,
+            "end": 55
+          },
+          {
+            "id": "format-fields",
+            "start": 57,
+            "end": 201
+          },
+          {
+            "id": "no-fixed-counts",
+            "start": 203,
+            "end": 233
+          },
+          {
+            "id": "content-responsibility",
+            "start": 234,
+            "end": 277
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,533 @@
+{
+  "origin": "configured_service_database_read_only_query",
+  "captured_at": "2026-11-13T04:40:40.336674+00:00",
+  "transaction": {
+    "database": "eumi",
+    "read_only": "on",
+    "isolation": "repeatable read",
+    "transaction_at": "2026-11-13T13:40:40.305282+09:00"
+  },
+  "target": {
+    "regions": {
+      "1168065500": "도곡1동",
+      "1168063000": "대치4동",
+      "5111062000": "효자1동"
+    },
+    "period_from": "2025-07-01",
+    "period_to": "2025-12-01"
+  },
+  "decimal_encoding": "Exact PostgreSQL numeric values are encoded as strings; NULL remains null.",
+  "source_files": {
+    "ai/src/database.py": "9c28eac44ea74e502153ff98be6b056eb010725954ab71eaa07191e327f696c4",
+    "data/pipeline/common/bh_indicators.py": "3b42f939a177b111f6341ba2c2d865f2e162088c61dcd5e9a78430c36e2b813a",
+    "data/pipeline/m3_indicator/batch_bh_region_indicators.py": "fd4c2064fda00699461ad924def3539874c630cc9a6dbbee2766822a58e581f1",
+    "data/pipeline/m3_indicator/batch_bh_grid_indicators.py": "c5fddee1907b4677da4d62ad50899e3a6e688e643b6d5edb4a219a89e9b6b0b2",
+    "data/pipeline/ops/make_seed.py": "f40845aa6ed9e56636222777c89a82fbf9c7dfc3c089e00192bcc56d0c5db963",
+    "data/README.md": "14b9f6f2ddb24ef748e8e1f3b209059c23dc7926197b1bf768f409e5deb39485"
+  },
+  "table_definitions": {
+    "analysis.bh_region_indicator": "읍면동·월별 저장된 활동 합계 및 행동 원지표 12개. 기여도 테이블과 다르다. 현재 서비스 report_sources에는 등록되지 않아 기존 노드 스냅샷에 포함되지 않았다.",
+    "activity_daily": "파이프라인 common/bh_indicators.py indicators: hour 00~23 각 시간대의 일평균 추정 활동값 24개를 합한 값. 동별 값은 소속 격자의 시간대별 값을 먼저 합산한 뒤 계산한다. 고유 주민 수·개인별 외출 횟수·V07의 24시간 평균과 같지 않다.",
+    "flow_detail": "시간대24·요일7·성연령12 구분별 flow_sum/day_count를 격자마다 구하고 동 안에서 합산하는 상세 자료. 현재 연결된 DB는 이 테이블 전체가 0행이다.",
+    "h18_senior_male_share": "60세 이상 남성 활동 / (60세 이상 남성 활동 + 여성 활동). 활동 구성 비중이며 주민 성비가 아니다.",
+    "h29_senior_gender_change_gap": "60세 이상 남성 활동 전월 변화율에서 여성 활동 전월 변화율을 뺀 값, 단위 %p. 양수는 남성 변화율이 여성보다 높다는 의미이며 둘 중 누가 절대 감소했는지는 이 값만으로 알 수 없다.",
+    "h26_weekend_weekday_change_gap": "토·일 일평균의 평균인 주말 활동의 전월 변화율에서 월~금 일평균의 평균인 주중 활동의 전월 변화율을 뺀 값, 단위 %p.",
+    "activity_hourly_mean": "activity_daily/24.0을 실제 읽기 전용 SELECT로 반환한 계산 열. V07의24시간대일평균추정활동값평균이며고유주민수·하루이동인원수가아니다. 원값은queries.activity_hourly_mean에정확소수문자열로보존한다."
+  },
+  "queries": {
+    "region_indicators": {
+      "sql": "SELECT period_start,adm_cd10,activity_daily,h12_evening_day_ratio,h13_commute_ratio,h14_hour_entropy,h15_weekday_entropy,h18_senior_male_share,h19_age_entropy,h20_senior_representation,h21_male50plus_representation,h26_weekend_weekday_change_gap,h29_senior_gender_change_gap,h30_hour_profile_distance,h31_weekday_profile_distance,updated_at FROM analysis.bh_region_indicator WHERE adm_cd10=ANY(%s) AND period_start BETWEEN %s AND %s ORDER BY adm_cd10,period_start",
+      "parameters": [
+        [
+          "1168065500",
+          "1168063000",
+          "5111062000"
+        ],
+        "2025-07-01",
+        "2025-12-01"
+      ],
+      "row_count": 18,
+      "rows": [
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "370526.14",
+          "h12_evening_day_ratio": "0.843317",
+          "h13_commute_ratio": "0.861789",
+          "h14_hour_entropy": "2.935406",
+          "h15_weekday_entropy": "1.940890",
+          "h18_senior_male_share": "0.507957",
+          "h19_age_entropy": "1.779760",
+          "h20_senior_representation": "0.864317",
+          "h21_male50plus_representation": "1.027874",
+          "h26_weekend_weekday_change_gap": null,
+          "h29_senior_gender_change_gap": null,
+          "h30_hour_profile_distance": null,
+          "h31_weekday_profile_distance": null,
+          "updated_at": "2026-11-03T09:45:30.560791"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "364418.59",
+          "h12_evening_day_ratio": "0.844364",
+          "h13_commute_ratio": "0.848403",
+          "h14_hour_entropy": "2.936394",
+          "h15_weekday_entropy": "1.941625",
+          "h18_senior_male_share": "0.506592",
+          "h19_age_entropy": "1.777552",
+          "h20_senior_representation": "0.857521",
+          "h21_male50plus_representation": "1.016853",
+          "h26_weekend_weekday_change_gap": "2.115267",
+          "h29_senior_gender_change_gap": "-0.529671",
+          "h30_hour_profile_distance": "0.010080",
+          "h31_weekday_profile_distance": "0.011307",
+          "updated_at": "2026-11-03T09:45:34.139278"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "373066.07",
+          "h12_evening_day_ratio": "0.848738",
+          "h13_commute_ratio": "0.872792",
+          "h14_hour_entropy": "2.933371",
+          "h15_weekday_entropy": "1.942896",
+          "h18_senior_male_share": "0.503252",
+          "h19_age_entropy": "1.778819",
+          "h20_senior_representation": "0.899305",
+          "h21_male50plus_representation": "1.047167",
+          "h26_weekend_weekday_change_gap": "4.904471",
+          "h29_senior_gender_change_gap": "-1.437968",
+          "h30_hour_profile_distance": "0.017832",
+          "h31_weekday_profile_distance": "0.013867",
+          "updated_at": "2026-11-03T09:45:41.015466"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "362396.80",
+          "h12_evening_day_ratio": "0.831537",
+          "h13_commute_ratio": "0.831441",
+          "h14_hour_entropy": "2.935769",
+          "h15_weekday_entropy": "1.941896",
+          "h18_senior_male_share": "0.498877",
+          "h19_age_entropy": "1.780517",
+          "h20_senior_representation": "0.886971",
+          "h21_male50plus_representation": "1.028739",
+          "h26_weekend_weekday_change_gap": "-2.138933",
+          "h29_senior_gender_change_gap": "-1.679946",
+          "h30_hour_profile_distance": "0.014145",
+          "h31_weekday_profile_distance": "0.012914",
+          "updated_at": "2026-11-03T09:45:48.170583"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "371482.65",
+          "h12_evening_day_ratio": "0.826395",
+          "h13_commute_ratio": "0.829949",
+          "h14_hour_entropy": "2.931489",
+          "h15_weekday_entropy": "1.941081",
+          "h18_senior_male_share": "0.503550",
+          "h19_age_entropy": "1.779806",
+          "h20_senior_representation": "0.878203",
+          "h21_male50plus_representation": "1.019409",
+          "h26_weekend_weekday_change_gap": "-4.372937",
+          "h29_senior_gender_change_gap": "1.918123",
+          "h30_hour_profile_distance": "0.008175",
+          "h31_weekday_profile_distance": "0.017627",
+          "updated_at": "2026-11-03T09:45:55.896242"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "351620.41",
+          "h12_evening_day_ratio": "0.814654",
+          "h13_commute_ratio": "0.813033",
+          "h14_hour_entropy": "2.936522",
+          "h15_weekday_entropy": "1.941074",
+          "h18_senior_male_share": "0.505054",
+          "h19_age_entropy": "1.778870",
+          "h20_senior_representation": "0.903659",
+          "h21_male50plus_representation": "1.050201",
+          "h26_weekend_weekday_change_gap": "0.437857",
+          "h29_senior_gender_change_gap": "0.594439",
+          "h30_hour_profile_distance": "0.010281",
+          "h31_weekday_profile_distance": "0.007477",
+          "updated_at": "2026-11-03T09:46:03.421050"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "139904.65",
+          "h12_evening_day_ratio": "0.801110",
+          "h13_commute_ratio": "0.907214",
+          "h14_hour_entropy": "2.943272",
+          "h15_weekday_entropy": "1.933330",
+          "h18_senior_male_share": "0.517387",
+          "h19_age_entropy": "1.756160",
+          "h20_senior_representation": "0.921806",
+          "h21_male50plus_representation": "1.131452",
+          "h26_weekend_weekday_change_gap": null,
+          "h29_senior_gender_change_gap": null,
+          "h30_hour_profile_distance": null,
+          "h31_weekday_profile_distance": null,
+          "updated_at": "2026-11-03T09:45:30.560791"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "131675.13",
+          "h12_evening_day_ratio": "0.804715",
+          "h13_commute_ratio": "0.884516",
+          "h14_hour_entropy": "2.949447",
+          "h15_weekday_entropy": "1.932950",
+          "h18_senior_male_share": "0.515900",
+          "h19_age_entropy": "1.758164",
+          "h20_senior_representation": "0.932571",
+          "h21_male50plus_representation": "1.129356",
+          "h26_weekend_weekday_change_gap": "0.026975",
+          "h29_senior_gender_change_gap": "-0.567539",
+          "h30_hour_profile_distance": "0.010732",
+          "h31_weekday_profile_distance": "0.015888",
+          "updated_at": "2026-11-03T09:45:34.139278"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "140789.47",
+          "h12_evening_day_ratio": "0.782104",
+          "h13_commute_ratio": "0.896555",
+          "h14_hour_entropy": "2.935829",
+          "h15_weekday_entropy": "1.935337",
+          "h18_senior_male_share": "0.516233",
+          "h19_age_entropy": "1.753298",
+          "h20_senior_representation": "0.938122",
+          "h21_male50plus_representation": "1.138562",
+          "h26_weekend_weekday_change_gap": "4.075469",
+          "h29_senior_gender_change_gap": "0.143577",
+          "h30_hour_profile_distance": "0.017409",
+          "h31_weekday_profile_distance": "0.018247",
+          "updated_at": "2026-11-03T09:45:41.015466"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "138564.46",
+          "h12_evening_day_ratio": "0.764356",
+          "h13_commute_ratio": "0.845155",
+          "h14_hour_entropy": "2.943103",
+          "h15_weekday_entropy": "1.935755",
+          "h18_senior_male_share": "0.513169",
+          "h19_age_entropy": "1.755530",
+          "h20_senior_representation": "0.947717",
+          "h21_male50plus_representation": "1.136875",
+          "h26_weekend_weekday_change_gap": "0.774800",
+          "h29_senior_gender_change_gap": "-1.223561",
+          "h30_hour_profile_distance": "0.017781",
+          "h31_weekday_profile_distance": "0.013893",
+          "updated_at": "2026-11-03T09:45:48.170583"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "139126.22",
+          "h12_evening_day_ratio": "0.773011",
+          "h13_commute_ratio": "0.869284",
+          "h14_hour_entropy": "2.939571",
+          "h15_weekday_entropy": "1.935775",
+          "h18_senior_male_share": "0.515927",
+          "h19_age_entropy": "1.758392",
+          "h20_senior_representation": "0.933216",
+          "h21_male50plus_representation": "1.128117",
+          "h26_weekend_weekday_change_gap": "-0.186318",
+          "h29_senior_gender_change_gap": "1.092670",
+          "h30_hour_profile_distance": "0.008688",
+          "h31_weekday_profile_distance": "0.014944",
+          "updated_at": "2026-11-03T09:45:55.896242"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "134596.50",
+          "h12_evening_day_ratio": "0.774390",
+          "h13_commute_ratio": "0.857709",
+          "h14_hour_entropy": "2.941062",
+          "h15_weekday_entropy": "1.935603",
+          "h18_senior_male_share": "0.522478",
+          "h19_age_entropy": "1.756884",
+          "h20_senior_representation": "0.942123",
+          "h21_male50plus_representation": "1.160773",
+          "h26_weekend_weekday_change_gap": "0.218456",
+          "h29_senior_gender_change_gap": "2.576580",
+          "h30_hour_profile_distance": "0.008097",
+          "h31_weekday_profile_distance": "0.009369",
+          "updated_at": "2026-11-03T09:46:03.421050"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "28322.11",
+          "h12_evening_day_ratio": "0.918354",
+          "h13_commute_ratio": "0.927355",
+          "h14_hour_entropy": "3.001301",
+          "h15_weekday_entropy": "1.937799",
+          "h18_senior_male_share": "0.479123",
+          "h19_age_entropy": "1.739533",
+          "h20_senior_representation": "0.799809",
+          "h21_male50plus_representation": "0.903618",
+          "h26_weekend_weekday_change_gap": null,
+          "h29_senior_gender_change_gap": null,
+          "h30_hour_profile_distance": null,
+          "h31_weekday_profile_distance": null,
+          "updated_at": "2026-11-03T09:45:30.560791"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "28784.74",
+          "h12_evening_day_ratio": "0.925288",
+          "h13_commute_ratio": "0.912605",
+          "h14_hour_entropy": "3.009245",
+          "h15_weekday_entropy": "1.938215",
+          "h18_senior_male_share": "0.478974",
+          "h19_age_entropy": "1.754772",
+          "h20_senior_representation": "0.755640",
+          "h21_male50plus_representation": "0.857483",
+          "h26_weekend_weekday_change_gap": "0.290263",
+          "h29_senior_gender_change_gap": "-0.057396",
+          "h30_hour_profile_distance": "0.014191",
+          "h31_weekday_profile_distance": "0.007609",
+          "updated_at": "2026-11-03T09:45:34.139278"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "30178.19",
+          "h12_evening_day_ratio": "0.909291",
+          "h13_commute_ratio": "0.945334",
+          "h14_hour_entropy": "2.998088",
+          "h15_weekday_entropy": "1.938451",
+          "h18_senior_male_share": "0.475736",
+          "h19_age_entropy": "1.753803",
+          "h20_senior_representation": "0.753248",
+          "h21_male50plus_representation": "0.854701",
+          "h26_weekend_weekday_change_gap": "0.350524",
+          "h29_senior_gender_change_gap": "-1.356973",
+          "h30_hour_profile_distance": "0.019951",
+          "h31_weekday_profile_distance": "0.005860",
+          "updated_at": "2026-11-03T09:45:41.015466"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "29565.10",
+          "h12_evening_day_ratio": "0.880661",
+          "h13_commute_ratio": "0.879206",
+          "h14_hour_entropy": "2.986807",
+          "h15_weekday_entropy": "1.942519",
+          "h18_senior_male_share": "0.478169",
+          "h19_age_entropy": "1.748884",
+          "h20_senior_representation": "0.762957",
+          "h21_male50plus_representation": "0.873734",
+          "h26_weekend_weekday_change_gap": "12.326410",
+          "h29_senior_gender_change_gap": "0.970561",
+          "h30_hour_profile_distance": "0.022039",
+          "h31_weekday_profile_distance": "0.026012",
+          "updated_at": "2026-11-03T09:45:48.170583"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "28346.97",
+          "h12_evening_day_ratio": "0.815928",
+          "h13_commute_ratio": "0.871388",
+          "h14_hour_entropy": "2.980382",
+          "h15_weekday_entropy": "1.939195",
+          "h18_senior_male_share": "0.480445",
+          "h19_age_entropy": "1.747799",
+          "h20_senior_representation": "0.761177",
+          "h21_male50plus_representation": "0.880697",
+          "h26_weekend_weekday_change_gap": "-10.010807",
+          "h29_senior_gender_change_gap": "0.882142",
+          "h30_hour_profile_distance": "0.017611",
+          "h31_weekday_profile_distance": "0.023783",
+          "updated_at": "2026-11-03T09:45:55.896242"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "28496.68",
+          "h12_evening_day_ratio": "0.795078",
+          "h13_commute_ratio": "0.828866",
+          "h14_hour_entropy": "2.977371",
+          "h15_weekday_entropy": "1.938238",
+          "h18_senior_male_share": "0.484225",
+          "h19_age_entropy": "1.746188",
+          "h20_senior_representation": "0.760105",
+          "h21_male50plus_representation": "0.890372",
+          "h26_weekend_weekday_change_gap": "-1.698822",
+          "h29_senior_gender_change_gap": "1.528861",
+          "h30_hour_profile_distance": "0.013392",
+          "h31_weekday_profile_distance": "0.006404",
+          "updated_at": "2026-11-03T09:46:03.421050"
+        }
+      ],
+      "query_result_sha256": "43fc0d5818d15b8c29d55ee778a35008b7fd6f558f4ba677f54d804f21b032d6",
+      "transaction": {
+        "database": "eumi",
+        "read_only": "on",
+        "isolation": "repeatable read",
+        "transaction_at": "2026-11-13T13:40:40.305282+09:00"
+      }
+    },
+    "activity_hourly_mean": {
+      "sql": "SELECT period_start,adm_cd10,activity_daily,activity_daily/24.0 AS activity_hourly_mean,updated_at FROM analysis.bh_region_indicator WHERE adm_cd10=ANY(%s) AND period_start BETWEEN %s AND %s ORDER BY adm_cd10,period_start",
+      "parameters": [
+        [
+          "1168065500",
+          "1168063000",
+          "5111062000"
+        ],
+        "2025-07-01",
+        "2025-12-01"
+      ],
+      "row_count": 18,
+      "rows": [
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "370526.14",
+          "activity_hourly_mean": "15438.589166666667",
+          "updated_at": "2026-11-03T09:45:30.560791"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "364418.59",
+          "activity_hourly_mean": "15184.107916666667",
+          "updated_at": "2026-11-03T09:45:34.139278"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "373066.07",
+          "activity_hourly_mean": "15544.419583333333",
+          "updated_at": "2026-11-03T09:45:41.015466"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "362396.80",
+          "activity_hourly_mean": "15099.866666666667",
+          "updated_at": "2026-11-03T09:45:48.170583"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "371482.65",
+          "activity_hourly_mean": "15478.443750000000",
+          "updated_at": "2026-11-03T09:45:55.896242"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168063000",
+          "activity_daily": "351620.41",
+          "activity_hourly_mean": "14650.850416666667",
+          "updated_at": "2026-11-03T09:46:03.421050"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "139904.65",
+          "activity_hourly_mean": "5829.3604166666666667",
+          "updated_at": "2026-11-03T09:45:30.560791"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "131675.13",
+          "activity_hourly_mean": "5486.4637500000000000",
+          "updated_at": "2026-11-03T09:45:34.139278"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "140789.47",
+          "activity_hourly_mean": "5866.2279166666666667",
+          "updated_at": "2026-11-03T09:45:41.015466"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "138564.46",
+          "activity_hourly_mean": "5773.5191666666666667",
+          "updated_at": "2026-11-03T09:45:48.170583"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "139126.22",
+          "activity_hourly_mean": "5796.9258333333333333",
+          "updated_at": "2026-11-03T09:45:55.896242"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "134596.50",
+          "activity_hourly_mean": "5608.1875000000000000",
+          "updated_at": "2026-11-03T09:46:03.421050"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "28322.11",
+          "activity_hourly_mean": "1180.0879166666666667",
+          "updated_at": "2026-11-03T09:45:30.560791"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "28784.74",
+          "activity_hourly_mean": "1199.3641666666666667",
+          "updated_at": "2026-11-03T09:45:34.139278"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "30178.19",
+          "activity_hourly_mean": "1257.4245833333333333",
+          "updated_at": "2026-11-03T09:45:41.015466"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "29565.10",
+          "activity_hourly_mean": "1231.8791666666666667",
+          "updated_at": "2026-11-03T09:45:48.170583"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "28346.97",
+          "activity_hourly_mean": "1181.1237500000000000",
+          "updated_at": "2026-11-03T09:45:55.896242"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "5111062000",
+          "activity_daily": "28496.68",
+          "activity_hourly_mean": "1187.3616666666666667",
+          "updated_at": "2026-11-03T09:46:03.421050"
+        }
+      ],
+      "query_result_sha256": "cd78455bb84855df7c7a04b67a20991fedf0162b443fa256d7205d2da7546e52",
+      "transaction": {
+        "database": "eumi",
+        "read_only": "on",
+        "isolation": "repeatable read",
+        "transaction_at": "2026-11-13T13:40:40.305282+09:00"
+      }
+    }
+  }
+}

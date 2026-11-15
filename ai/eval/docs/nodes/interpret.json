@@ -1,0 +1,316 @@
+{
+  "checks": [
+    {
+      "검사 ID": "N01-O.2",
+      "평가 축": "필수 내용 충족",
+      "검사 항목": "목표·조건 포함",
+      "검사 내용": "이번 단계에서 파악해야 할 대상·목표·조건·완료 기준의 의미가 후속 노드에 전달하는 정리 내용에 있는지 확인한다.",
+      "적용 조건": "항상",
+      "평가 방식": "LLM 기반",
+      "평가 입력": "- 실행 당시 입력: 모델 호출 입력<br>- 검사 대상 결과: 모델 반환값",
+      "측정 방법": "실행 당시 요청·대화와 현재 역할·업무 지침에서 이번 목표·조건에 반영하도록 한 대상·요구·완료 기준을 확인한다.<br>반환한 목표·조건과 후속 노드에 실제 전달되는 파악 이유 전체에서 해당 의미가 드러나는지 대조한다.<br>후속 답변의 추가 정보와 이전 요청의 유효 조건도 포함한다.",
+      "성공 기준": "이번 단계에서 확인할 수 있는 대상·목표·필수 조건·선호 조건·제외 조건·완료 기준의 의미를 빠뜨리지 않는다.<br>설명·수치·원인·한계를 답하라는 요구는 후속 작업의 목표·조건으로 인식하면 되며, 목적 파악 단계에서 완성된 답변을 요구하지 않는다.<br>선택 항목인 request.constraints.required가 없어도 목표·다른 조건·전달되는 파악 이유에 요구 의미가 있으면 누락이 아니다. 별도 필수 조건 목록이나 같은 내용의 중복 작성을 요구하지 않는다.<br>아직 알 수 없는 값을 채워 넣도록 요구하지 않는다."
+    },
+    {
+      "검사 ID": "N01-O.1",
+      "평가 축": "내용 정확성",
+      "검사 항목": "목표·조건 해석",
+      "검사 내용": "정리한 목표·조건이 요청·대화·화면 문맥의 의미에 맞는지 확인한다.",
+      "적용 조건": "항상",
+      "평가 방식": "LLM 기반",
+      "평가 입력": "- 실행 당시 입력: 모델 호출 입력<br>- 검사 대상 결과: 모델 반환값",
+      "측정 방법": "출력의 대상·목표·조건·파악 이유를 실행 당시 요청·대화·현재 역할·업무 지침과 대조한다.<br>후속 발화의 요청 보완·새 요청 여부와 지시 대상(“이 지역” 등)을 확인한다.<br>후속 작업 목표로 쓰이는 request.goal·request.constraints에서 현재 유효한 요구의 의미·강도·분류·적용 범위가 보존됐는지 확인한다.<br>출력 전체에서 요구 의미가 없는 경우는 필수 내용 충족 검사에서 판정한다.",
+      "성공 기준": "대상·목표·조건의 의미와 필수·선호·제외 구분을 보존하며, 근거 없는 조건이나 유효하지 않은 이전 조건을 넣지 않는다.<br>파악 이유에 요구를 언급했더라도 목표·조건에서 그 의미나 적용 범위를 잃거나 필수 조건을 선호 조건으로 낮추지 않는다.<br>필수 요구를 목표에 통합해도 그 의미·강도가 보존되면 인정하며, 별도 필수 조건 목록을 요구하지 않는다."
+    }
+  ],
+  "bindings": [
+    {
+      "row": 0,
+      "row_id": "N01-O.2/general",
+      "when": {},
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order",
+          "clause_ids": [
+            "required-content",
+            "required-content-boundary",
+            "no-invented-format"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict",
+          "clause_ids": [
+            "verdicts",
+            "applicability",
+            "missing-evidence",
+            "allowed-alternatives",
+            "evidence-only"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "llm-procedure",
+          "clause_ids": [
+            "untrusted-data",
+            "evidence"
+          ]
+        }
+      ],
+      "judge_fields": {
+        "적용 조건": {
+          "text_sha256": "f1d42a32366087dde8c32369179ac3783f7fec5033694ec9cf21eb6a10f3078c",
+          "clauses": [
+            {
+              "id": "applicability",
+              "start": 0,
+              "end": 2,
+              "section": "평가 대상과 적용 조건",
+              "group": 1
+            }
+          ]
+        },
+        "측정 방법": {
+          "text_sha256": "1f2f8b68139865d2f9e53ac9a24d09b352ec141f3c6e27e0ef416e94a82d2361",
+          "clauses": [
+            {
+              "id": "measurement-1",
+              "start": 0,
+              "end": 63,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "measurement-2",
+              "start": 67,
+              "end": 122,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "measurement-3",
+              "start": 126,
+              "end": 159,
+              "section": "대조할 기준",
+              "group": 1
+            }
+          ]
+        },
+        "성공 기준": {
+          "text_sha256": "8cca714a1721d3d3f5a33e75390bbc9939dae3c4024de890fb9e7a4574c6a4e1",
+          "clauses": [
+            {
+              "id": "success-1",
+              "start": 0,
+              "end": 61,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "success-2",
+              "start": 65,
+              "end": 139,
+              "section": "담당 범위",
+              "group": 1
+            },
+            {
+              "id": "success-3",
+              "start": 143,
+              "end": 262,
+              "section": "담당 범위",
+              "group": 1
+            },
+            {
+              "id": "success-4",
+              "start": 266,
+              "end": 295,
+              "section": "담당 범위",
+              "group": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "row": 1,
+      "row_id": "N01-O.1/general",
+      "when": {},
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order",
+          "clause_ids": [
+            "no-invented-format"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict",
+          "clause_ids": [
+            "verdicts",
+            "applicability",
+            "missing-evidence",
+            "allowed-alternatives",
+            "evidence-only"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "llm-procedure",
+          "clause_ids": [
+            "untrusted-data",
+            "explicit-values",
+            "evidence"
+          ]
+        }
+      ],
+      "judge_fields": {
+        "적용 조건": {
+          "text_sha256": "f1d42a32366087dde8c32369179ac3783f7fec5033694ec9cf21eb6a10f3078c",
+          "clauses": [
+            {
+              "id": "applicability",
+              "start": 0,
+              "end": 2,
+              "section": "평가 대상과 적용 조건",
+              "group": 1
+            }
+          ]
+        },
+        "측정 방법": {
+          "text_sha256": "7aee3bd3f941918883af448515a7881fd460356c7cce6fa2a41275ed407c3ea9",
+          "clauses": [
+            {
+              "id": "measurement-1",
+              "start": 0,
+              "end": 50,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "measurement-2",
+              "start": 54,
+              "end": 98,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "measurement-3",
+              "start": 102,
+              "end": 189,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "measurement-4",
+              "start": 193,
+              "end": 234,
+              "section": "담당 범위",
+              "group": 1
+            }
+          ]
+        },
+        "성공 기준": {
+          "text_sha256": "f50d5699466a1ddd90a8d88ddae99af0c3316c87d4a9d2bd11a027e62a06d56a",
+          "clauses": [
+            {
+              "id": "success-1",
+              "start": 0,
+              "end": 66,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "success-2",
+              "start": 70,
+              "end": 136,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "success-3",
+              "start": 140,
+              "end": 198,
+              "section": "대조할 기준",
+              "group": 1
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "principles": [
+    {
+      "key": "output-format",
+      "title": "출력 형식",
+      "text": "N-F.1은 아래 형식과 [공통 형식 기준](common.md#출력-형식의-공통-기준)을 적용한다.\n\n| 필드 | 자료형 | 필수 여부 | 형식 기준 |\n| --- | --- | --- | --- |\n| `request` | 객체 | 필수 | 아래 목표·조건 필드로 구성한다. |\n| `request.goal` | 문자열 | 필수 | 공백 외 문자가 있어야 한다.<br>파악한 작업 목표를 담는다. |\n| `request.constraints` | 객체 | 선택 | 생략하면 조건이 없는 것으로 해석한다. |\n| `request.constraints.required` | 문자열 배열 | 선택 | 필수 조건 목록.<br>생략하면 빈 배열이다. |\n| `request.constraints.preferred` | 문자열 배열 | 선택 | 선호 조건 목록.<br>생략하면 빈 배열이다. |\n| `request.constraints.excluded` | 문자열 배열 | 선택 | 제외 조건 목록.<br>생략하면 빈 배열이다. |\n| `reason` | 문자열 | 필수 | 목표·조건을 파악한 이유를 담는다. |\n\n조건 필드의 생략이 형식상 허용돼도, 요청에 명시된 조건이 빠지면 N01-O.2에서 실패로 판정한다.\n목표·조건 구조의 기준은 [요청과 조건](../../agent/state.md#11-request)이다.",
+      "classification": "judgment",
+      "selection": {
+        "text_sha256": "efcf645627229810e10c89fca4631ad4036143847aba9562088d708f8914e027",
+        "clauses": [
+          {
+            "id": "format",
+            "start": 0,
+            "end": 562
+          },
+          {
+            "id": "required-conditions",
+            "start": 564,
+            "end": 620
+          }
+        ]
+      }
+    }
+  ]
+}

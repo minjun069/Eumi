@@ -1,0 +1,924 @@
+{
+  "checks": [
+    {
+      "검사 ID": "N02-O.2",
+      "평가 축": "필수 내용 충족",
+      "검사 항목": "선택 이유 명시",
+      "검사 내용": "선택한 작업의 이유가 최근 진행 판단이 정한 정보와 연결되어 제시됐는지 확인한다.",
+      "적용 조건": "항상",
+      "평가 방식": "LLM 기반",
+      "평가 입력": "- 실행 당시 입력: 모델 호출 입력<br>- 검사 대상 결과: 모델 반환값",
+      "측정 방법": "선택 이유에서 최근 진행 판단의 필요 정보와 이번 작업을 연결하는 의미가 드러나는지 확인한다.<br>사실 일치·작업 적절성은 별도 검사 대상이다.",
+      "성공 기준": "이번 작업으로 어떤 필요 정보를 확보하려는지 선택 이유에 담는다.<br>빈 문장·작업명 반복으로 대신하지 않는다.<br>아직 실행하지 않은 호출 결과나 최종 답변은 요구하지 않는다."
+    },
+    {
+      "검사 ID": "N02-O.1",
+      "평가 축": "내용 정확성",
+      "검사 항목": "작업 선택",
+      "검사 내용": "최근 진행 판단이 정한 정보를 확보할 작업·호출 대상을 선택했는지 확인한다.",
+      "적용 조건": "항상",
+      "평가 방식": "LLM 기반",
+      "평가 입력": "- 실행 당시 입력: 모델 호출 입력<br>- 검사 대상 결과: 모델 반환값",
+      "측정 방법": "선택한 도구·에이전트를 최근 진행 판단의 필요 정보, 현재 역할, 도구 기능·조회 가능한 자료와 대조한다.<br>선택 이유의 작업 상태·자료 정보는 입력 이력·자료 정보와, 자료 본문을 인용한 주장은 해당 본문과 대조한다.<br>이유 누락·정보 충분성·추가 작업 필요성·인자 값·뷰 선택은 별도 검사 대상이다.",
+      "성공 기준": "최근 진행 판단의 필요 정보를 확보할 작업을 고르고, 선택 이유는 입력 기록·자료와 일치해야 한다.<br>정상 0건을 이유로 같은 조회를 반복하지 않는다."
+    },
+    {
+      "검사 ID": "N02-O.3",
+      "평가 축": "내용 정확성",
+      "검사 항목": "입력 인자 일치",
+      "검사 내용": "선택한 호출 인자의 값·자료 참조가 요청 조건에 맞고 실제 확보한 유효 결과를 가리키는지 확인한다.",
+      "적용 조건": "데이터 조회를 선택한 작업 선택 호출",
+      "평가 방식": "규칙 기반",
+      "평가 입력": "- 실행 당시 입력: 도구 입력 명세<br>- 검사 대상 결과: 모델 반환값<br>- 별도 평가 자료: 기대 결과",
+      "측정 방법": "선택한 인자의 값을 사례의 기대값에 대조한다.<br>조회 조건은 요청의 대상·기간과 비교한다.<br>구조·필수 필드·자료형은 N-F.1에서 판정한다.",
+      "성공 기준": "선택한 인자의 값이 요청 조건에 맞으며, 사용자에게 확인할 미확보 필수 값을 임의로 넣지 않는다."
+    },
+    {
+      "검사 ID": "N02-O.3",
+      "평가 축": "내용 정확성",
+      "검사 항목": "입력 인자 일치",
+      "검사 내용": "선택한 호출 인자의 값·자료 참조가 요청 조건에 맞고 실제 확보한 유효 결과를 가리키는지 확인한다.",
+      "적용 조건": "데이터 가공을 선택한 작업 선택 호출",
+      "평가 방식": "규칙 기반",
+      "평가 입력": "- 실행 당시 입력: 도구 입력 명세, 가공 가능한 결과 ID와 열, 입력 자료 정보<br>- 검사 대상 결과: 모델 반환값<br>- 별도 평가 자료: 기대 결과",
+      "측정 방법": "선택한 인자의 값을 사례의 기대값에 대조한다.<br>가공 참조는 확보한 결과 ID·열·처리 상태와 비교한다.<br>구조·필수 필드·자료형은 N-F.1에서 판정한다.",
+      "성공 기준": "선택한 인자의 값이 요청 조건에 맞으며, 사용자에게 확인할 미확보 필수 값을 임의로 넣지 않는다.<br>자료 참조는 실제 확보한 유효 결과를 가리키며 실패·취소·부적합 결과를 가공 입력으로 선택하지 않는다."
+    },
+    {
+      "검사 ID": "N02-O.3",
+      "평가 축": "내용 정확성",
+      "검사 항목": "입력 인자 일치",
+      "검사 내용": "선택한 호출 인자의 값·자료 참조가 요청 조건에 맞고 실제 확보한 유효 결과를 가리키는지 확인한다.",
+      "적용 조건": "시각화 검증을 선택한 작업 선택 호출",
+      "평가 방식": "규칙 기반",
+      "평가 입력": "- 실행 당시 입력: 도구 입력 명세, 시각화 목록과 입력 조건<br>- 검사 대상 결과: 모델 반환값<br>- 별도 평가 자료: 기대 결과",
+      "측정 방법": "선택한 인자의 값을 사례의 기대값에 대조한다.<br>시각화는 뷰의 매개변수·필터 조건과 요청한 표시값을 대조한다.<br>구조·필수 필드·자료형은 N-F.1에서 판정한다.<br>뷰 적합성은 N02-O.4에서 판정한다.",
+      "성공 기준": "선택한 인자의 값이 요청 조건에 맞으며, 사용자에게 확인할 미확보 필수 값을 임의로 넣지 않는다.<br>시각화의 지역·기간·필터가 요청한 표시 조건에 맞는다."
+    },
+    {
+      "검사 ID": "N02-O.3",
+      "평가 축": "내용 정확성",
+      "검사 항목": "입력 인자 일치",
+      "검사 내용": "선택한 호출 인자의 값·자료 참조가 요청 조건에 맞고 실제 확보한 유효 결과를 가리키는지 확인한다.",
+      "적용 조건": "하위 에이전트 호출을 선택한 작업 선택 호출",
+      "평가 방식": "규칙 기반",
+      "평가 입력": "- 실행 당시 입력: 도구 입력 명세<br>- 검사 대상 결과: 모델 반환값<br>- 별도 평가 자료: 기대 결과",
+      "측정 방법": "선택한 인자의 값을 사례의 기대값에 대조한다.<br>구조·필수 필드·자료형은 N-F.1에서 판정한다.",
+      "성공 기준": "선택한 인자의 값이 요청 조건에 맞으며, 사용자에게 확인할 미확보 필수 값을 임의로 넣지 않는다."
+    },
+    {
+      "검사 ID": "N02-O.4",
+      "평가 축": "내용 정확성",
+      "검사 항목": "뷰 선택",
+      "검사 내용": "선택한 게시 뷰가 요청한 대상·지표·기간을 표현할 수 있으며 시각화 목적에 맞는지 확인한다.",
+      "적용 조건": "게시 뷰를 지정하는 시각화 작업을 선택해야 하거나 실제 선택한 경우",
+      "평가 방식": "LLM 기반",
+      "평가 입력": "- 실행 당시 입력: 모델 호출 입력<br>- 검사 대상 결과: 모델 반환값",
+      "측정 방법": "선택 뷰의 대상·지표·기간을 제공된 기능·자료 범위에서 확인해 요청 조건과 대조한다.<br>지역·기간·필터 값은 별도 검사 대상이다.",
+      "성공 기준": "게시된 뷰 중 시각화 목적·자료·표현 조건을 충족하는 뷰를 선택한다.<br>같은 목적과 입력 조건을 충족하는 대안 뷰도 인정한다."
+    },
+    {
+      "검사 ID": "N02-B.2",
+      "평가 축": "내용 정확성",
+      "검사 항목": "호출 대상 범위",
+      "검사 내용": "출력에서 선택한 호출 대상이 현재 역할·시작 이벤트의 허용 범위를 지켰는지 확인한다.",
+      "적용 조건": "시각화 검증 이외의 작업 선택 호출",
+      "평가 방식": "규칙 기반",
+      "평가 입력": "- 실행 당시 입력: 현재 Agent 역할, 도구 기능 설명, 사용·공개 조건<br>- 검사 대상 결과: 모델 반환값",
+      "측정 방법": "선택한 도구·하위 에이전트를 현재 역할에 허용된 목록과 대조한다.",
+      "성공 기준": "출력에서 현재 역할·시작 이벤트와 제공된 호출 제한에 허용된 대상만 선택한다."
+    },
+    {
+      "검사 ID": "N02-B.2",
+      "평가 축": "내용 정확성",
+      "검사 항목": "호출 대상 범위",
+      "검사 내용": "출력에서 선택한 호출 대상이 현재 역할·시작 이벤트의 허용 범위를 지켰는지 확인한다.",
+      "적용 조건": "시각화 검증을 선택한 작업 선택 호출",
+      "평가 방식": "규칙 기반",
+      "평가 입력": "- 실행 당시 입력: 현재 Agent 역할, 실행 조건, 도구 기능 설명, 시각화 목록과 입력 조건, 사용·공개 조건<br>- 검사 대상 결과: 모델 반환값",
+      "측정 방법": "선택한 도구·하위 에이전트를 현재 역할에 허용된 목록과 대조한다.<br>시각화 작업은 시작 이벤트의 허용 뷰를 확인하고 별도 호출 제한이 있으면 함께 대조한다.",
+      "성공 기준": "출력에서 현재 역할·시작 이벤트와 제공된 호출 제한에 허용된 대상만 선택한다."
+    }
+  ],
+  "bindings": [
+    {
+      "row": 0,
+      "row_id": "N02-O.2/general",
+      "when": {},
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order",
+          "clause_ids": [
+            "required-content",
+            "required-content-boundary",
+            "no-invented-format"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict",
+          "clause_ids": [
+            "verdicts",
+            "applicability",
+            "missing-evidence",
+            "allowed-alternatives",
+            "evidence-only"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "llm-procedure",
+          "clause_ids": [
+            "untrusted-data",
+            "evidence"
+          ]
+        }
+      ],
+      "judge_fields": {
+        "적용 조건": {
+          "text_sha256": "f1d42a32366087dde8c32369179ac3783f7fec5033694ec9cf21eb6a10f3078c",
+          "clauses": [
+            {
+              "id": "applicability",
+              "start": 0,
+              "end": 2,
+              "section": "평가 대상과 적용 조건",
+              "group": 1
+            }
+          ]
+        },
+        "측정 방법": {
+          "text_sha256": "0a9e163ce202d42c8f24a9a1eab41cacc3064ab9c9893958080d62d3306da804",
+          "clauses": [
+            {
+              "id": "measurement-1",
+              "start": 0,
+              "end": 52,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "measurement-2",
+              "start": 56,
+              "end": 81,
+              "section": "담당 범위",
+              "group": 1
+            }
+          ]
+        },
+        "성공 기준": {
+          "text_sha256": "96369d2de5716901824b5b03310645c1ae535322f80345c31e7b244191748491",
+          "clauses": [
+            {
+              "id": "success-1",
+              "start": 0,
+              "end": 36,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "success-2",
+              "start": 40,
+              "end": 63,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "success-3",
+              "start": 67,
+              "end": 101,
+              "section": "담당 범위",
+              "group": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "row": 1,
+      "row_id": "N02-O.1/general",
+      "when": {},
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order",
+          "clause_ids": [
+            "no-invented-format"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict",
+          "clause_ids": [
+            "verdicts",
+            "applicability",
+            "missing-evidence",
+            "allowed-alternatives",
+            "evidence-only"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "llm-procedure",
+          "clause_ids": [
+            "untrusted-data",
+            "explicit-values",
+            "evidence"
+          ]
+        }
+      ],
+      "judge_fields": {
+        "적용 조건": {
+          "text_sha256": "f1d42a32366087dde8c32369179ac3783f7fec5033694ec9cf21eb6a10f3078c",
+          "clauses": [
+            {
+              "id": "applicability",
+              "start": 0,
+              "end": 2,
+              "section": "평가 대상과 적용 조건",
+              "group": 1
+            }
+          ]
+        },
+        "측정 방법": {
+          "text_sha256": "d9fefe461c3e61702891c920312974a44d32c7cfd40b90c6f06c9678cedf1185",
+          "clauses": [
+            {
+              "id": "measurement-1",
+              "start": 0,
+              "end": 59,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "measurement-2",
+              "start": 63,
+              "end": 124,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "measurement-3",
+              "start": 128,
+              "end": 173,
+              "section": "담당 범위",
+              "group": 1
+            }
+          ]
+        },
+        "성공 기준": {
+          "text_sha256": "96efc2104042b68dbc43557f015e01069fe3fda8cf8e6f2bf48e4a700c6fedc6",
+          "clauses": [
+            {
+              "id": "success-1",
+              "start": 0,
+              "end": 55,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "success-2",
+              "start": 59,
+              "end": 86,
+              "section": "대조할 기준",
+              "group": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "row": 2,
+      "row_id": "N02-O.3/query",
+      "when": {
+        "tools": [
+          "query_data"
+        ]
+      },
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "node-verdict"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-reuse"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-aggregation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict"
+        }
+      ]
+    },
+    {
+      "row": 3,
+      "row_id": "N02-O.3/process",
+      "when": {
+        "tools": [
+          "process_data"
+        ]
+      },
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "node-verdict"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-reuse"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-aggregation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict"
+        }
+      ]
+    },
+    {
+      "row": 4,
+      "row_id": "N02-O.3/visualization",
+      "when": {
+        "tools": [
+          "validate_visualization"
+        ]
+      },
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "node-verdict"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-reuse"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-aggregation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict"
+        }
+      ]
+    },
+    {
+      "row": 5,
+      "row_id": "N02-O.3/agent",
+      "when": {
+        "tools": [
+          "interpretation_agent",
+          "visualization_agent"
+        ]
+      },
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "node-verdict"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-reuse"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-aggregation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict"
+        }
+      ]
+    },
+    {
+      "row": 6,
+      "row_id": "N02-O.4/general",
+      "when": {},
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order",
+          "clause_ids": [
+            "no-invented-format"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict",
+          "clause_ids": [
+            "verdicts",
+            "applicability",
+            "missing-evidence",
+            "allowed-alternatives",
+            "evidence-only"
+          ]
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods",
+          "clause_ids": []
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "llm-procedure",
+          "clause_ids": [
+            "untrusted-data",
+            "explicit-values",
+            "evidence"
+          ]
+        }
+      ],
+      "judge_fields": {
+        "적용 조건": {
+          "text_sha256": "eb665d90ef51be84048fb6232e11568e65e35fb2fcb50090c2f960c3858893e8",
+          "clauses": [
+            {
+              "id": "applicability",
+              "start": 0,
+              "end": 37,
+              "section": "평가 대상과 적용 조건",
+              "group": 1
+            }
+          ]
+        },
+        "측정 방법": {
+          "text_sha256": "62b94e966116526dc12639e5388a6e507238af8116a46dbb6f343ed7fe3def64",
+          "clauses": [
+            {
+              "id": "measurement-1",
+              "start": 0,
+              "end": 47,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "measurement-2",
+              "start": 51,
+              "end": 74,
+              "section": "담당 범위",
+              "group": 1
+            }
+          ]
+        },
+        "성공 기준": {
+          "text_sha256": "547992db722b8ca4f5021bc9abe46361718f8fb5a7199458b1c78e829084815f",
+          "clauses": [
+            {
+              "id": "success-1",
+              "start": 0,
+              "end": 38,
+              "section": "대조할 기준",
+              "group": 1
+            },
+            {
+              "id": "success-2",
+              "start": 42,
+              "end": 72,
+              "section": "대조할 기준",
+              "group": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "row": 7,
+      "row_id": "N02-B.2/other",
+      "when": {
+        "exclude_tools": [
+          "validate_visualization"
+        ]
+      },
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "node-verdict"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-reuse"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-aggregation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict"
+        }
+      ]
+    },
+    {
+      "row": 8,
+      "row_id": "N02-B.2/visualization",
+      "when": {
+        "tools": [
+          "validate_visualization"
+        ]
+      },
+      "principles": [
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-order"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "node-verdict"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "input-selection"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "check-responsibility"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-reuse"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "independent-violations"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "revision-evaluation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict-aggregation"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "evaluation-methods"
+        },
+        {
+          "path": "eval/docs/nodes/common.json",
+          "key": "verdict"
+        }
+      ]
+    }
+  ],
+  "principles": [
+    {
+      "key": "output-action",
+      "title": "반환 구조",
+      "text": "N-F.1은 아래 반환 구조·호출 인자와 [공통 형식 기준](common.md#출력-형식의-공통-기준)을 적용한다.\n호출 대상의 역할별 허용 범위는 N02-B.2에서 판정한다.\n인자의 요청 적합성과 자료 참조는 N02-O.3에서 판정한다.\n\n| 필드 | 자료형 | 필수 여부 | 형식 기준 |\n| --- | --- | --- | --- |\n| `name` | 문자열 | 필수 | `query_data`, `process_data`, `validate_visualization`, `interpretation_agent`, `visualization_agent` 중 하나다. |\n| `arguments_json` | 문자열 | 필수 | 아래 호출 인자 객체를 JSON으로 직렬화한 문자열이다.<br>해석 결과가 객체여야 한다. |\n| `reason` | 문자열 | 필수 | 선택한 작업의 이유를 담는다. |",
+      "classification": "judgment",
+      "selection": {
+        "text_sha256": "fc3eb7535738c9113d3a0a4c972abe326a57fecc26d048b0f1b55180562eee6e",
+        "clauses": [
+          {
+            "id": "format-scope",
+            "start": 0,
+            "end": 64
+          },
+          {
+            "id": "call-scope",
+            "start": 65,
+            "end": 98
+          },
+          {
+            "id": "argument-accuracy",
+            "start": 99,
+            "end": 133
+          },
+          {
+            "id": "format",
+            "start": 135,
+            "end": 450
+          }
+        ]
+      }
+    },
+    {
+      "key": "arguments-common",
+      "title": "호출 인자",
+      "text": "아래 필드는 `arguments_json`을 해석한 객체 안의 필드다.\n'텍스트'는 공백 외 문자가 있는 문자열이며, '단일값'은 문자열·유한한 수·불리언·`null` 중 하나다.",
+      "classification": "judgment",
+      "selection": {
+        "text_sha256": "9eaa3dd220029755e9b4b0efc06b45534604124bbd4e5d5b796af4216b9a796a",
+        "clauses": [
+          {
+            "id": "whole",
+            "start": 0,
+            "end": 100
+          }
+        ]
+      }
+    },
+    {
+      "key": "argument-conditions",
+      "title": "조건·정렬 객체",
+      "text": "| 객체 | 필드 | 자료형 | 형식 기준 |\n| --- | --- | --- | --- |\n| 조건 | `field` | 텍스트 | — |\n| 조건 | `operator` | 문자열 | `eq`, `ne`, `lt`, `le`, `gt`, `ge`, `contains`, `is_null` 중 하나다. |\n| 조건 | `value` | 단일값 | — |\n| 정렬 | `field` | 텍스트 | — |\n| 정렬 | `descending` | 불리언 | — |\n\n모든 필드는 필수다.\n조건 값과 대상 열의 자료형·연산 의미가 맞는지는 N02-O.3에서 확인한다.",
+      "classification": "judgment",
+      "selection": {
+        "text_sha256": "e5c56441946351666cafa934177278f81fdc039d9839960bbc62c89bd9b871eb",
+        "clauses": [
+          {
+            "id": "format",
+            "start": 0,
+            "end": 270
+          },
+          {
+            "id": "value-semantics",
+            "start": 271,
+            "end": 314
+          }
+        ]
+      }
+    },
+    {
+      "key": "arguments-query",
+      "title": "호출 인자",
+      "text": "| 호출 대상 | 필드 | 자료형 | 필수 여부 | 형식 기준 |\n| --- | --- | --- | --- | --- |\n| 데이터 조회 `query_data` | `target` | 텍스트 | 필수 | — |\n| 데이터 조회 | `version`, `as_of` | 텍스트 | 선택 | — |\n| 데이터 조회 | `filters` | 조건 객체 배열 | 선택 | 조건 객체는 아래 정의를 따른다. |\n| 데이터 조회 | `fields` | 텍스트 배열 | 선택 | 제공하면 1개 이상이다. |\n| 데이터 조회 | `sort` | 정렬 객체 배열 | 선택 | 정렬 객체는 아래 정의를 따른다. |\n| 데이터 조회 | `offset` | 정수 | 선택 | 0 이상이다. |\n| 데이터 조회 | `limit` | 정수 | 선택 | 1~10,000이다. |",
+      "classification": "judgment",
+      "selection": {
+        "text_sha256": "572bc627f09e74cc487928402c66e41c5f2c801f2f78f871e00d82d94ec97552",
+        "clauses": [
+          {
+            "id": "whole",
+            "start": 0,
+            "end": 421
+          }
+        ]
+      }
+    },
+    {
+      "key": "arguments-process",
+      "title": "호출 인자",
+      "text": "| 호출 대상 | 필드 | 자료형 | 필수 여부 | 형식 기준 |\n| --- | --- | --- | --- | --- |\n| 데이터 가공 `process_data` | `input_result_id` | 문자열 | 필수 | 가공할 자료를 가진 작업 결과의 ID를 담는다. |\n| 데이터 가공 | `operations` | 연산 객체 배열 | 필수 | 1개 이상이며 아래 연산별 구조를 따른다. |\n| 데이터 가공 | `missing` | 문자열 | 선택 | `error`, `drop`, `preserve` 중 하나다. |\n| 데이터 가공 | `fields` | 텍스트 배열 | 선택 | 제공하면 1개 이상이다. |\n| 데이터 가공 | `decimals` | 정수 | 선택 | 0~12다. |\n\n가공 입력의 자료 본문은 런타임이 결과 ID로 찾아 전달한다.\n모델은 `data` 본문을 반환하지 않고 `input_result_id`를 사용한다.\n모델은 결합할 자료의 `right` 본문을 반환하지 않고 `right_result_id`를 사용한다.\n\n#### 가공 연산 객체\n\n각 연산은 `operation`으로 종류를 지정하며, 해당 연산에 나열한 필드를 모두 포함한다.\n\n| 연산 | `operation` 값 | 나머지 필드 | 자료형 | 형식 기준 |\n| --- | --- | --- | --- | --- |\n| 계산 | `calculate` | `method` | 문자열 | `difference`, `ratio`, `percentage`, `percent_change` 중 하나다. |\n| 계산 | `calculate` | `before`, `after`, `output` | 텍스트 | — |\n| 집계 | `aggregate` | `method` | 문자열 | `sum`, `mean`, `min`, `max`, `count` 중 하나다. |\n| 집계 | `aggregate` | `field`, `output` | 텍스트 | — |\n| 집계 | `aggregate` | `group_by` | 텍스트 배열 | 빈 배열을 허용한다. |\n| 결합 | `join` | `right_result_id` | 문자열 | — |\n| 결합 | `join` | `keys` | 텍스트 배열 | 1개 이상이다. |\n| 결합 | `join` | `how` | 문자열 | `inner`, `left` 중 하나다. |\n| 결합 | `join` | `fields` | 텍스트 이름 → 텍스트 이름의 객체 | 오른쪽 원본 열 이름을 결과 열 이름에 연결하며, 항목은 1개 이상이다. |\n| 행 필터 | `filter` | `conditions` | 조건 객체 배열 | 위 조건 객체 정의를 따른다. |\n| 자료형 변환 | `cast` | `field` | 텍스트 | — |\n| 자료형 변환 | `cast` | `kind` | 문자열 | `string`, `integer`, `number` 중 하나다. |\n| 정렬 | `sort` | `by` | 정렬 객체 배열 | 위 정렬 객체 정의를 따르며, 1개 이상이다. |",
+      "classification": "judgment",
+      "selection": {
+        "text_sha256": "93d7938fce9777d72c7c0b4994b729ea0d11b787cd024bcb830ed06ad24a429f",
+        "clauses": [
+          {
+            "id": "arguments-format",
+            "start": 0,
+            "end": 388
+          },
+          {
+            "id": "input-reference",
+            "start": 425,
+            "end": 472
+          },
+          {
+            "id": "join-reference",
+            "start": 473,
+            "end": 529
+          },
+          {
+            "id": "operations-format",
+            "start": 546,
+            "end": 1511
+          }
+        ]
+      }
+    },
+    {
+      "key": "arguments-visualization",
+      "title": "호출 인자",
+      "text": "| 호출 대상 | 필드 | 자료형 | 필수 여부 | 형식 기준 |\n| --- | --- | --- | --- | --- |\n| 시각화 검증 `validate_visualization` | `view_key` | 텍스트 | 필수 | — |\n| 시각화 검증 | `parameters` | 텍스트 이름 → 텍스트 값의 객체 | 선택 | 선택한 뷰에 등록된 필수 매개변수는 모두 포함한다. |\n| 시각화 검증 | `filters` | 텍스트 이름 → 텍스트 배열의 객체 | 선택 | 제공한 필터별 값은 1개 이상이다. |\n\n#### 시각화 입력 프로필\n\n선택한 뷰에 연결된 프로필을 적용한다. 아래 매개변수는 모두 필수이며 JSON 문자열로 전달한다.\n\n| 프로필 | 매개변수 이름 | 자료형 | 형식 기준 |\n| --- | --- | --- | --- |\n| 도시 단위 `monthly_city` | `p_city` | 문자열 | 도시 식별 문자열이다. |\n| 도시 단위 `monthly_city` | `p_start`, `p_end` | 문자열 | `YYYY-MM-DD` 형식의 유효한 날짜다. |\n| 상세 지역 `monthly_detail` | `p_detail_adm` | 문자열 | 행정동 표시 문자열이다. |\n| 상세 지역 `monthly_detail` | `p_start`, `p_end` | 문자열 | `YYYY-MM-DD` 형식의 유효한 날짜다. |\n\n| 프로필 | 필터 이름 | 자료형 | 형식 기준 |\n| --- | --- | --- | --- |\n| 도시 단위 `monthly_city` | `읍면동` | 텍스트 배열 | 필터는 생략할 수 있으며, 제공하면 값은 1개 이상이다. |\n| 상세 지역 `monthly_detail` | — | — | 지정할 필터가 없다.<br>`filters`를 생략하거나 빈 객체로 반환한다. |\n\n뷰와 프로필의 연결은 [등록 뷰의 입력 프로필](../../agent/tableau.md#뷰와-입력-프로필)에 따라 사례에 고정한다.\n매개변수·필터의 이름과 자료형은 N-F.1에서 위 정의에 대조한다.\n지역·기간·필터 값의 허용 범위·요청 일치는 N02-O.3에서 판정한다.",
+      "classification": "judgment",
+      "selection": {
+        "text_sha256": "9e253da0d6c5a92f3bda1dab1d66f68774967cf76d601db08485624484c8b57b",
+        "clauses": [
+          {
+            "id": "arguments-format",
+            "start": 0,
+            "end": 287
+          },
+          {
+            "id": "profiles",
+            "start": 306,
+            "end": 918
+          },
+          {
+            "id": "format-scope",
+            "start": 995,
+            "end": 1032
+          },
+          {
+            "id": "value-scope",
+            "start": 1033,
+            "end": 1073
+          }
+        ]
+      }
+    },
+    {
+      "key": "arguments-agent",
+      "title": "호출 인자",
+      "text": "| 호출 대상 | 필드 | 자료형 | 필수 여부 | 형식 기준 |\n| --- | --- | --- | --- | --- |\n| 하위 호출 `interpretation_agent`, `visualization_agent` | `goal` | 문자열 | 필수 | — |",
+      "classification": "judgment",
+      "selection": {
+        "text_sha256": "b90af6ea430c736b910882bba251f53e99579b1d51a1950ffe12e799baf2f191",
+        "clauses": [
+          {
+            "id": "whole",
+            "start": 0,
+            "end": 148
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,4778 @@
+{
+  "origin": "configured_service_database_read_only_query",
+  "captured_at": "2026-11-13T01:13:48.966047+00:00",
+  "transaction": {
+    "database": "eumi",
+    "read_only": "on",
+    "isolation": "repeatable read",
+    "transaction_at": "2026-11-13T10:13:48.795287+09:00"
+  },
+  "target": {
+    "adm_cd10": "1168065500",
+    "adm_nm": "도곡1동",
+    "period_from": "2025-07-01",
+    "period_to": "2025-12-01"
+  },
+  "decimal_encoding": "Exact PostgreSQL numeric values are encoded as strings; NULL remains null.",
+  "source_files": {
+    "ai/src/database.py": "9c28eac44ea74e502153ff98be6b056eb010725954ab71eaa07191e327f696c4",
+    "data/pipeline/common/bh_indicators.py": "3b42f939a177b111f6341ba2c2d865f2e162088c61dcd5e9a78430c36e2b813a",
+    "data/pipeline/m3_indicator/batch_bh_region_indicators.py": "fd4c2064fda00699461ad924def3539874c630cc9a6dbbee2766822a58e581f1",
+    "data/pipeline/m3_indicator/batch_bh_grid_indicators.py": "c5fddee1907b4677da4d62ad50899e3a6e688e643b6d5edb4a219a89e9b6b0b2",
+    "data/pipeline/ops/make_seed.py": "f40845aa6ed9e56636222777c89a82fbf9c7dfc3c089e00192bcc56d0c5db963",
+    "data/README.md": "14b9f6f2ddb24ef748e8e1f3b209059c23dc7926197b1bf768f409e5deb39485"
+  },
+  "table_definitions": {
+    "analysis.bh_region_indicator": "읍면동·월별 저장된 활동 합계 및 행동 원지표 12개. 기여도 테이블과 다르다. 현재 서비스 report_sources에는 등록되지 않아 기존 노드 스냅샷에 포함되지 않았다.",
+    "analysis.bh_grid_indicator": "격자·월별 저장된 활동 합계. 이 증거에서는 activity_daily만 조회하고 dim_grid100으로 읍면동을 연결했다.",
+    "activity_daily": "파이프라인 common/bh_indicators.py indicators: hour 00~23 각 시간대의 일평균 추정 활동값 24개를 합한 값. 동별 값은 소속 격자의 시간대별 값을 먼저 합산한 뒤 계산한다. 고유 주민 수·개인별 외출 횟수·V07의 24시간 평균과 같지 않다.",
+    "flow_detail": "시간대24·요일7·성연령12 구분별 flow_sum/day_count를 격자마다 구하고 동 안에서 합산하는 상세 자료. 현재 연결된 DB는 이 테이블 전체가 0행이다.",
+    "h18_senior_male_share": "60세 이상 남성 활동 / (60세 이상 남성 활동 + 여성 활동). 활동 구성 비중이며 주민 성비가 아니다.",
+    "h29_senior_gender_change_gap": "60세 이상 남성 활동 전월 변화율에서 여성 활동 전월 변화율을 뺀 값, 단위 %p. 양수는 남성 변화율이 여성보다 높다는 의미이며 둘 중 누가 절대 감소했는지는 이 값만으로 알 수 없다.",
+    "h26_weekend_weekday_change_gap": "토·일 일평균의 평균인 주말 활동의 전월 변화율에서 월~금 일평균의 평균인 주중 활동의 전월 변화율을 뺀 값, 단위 %p.",
+    "activity_hourly_mean": "activity_daily/24.0을 실제 읽기 전용 SELECT로 반환한 계산 열. V07의24시간대일평균추정활동값평균이며고유주민수·하루이동인원수가아니다. 원값은queries.activity_hourly_mean에정확소수문자열로보존한다."
+  },
+  "queries": {
+    "region_indicators": {
+      "sql": "SELECT period_start,adm_cd10,activity_daily,h12_evening_day_ratio,h13_commute_ratio,h14_hour_entropy,h15_weekday_entropy,h18_senior_male_share,h19_age_entropy,h20_senior_representation,h21_male50plus_representation,h26_weekend_weekday_change_gap,h29_senior_gender_change_gap,h30_hour_profile_distance,h31_weekday_profile_distance,updated_at FROM analysis.bh_region_indicator WHERE adm_cd10=%s AND period_start BETWEEN %s AND %s ORDER BY period_start",
+      "parameters": [
+        "1168065500",
+        "2025-07-01",
+        "2025-12-01"
+      ],
+      "row_count": 6,
+      "rows": [
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "139904.65",
+          "h12_evening_day_ratio": "0.801110",
+          "h13_commute_ratio": "0.907214",
+          "h14_hour_entropy": "2.943272",
+          "h15_weekday_entropy": "1.933330",
+          "h18_senior_male_share": "0.517387",
+          "h19_age_entropy": "1.756160",
+          "h20_senior_representation": "0.921806",
+          "h21_male50plus_representation": "1.131452",
+          "h26_weekend_weekday_change_gap": null,
+          "h29_senior_gender_change_gap": null,
+          "h30_hour_profile_distance": null,
+          "h31_weekday_profile_distance": null,
+          "updated_at": "2026-11-03T09:45:30.560791"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "131675.13",
+          "h12_evening_day_ratio": "0.804715",
+          "h13_commute_ratio": "0.884516",
+          "h14_hour_entropy": "2.949447",
+          "h15_weekday_entropy": "1.932950",
+          "h18_senior_male_share": "0.515900",
+          "h19_age_entropy": "1.758164",
+          "h20_senior_representation": "0.932571",
+          "h21_male50plus_representation": "1.129356",
+          "h26_weekend_weekday_change_gap": "0.026975",
+          "h29_senior_gender_change_gap": "-0.567539",
+          "h30_hour_profile_distance": "0.010732",
+          "h31_weekday_profile_distance": "0.015888",
+          "updated_at": "2026-11-03T09:45:34.139278"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "140789.47",
+          "h12_evening_day_ratio": "0.782104",
+          "h13_commute_ratio": "0.896555",
+          "h14_hour_entropy": "2.935829",
+          "h15_weekday_entropy": "1.935337",
+          "h18_senior_male_share": "0.516233",
+          "h19_age_entropy": "1.753298",
+          "h20_senior_representation": "0.938122",
+          "h21_male50plus_representation": "1.138562",
+          "h26_weekend_weekday_change_gap": "4.075469",
+          "h29_senior_gender_change_gap": "0.143577",
+          "h30_hour_profile_distance": "0.017409",
+          "h31_weekday_profile_distance": "0.018247",
+          "updated_at": "2026-11-03T09:45:41.015466"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "138564.46",
+          "h12_evening_day_ratio": "0.764356",
+          "h13_commute_ratio": "0.845155",
+          "h14_hour_entropy": "2.943103",
+          "h15_weekday_entropy": "1.935755",
+          "h18_senior_male_share": "0.513169",
+          "h19_age_entropy": "1.755530",
+          "h20_senior_representation": "0.947717",
+          "h21_male50plus_representation": "1.136875",
+          "h26_weekend_weekday_change_gap": "0.774800",
+          "h29_senior_gender_change_gap": "-1.223561",
+          "h30_hour_profile_distance": "0.017781",
+          "h31_weekday_profile_distance": "0.013893",
+          "updated_at": "2026-11-03T09:45:48.170583"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "139126.22",
+          "h12_evening_day_ratio": "0.773011",
+          "h13_commute_ratio": "0.869284",
+          "h14_hour_entropy": "2.939571",
+          "h15_weekday_entropy": "1.935775",
+          "h18_senior_male_share": "0.515927",
+          "h19_age_entropy": "1.758392",
+          "h20_senior_representation": "0.933216",
+          "h21_male50plus_representation": "1.128117",
+          "h26_weekend_weekday_change_gap": "-0.186318",
+          "h29_senior_gender_change_gap": "1.092670",
+          "h30_hour_profile_distance": "0.008688",
+          "h31_weekday_profile_distance": "0.014944",
+          "updated_at": "2026-11-03T09:45:55.896242"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "134596.50",
+          "h12_evening_day_ratio": "0.774390",
+          "h13_commute_ratio": "0.857709",
+          "h14_hour_entropy": "2.941062",
+          "h15_weekday_entropy": "1.935603",
+          "h18_senior_male_share": "0.522478",
+          "h19_age_entropy": "1.756884",
+          "h20_senior_representation": "0.942123",
+          "h21_male50plus_representation": "1.160773",
+          "h26_weekend_weekday_change_gap": "0.218456",
+          "h29_senior_gender_change_gap": "2.576580",
+          "h30_hour_profile_distance": "0.008097",
+          "h31_weekday_profile_distance": "0.009369",
+          "updated_at": "2026-11-03T09:46:03.421050"
+        }
+      ],
+      "query_result_sha256": "22dca16c5ff48d36c9aee01149e90563c7e0cea226ce4c6480a6aec3fa440b01"
+    },
+    "grid_activity": {
+      "sql": "SELECT b.period_start,g.adm_cd10,b.grid_cd,b.activity_daily,b.updated_at FROM analysis.bh_grid_indicator b JOIN analysis.dim_grid100 g USING(grid_cd) WHERE g.adm_cd10=%s AND b.period_start BETWEEN %s AND %s ORDER BY b.period_start,b.grid_cd",
+      "parameters": [
+        "1168065500",
+        "2025-07-01",
+        "2025-12-01"
+      ],
+      "row_count": 630,
+      "rows": [
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586432",
+          "activity_daily": "1285.37",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586433",
+          "activity_daily": "3002.65",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586434",
+          "activity_daily": "12206.46",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587429",
+          "activity_daily": "2717.39",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587430",
+          "activity_daily": "3528.64",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587431",
+          "activity_daily": "4192.93",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587432",
+          "activity_daily": "955.44",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587433",
+          "activity_daily": "862.45",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587434",
+          "activity_daily": "3114.62",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588429",
+          "activity_daily": "4734.40",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588430",
+          "activity_daily": "4273.10",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588431",
+          "activity_daily": "1205.91",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588432",
+          "activity_daily": "516.01",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588433",
+          "activity_daily": "584.16",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588434",
+          "activity_daily": "1132.83",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588435",
+          "activity_daily": "4035.71",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589429",
+          "activity_daily": "6545.99",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589430",
+          "activity_daily": "5041.05",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589431",
+          "activity_daily": "1698.26",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589432",
+          "activity_daily": "868.90",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589433",
+          "activity_daily": "591.64",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589434",
+          "activity_daily": "427.60",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589435",
+          "activity_daily": "2019.27",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590429",
+          "activity_daily": "4833.42",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590430",
+          "activity_daily": "4249.81",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590431",
+          "activity_daily": "1906.27",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590432",
+          "activity_daily": "471.04",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590433",
+          "activity_daily": "343.99",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590434",
+          "activity_daily": "247.42",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590435",
+          "activity_daily": "575.05",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591430",
+          "activity_daily": "4333.64",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591431",
+          "activity_daily": "1455.05",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591432",
+          "activity_daily": "387.95",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591433",
+          "activity_daily": "82.39",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591434",
+          "activity_daily": "68.85",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591435",
+          "activity_daily": "212.27",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591436",
+          "activity_daily": "1458.02",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592430",
+          "activity_daily": "2023.36",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592431",
+          "activity_daily": "1214.35",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592432",
+          "activity_daily": "353.69",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592433",
+          "activity_daily": "310.71",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592434",
+          "activity_daily": "300.79",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592435",
+          "activity_daily": "256.85",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592436",
+          "activity_daily": "1518.29",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593430",
+          "activity_daily": "2511.44",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593431",
+          "activity_daily": "278.28",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593432",
+          "activity_daily": "410.86",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593433",
+          "activity_daily": "463.96",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593434",
+          "activity_daily": "428.03",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593435",
+          "activity_daily": "230.00",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593436",
+          "activity_daily": "693.21",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593437",
+          "activity_daily": "5155.31",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594430",
+          "activity_daily": "2013.30",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594431",
+          "activity_daily": "236.75",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594432",
+          "activity_daily": "136.87",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594433",
+          "activity_daily": "362.83",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594434",
+          "activity_daily": "570.55",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594435",
+          "activity_daily": "229.33",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594436",
+          "activity_daily": "379.56",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594437",
+          "activity_daily": "2957.61",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595430",
+          "activity_daily": "1529.01",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595431",
+          "activity_daily": "24.47",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595432",
+          "activity_daily": "35.30",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595433",
+          "activity_daily": "70.09",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595434",
+          "activity_daily": "43.30",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595435",
+          "activity_daily": "32.16",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595436",
+          "activity_daily": "67.90",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595437",
+          "activity_daily": "845.09",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596431",
+          "activity_daily": "343.30",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596432",
+          "activity_daily": "82.86",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596433",
+          "activity_daily": "17.44",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596434",
+          "activity_daily": "16.99",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596435",
+          "activity_daily": "81.00",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596436",
+          "activity_daily": "120.99",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596437",
+          "activity_daily": "401.32",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596438",
+          "activity_daily": "661.50",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597431",
+          "activity_daily": "2286.54",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597432",
+          "activity_daily": "444.67",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597433",
+          "activity_daily": "43.16",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597434",
+          "activity_daily": "26.00",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597435",
+          "activity_daily": "98.49",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597436",
+          "activity_daily": "192.26",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597437",
+          "activity_daily": "799.35",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597438",
+          "activity_daily": "1076.54",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598432",
+          "activity_daily": "1847.89",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598433",
+          "activity_daily": "226.96",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598434",
+          "activity_daily": "35.77",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598435",
+          "activity_daily": "60.39",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598436",
+          "activity_daily": "317.47",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598437",
+          "activity_daily": "1866.53",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598438",
+          "activity_daily": "1883.02",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598439",
+          "activity_daily": "2170.90",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599432",
+          "activity_daily": "2159.26",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599433",
+          "activity_daily": "1025.58",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599434",
+          "activity_daily": "51.40",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599435",
+          "activity_daily": "41.93",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599436",
+          "activity_daily": "296.90",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599437",
+          "activity_daily": "2722.03",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599438",
+          "activity_daily": "2986.11",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600433",
+          "activity_daily": "964.99",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600434",
+          "activity_daily": "105.73",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600435",
+          "activity_daily": "150.96",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600436",
+          "activity_daily": "486.73",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601433",
+          "activity_daily": "1474.99",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601434",
+          "activity_daily": "487.50",
+          "updated_at": "2026-11-03T09:44:38.802113"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586432",
+          "activity_daily": "1182.27",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586433",
+          "activity_daily": "2734.98",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586434",
+          "activity_daily": "11270.09",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587429",
+          "activity_daily": "2605.68",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587430",
+          "activity_daily": "3224.96",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587431",
+          "activity_daily": "3912.10",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587432",
+          "activity_daily": "899.21",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587433",
+          "activity_daily": "817.68",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587434",
+          "activity_daily": "2904.45",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588429",
+          "activity_daily": "4415.35",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588430",
+          "activity_daily": "4027.37",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588431",
+          "activity_daily": "1193.65",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588432",
+          "activity_daily": "479.93",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588433",
+          "activity_daily": "534.86",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588434",
+          "activity_daily": "1052.24",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588435",
+          "activity_daily": "3811.84",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589429",
+          "activity_daily": "6074.54",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589430",
+          "activity_daily": "4630.10",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589431",
+          "activity_daily": "1633.24",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589432",
+          "activity_daily": "784.54",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589433",
+          "activity_daily": "511.89",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589434",
+          "activity_daily": "393.00",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589435",
+          "activity_daily": "1906.84",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590429",
+          "activity_daily": "4588.64",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590430",
+          "activity_daily": "3933.43",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590431",
+          "activity_daily": "1725.01",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590432",
+          "activity_daily": "436.88",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590433",
+          "activity_daily": "323.60",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590434",
+          "activity_daily": "229.18",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590435",
+          "activity_daily": "550.56",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591430",
+          "activity_daily": "4069.64",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591431",
+          "activity_daily": "1370.63",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591432",
+          "activity_daily": "370.90",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591433",
+          "activity_daily": "91.51",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591434",
+          "activity_daily": "76.56",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591435",
+          "activity_daily": "221.32",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591436",
+          "activity_daily": "1354.72",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592430",
+          "activity_daily": "1954.93",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592431",
+          "activity_daily": "1193.25",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592432",
+          "activity_daily": "370.67",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592433",
+          "activity_daily": "318.99",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592434",
+          "activity_daily": "301.25",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592435",
+          "activity_daily": "254.35",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592436",
+          "activity_daily": "1449.96",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593430",
+          "activity_daily": "2372.64",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593431",
+          "activity_daily": "283.63",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593432",
+          "activity_daily": "407.35",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593433",
+          "activity_daily": "488.83",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593434",
+          "activity_daily": "428.82",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593435",
+          "activity_daily": "237.71",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593436",
+          "activity_daily": "682.24",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593437",
+          "activity_daily": "4946.47",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594430",
+          "activity_daily": "1912.12",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594431",
+          "activity_daily": "241.37",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594432",
+          "activity_daily": "143.97",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594433",
+          "activity_daily": "347.50",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594434",
+          "activity_daily": "560.71",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594435",
+          "activity_daily": "241.11",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594436",
+          "activity_daily": "394.39",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594437",
+          "activity_daily": "2766.31",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595430",
+          "activity_daily": "1442.15",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595431",
+          "activity_daily": "23.89",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595432",
+          "activity_daily": "34.61",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595433",
+          "activity_daily": "65.07",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595434",
+          "activity_daily": "39.85",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595435",
+          "activity_daily": "34.94",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595436",
+          "activity_daily": "73.09",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595437",
+          "activity_daily": "814.36",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596431",
+          "activity_daily": "329.00",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596432",
+          "activity_daily": "87.62",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596433",
+          "activity_daily": "16.89",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596434",
+          "activity_daily": "16.72",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596435",
+          "activity_daily": "73.30",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596436",
+          "activity_daily": "109.26",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596437",
+          "activity_daily": "392.46",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596438",
+          "activity_daily": "671.75",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597431",
+          "activity_daily": "2228.60",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597432",
+          "activity_daily": "447.91",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597433",
+          "activity_daily": "48.52",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597434",
+          "activity_daily": "25.60",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597435",
+          "activity_daily": "89.27",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597436",
+          "activity_daily": "180.30",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597437",
+          "activity_daily": "787.90",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597438",
+          "activity_daily": "995.16",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598432",
+          "activity_daily": "1677.48",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598433",
+          "activity_daily": "232.52",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598434",
+          "activity_daily": "39.39",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598435",
+          "activity_daily": "57.11",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598436",
+          "activity_daily": "280.56",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598437",
+          "activity_daily": "1715.34",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598438",
+          "activity_daily": "1735.30",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598439",
+          "activity_daily": "2060.84",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599432",
+          "activity_daily": "2030.37",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599433",
+          "activity_daily": "980.05",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599434",
+          "activity_daily": "48.46",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599435",
+          "activity_daily": "40.02",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599436",
+          "activity_daily": "272.29",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599437",
+          "activity_daily": "2472.96",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599438",
+          "activity_daily": "2786.56",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600433",
+          "activity_daily": "925.52",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600434",
+          "activity_daily": "102.95",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600435",
+          "activity_daily": "150.30",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600436",
+          "activity_daily": "445.96",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601433",
+          "activity_daily": "1437.82",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601434",
+          "activity_daily": "513.15",
+          "updated_at": "2026-11-03T09:44:44.667499"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586432",
+          "activity_daily": "1323.32",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586433",
+          "activity_daily": "3020.85",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586434",
+          "activity_daily": "12226.11",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587429",
+          "activity_daily": "2774.05",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587430",
+          "activity_daily": "3592.20",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587431",
+          "activity_daily": "4393.06",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587432",
+          "activity_daily": "1022.88",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587433",
+          "activity_daily": "856.63",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587434",
+          "activity_daily": "3206.98",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588429",
+          "activity_daily": "4689.02",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588430",
+          "activity_daily": "4242.17",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588431",
+          "activity_daily": "1248.98",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588432",
+          "activity_daily": "514.96",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588433",
+          "activity_daily": "568.00",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588434",
+          "activity_daily": "1148.51",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588435",
+          "activity_daily": "4251.41",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589429",
+          "activity_daily": "6546.37",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589430",
+          "activity_daily": "4987.09",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589431",
+          "activity_daily": "1785.14",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589432",
+          "activity_daily": "834.70",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589433",
+          "activity_daily": "558.90",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589434",
+          "activity_daily": "433.82",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589435",
+          "activity_daily": "2056.33",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590429",
+          "activity_daily": "5497.07",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590430",
+          "activity_daily": "4229.75",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590431",
+          "activity_daily": "1856.41",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590432",
+          "activity_daily": "478.55",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590433",
+          "activity_daily": "340.49",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590434",
+          "activity_daily": "250.29",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590435",
+          "activity_daily": "578.77",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591430",
+          "activity_daily": "4225.40",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591431",
+          "activity_daily": "1456.86",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591432",
+          "activity_daily": "384.19",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591433",
+          "activity_daily": "82.87",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591434",
+          "activity_daily": "72.91",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591435",
+          "activity_daily": "220.33",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591436",
+          "activity_daily": "1500.82",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592430",
+          "activity_daily": "2078.14",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592431",
+          "activity_daily": "1236.90",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592432",
+          "activity_daily": "362.47",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592433",
+          "activity_daily": "316.18",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592434",
+          "activity_daily": "296.26",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592435",
+          "activity_daily": "263.73",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592436",
+          "activity_daily": "1552.51",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593430",
+          "activity_daily": "2549.24",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593431",
+          "activity_daily": "277.92",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593432",
+          "activity_daily": "413.69",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593433",
+          "activity_daily": "486.21",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593434",
+          "activity_daily": "439.36",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593435",
+          "activity_daily": "236.06",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593436",
+          "activity_daily": "700.00",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593437",
+          "activity_daily": "5188.92",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594430",
+          "activity_daily": "2089.88",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594431",
+          "activity_daily": "245.16",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594432",
+          "activity_daily": "141.34",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594433",
+          "activity_daily": "378.91",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594434",
+          "activity_daily": "599.02",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594435",
+          "activity_daily": "233.88",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594436",
+          "activity_daily": "401.81",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594437",
+          "activity_daily": "2973.41",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595430",
+          "activity_daily": "1531.95",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595431",
+          "activity_daily": "23.49",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595432",
+          "activity_daily": "34.24",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595433",
+          "activity_daily": "68.12",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595434",
+          "activity_daily": "41.26",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595435",
+          "activity_daily": "33.46",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595436",
+          "activity_daily": "71.77",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595437",
+          "activity_daily": "893.97",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596431",
+          "activity_daily": "333.23",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596432",
+          "activity_daily": "87.03",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596433",
+          "activity_daily": "16.54",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596434",
+          "activity_daily": "16.78",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596435",
+          "activity_daily": "79.77",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596436",
+          "activity_daily": "118.94",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596437",
+          "activity_daily": "429.31",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596438",
+          "activity_daily": "700.11",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597431",
+          "activity_daily": "2200.59",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597432",
+          "activity_daily": "438.27",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597433",
+          "activity_daily": "43.66",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597434",
+          "activity_daily": "23.93",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597435",
+          "activity_daily": "96.71",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597436",
+          "activity_daily": "190.41",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597437",
+          "activity_daily": "818.60",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597438",
+          "activity_daily": "1018.35",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598432",
+          "activity_daily": "1713.48",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598433",
+          "activity_daily": "215.39",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598434",
+          "activity_daily": "36.16",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598435",
+          "activity_daily": "56.72",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598436",
+          "activity_daily": "286.22",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598437",
+          "activity_daily": "1790.75",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598438",
+          "activity_daily": "1847.83",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598439",
+          "activity_daily": "2172.25",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599432",
+          "activity_daily": "2015.20",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599433",
+          "activity_daily": "941.45",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599434",
+          "activity_daily": "45.59",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599435",
+          "activity_daily": "38.08",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599436",
+          "activity_daily": "277.48",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599437",
+          "activity_daily": "2609.78",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599438",
+          "activity_daily": "2923.52",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600433",
+          "activity_daily": "928.83",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600434",
+          "activity_daily": "101.16",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600435",
+          "activity_daily": "143.89",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600436",
+          "activity_daily": "463.76",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601433",
+          "activity_daily": "1475.96",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601434",
+          "activity_daily": "478.29",
+          "updated_at": "2026-11-03T09:44:54.139747"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586432",
+          "activity_daily": "1250.36",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586433",
+          "activity_daily": "2958.55",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586434",
+          "activity_daily": "12040.18",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587429",
+          "activity_daily": "2655.93",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587430",
+          "activity_daily": "3517.61",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587431",
+          "activity_daily": "4288.06",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587432",
+          "activity_daily": "994.10",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587433",
+          "activity_daily": "759.97",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587434",
+          "activity_daily": "3085.26",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588429",
+          "activity_daily": "4361.89",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588430",
+          "activity_daily": "4083.65",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588431",
+          "activity_daily": "1195.15",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588432",
+          "activity_daily": "492.92",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588433",
+          "activity_daily": "587.36",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588434",
+          "activity_daily": "1098.15",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588435",
+          "activity_daily": "4136.75",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589429",
+          "activity_daily": "5930.48",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589430",
+          "activity_daily": "4817.99",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589431",
+          "activity_daily": "1854.64",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589432",
+          "activity_daily": "890.66",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589433",
+          "activity_daily": "576.36",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589434",
+          "activity_daily": "456.10",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589435",
+          "activity_daily": "1971.33",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590429",
+          "activity_daily": "5519.78",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590430",
+          "activity_daily": "4301.95",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590431",
+          "activity_daily": "1920.25",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590432",
+          "activity_daily": "488.99",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590433",
+          "activity_daily": "347.45",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590434",
+          "activity_daily": "236.20",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590435",
+          "activity_daily": "552.39",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591430",
+          "activity_daily": "4232.40",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591431",
+          "activity_daily": "1451.67",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591432",
+          "activity_daily": "390.51",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591433",
+          "activity_daily": "79.56",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591434",
+          "activity_daily": "69.44",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591435",
+          "activity_daily": "209.44",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591436",
+          "activity_daily": "1515.80",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592430",
+          "activity_daily": "2105.11",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592431",
+          "activity_daily": "1231.90",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592432",
+          "activity_daily": "350.13",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592433",
+          "activity_daily": "305.07",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592434",
+          "activity_daily": "295.40",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592435",
+          "activity_daily": "258.73",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592436",
+          "activity_daily": "1493.50",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593430",
+          "activity_daily": "2617.42",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593431",
+          "activity_daily": "283.78",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593432",
+          "activity_daily": "423.95",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593433",
+          "activity_daily": "480.50",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593434",
+          "activity_daily": "434.17",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593435",
+          "activity_daily": "232.00",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593436",
+          "activity_daily": "692.08",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593437",
+          "activity_daily": "5211.55",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594430",
+          "activity_daily": "2150.70",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594431",
+          "activity_daily": "245.91",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594432",
+          "activity_daily": "140.32",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594433",
+          "activity_daily": "373.16",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594434",
+          "activity_daily": "614.42",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594435",
+          "activity_daily": "226.54",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594436",
+          "activity_daily": "394.47",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594437",
+          "activity_daily": "3016.09",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595430",
+          "activity_daily": "1556.21",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595431",
+          "activity_daily": "24.13",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595432",
+          "activity_daily": "36.86",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595433",
+          "activity_daily": "79.71",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595434",
+          "activity_daily": "44.99",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595435",
+          "activity_daily": "31.43",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595436",
+          "activity_daily": "75.97",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595437",
+          "activity_daily": "894.57",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596431",
+          "activity_daily": "331.91",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596432",
+          "activity_daily": "90.69",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596433",
+          "activity_daily": "19.75",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596434",
+          "activity_daily": "19.78",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596435",
+          "activity_daily": "86.41",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596436",
+          "activity_daily": "115.24",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596437",
+          "activity_daily": "441.70",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596438",
+          "activity_daily": "688.58",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597431",
+          "activity_daily": "2054.86",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597432",
+          "activity_daily": "407.28",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597433",
+          "activity_daily": "43.15",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597434",
+          "activity_daily": "25.92",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597435",
+          "activity_daily": "107.94",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597436",
+          "activity_daily": "203.69",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597437",
+          "activity_daily": "873.13",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597438",
+          "activity_daily": "996.72",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598432",
+          "activity_daily": "1606.33",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598433",
+          "activity_daily": "190.43",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598434",
+          "activity_daily": "36.36",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598435",
+          "activity_daily": "59.86",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598436",
+          "activity_daily": "304.56",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598437",
+          "activity_daily": "1818.34",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598438",
+          "activity_daily": "1815.27",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598439",
+          "activity_daily": "2138.14",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599432",
+          "activity_daily": "1923.91",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599433",
+          "activity_daily": "800.02",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599434",
+          "activity_daily": "36.96",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599435",
+          "activity_daily": "44.55",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599436",
+          "activity_daily": "285.89",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599437",
+          "activity_daily": "2679.86",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599438",
+          "activity_daily": "2973.09",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600433",
+          "activity_daily": "961.08",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600434",
+          "activity_daily": "98.42",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600435",
+          "activity_daily": "140.62",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600436",
+          "activity_daily": "480.54",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601433",
+          "activity_daily": "1558.61",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601434",
+          "activity_daily": "464.82",
+          "updated_at": "2026-11-03T09:45:02.451376"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586432",
+          "activity_daily": "1280.92",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586433",
+          "activity_daily": "2969.71",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586434",
+          "activity_daily": "12242.51",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587429",
+          "activity_daily": "2724.08",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587430",
+          "activity_daily": "3558.32",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587431",
+          "activity_daily": "4528.62",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587432",
+          "activity_daily": "1015.40",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587433",
+          "activity_daily": "819.90",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587434",
+          "activity_daily": "3217.61",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588429",
+          "activity_daily": "4497.82",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588430",
+          "activity_daily": "4235.81",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588431",
+          "activity_daily": "1250.18",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588432",
+          "activity_daily": "521.21",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588433",
+          "activity_daily": "551.88",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588434",
+          "activity_daily": "1144.13",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588435",
+          "activity_daily": "4277.16",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589429",
+          "activity_daily": "5967.43",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589430",
+          "activity_daily": "4949.95",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589431",
+          "activity_daily": "1829.24",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589432",
+          "activity_daily": "808.93",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589433",
+          "activity_daily": "515.59",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589434",
+          "activity_daily": "434.80",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589435",
+          "activity_daily": "1995.06",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590429",
+          "activity_daily": "5474.74",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590430",
+          "activity_daily": "4204.35",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590431",
+          "activity_daily": "1765.55",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590432",
+          "activity_daily": "461.01",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590433",
+          "activity_daily": "331.99",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590434",
+          "activity_daily": "242.60",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590435",
+          "activity_daily": "586.20",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591430",
+          "activity_daily": "4218.17",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591431",
+          "activity_daily": "1422.36",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591432",
+          "activity_daily": "388.41",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591433",
+          "activity_daily": "92.24",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591434",
+          "activity_daily": "80.49",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591435",
+          "activity_daily": "236.09",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591436",
+          "activity_daily": "1503.32",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592430",
+          "activity_daily": "2091.01",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592431",
+          "activity_daily": "1250.36",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592432",
+          "activity_daily": "383.93",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592433",
+          "activity_daily": "336.70",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592434",
+          "activity_daily": "319.26",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592435",
+          "activity_daily": "268.99",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592436",
+          "activity_daily": "1564.33",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593430",
+          "activity_daily": "2545.27",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593431",
+          "activity_daily": "296.16",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593432",
+          "activity_daily": "423.89",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593433",
+          "activity_daily": "523.48",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593434",
+          "activity_daily": "452.04",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593435",
+          "activity_daily": "250.42",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593436",
+          "activity_daily": "733.58",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593437",
+          "activity_daily": "5405.39",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594430",
+          "activity_daily": "2078.92",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594431",
+          "activity_daily": "271.32",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594432",
+          "activity_daily": "154.93",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594433",
+          "activity_daily": "388.72",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594434",
+          "activity_daily": "618.07",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594435",
+          "activity_daily": "262.49",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594436",
+          "activity_daily": "443.61",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594437",
+          "activity_daily": "2970.68",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595430",
+          "activity_daily": "1589.60",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595431",
+          "activity_daily": "22.51",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595432",
+          "activity_daily": "33.52",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595433",
+          "activity_daily": "64.34",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595434",
+          "activity_daily": "39.72",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595435",
+          "activity_daily": "37.51",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595436",
+          "activity_daily": "79.83",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595437",
+          "activity_daily": "920.50",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596431",
+          "activity_daily": "335.36",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596432",
+          "activity_daily": "97.03",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596433",
+          "activity_daily": "18.06",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596434",
+          "activity_daily": "17.63",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596435",
+          "activity_daily": "75.00",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596436",
+          "activity_daily": "114.46",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596437",
+          "activity_daily": "435.33",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596438",
+          "activity_daily": "711.24",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597431",
+          "activity_daily": "2140.07",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597432",
+          "activity_daily": "441.48",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597433",
+          "activity_daily": "50.34",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597434",
+          "activity_daily": "25.42",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597435",
+          "activity_daily": "96.10",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597436",
+          "activity_daily": "206.35",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597437",
+          "activity_daily": "771.41",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597438",
+          "activity_daily": "975.51",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598432",
+          "activity_daily": "1554.80",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598433",
+          "activity_daily": "216.93",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598434",
+          "activity_daily": "40.69",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598435",
+          "activity_daily": "55.14",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598436",
+          "activity_daily": "267.17",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598437",
+          "activity_daily": "1643.46",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598438",
+          "activity_daily": "1662.86",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598439",
+          "activity_daily": "2102.60",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599432",
+          "activity_daily": "1848.84",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599433",
+          "activity_daily": "792.46",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599434",
+          "activity_daily": "41.61",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599435",
+          "activity_daily": "43.82",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599436",
+          "activity_daily": "254.19",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599437",
+          "activity_daily": "2518.04",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599438",
+          "activity_daily": "2777.32",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600433",
+          "activity_daily": "918.01",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600434",
+          "activity_daily": "92.87",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600435",
+          "activity_daily": "143.85",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600436",
+          "activity_daily": "448.08",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601433",
+          "activity_daily": "1505.77",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601434",
+          "activity_daily": "522.06",
+          "updated_at": "2026-11-03T09:45:10.894214"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586432",
+          "activity_daily": "1282.17",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586433",
+          "activity_daily": "2931.54",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사586434",
+          "activity_daily": "12058.72",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587429",
+          "activity_daily": "2579.23",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587430",
+          "activity_daily": "3512.00",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587431",
+          "activity_daily": "4464.85",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587432",
+          "activity_daily": "1010.61",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587433",
+          "activity_daily": "834.81",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사587434",
+          "activity_daily": "3114.12",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588429",
+          "activity_daily": "4306.84",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588430",
+          "activity_daily": "4053.29",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588431",
+          "activity_daily": "1223.92",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588432",
+          "activity_daily": "496.99",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588433",
+          "activity_daily": "535.06",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588434",
+          "activity_daily": "1165.89",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사588435",
+          "activity_daily": "4237.77",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589429",
+          "activity_daily": "5764.57",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589430",
+          "activity_daily": "4906.88",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589431",
+          "activity_daily": "1728.43",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589432",
+          "activity_daily": "801.51",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589433",
+          "activity_daily": "517.70",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589434",
+          "activity_daily": "428.88",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사589435",
+          "activity_daily": "1971.66",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590429",
+          "activity_daily": "5404.12",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590430",
+          "activity_daily": "4046.39",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590431",
+          "activity_daily": "1703.02",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590432",
+          "activity_daily": "440.65",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590433",
+          "activity_daily": "311.26",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590434",
+          "activity_daily": "232.36",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사590435",
+          "activity_daily": "551.63",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591430",
+          "activity_daily": "4061.23",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591431",
+          "activity_daily": "1400.79",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591432",
+          "activity_daily": "359.31",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591433",
+          "activity_daily": "72.60",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591434",
+          "activity_daily": "63.49",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591435",
+          "activity_daily": "206.74",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사591436",
+          "activity_daily": "1465.25",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592430",
+          "activity_daily": "2000.90",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592431",
+          "activity_daily": "1149.29",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592432",
+          "activity_daily": "328.86",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592433",
+          "activity_daily": "286.65",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592434",
+          "activity_daily": "281.06",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592435",
+          "activity_daily": "249.83",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사592436",
+          "activity_daily": "1490.62",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593430",
+          "activity_daily": "2504.47",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593431",
+          "activity_daily": "250.37",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593432",
+          "activity_daily": "371.42",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593433",
+          "activity_daily": "445.28",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593434",
+          "activity_daily": "409.27",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593435",
+          "activity_daily": "219.06",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593436",
+          "activity_daily": "657.17",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사593437",
+          "activity_daily": "5150.90",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594430",
+          "activity_daily": "1991.05",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594431",
+          "activity_daily": "230.52",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594432",
+          "activity_daily": "127.77",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594433",
+          "activity_daily": "373.15",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594434",
+          "activity_daily": "579.24",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594435",
+          "activity_daily": "219.29",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594436",
+          "activity_daily": "394.11",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사594437",
+          "activity_daily": "2866.77",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595430",
+          "activity_daily": "1497.35",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595431",
+          "activity_daily": "19.97",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595432",
+          "activity_daily": "29.74",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595433",
+          "activity_daily": "61.42",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595434",
+          "activity_daily": "38.83",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595435",
+          "activity_daily": "31.35",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595436",
+          "activity_daily": "66.83",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사595437",
+          "activity_daily": "901.47",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596431",
+          "activity_daily": "333.00",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596432",
+          "activity_daily": "81.75",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596433",
+          "activity_daily": "15.53",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596434",
+          "activity_daily": "14.79",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596435",
+          "activity_daily": "75.51",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596436",
+          "activity_daily": "115.96",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596437",
+          "activity_daily": "423.50",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사596438",
+          "activity_daily": "676.91",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597431",
+          "activity_daily": "2045.70",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597432",
+          "activity_daily": "371.50",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597433",
+          "activity_daily": "41.38",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597434",
+          "activity_daily": "21.14",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597435",
+          "activity_daily": "91.28",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597436",
+          "activity_daily": "202.21",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597437",
+          "activity_daily": "765.17",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사597438",
+          "activity_daily": "947.17",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598432",
+          "activity_daily": "1487.86",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598433",
+          "activity_daily": "181.84",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598434",
+          "activity_daily": "31.79",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598435",
+          "activity_daily": "51.22",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598436",
+          "activity_daily": "275.90",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598437",
+          "activity_daily": "1640.86",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598438",
+          "activity_daily": "1644.55",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사598439",
+          "activity_daily": "2036.80",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599432",
+          "activity_daily": "1801.65",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599433",
+          "activity_daily": "703.57",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599434",
+          "activity_daily": "37.40",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599435",
+          "activity_daily": "38.54",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599436",
+          "activity_daily": "258.24",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599437",
+          "activity_daily": "2499.59",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사599438",
+          "activity_daily": "2784.32",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600433",
+          "activity_daily": "864.90",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600434",
+          "activity_daily": "83.18",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600435",
+          "activity_daily": "125.83",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사600436",
+          "activity_daily": "449.60",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601433",
+          "activity_daily": "1466.20",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "grid_cd": "다사601434",
+          "activity_daily": "439.87",
+          "updated_at": "2026-11-03T09:45:19.229687"
+        }
+      ],
+      "query_result_sha256": "9d62e5e99f70cc1291375e03616600613080efb253c4bb03405e8833e03685aa"
+    },
+    "grid_activity_summary": {
+      "sql": "SELECT b.period_start,count(*) AS row_count,count(b.activity_daily) AS nonnull_activity_count,min(b.activity_daily) AS minimum,max(b.activity_daily) AS maximum,sum(b.activity_daily) AS total,avg(b.activity_daily) AS mean FROM analysis.bh_grid_indicator b JOIN analysis.dim_grid100 g USING(grid_cd) WHERE g.adm_cd10=%s AND b.period_start BETWEEN %s AND %s GROUP BY b.period_start ORDER BY b.period_start",
+      "parameters": [
+        "1168065500",
+        "2025-07-01",
+        "2025-12-01"
+      ],
+      "row_count": 6,
+      "rows": [
+        {
+          "period_start": "2025-07-01",
+          "row_count": 105,
+          "nonnull_activity_count": 105,
+          "minimum": "16.99",
+          "maximum": "12206.46",
+          "total": "139904.65",
+          "mean": "1332.4252380952380952"
+        },
+        {
+          "period_start": "2025-08-01",
+          "row_count": 105,
+          "nonnull_activity_count": 105,
+          "minimum": "16.72",
+          "maximum": "11270.09",
+          "total": "131675.13",
+          "mean": "1254.0488571428571429"
+        },
+        {
+          "period_start": "2025-09-01",
+          "row_count": 105,
+          "nonnull_activity_count": 105,
+          "minimum": "16.54",
+          "maximum": "12226.11",
+          "total": "140789.47",
+          "mean": "1340.8520952380952381"
+        },
+        {
+          "period_start": "2025-10-01",
+          "row_count": 105,
+          "nonnull_activity_count": 105,
+          "minimum": "19.75",
+          "maximum": "12040.18",
+          "total": "138564.46",
+          "mean": "1319.6615238095238095"
+        },
+        {
+          "period_start": "2025-11-01",
+          "row_count": 105,
+          "nonnull_activity_count": 105,
+          "minimum": "17.63",
+          "maximum": "12242.51",
+          "total": "139126.22",
+          "mean": "1325.0116190476190476"
+        },
+        {
+          "period_start": "2025-12-01",
+          "row_count": 105,
+          "nonnull_activity_count": 105,
+          "minimum": "14.79",
+          "maximum": "12058.72",
+          "total": "134596.50",
+          "mean": "1281.8714285714285714"
+        }
+      ],
+      "query_result_sha256": "4d1f4ae7ccab180c277b8d416b346b3383988e4b34b9711b587114393c1f0414"
+    },
+    "flow_table_coverage": {
+      "sql": "SELECT count(*) AS row_count,min(period_start) AS first_month,max(period_start) AS last_month,count(DISTINCT grid_cd) AS grid_count FROM analysis.flow_detail",
+      "parameters": [],
+      "row_count": 1,
+      "rows": [
+        {
+          "row_count": 0,
+          "first_month": null,
+          "last_month": null,
+          "grid_count": 0
+        }
+      ],
+      "query_result_sha256": "ead2670a3f53860fd04df049a50c85cce4ac472095d76138cb2a72fd87493d81"
+    },
+    "flow_target_coverage": {
+      "sql": "SELECT f.period_start,f.dim_type,count(*) AS row_count,count(DISTINCT f.grid_cd) AS grid_count FROM analysis.flow_detail f JOIN analysis.dim_grid100 g USING(grid_cd) WHERE g.adm_cd10=%s AND f.period_start BETWEEN %s AND %s GROUP BY f.period_start,f.dim_type ORDER BY f.period_start,f.dim_type",
+      "parameters": [
+        "1168065500",
+        "2025-07-01",
+        "2025-12-01"
+      ],
+      "row_count": 0,
+      "rows": [],
+      "query_result_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "target_grid_mapping": {
+      "sql": "SELECT count(*) AS grid_count FROM analysis.dim_grid100 WHERE adm_cd10=%s",
+      "parameters": [
+        "1168065500"
+      ],
+      "row_count": 1,
+      "rows": [
+        {
+          "grid_count": 108
+        }
+      ],
+      "query_result_sha256": "55ad5c274f135af03c0c7a990331da11121a59c259bb8c92370f7c304efdb212"
+    },
+    "activity_hourly_mean": {
+      "sql": "SELECT period_start,adm_cd10,activity_daily,activity_daily/24.0 AS activity_hourly_mean,updated_at FROM analysis.bh_region_indicator WHERE adm_cd10=%s AND period_start BETWEEN %s AND %s ORDER BY period_start",
+      "parameters": [
+        "1168065500",
+        "2025-07-01",
+        "2025-12-01"
+      ],
+      "captured_at": "2026-11-13T01:20:28.564952+00:00",
+      "transaction": {
+        "database": "eumi",
+        "read_only": "on",
+        "isolation": "repeatable read",
+        "transaction_at": "2026-11-13T10:20:28.550984+09:00"
+      },
+      "row_count": 6,
+      "rows": [
+        {
+          "period_start": "2025-07-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "139904.65",
+          "activity_hourly_mean": "5829.3604166666666667",
+          "updated_at": "2026-11-03T09:45:30.560791"
+        },
+        {
+          "period_start": "2025-08-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "131675.13",
+          "activity_hourly_mean": "5486.4637500000000000",
+          "updated_at": "2026-11-03T09:45:34.139278"
+        },
+        {
+          "period_start": "2025-09-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "140789.47",
+          "activity_hourly_mean": "5866.2279166666666667",
+          "updated_at": "2026-11-03T09:45:41.015466"
+        },
+        {
+          "period_start": "2025-10-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "138564.46",
+          "activity_hourly_mean": "5773.5191666666666667",
+          "updated_at": "2026-11-03T09:45:48.170583"
+        },
+        {
+          "period_start": "2025-11-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "139126.22",
+          "activity_hourly_mean": "5796.9258333333333333",
+          "updated_at": "2026-11-03T09:45:55.896242"
+        },
+        {
+          "period_start": "2025-12-01",
+          "adm_cd10": "1168065500",
+          "activity_daily": "134596.50",
+          "activity_hourly_mean": "5608.1875000000000000",
+          "updated_at": "2026-11-03T09:46:03.421050"
+        }
+      ],
+      "query_result_sha256": "8594398f43023adbdfc0bda3bf23e9bf43828336e4df4a6de30e1cda5f6db214",
+      "calculation_definition": "저장된 activity_daily는 각 시간대 일평균값 24개의 합계다. SQL에서 24.0으로 나눠 V07 정의의 시간대별 일평균값 평균을 구한다. 조회한 합계와 평균을 Decimal로 나눠 SQL 반환 소수자리에서 일치함을 검증했다. 시간대별 원값을 재구성한 것은 아니다.",
+      "definition_completeness": "common/bh_indicators.py의 H는00~23, indicators는cur[H]의NumPy sum(axis=1)을사용한다. 누락시간대가NaN이면합계도NaN이므로현재저장된nonnull합계는정의상24개시간대값의합계다. 동별값은region_means에서시간대별격자합을구한뒤동일함수로계산한다. 이번에원본flow_detail의개별시간대완전성을독립검증한것은아니다."
+    }
+  },
+  "flow_zero_diagnosis": {
+    "observed": "전체 flow_detail 0행, 대상 동 격자 매핑 존재. 대상 월 필터나 조인으로만 생긴 0행이 아니다.",
+    "documented_transfer_policy": "data/README.md 서버 DB 반영 및 ops/make_seed.py: flow_detail는 약760만행·500MB여서 seed에서 제외하고 별도 dump로 이관한다.",
+    "inference": "기존 결과·원지표 seed만 있고 활동 상세 dump가 없는 상태와 일치한다. 이 DB에서 누가 언제 상세를 적재·삭제했는지는 확인하지 않았다.",
+    "original_snapshot": "기존 nodes 스냅샷도 2026-11-11에 동일 자료원을 2025-08~12 조건으로 조회해 0행을 보존했다."
+  },
+  "local_source_availability": {
+    "data_raw_exists": false,
+    "data_processed_exists": false,
+    "documented_raw_files": [
+      "data/raw/skt_flow_time/flow_time_pop_202507_202512.xlsx",
+      "data/raw/skt_flow_wkdy/flow_wkdy_pop_202507_202512.xlsx",
+      "data/raw/skt_flow_age/flow_age_pop_202507_202512.csv",
+      "data/raw/skt_cohort/2025-07_2025-12/skt_cohort_50m.csv"
+    ],
+    "documented_object_paths": [
+      "sgi/raw/skt_flow_time/",
+      "sgi/raw/skt_flow_wkdy/",
+      "sgi/raw/skt_flow_age/",
+      "sgi/raw/skt_cohort/",
+      "sgi/synth/anchor/period=2025-11.parquet",
+      "sgi/synth/anchor/period=2025-12.parquet"
+    ],
+    "minio_check": "설정된 endpoint에 TCP 연결을 시도했으나 ConnectionRefusedError. 저장 객체 유무는 확인하지 못했다.",
+    "pipeline_database": "infra/.env의 PIPELINE_DB_DSN과 서비스 DB의 host/port/dbname이 같음을 비밀 원문 출력 없이 확인했다."
+  },
+  "limitations": [
+    "원지표와 총활동 지표의 실제 DB 저장값이다. 이번 조회가 원시 이동통신 관측의 수집·품질을 검증한 것은 아니다.",
+    "data/README.md에 따르면 시간 단위 유동은 SKT 월평균을 보존하도록 생성되며, 생성기 성연령×시간대 초기 가중은 해석용 관측 근거가 아니다.",
+    "남녀 각각 활동량, 24시간대별 원값, 7요일별 원값은 이번 DB에서 확보하지 못했다. 비율이나 기여도를 이용해 원값을 역산하지 않았다.",
+    "서비스 DB·기존 스냅샷·시나리오·런타임 코드는 변경하지 않았다. 새 증거 JSON 한 파일만 작성했다."
+  ]
+}

@@ -1,0 +1,4060 @@
+{
+  "id": "basic-interpretation-new_topic",
+  "title": "데이터 분석 결과 해석 · 이전과 다른 새 주제",
+  "event": "user_request",
+  "family": "basic-interpretation",
+  "axes": {
+    "conversation_condition": "new_topic"
+  },
+  "source_groups": [],
+  "steps": [
+    {
+      "step_id": "s001",
+      "node": "interpret",
+      "role": "interpretation",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "constraints": {
+            "required": [
+              "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+              "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [],
+        "response": null,
+        "execution": {
+          "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+          "event": "user_request",
+          "status": "queued",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 3,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "entry",
+        "from_step": null
+      },
+      "model_outputs": [
+        {
+          "request": {
+            "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "constraints": {
+              "required": [
+                "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다."
+        }
+      ],
+      "case_id": "path-interpret-eb17a804a70ee3692f52",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "constraints": {
+            "required": [
+              "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+              "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "0ca59ec5752f58638c452b521375997e",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                    "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 4,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "decide"
+      ],
+      "input_ref": "interpret.json#/cases/8/initial",
+      "expectation_ref": "interpret.json#/cases/8/assessment"
+    },
+    {
+      "step_id": "s002",
+      "node": "decide",
+      "role": "interpretation",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "constraints": {
+            "required": [
+              "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+              "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "0ca59ec5752f58638c452b521375997e",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                    "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 4,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s001"
+      },
+      "model_outputs": [
+        {
+          "next": "act",
+          "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다."
+        }
+      ],
+      "case_id": "path-decide-964c1b3f6103a12e43aa",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "constraints": {
+            "required": [
+              "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+              "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "0ca59ec5752f58638c452b521375997e",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                    "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "2419a18f615f5027b2423d0a0711034f",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 5,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "act"
+      ],
+      "input_ref": "decide.json#/cases/21/initial",
+      "expectation_ref": "decide.json#/cases/21/assessment"
+    },
+    {
+      "step_id": "s003",
+      "node": "act",
+      "role": "interpretation",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "constraints": {
+            "required": [
+              "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+              "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "0ca59ec5752f58638c452b521375997e",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                    "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "2419a18f615f5027b2423d0a0711034f",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 5,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 0,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s002"
+      },
+      "model_outputs": [
+        {
+          "name": "query_data",
+          "arguments_json": "{\"target\": \"public.region_result\", \"filters\": [{\"field\": \"period_start\", \"operator\": \"eq\", \"value\": \"2025-12-01\"}, {\"field\": \"adm_cd10\", \"operator\": \"eq\", \"value\": \"1168065500\"}]}",
+          "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다."
+        }
+      ],
+      "case_id": "path-act-18f62bd4d020f5281e23",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "constraints": {
+            "required": [
+              "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+              "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "0ca59ec5752f58638c452b521375997e",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                    "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "2419a18f615f5027b2423d0a0711034f",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "b39fbc54256b5909819da4cf7e24549d",
+            "node": "act",
+            "decision": "selection",
+            "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+            "action": null,
+            "output": {
+              "name": "query_data",
+              "arguments_json": "{\"target\": \"public.region_result\", \"filters\": [{\"field\": \"period_start\", \"operator\": \"eq\", \"value\": \"2025-12-01\"}, {\"field\": \"adm_cd10\", \"operator\": \"eq\", \"value\": \"1168065500\"}]}",
+              "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "f9e8d99e10b45370a61dfe5457987923",
+            "node": "act",
+            "decision": "call",
+            "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+            "action": {
+              "name": "query_data",
+              "arguments": {
+                "target": "public.region_result",
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "field": "adm_cd10",
+                    "operator": "eq",
+                    "value": "1168065500"
+                  }
+                ]
+              }
+            },
+            "output": {
+              "data": {
+                "reference": {
+                  "id": "derived:3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559",
+                  "version": "3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559"
+                },
+                "as_of": "2026-11-03T10:42:36.824797",
+                "sources": [
+                  {
+                    "label": "파이프라인 읍면동 월별 분석 결과",
+                    "uri": "db://public/region_result"
+                  }
+                ],
+                "columns": [
+                  {
+                    "name": "period_start",
+                    "kind": "string",
+                    "unit": "기준월 첫날",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "adm_cd10",
+                    "kind": "string",
+                    "unit": "행정동코드",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bg_score",
+                    "kind": "number",
+                    "unit": "배경 점수",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bg_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bh_score",
+                    "kind": "number",
+                    "unit": "행동 점수",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bh_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "risk_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "updated_at",
+                    "kind": "string",
+                    "unit": "분석 수정 시각(한국 시간)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  }
+                ],
+                "rows": [
+                  {
+                    "period_start": "2025-12-01",
+                    "adm_cd10": "1168065500",
+                    "bg_score": 7.09,
+                    "bg_grade": 1,
+                    "bh_score": 53.06,
+                    "bh_grade": 2,
+                    "risk_grade": 2,
+                    "updated_at": "2026-11-03T10:42:36.824797"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "id": "public.region_result",
+                    "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9"
+                  }
+                ]
+              },
+              "applied": {
+                "target": "public.region_result",
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "field": "adm_cd10",
+                    "operator": "eq",
+                    "value": "1168065500"
+                  }
+                ],
+                "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9",
+                "as_of": "2026-11-03T10:42:36.824797",
+                "fields": [
+                  "period_start",
+                  "adm_cd10",
+                  "bg_score",
+                  "bg_grade",
+                  "bh_score",
+                  "bh_grade",
+                  "risk_grade",
+                  "updated_at"
+                ],
+                "sort": [],
+                "offset": 0,
+                "limit": 100
+              },
+              "total": 1,
+              "returned": 1,
+              "next_offset": null
+            },
+            "description": "call",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 6,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "decide"
+      ],
+      "input_ref": "act.json#/cases/13/initial",
+      "expectation_ref": "act.json#/cases/13/assessment"
+    },
+    {
+      "step_id": "s004",
+      "node": "decide",
+      "role": "interpretation",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "constraints": {
+            "required": [
+              "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+              "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "0ca59ec5752f58638c452b521375997e",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                    "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "2419a18f615f5027b2423d0a0711034f",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "b39fbc54256b5909819da4cf7e24549d",
+            "node": "act",
+            "decision": "selection",
+            "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+            "action": null,
+            "output": {
+              "name": "query_data",
+              "arguments_json": "{\"target\": \"public.region_result\", \"filters\": [{\"field\": \"period_start\", \"operator\": \"eq\", \"value\": \"2025-12-01\"}, {\"field\": \"adm_cd10\", \"operator\": \"eq\", \"value\": \"1168065500\"}]}",
+              "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "f9e8d99e10b45370a61dfe5457987923",
+            "node": "act",
+            "decision": "call",
+            "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+            "action": {
+              "name": "query_data",
+              "arguments": {
+                "target": "public.region_result",
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "field": "adm_cd10",
+                    "operator": "eq",
+                    "value": "1168065500"
+                  }
+                ]
+              }
+            },
+            "output": {
+              "data": {
+                "reference": {
+                  "id": "derived:3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559",
+                  "version": "3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559"
+                },
+                "as_of": "2026-11-03T10:42:36.824797",
+                "sources": [
+                  {
+                    "label": "파이프라인 읍면동 월별 분석 결과",
+                    "uri": "db://public/region_result"
+                  }
+                ],
+                "columns": [
+                  {
+                    "name": "period_start",
+                    "kind": "string",
+                    "unit": "기준월 첫날",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "adm_cd10",
+                    "kind": "string",
+                    "unit": "행정동코드",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bg_score",
+                    "kind": "number",
+                    "unit": "배경 점수",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bg_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bh_score",
+                    "kind": "number",
+                    "unit": "행동 점수",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bh_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "risk_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "updated_at",
+                    "kind": "string",
+                    "unit": "분석 수정 시각(한국 시간)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  }
+                ],
+                "rows": [
+                  {
+                    "period_start": "2025-12-01",
+                    "adm_cd10": "1168065500",
+                    "bg_score": 7.09,
+                    "bg_grade": 1,
+                    "bh_score": 53.06,
+                    "bh_grade": 2,
+                    "risk_grade": 2,
+                    "updated_at": "2026-11-03T10:42:36.824797"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "id": "public.region_result",
+                    "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9"
+                  }
+                ]
+              },
+              "applied": {
+                "target": "public.region_result",
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "field": "adm_cd10",
+                    "operator": "eq",
+                    "value": "1168065500"
+                  }
+                ],
+                "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9",
+                "as_of": "2026-11-03T10:42:36.824797",
+                "fields": [
+                  "period_start",
+                  "adm_cd10",
+                  "bg_score",
+                  "bg_grade",
+                  "bh_score",
+                  "bh_grade",
+                  "risk_grade",
+                  "updated_at"
+                ],
+                "sort": [],
+                "offset": 0,
+                "limit": 100
+              },
+              "total": 1,
+              "returned": 1,
+              "next_offset": null
+            },
+            "description": "call",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 6,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s003"
+      },
+      "model_outputs": [
+        {
+          "next": "compose",
+          "reason": "요청한 동·현재 월의 실제 행동 이상 점수와 출처가 확보됐다. 전월 비교는 제외했으므로 현재 값과 정의·한계를 설명할 수 있다."
+        }
+      ],
+      "case_id": "path-decide-0b40e117c89b6f76f8c3",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "constraints": {
+            "required": [
+              "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+              "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "0ca59ec5752f58638c452b521375997e",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                    "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "2419a18f615f5027b2423d0a0711034f",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "b39fbc54256b5909819da4cf7e24549d",
+            "node": "act",
+            "decision": "selection",
+            "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+            "action": null,
+            "output": {
+              "name": "query_data",
+              "arguments_json": "{\"target\": \"public.region_result\", \"filters\": [{\"field\": \"period_start\", \"operator\": \"eq\", \"value\": \"2025-12-01\"}, {\"field\": \"adm_cd10\", \"operator\": \"eq\", \"value\": \"1168065500\"}]}",
+              "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "f9e8d99e10b45370a61dfe5457987923",
+            "node": "act",
+            "decision": "call",
+            "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+            "action": {
+              "name": "query_data",
+              "arguments": {
+                "target": "public.region_result",
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "field": "adm_cd10",
+                    "operator": "eq",
+                    "value": "1168065500"
+                  }
+                ]
+              }
+            },
+            "output": {
+              "data": {
+                "reference": {
+                  "id": "derived:3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559",
+                  "version": "3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559"
+                },
+                "as_of": "2026-11-03T10:42:36.824797",
+                "sources": [
+                  {
+                    "label": "파이프라인 읍면동 월별 분석 결과",
+                    "uri": "db://public/region_result"
+                  }
+                ],
+                "columns": [
+                  {
+                    "name": "period_start",
+                    "kind": "string",
+                    "unit": "기준월 첫날",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "adm_cd10",
+                    "kind": "string",
+                    "unit": "행정동코드",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bg_score",
+                    "kind": "number",
+                    "unit": "배경 점수",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bg_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bh_score",
+                    "kind": "number",
+                    "unit": "행동 점수",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bh_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "risk_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "updated_at",
+                    "kind": "string",
+                    "unit": "분석 수정 시각(한국 시간)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  }
+                ],
+                "rows": [
+                  {
+                    "period_start": "2025-12-01",
+                    "adm_cd10": "1168065500",
+                    "bg_score": 7.09,
+                    "bg_grade": 1,
+                    "bh_score": 53.06,
+                    "bh_grade": 2,
+                    "risk_grade": 2,
+                    "updated_at": "2026-11-03T10:42:36.824797"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "id": "public.region_result",
+                    "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9"
+                  }
+                ]
+              },
+              "applied": {
+                "target": "public.region_result",
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "field": "adm_cd10",
+                    "operator": "eq",
+                    "value": "1168065500"
+                  }
+                ],
+                "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9",
+                "as_of": "2026-11-03T10:42:36.824797",
+                "fields": [
+                  "period_start",
+                  "adm_cd10",
+                  "bg_score",
+                  "bg_grade",
+                  "bh_score",
+                  "bh_grade",
+                  "risk_grade",
+                  "updated_at"
+                ],
+                "sort": [],
+                "offset": 0,
+                "limit": 100
+              },
+              "total": 1,
+              "returned": 1,
+              "next_offset": null
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "e5a4fbc76a1459fa9e44761f7b92d1f5",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 동·현재 월의 실제 행동 이상 점수와 출처가 확보됐다. 전월 비교는 제외했으므로 현재 값과 정의·한계를 설명할 수 있다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "요청한 동·현재 월의 실제 행동 이상 점수와 출처가 확보됐다. 전월 비교는 제외했으므로 현재 값과 정의·한계를 설명할 수 있다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 7,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "compose"
+      ],
+      "input_ref": "decide.json#/cases/22/initial",
+      "expectation_ref": "decide.json#/cases/22/assessment"
+    },
+    {
+      "step_id": "s005",
+      "node": "compose",
+      "role": "interpretation",
+      "frame": "root",
+      "before_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null
+          }
+        ],
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "constraints": {
+            "required": [
+              "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+              "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "0ca59ec5752f58638c452b521375997e",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                    "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "2419a18f615f5027b2423d0a0711034f",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "b39fbc54256b5909819da4cf7e24549d",
+            "node": "act",
+            "decision": "selection",
+            "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+            "action": null,
+            "output": {
+              "name": "query_data",
+              "arguments_json": "{\"target\": \"public.region_result\", \"filters\": [{\"field\": \"period_start\", \"operator\": \"eq\", \"value\": \"2025-12-01\"}, {\"field\": \"adm_cd10\", \"operator\": \"eq\", \"value\": \"1168065500\"}]}",
+              "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "f9e8d99e10b45370a61dfe5457987923",
+            "node": "act",
+            "decision": "call",
+            "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+            "action": {
+              "name": "query_data",
+              "arguments": {
+                "target": "public.region_result",
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "field": "adm_cd10",
+                    "operator": "eq",
+                    "value": "1168065500"
+                  }
+                ]
+              }
+            },
+            "output": {
+              "data": {
+                "reference": {
+                  "id": "derived:3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559",
+                  "version": "3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559"
+                },
+                "as_of": "2026-11-03T10:42:36.824797",
+                "sources": [
+                  {
+                    "label": "파이프라인 읍면동 월별 분석 결과",
+                    "uri": "db://public/region_result"
+                  }
+                ],
+                "columns": [
+                  {
+                    "name": "period_start",
+                    "kind": "string",
+                    "unit": "기준월 첫날",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "adm_cd10",
+                    "kind": "string",
+                    "unit": "행정동코드",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bg_score",
+                    "kind": "number",
+                    "unit": "배경 점수",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bg_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bh_score",
+                    "kind": "number",
+                    "unit": "행동 점수",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bh_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "risk_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "updated_at",
+                    "kind": "string",
+                    "unit": "분석 수정 시각(한국 시간)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  }
+                ],
+                "rows": [
+                  {
+                    "period_start": "2025-12-01",
+                    "adm_cd10": "1168065500",
+                    "bg_score": 7.09,
+                    "bg_grade": 1,
+                    "bh_score": 53.06,
+                    "bh_grade": 2,
+                    "risk_grade": 2,
+                    "updated_at": "2026-11-03T10:42:36.824797"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "id": "public.region_result",
+                    "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9"
+                  }
+                ]
+              },
+              "applied": {
+                "target": "public.region_result",
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "field": "adm_cd10",
+                    "operator": "eq",
+                    "value": "1168065500"
+                  }
+                ],
+                "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9",
+                "as_of": "2026-11-03T10:42:36.824797",
+                "fields": [
+                  "period_start",
+                  "adm_cd10",
+                  "bg_score",
+                  "bg_grade",
+                  "bh_score",
+                  "bh_grade",
+                  "risk_grade",
+                  "updated_at"
+                ],
+                "sort": [],
+                "offset": 0,
+                "limit": 100
+              },
+              "total": 1,
+              "returned": 1,
+              "next_offset": null
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "e5a4fbc76a1459fa9e44761f7b92d1f5",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 동·현재 월의 실제 행동 이상 점수와 출처가 확보됐다. 전월 비교는 제외했으므로 현재 값과 정의·한계를 설명할 수 있다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "요청한 동·현재 월의 실제 행동 이상 점수와 출처가 확보됐다. 전월 비교는 제외했으므로 현재 값과 정의·한계를 설명할 수 있다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          }
+        ],
+        "response": null,
+        "execution": {
+          "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+          "event": "user_request",
+          "status": "running",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 7,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "boundary_before": {
+        "kind": "next",
+        "from_step": "s004"
+      },
+      "model_outputs": [
+        {
+          "content": "도곡1동의 2025-12 행동 이상 점수는 53.06입니다. 출처 public.region_result. 행동 이상 점수는 학습 기준 행동과의 차이이며 실제 활동량이나 개인의 고립 상태가 아니다. 현장 원인과 개인 상태는 확인되지 않았다.",
+          "artifact_ids": [],
+          "status": "completed",
+          "reason": "요청한 현재 월의 점수·출처·해석 한계만 설명하고 전월 비교를 추가하지 않는다."
+        }
+      ],
+      "case_id": "path-compose-5d5f048cd53b64874d48",
+      "after_state": {
+        "messages": [
+          {
+            "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "98188ee9-3443-5511-9b20-80e10b267058"
+          },
+          {
+            "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "f4a69a1f-bb56-5500-909c-dd53d2f8d028",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          },
+          {
+            "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "7c931588-355a-5638-9bca-75b410be3a05"
+          },
+          {
+            "content": "도곡1동의 2025-12 행동 이상 점수는 53.06입니다. 출처 public.region_result. 행동 이상 점수는 학습 기준 행동과의 차이이며 실제 활동량이나 개인의 고립 상태가 아니다. 현장 원인과 개인 상태는 확인되지 않았다.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": "de071e45-1313-5e5b-adba-6d3f11b8eca9",
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+          }
+        ],
+        "request": {
+          "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "constraints": {
+            "required": [
+              "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+              "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+            ],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "results": [
+          {
+            "id": "0ca59ec5752f58638c452b521375997e",
+            "node": "interpret",
+            "decision": "interpretation",
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "action": null,
+            "output": {
+              "request": {
+                "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                "constraints": {
+                  "required": [
+                    "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                    "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                  ],
+                  "preferred": [],
+                  "excluded": []
+                }
+              },
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "interpretation",
+            "outcome": "success"
+          },
+          {
+            "id": "2419a18f615f5027b2423d0a0711034f",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+            "action": null,
+            "output": {
+              "next": "act",
+              "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "b39fbc54256b5909819da4cf7e24549d",
+            "node": "act",
+            "decision": "selection",
+            "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+            "action": null,
+            "output": {
+              "name": "query_data",
+              "arguments_json": "{\"target\": \"public.region_result\", \"filters\": [{\"field\": \"period_start\", \"operator\": \"eq\", \"value\": \"2025-12-01\"}, {\"field\": \"adm_cd10\", \"operator\": \"eq\", \"value\": \"1168065500\"}]}",
+              "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "selection",
+            "outcome": "success"
+          },
+          {
+            "id": "f9e8d99e10b45370a61dfe5457987923",
+            "node": "act",
+            "decision": "call",
+            "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+            "action": {
+              "name": "query_data",
+              "arguments": {
+                "target": "public.region_result",
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "field": "adm_cd10",
+                    "operator": "eq",
+                    "value": "1168065500"
+                  }
+                ]
+              }
+            },
+            "output": {
+              "data": {
+                "reference": {
+                  "id": "derived:3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559",
+                  "version": "3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559"
+                },
+                "as_of": "2026-11-03T10:42:36.824797",
+                "sources": [
+                  {
+                    "label": "파이프라인 읍면동 월별 분석 결과",
+                    "uri": "db://public/region_result"
+                  }
+                ],
+                "columns": [
+                  {
+                    "name": "period_start",
+                    "kind": "string",
+                    "unit": "기준월 첫날",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "adm_cd10",
+                    "kind": "string",
+                    "unit": "행정동코드",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bg_score",
+                    "kind": "number",
+                    "unit": "배경 점수",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bg_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bh_score",
+                    "kind": "number",
+                    "unit": "행동 점수",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "bh_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "risk_grade",
+                    "kind": "integer",
+                    "unit": "단계(1~5)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  },
+                  {
+                    "name": "updated_at",
+                    "kind": "string",
+                    "unit": "분석 수정 시각(한국 시간)",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  }
+                ],
+                "rows": [
+                  {
+                    "period_start": "2025-12-01",
+                    "adm_cd10": "1168065500",
+                    "bg_score": 7.09,
+                    "bg_grade": 1,
+                    "bh_score": 53.06,
+                    "bh_grade": 2,
+                    "risk_grade": 2,
+                    "updated_at": "2026-11-03T10:42:36.824797"
+                  }
+                ],
+                "inputs": [
+                  {
+                    "id": "public.region_result",
+                    "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9"
+                  }
+                ]
+              },
+              "applied": {
+                "target": "public.region_result",
+                "filters": [
+                  {
+                    "field": "period_start",
+                    "operator": "eq",
+                    "value": "2025-12-01"
+                  },
+                  {
+                    "field": "adm_cd10",
+                    "operator": "eq",
+                    "value": "1168065500"
+                  }
+                ],
+                "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9",
+                "as_of": "2026-11-03T10:42:36.824797",
+                "fields": [
+                  "period_start",
+                  "adm_cd10",
+                  "bg_score",
+                  "bg_grade",
+                  "bh_score",
+                  "bh_grade",
+                  "risk_grade",
+                  "updated_at"
+                ],
+                "sort": [],
+                "offset": 0,
+                "limit": 100
+              },
+              "total": 1,
+              "returned": 1,
+              "next_offset": null
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "e5a4fbc76a1459fa9e44761f7b92d1f5",
+            "node": "decide",
+            "decision": "decision",
+            "reason": "요청한 동·현재 월의 실제 행동 이상 점수와 출처가 확보됐다. 전월 비교는 제외했으므로 현재 값과 정의·한계를 설명할 수 있다.",
+            "action": null,
+            "output": {
+              "next": "compose",
+              "reason": "요청한 동·현재 월의 실제 행동 이상 점수와 출처가 확보됐다. 전월 비교는 제외했으므로 현재 값과 정의·한계를 설명할 수 있다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "decision",
+            "outcome": "success"
+          },
+          {
+            "id": "459af945baea557482b688a79f2d4e39",
+            "node": "compose",
+            "decision": "composition",
+            "reason": "요청한 현재 월의 점수·출처·해석 한계만 설명하고 전월 비교를 추가하지 않는다.",
+            "action": null,
+            "output": {
+              "content": "도곡1동의 2025-12 행동 이상 점수는 53.06입니다. 출처 public.region_result. 행동 이상 점수는 학습 기준 행동과의 차이이며 실제 활동량이나 개인의 고립 상태가 아니다. 현장 원인과 개인 상태는 확인되지 않았다.",
+              "artifact_ids": [],
+              "status": "completed",
+              "reason": "요청한 현재 월의 점수·출처·해석 한계만 설명하고 전월 비교를 추가하지 않는다.",
+              "model_usage": {
+                "model": "unknown",
+                "tokens": {},
+                "elapsed_seconds": 0.0
+              }
+            },
+            "description": "composition",
+            "outcome": "success"
+          }
+        ],
+        "response": {
+          "id": "de071e45-1313-5e5b-adba-6d3f11b8eca9",
+          "kind": "final",
+          "label": "final",
+          "content": "도곡1동의 2025-12 행동 이상 점수는 53.06입니다. 출처 public.region_result. 행동 이상 점수는 학습 기준 행동과의 차이이며 실제 활동량이나 개인의 고립 상태가 아니다. 현장 원인과 개인 상태는 확인되지 않았다.",
+          "artifacts": []
+        },
+        "execution": {
+          "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+          "event": "user_request",
+          "status": "completed",
+          "version": "ai-api-v1",
+          "budget": {
+            "steps": {
+              "used": 8,
+              "limit": 200
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 100
+            },
+            "agent_calls": {
+              "used": 1,
+              "limit": 20
+            },
+            "retries": {
+              "used": 0,
+              "limit": 20
+            },
+            "active_seconds": {
+              "used": 0,
+              "limit": 3600.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": null
+        }
+      },
+      "expected_next_nodes": [
+        "__end__"
+      ],
+      "input_ref": "compose.json#/cases/8/initial",
+      "expectation_ref": "compose.json#/cases/8/assessment"
+    }
+  ],
+  "boundaries": [],
+  "events": [],
+  "history_provenance": "작성한 모델 응답으로 실제 노드를 실행해 구성한 기준 이력",
+  "scope": "agent",
+  "agent_role": "interpretation",
+  "conversation_condition": "new_topic",
+  "region_code": "1168065500",
+  "expected_summary": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+  "task_rationale": {
+    "user_requirement": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+    "available_evidence": [
+      "대화에서 확정된 행정동과 요청 월",
+      "등록 자료원·지표 정의; 이번 실행의 점수 조회 결과는 아직 없음"
+    ],
+    "missing_evidence": [
+      "현재 월의 실제 행동 이상 점수"
+    ],
+    "necessary_work": [
+      "현재 월 원자료 조회",
+      "현재 점수·출처·해석 한계 설명"
+    ],
+    "excluded_work": [
+      "개인 진단",
+      "관측되지 않은 원인 단정",
+      "전월 조회",
+      "차이 계산",
+      "기간 추세 설명"
+    ]
+  },
+  "evidence_refs": [
+    {
+      "snapshot": "snapshots/data.json",
+      "dataset": "public.region_result",
+      "reference": {
+        "id": "public.region_result",
+        "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9"
+      },
+      "adm_cd10": "1168065500",
+      "months": [
+        "2025-12"
+      ]
+    }
+  ],
+  "start_state": {
+    "messages": [
+      {
+        "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null
+      },
+      {
+        "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "ai",
+        "name": null,
+        "id": null,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": null
+      },
+      {
+        "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": null
+      }
+    ],
+    "request": {
+      "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+      "constraints": {
+        "required": [
+          "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+          "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+        ],
+        "preferred": [],
+        "excluded": []
+      }
+    },
+    "results": [],
+    "response": null,
+    "execution": {
+      "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+      "event": "user_request",
+      "status": "queued",
+      "version": "ai-api-v1",
+      "budget": {
+        "steps": {
+          "used": 3,
+          "limit": 200
+        },
+        "tool_calls": {
+          "used": 0,
+          "limit": 100
+        },
+        "agent_calls": {
+          "used": 1,
+          "limit": 20
+        },
+        "retries": {
+          "used": 0,
+          "limit": 20
+        },
+        "active_seconds": {
+          "used": 0,
+          "limit": 3600.0
+        },
+        "final_model_calls": {
+          "used": 0,
+          "limit": 1
+        },
+        "final_active_seconds": {
+          "used": 0,
+          "limit": 30
+        }
+      },
+      "error": null
+    }
+  },
+  "entry_transition": {
+    "kind": "agent_call",
+    "parent_role": "request",
+    "parent_start_state": {
+      "messages": [
+        {
+          "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": null
+        },
+        {
+          "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": null,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        },
+        {
+          "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": null
+        }
+      ],
+      "request": {
+        "goal": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+        "constraints": {
+          "required": [
+            "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+            "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+          ],
+          "preferred": [],
+          "excluded": []
+        }
+      },
+      "results": [],
+      "response": null,
+      "execution": {
+        "run_id": "00000000-0000-0000-0000-000000000001",
+        "event": "user_request",
+        "status": "queued",
+        "version": "ai-api-v1",
+        "budget": {
+          "steps": {
+            "used": 0,
+            "limit": 200
+          },
+          "tool_calls": {
+            "used": 0,
+            "limit": 100
+          },
+          "agent_calls": {
+            "used": 0,
+            "limit": 20
+          },
+          "retries": {
+            "used": 0,
+            "limit": 20
+          },
+          "active_seconds": {
+            "used": 0,
+            "limit": 3600.0
+          },
+          "final_model_calls": {
+            "used": 0,
+            "limit": 1
+          },
+          "final_active_seconds": {
+            "used": 0,
+            "limit": 30
+          }
+        },
+        "error": null
+      }
+    },
+    "parent_steps": [
+      {
+        "step_id": "s001",
+        "node": "interpret",
+        "role": "request",
+        "frame": "root",
+        "before_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "constraints": {
+              "required": [
+                "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "queued",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 0,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 0,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 0,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "boundary_before": {
+          "kind": "entry",
+          "from_step": null
+        },
+        "model_outputs": [
+          {
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                  "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다."
+          }
+        ],
+        "after_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "constraints": {
+              "required": [
+                "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [
+            {
+              "id": "aba9be5d0c7950789899e64c927cf929",
+              "node": "interpret",
+              "decision": "interpretation",
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "action": null,
+              "output": {
+                "request": {
+                  "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                  "constraints": {
+                    "required": [
+                      "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                      "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                    ],
+                    "preferred": [],
+                    "excluded": []
+                  }
+                },
+                "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "interpretation",
+              "outcome": "success"
+            }
+          ],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "running",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 1,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 0,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 0,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "expected_next_nodes": [
+          "decide"
+        ]
+      },
+      {
+        "step_id": "s002",
+        "node": "decide",
+        "role": "request",
+        "frame": "root",
+        "before_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "constraints": {
+              "required": [
+                "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [
+            {
+              "id": "aba9be5d0c7950789899e64c927cf929",
+              "node": "interpret",
+              "decision": "interpretation",
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "action": null,
+              "output": {
+                "request": {
+                  "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                  "constraints": {
+                    "required": [
+                      "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                      "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                    ],
+                    "preferred": [],
+                    "excluded": []
+                  }
+                },
+                "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "interpretation",
+              "outcome": "success"
+            }
+          ],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "running",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 1,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 0,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 0,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "boundary_before": {
+          "kind": "next",
+          "from_step": "s001"
+        },
+        "model_outputs": [
+          {
+            "next": "act",
+            "reason": "새 요청의 동·현재 월은 확인됐지만 실제 점수와 그 값을 설명할 근거가 없다. 전월 비교 없이 현재 값의 전문 해석이 필요하다."
+          }
+        ],
+        "after_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "constraints": {
+              "required": [
+                "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [
+            {
+              "id": "aba9be5d0c7950789899e64c927cf929",
+              "node": "interpret",
+              "decision": "interpretation",
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "action": null,
+              "output": {
+                "request": {
+                  "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                  "constraints": {
+                    "required": [
+                      "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                      "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                    ],
+                    "preferred": [],
+                    "excluded": []
+                  }
+                },
+                "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "interpretation",
+              "outcome": "success"
+            },
+            {
+              "id": "93ec19a226e657198d94eca2b2e16cdd",
+              "node": "decide",
+              "decision": "decision",
+              "reason": "새 요청의 동·현재 월은 확인됐지만 실제 점수와 그 값을 설명할 근거가 없다. 전월 비교 없이 현재 값의 전문 해석이 필요하다.",
+              "action": null,
+              "output": {
+                "next": "act",
+                "reason": "새 요청의 동·현재 월은 확인됐지만 실제 점수와 그 값을 설명할 근거가 없다. 전월 비교 없이 현재 값의 전문 해석이 필요하다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "decision",
+              "outcome": "success"
+            }
+          ],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "running",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 2,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 0,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 0,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "expected_next_nodes": [
+          "act"
+        ]
+      },
+      {
+        "step_id": "s003",
+        "node": "act",
+        "role": "request",
+        "frame": "root",
+        "before_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "constraints": {
+              "required": [
+                "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [
+            {
+              "id": "aba9be5d0c7950789899e64c927cf929",
+              "node": "interpret",
+              "decision": "interpretation",
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "action": null,
+              "output": {
+                "request": {
+                  "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                  "constraints": {
+                    "required": [
+                      "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                      "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                    ],
+                    "preferred": [],
+                    "excluded": []
+                  }
+                },
+                "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "interpretation",
+              "outcome": "success"
+            },
+            {
+              "id": "93ec19a226e657198d94eca2b2e16cdd",
+              "node": "decide",
+              "decision": "decision",
+              "reason": "새 요청의 동·현재 월은 확인됐지만 실제 점수와 그 값을 설명할 근거가 없다. 전월 비교 없이 현재 값의 전문 해석이 필요하다.",
+              "action": null,
+              "output": {
+                "next": "act",
+                "reason": "새 요청의 동·현재 월은 확인됐지만 실제 점수와 그 값을 설명할 근거가 없다. 전월 비교 없이 현재 값의 전문 해석이 필요하다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "decision",
+              "outcome": "success"
+            }
+          ],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "running",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 2,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 0,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 0,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "boundary_before": {
+          "kind": "next",
+          "from_step": "s002"
+        },
+        "model_outputs": [
+          {
+            "name": "interpretation_agent",
+            "arguments_json": "{\"goal\": \"도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.\"}",
+            "reason": "확정한 대상·기간·목적·조건을 해당 전문 에이전트에 전달해 부족한 근거와 요청 산출물을 확보한다."
+          }
+        ],
+        "after_state": {
+          "messages": [
+            {
+              "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            },
+            {
+              "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "ai",
+              "name": null,
+              "id": null,
+              "tool_calls": [],
+              "invalid_tool_calls": [],
+              "usage_metadata": null
+            },
+            {
+              "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "additional_kwargs": {},
+              "response_metadata": {},
+              "type": "human",
+              "name": null,
+              "id": null
+            }
+          ],
+          "request": {
+            "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+            "constraints": {
+              "required": [
+                "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+              ],
+              "preferred": [],
+              "excluded": []
+            }
+          },
+          "results": [
+            {
+              "id": "aba9be5d0c7950789899e64c927cf929",
+              "node": "interpret",
+              "decision": "interpretation",
+              "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+              "action": null,
+              "output": {
+                "request": {
+                  "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                  "constraints": {
+                    "required": [
+                      "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                      "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                    ],
+                    "preferred": [],
+                    "excluded": []
+                  }
+                },
+                "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "interpretation",
+              "outcome": "success"
+            },
+            {
+              "id": "93ec19a226e657198d94eca2b2e16cdd",
+              "node": "decide",
+              "decision": "decision",
+              "reason": "새 요청의 동·현재 월은 확인됐지만 실제 점수와 그 값을 설명할 근거가 없다. 전월 비교 없이 현재 값의 전문 해석이 필요하다.",
+              "action": null,
+              "output": {
+                "next": "act",
+                "reason": "새 요청의 동·현재 월은 확인됐지만 실제 점수와 그 값을 설명할 근거가 없다. 전월 비교 없이 현재 값의 전문 해석이 필요하다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "decision",
+              "outcome": "success"
+            },
+            {
+              "id": "c741a522f70f52fc9712b92ec6b1bcc3",
+              "node": "act",
+              "decision": "selection",
+              "reason": "확정한 대상·기간·목적·조건을 해당 전문 에이전트에 전달해 부족한 근거와 요청 산출물을 확보한다.",
+              "action": null,
+              "output": {
+                "name": "interpretation_agent",
+                "arguments_json": "{\"goal\": \"도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.\"}",
+                "reason": "확정한 대상·기간·목적·조건을 해당 전문 에이전트에 전달해 부족한 근거와 요청 산출물을 확보한다.",
+                "model_usage": {
+                  "model": "unknown",
+                  "tokens": {},
+                  "elapsed_seconds": 0.0
+                }
+              },
+              "description": "selection",
+              "outcome": "success"
+            },
+            {
+              "id": "31a9316a90d95a878ca27df8f4dedbda",
+              "node": "act",
+              "decision": "call",
+              "reason": "확정한 대상·기간·목적·조건을 해당 전문 에이전트에 전달해 부족한 근거와 요청 산출물을 확보한다.",
+              "action": {
+                "name": "interpretation_agent",
+                "arguments": {
+                  "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다."
+                }
+              },
+              "output": {
+                "response": {
+                  "id": "de071e45-1313-5e5b-adba-6d3f11b8eca9",
+                  "kind": "final",
+                  "label": "final",
+                  "content": "도곡1동의 2025-12 행동 이상 점수는 53.06입니다. 출처 public.region_result. 행동 이상 점수는 학습 기준 행동과의 차이이며 실제 활동량이나 개인의 고립 상태가 아니다. 현장 원인과 개인 상태는 확인되지 않았다.",
+                  "artifacts": []
+                },
+                "results": [
+                  {
+                    "id": "0ca59ec5752f58638c452b521375997e",
+                    "node": "interpret",
+                    "decision": "interpretation",
+                    "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                    "action": null,
+                    "output": {
+                      "request": {
+                        "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+                        "constraints": {
+                          "required": [
+                            "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                            "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                          ],
+                          "preferred": [],
+                          "excluded": []
+                        }
+                      },
+                      "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+                      "model_usage": {
+                        "model": "unknown",
+                        "tokens": {},
+                        "elapsed_seconds": 0.0
+                      }
+                    },
+                    "description": "interpretation",
+                    "outcome": "success"
+                  },
+                  {
+                    "id": "2419a18f615f5027b2423d0a0711034f",
+                    "node": "decide",
+                    "decision": "decision",
+                    "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+                    "action": null,
+                    "output": {
+                      "next": "act",
+                      "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+                      "model_usage": {
+                        "model": "unknown",
+                        "tokens": {},
+                        "elapsed_seconds": 0.0
+                      }
+                    },
+                    "description": "decision",
+                    "outcome": "success"
+                  },
+                  {
+                    "id": "b39fbc54256b5909819da4cf7e24549d",
+                    "node": "act",
+                    "decision": "selection",
+                    "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+                    "action": null,
+                    "output": {
+                      "name": "query_data",
+                      "arguments_json": "{\"target\": \"public.region_result\", \"filters\": [{\"field\": \"period_start\", \"operator\": \"eq\", \"value\": \"2025-12-01\"}, {\"field\": \"adm_cd10\", \"operator\": \"eq\", \"value\": \"1168065500\"}]}",
+                      "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+                      "model_usage": {
+                        "model": "unknown",
+                        "tokens": {},
+                        "elapsed_seconds": 0.0
+                      }
+                    },
+                    "description": "selection",
+                    "outcome": "success"
+                  },
+                  {
+                    "id": "f9e8d99e10b45370a61dfe5457987923",
+                    "node": "act",
+                    "decision": "call",
+                    "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+                    "action": {
+                      "name": "query_data",
+                      "arguments": {
+                        "target": "public.region_result",
+                        "filters": [
+                          {
+                            "field": "period_start",
+                            "operator": "eq",
+                            "value": "2025-12-01"
+                          },
+                          {
+                            "field": "adm_cd10",
+                            "operator": "eq",
+                            "value": "1168065500"
+                          }
+                        ]
+                      }
+                    },
+                    "output": {
+                      "data": {
+                        "reference": {
+                          "id": "derived:3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559",
+                          "version": "3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559"
+                        },
+                        "as_of": "2026-11-03T10:42:36.824797",
+                        "sources": [
+                          {
+                            "label": "파이프라인 읍면동 월별 분석 결과",
+                            "uri": "db://public/region_result"
+                          }
+                        ],
+                        "columns": [
+                          {
+                            "name": "period_start",
+                            "kind": "string",
+                            "unit": "기준월 첫날",
+                            "spatial_unit": "행정동",
+                            "temporal_unit": "월",
+                            "denominator": "해당 없음"
+                          },
+                          {
+                            "name": "adm_cd10",
+                            "kind": "string",
+                            "unit": "행정동코드",
+                            "spatial_unit": "행정동",
+                            "temporal_unit": "월",
+                            "denominator": "해당 없음"
+                          },
+                          {
+                            "name": "bg_score",
+                            "kind": "number",
+                            "unit": "배경 점수",
+                            "spatial_unit": "행정동",
+                            "temporal_unit": "월",
+                            "denominator": "해당 없음"
+                          },
+                          {
+                            "name": "bg_grade",
+                            "kind": "integer",
+                            "unit": "단계(1~5)",
+                            "spatial_unit": "행정동",
+                            "temporal_unit": "월",
+                            "denominator": "해당 없음"
+                          },
+                          {
+                            "name": "bh_score",
+                            "kind": "number",
+                            "unit": "행동 점수",
+                            "spatial_unit": "행정동",
+                            "temporal_unit": "월",
+                            "denominator": "해당 없음"
+                          },
+                          {
+                            "name": "bh_grade",
+                            "kind": "integer",
+                            "unit": "단계(1~5)",
+                            "spatial_unit": "행정동",
+                            "temporal_unit": "월",
+                            "denominator": "해당 없음"
+                          },
+                          {
+                            "name": "risk_grade",
+                            "kind": "integer",
+                            "unit": "단계(1~5)",
+                            "spatial_unit": "행정동",
+                            "temporal_unit": "월",
+                            "denominator": "해당 없음"
+                          },
+                          {
+                            "name": "updated_at",
+                            "kind": "string",
+                            "unit": "분석 수정 시각(한국 시간)",
+                            "spatial_unit": "행정동",
+                            "temporal_unit": "월",
+                            "denominator": "해당 없음"
+                          }
+                        ],
+                        "rows": [
+                          {
+                            "period_start": "2025-12-01",
+                            "adm_cd10": "1168065500",
+                            "bg_score": 7.09,
+                            "bg_grade": 1,
+                            "bh_score": 53.06,
+                            "bh_grade": 2,
+                            "risk_grade": 2,
+                            "updated_at": "2026-11-03T10:42:36.824797"
+                          }
+                        ],
+                        "inputs": [
+                          {
+                            "id": "public.region_result",
+                            "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9"
+                          }
+                        ]
+                      },
+                      "applied": {
+                        "target": "public.region_result",
+                        "filters": [
+                          {
+                            "field": "period_start",
+                            "operator": "eq",
+                            "value": "2025-12-01"
+                          },
+                          {
+                            "field": "adm_cd10",
+                            "operator": "eq",
+                            "value": "1168065500"
+                          }
+                        ],
+                        "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9",
+                        "as_of": "2026-11-03T10:42:36.824797",
+                        "fields": [
+                          "period_start",
+                          "adm_cd10",
+                          "bg_score",
+                          "bg_grade",
+                          "bh_score",
+                          "bh_grade",
+                          "risk_grade",
+                          "updated_at"
+                        ],
+                        "sort": [],
+                        "offset": 0,
+                        "limit": 100
+                      },
+                      "total": 1,
+                      "returned": 1,
+                      "next_offset": null
+                    },
+                    "description": "call",
+                    "outcome": "success"
+                  },
+                  {
+                    "id": "e5a4fbc76a1459fa9e44761f7b92d1f5",
+                    "node": "decide",
+                    "decision": "decision",
+                    "reason": "요청한 동·현재 월의 실제 행동 이상 점수와 출처가 확보됐다. 전월 비교는 제외했으므로 현재 값과 정의·한계를 설명할 수 있다.",
+                    "action": null,
+                    "output": {
+                      "next": "compose",
+                      "reason": "요청한 동·현재 월의 실제 행동 이상 점수와 출처가 확보됐다. 전월 비교는 제외했으므로 현재 값과 정의·한계를 설명할 수 있다.",
+                      "model_usage": {
+                        "model": "unknown",
+                        "tokens": {},
+                        "elapsed_seconds": 0.0
+                      }
+                    },
+                    "description": "decision",
+                    "outcome": "success"
+                  },
+                  {
+                    "id": "459af945baea557482b688a79f2d4e39",
+                    "node": "compose",
+                    "decision": "composition",
+                    "reason": "요청한 현재 월의 점수·출처·해석 한계만 설명하고 전월 비교를 추가하지 않는다.",
+                    "action": null,
+                    "output": {
+                      "content": "도곡1동의 2025-12 행동 이상 점수는 53.06입니다. 출처 public.region_result. 행동 이상 점수는 학습 기준 행동과의 차이이며 실제 활동량이나 개인의 고립 상태가 아니다. 현장 원인과 개인 상태는 확인되지 않았다.",
+                      "artifact_ids": [],
+                      "status": "completed",
+                      "reason": "요청한 현재 월의 점수·출처·해석 한계만 설명하고 전월 비교를 추가하지 않는다.",
+                      "model_usage": {
+                        "model": "unknown",
+                        "tokens": {},
+                        "elapsed_seconds": 0.0
+                      }
+                    },
+                    "description": "composition",
+                    "outcome": "success"
+                  }
+                ],
+                "execution": {
+                  "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+                  "event": "user_request",
+                  "status": "completed",
+                  "version": "ai-api-v1",
+                  "budget": {
+                    "steps": {
+                      "used": 8,
+                      "limit": 200
+                    },
+                    "tool_calls": {
+                      "used": 1,
+                      "limit": 100
+                    },
+                    "agent_calls": {
+                      "used": 1,
+                      "limit": 20
+                    },
+                    "retries": {
+                      "used": 0,
+                      "limit": 20
+                    },
+                    "active_seconds": {
+                      "used": 0,
+                      "limit": 3600.0
+                    },
+                    "final_model_calls": {
+                      "used": 0,
+                      "limit": 1
+                    },
+                    "final_active_seconds": {
+                      "used": 0,
+                      "limit": 30
+                    }
+                  },
+                  "error": null
+                }
+              },
+              "description": "call",
+              "outcome": "success"
+            }
+          ],
+          "response": null,
+          "execution": {
+            "run_id": "00000000-0000-0000-0000-000000000001",
+            "event": "user_request",
+            "status": "running",
+            "version": "ai-api-v1",
+            "budget": {
+              "steps": {
+                "used": 8,
+                "limit": 200
+              },
+              "tool_calls": {
+                "used": 1,
+                "limit": 100
+              },
+              "agent_calls": {
+                "used": 1,
+                "limit": 20
+              },
+              "retries": {
+                "used": 0,
+                "limit": 20
+              },
+              "active_seconds": {
+                "used": 0,
+                "limit": 3600.0
+              },
+              "final_model_calls": {
+                "used": 0,
+                "limit": 1
+              },
+              "final_active_seconds": {
+                "used": 0,
+                "limit": 30
+              }
+            },
+            "error": null
+          }
+        },
+        "expected_next_nodes": [
+          "decide"
+        ]
+      }
+    ],
+    "call_step_id": "s003",
+    "after_state": {
+      "messages": [
+        {
+          "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": null
+        },
+        {
+          "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": null,
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        },
+        {
+          "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": null
+        }
+      ],
+      "request": {
+        "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+        "constraints": {
+          "required": [
+            "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+            "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+          ],
+          "preferred": [],
+          "excluded": []
+        }
+      },
+      "results": [],
+      "response": null,
+      "execution": {
+        "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+        "event": "user_request",
+        "status": "queued",
+        "version": "ai-api-v1",
+        "budget": {
+          "steps": {
+            "used": 3,
+            "limit": 200
+          },
+          "tool_calls": {
+            "used": 0,
+            "limit": 100
+          },
+          "agent_calls": {
+            "used": 1,
+            "limit": 20
+          },
+          "retries": {
+            "used": 0,
+            "limit": 20
+          },
+          "active_seconds": {
+            "used": 0,
+            "limit": 3600.0
+          },
+          "final_model_calls": {
+            "used": 0,
+            "limit": 1
+          },
+          "final_active_seconds": {
+            "used": 0,
+            "limit": 30
+          }
+        },
+        "error": null
+      }
+    },
+    "parent_return_record_id": "31a9316a90d95a878ca27df8f4dedbda"
+  },
+  "terminal": {
+    "status": "completed",
+    "state": {
+      "messages": [
+        {
+          "content": "대치4동의 배경 취약성 점수는 개인의 상태인가요?",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "98188ee9-3443-5511-9b20-80e10b267058"
+        },
+        {
+          "content": "지역 수준의 배경 취약성 점수이며 개인 상태를 확인한 결과는 아닙니다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": "f4a69a1f-bb56-5500-909c-dd53d2f8d028",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        },
+        {
+          "content": "이전 설명은 여기까지 하고 새 요청입니다. 도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "human",
+          "name": null,
+          "id": "7c931588-355a-5638-9bca-75b410be3a05"
+        },
+        {
+          "content": "도곡1동의 2025-12 행동 이상 점수는 53.06입니다. 출처 public.region_result. 행동 이상 점수는 학습 기준 행동과의 차이이며 실제 활동량이나 개인의 고립 상태가 아니다. 현장 원인과 개인 상태는 확인되지 않았다.",
+          "additional_kwargs": {},
+          "response_metadata": {},
+          "type": "ai",
+          "name": null,
+          "id": "de071e45-1313-5e5b-adba-6d3f11b8eca9",
+          "tool_calls": [],
+          "invalid_tool_calls": [],
+          "usage_metadata": null
+        }
+      ],
+      "request": {
+        "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+        "constraints": {
+          "required": [
+            "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+            "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+          ],
+          "preferred": [],
+          "excluded": []
+        }
+      },
+      "results": [
+        {
+          "id": "0ca59ec5752f58638c452b521375997e",
+          "node": "interpret",
+          "decision": "interpretation",
+          "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+          "action": null,
+          "output": {
+            "request": {
+              "goal": "도곡1동(1168065500)의 2025-12 행동 이상 점수만 확인하고 출처·해석 한계를 설명한다. 전월 비교는 하지 않는다.",
+              "constraints": {
+                "required": [
+                  "요청한 동·현재 월의 행동 이상 점수만 설명한다.",
+                  "출처·해석 한계를 밝히고 전월 비교는 하지 않는다."
+                ],
+                "preferred": [],
+                "excluded": []
+              }
+            },
+            "reason": "이전 주제는 종료했고 현재 발화가 지정한 새 대상·작업 목적만 이번 요청에 반영한다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "interpretation",
+          "outcome": "success"
+        },
+        {
+          "id": "2419a18f615f5027b2423d0a0711034f",
+          "node": "decide",
+          "decision": "decision",
+          "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+          "action": null,
+          "output": {
+            "next": "act",
+            "reason": "대상과 현재 월은 확인됐지만 실제 점수가 없다. 현재 월 점수만 확보하면 되며 전월 자료와 차이 계산은 요청하지 않았다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "decision",
+          "outcome": "success"
+        },
+        {
+          "id": "b39fbc54256b5909819da4cf7e24549d",
+          "node": "act",
+          "decision": "selection",
+          "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+          "action": null,
+          "output": {
+            "name": "query_data",
+            "arguments_json": "{\"target\": \"public.region_result\", \"filters\": [{\"field\": \"period_start\", \"operator\": \"eq\", \"value\": \"2025-12-01\"}, {\"field\": \"adm_cd10\", \"operator\": \"eq\", \"value\": \"1168065500\"}]}",
+            "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "selection",
+          "outcome": "success"
+        },
+        {
+          "id": "f9e8d99e10b45370a61dfe5457987923",
+          "node": "act",
+          "decision": "call",
+          "reason": "확인된 행정동·현재 월의 행동 이상 점수 원자료를 조회한다.",
+          "action": {
+            "name": "query_data",
+            "arguments": {
+              "target": "public.region_result",
+              "filters": [
+                {
+                  "field": "period_start",
+                  "operator": "eq",
+                  "value": "2025-12-01"
+                },
+                {
+                  "field": "adm_cd10",
+                  "operator": "eq",
+                  "value": "1168065500"
+                }
+              ]
+            }
+          },
+          "output": {
+            "data": {
+              "reference": {
+                "id": "derived:3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559",
+                "version": "3eeb1986fcaec83036f17df665de2935ac0f5ce05101d3d7ef23ea5bacbfd559"
+              },
+              "as_of": "2026-11-03T10:42:36.824797",
+              "sources": [
+                {
+                  "label": "파이프라인 읍면동 월별 분석 결과",
+                  "uri": "db://public/region_result"
+                }
+              ],
+              "columns": [
+                {
+                  "name": "period_start",
+                  "kind": "string",
+                  "unit": "기준월 첫날",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "adm_cd10",
+                  "kind": "string",
+                  "unit": "행정동코드",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bg_score",
+                  "kind": "number",
+                  "unit": "배경 점수",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bg_grade",
+                  "kind": "integer",
+                  "unit": "단계(1~5)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bh_score",
+                  "kind": "number",
+                  "unit": "행동 점수",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "bh_grade",
+                  "kind": "integer",
+                  "unit": "단계(1~5)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "risk_grade",
+                  "kind": "integer",
+                  "unit": "단계(1~5)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                },
+                {
+                  "name": "updated_at",
+                  "kind": "string",
+                  "unit": "분석 수정 시각(한국 시간)",
+                  "spatial_unit": "행정동",
+                  "temporal_unit": "월",
+                  "denominator": "해당 없음"
+                }
+              ],
+              "rows": [
+                {
+                  "period_start": "2025-12-01",
+                  "adm_cd10": "1168065500",
+                  "bg_score": 7.09,
+                  "bg_grade": 1,
+                  "bh_score": 53.06,
+                  "bh_grade": 2,
+                  "risk_grade": 2,
+                  "updated_at": "2026-11-03T10:42:36.824797"
+                }
+              ],
+              "inputs": [
+                {
+                  "id": "public.region_result",
+                  "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9"
+                }
+              ]
+            },
+            "applied": {
+              "target": "public.region_result",
+              "filters": [
+                {
+                  "field": "period_start",
+                  "operator": "eq",
+                  "value": "2025-12-01"
+                },
+                {
+                  "field": "adm_cd10",
+                  "operator": "eq",
+                  "value": "1168065500"
+                }
+              ],
+              "version": "37e2956ed76fe2103203dc004ecdcf1026b889c985364577f10c358170df31a9",
+              "as_of": "2026-11-03T10:42:36.824797",
+              "fields": [
+                "period_start",
+                "adm_cd10",
+                "bg_score",
+                "bg_grade",
+                "bh_score",
+                "bh_grade",
+                "risk_grade",
+                "updated_at"
+              ],
+              "sort": [],
+              "offset": 0,
+              "limit": 100
+            },
+            "total": 1,
+            "returned": 1,
+            "next_offset": null
+          },
+          "description": "call",
+          "outcome": "success"
+        },
+        {
+          "id": "e5a4fbc76a1459fa9e44761f7b92d1f5",
+          "node": "decide",
+          "decision": "decision",
+          "reason": "요청한 동·현재 월의 실제 행동 이상 점수와 출처가 확보됐다. 전월 비교는 제외했으므로 현재 값과 정의·한계를 설명할 수 있다.",
+          "action": null,
+          "output": {
+            "next": "compose",
+            "reason": "요청한 동·현재 월의 실제 행동 이상 점수와 출처가 확보됐다. 전월 비교는 제외했으므로 현재 값과 정의·한계를 설명할 수 있다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "decision",
+          "outcome": "success"
+        },
+        {
+          "id": "459af945baea557482b688a79f2d4e39",
+          "node": "compose",
+          "decision": "composition",
+          "reason": "요청한 현재 월의 점수·출처·해석 한계만 설명하고 전월 비교를 추가하지 않는다.",
+          "action": null,
+          "output": {
+            "content": "도곡1동의 2025-12 행동 이상 점수는 53.06입니다. 출처 public.region_result. 행동 이상 점수는 학습 기준 행동과의 차이이며 실제 활동량이나 개인의 고립 상태가 아니다. 현장 원인과 개인 상태는 확인되지 않았다.",
+            "artifact_ids": [],
+            "status": "completed",
+            "reason": "요청한 현재 월의 점수·출처·해석 한계만 설명하고 전월 비교를 추가하지 않는다.",
+            "model_usage": {
+              "model": "unknown",
+              "tokens": {},
+              "elapsed_seconds": 0.0
+            }
+          },
+          "description": "composition",
+          "outcome": "success"
+        }
+      ],
+      "response": {
+        "id": "de071e45-1313-5e5b-adba-6d3f11b8eca9",
+        "kind": "final",
+        "label": "final",
+        "content": "도곡1동의 2025-12 행동 이상 점수는 53.06입니다. 출처 public.region_result. 행동 이상 점수는 학습 기준 행동과의 차이이며 실제 활동량이나 개인의 고립 상태가 아니다. 현장 원인과 개인 상태는 확인되지 않았다.",
+        "artifacts": []
+      },
+      "execution": {
+        "run_id": "a5efe2d0-1cd5-5bd7-b23b-d20ca0b019c4",
+        "event": "user_request",
+        "status": "completed",
+        "version": "ai-api-v1",
+        "budget": {
+          "steps": {
+            "used": 8,
+            "limit": 200
+          },
+          "tool_calls": {
+            "used": 1,
+            "limit": 100
+          },
+          "agent_calls": {
+            "used": 1,
+            "limit": 20
+          },
+          "retries": {
+            "used": 0,
+            "limit": 20
+          },
+          "active_seconds": {
+            "used": 0,
+            "limit": 3600.0
+          },
+          "final_model_calls": {
+            "used": 0,
+            "limit": 1
+          },
+          "final_active_seconds": {
+            "used": 0,
+            "limit": 30
+          }
+        },
+        "error": null
+      }
+    }
+  }
+}

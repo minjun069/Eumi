@@ -1,0 +1,522 @@
+{
+  "schema_version": "evaluation-suite-v1",
+  "id": "execution-synthetic-v1",
+  "datasets": {
+    "public.region_result": {
+      "reference": {
+        "id": "public.region_result",
+        "version": "synthetic-v1"
+      },
+      "as_of": "2025-12-15",
+      "sources": [
+        {
+          "label": "합성 점수",
+          "uri": "fixture://execution/scores"
+        }
+      ],
+      "columns": [
+        {
+          "name": "bh_score",
+          "kind": "number",
+          "unit": "점수",
+          "spatial_unit": "행정동",
+          "temporal_unit": "월",
+          "denominator": "해당 없음"
+        }
+      ],
+      "rows": [
+        {
+          "bh_score": 42.0
+        }
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "request-context",
+      "unit": "agent",
+      "target": "request",
+      "purpose": "사용자 요청의 목적 파악·진행 판단·최종 반환 연결을 확인한다.",
+      "initial": {
+        "request": {
+          "goal": "제공된 범위와 한계를 설명한다.",
+          "constraints": {
+            "required": [],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "event": "user_request",
+        "messages": [
+          {
+            "content": "제공된 분석은 행정동의 월별 집계입니다. 개인 상태를 판정할 수 있는지 이 범위만으로 설명해주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "question"
+          }
+        ]
+      },
+      "providers": [],
+      "assessment": {
+        "expected": {
+          "schema_version": "execution-expectations-v1",
+          "situation": "normal",
+          "entry": "initial",
+          "environment": "prepared synthetic data / configured model",
+          "data_size": "one request or one dong-month; one source row",
+          "run_status": "returned",
+          "response_kind": "final"
+        },
+        "checks": [
+          "EX-1",
+          "EX-2",
+          "EX-3",
+          "EX-4",
+          "EX-5"
+        ],
+        "required": true
+      }
+    },
+    {
+      "id": "request-exhausted",
+      "unit": "agent",
+      "target": "request",
+      "purpose": "공유 종료 예산까지 소진된 진입에서 새 호출 없이 반환한다.",
+      "initial": {
+        "request": {
+          "goal": "제공된 범위와 한계를 설명한다.",
+          "constraints": {
+            "required": [],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "event": "user_request",
+        "messages": [
+          {
+            "content": "제공된 분석은 행정동의 월별 집계입니다. 개인 상태를 판정할 수 있는지 이 범위만으로 설명해주세요.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "question"
+          }
+        ],
+        "budget": {
+          "steps": {
+            "used": 0,
+            "limit": 0
+          },
+          "tool_calls": {
+            "used": 0,
+            "limit": 30
+          },
+          "agent_calls": {
+            "used": 0,
+            "limit": 10
+          },
+          "retries": {
+            "used": 0,
+            "limit": 2
+          },
+          "active_seconds": {
+            "used": 0,
+            "limit": 300.0
+          },
+          "final_model_calls": {
+            "used": 1,
+            "limit": 1
+          },
+          "final_active_seconds": {
+            "used": 0,
+            "limit": 30
+          }
+        }
+      },
+      "providers": [],
+      "assessment": {
+        "expected": {
+          "schema_version": "execution-expectations-v1",
+          "situation": "limit_cancel",
+          "entry": "initial",
+          "environment": "prepared synthetic data / configured model",
+          "data_size": "one request or one dong-month; one source row",
+          "run_status": "returned",
+          "error_code": "execution_limit_exceeded"
+        },
+        "checks": [
+          "EX-1",
+          "EX-2",
+          "EX-3",
+          "EX-4",
+          "EX-5"
+        ],
+        "required": true
+      }
+    },
+    {
+      "id": "report-start",
+      "unit": "workflow",
+      "target": "report",
+      "purpose": "한 동의 역할 순서·승인 결과 전달·보고서 구성을 확인한다.",
+      "initial": {
+        "request": {
+          "goal": "합성 자료로 대치2동 2025년 12월 보고서를 작성한다.",
+          "constraints": {
+            "required": [],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "event": "analysis_pipeline",
+        "messages": [],
+        "results": [
+          {
+            "id": "report-input",
+            "node": "report",
+            "decision": "report_input",
+            "reason": "합성 보고서 요청",
+            "action": null,
+            "output": {
+              "requestId": "execution-synthetic",
+              "month": "2025-12",
+              "dongCodes": [
+                "1168066000"
+              ],
+              "dongCode": "1168066000"
+            },
+            "description": "report_input",
+            "outcome": "success"
+          },
+          {
+            "id": "report-source",
+            "node": "report",
+            "decision": "report_source",
+            "reason": "합성 자료 시점",
+            "action": null,
+            "output": {
+              "period_start": "2025-12-01",
+              "adm_cd10": "1168066000",
+              "updated_at": "2025-12-15T00:00:00"
+            },
+            "description": "report_source",
+            "outcome": "success"
+          }
+        ]
+      },
+      "assessment": {
+        "expected": {
+          "schema_version": "execution-expectations-v1",
+          "situation": "normal",
+          "entry": "initial",
+          "environment": "prepared synthetic data / configured model",
+          "data_size": "one request or one dong-month; one source row",
+          "run_status": "returned"
+        },
+        "checks": [
+          "EX-1",
+          "EX-2",
+          "EX-3",
+          "EX-4",
+          "EX-5",
+          "EX-R1",
+          "EX-R2",
+          "EX-R3",
+          "EX-R4",
+          "EX-R5"
+        ],
+        "required": true
+      }
+    },
+    {
+      "id": "report-reentry",
+      "unit": "workflow",
+      "target": "report",
+      "purpose": "준비된 선정 승인과 설명 오류 이력에서 설명 역할부터 재진입한다.",
+      "initial": {
+        "request": {
+          "goal": "합성 자료로 대치2동 2025년 12월 보고서를 작성한다.",
+          "constraints": {
+            "required": [],
+            "preferred": [],
+            "excluded": []
+          }
+        },
+        "event": "analysis_pipeline",
+        "messages": [],
+        "results": [
+          {
+            "id": "report-input",
+            "node": "report",
+            "decision": "report_input",
+            "reason": "합성 보고서 요청",
+            "action": null,
+            "output": {
+              "requestId": "execution-synthetic",
+              "month": "2025-12",
+              "dongCodes": [
+                "1168066000"
+              ],
+              "dongCode": "1168066000"
+            },
+            "description": "report_input",
+            "outcome": "success"
+          },
+          {
+            "id": "report-source",
+            "node": "report",
+            "decision": "report_source",
+            "reason": "합성 자료 시점",
+            "action": null,
+            "output": {
+              "period_start": "2025-12-01",
+              "adm_cd10": "1168066000",
+              "updated_at": "2025-12-15T00:00:00"
+            },
+            "description": "report_source",
+            "outcome": "success"
+          },
+          {
+            "id": "source-call",
+            "node": "act",
+            "decision": "call",
+            "reason": "이전 진입의 합성 자료 조회",
+            "action": {
+              "name": "query_data",
+              "arguments": {
+                "target": "public.region_result"
+              }
+            },
+            "output": {
+              "data": {
+                "reference": {
+                  "id": "derived:f0229b0f2b78e8cb912b26e8b9ed590abe6a712186a3cbca04c81a7aa4ef4337",
+                  "version": "f0229b0f2b78e8cb912b26e8b9ed590abe6a712186a3cbca04c81a7aa4ef4337"
+                },
+                "as_of": "2025-12-15",
+                "sources": [
+                  {
+                    "label": "합성 점수",
+                    "uri": "fixture://execution/scores"
+                  }
+                ],
+                "columns": [
+                  {
+                    "name": "bh_score",
+                    "kind": "number",
+                    "unit": "점수",
+                    "spatial_unit": "행정동",
+                    "temporal_unit": "월",
+                    "denominator": "해당 없음"
+                  }
+                ],
+                "rows": [
+                  {
+                    "bh_score": 42.0
+                  }
+                ],
+                "inputs": [
+                  {
+                    "id": "public.region_result",
+                    "version": "synthetic-v1"
+                  }
+                ]
+              },
+              "applied": {
+                "target": "public.region_result",
+                "version": "synthetic-v1",
+                "as_of": "2025-12-15",
+                "fields": [
+                  "bh_score"
+                ],
+                "filters": [],
+                "sort": [],
+                "offset": 0,
+                "limit": 100
+              },
+              "total": 1,
+              "returned": 1,
+              "next_offset": null
+            },
+            "description": "call",
+            "outcome": "success"
+          },
+          {
+            "id": "selected",
+            "node": "compose",
+            "decision": "report_selection",
+            "reason": "이전 진입의 선정 결과",
+            "action": {
+              "name": "select_report_views",
+              "arguments": {
+                "view_key": null,
+                "result_ids": [
+                  "source-call"
+                ]
+              }
+            },
+            "output": {
+              "views": [
+                {
+                  "view_key": "EmbedDetailV01",
+                  "reason": "합성 점수의 관측 범위만 설명",
+                  "evidence_ids": [
+                    "source-call"
+                  ]
+                }
+              ]
+            },
+            "description": "report_selection",
+            "outcome": "success"
+          },
+          {
+            "id": "selection-review",
+            "node": "compose",
+            "decision": "verification",
+            "reason": "준비된 선정 승인",
+            "action": {
+              "name": "review_report",
+              "arguments": {
+                "view_key": null,
+                "result_ids": [
+                  "selected"
+                ]
+              }
+            },
+            "output": {
+              "call_id": "selected",
+              "accepted": true,
+              "reason": "연결 시험용 승인"
+            },
+            "description": "verification",
+            "outcome": "success"
+          },
+          {
+            "id": "selection-done",
+            "node": "compose",
+            "decision": "composition",
+            "reason": "선정 역할 완료",
+            "action": {
+              "name": "report_selection_agent",
+              "arguments": {
+                "view_key": null,
+                "result_ids": [
+                  "selected"
+                ]
+              }
+            },
+            "output": {
+              "content": "선정 완료",
+              "artifact_ids": [],
+              "status": "partial",
+              "reason": "한 뷰만 선정"
+            },
+            "description": "composition",
+            "outcome": "success"
+          },
+          {
+            "id": "description-stage",
+            "node": "report",
+            "decision": "report_stage",
+            "reason": "이전 설명 역할 진입",
+            "action": {
+              "name": "report_description_agent",
+              "arguments": {
+                "view_key": null,
+                "result_ids": [
+                  "selected",
+                  "source-call"
+                ]
+              }
+            },
+            "output": null,
+            "description": "report_stage",
+            "outcome": "success"
+          },
+          {
+            "id": "description-error",
+            "node": "compose",
+            "decision": "execution_failed",
+            "reason": "이전 진입 설명 호출 오류",
+            "action": null,
+            "output": {
+              "code": "runtime_error",
+              "error_type": "ConnectionError"
+            },
+            "description": "execution_failed",
+            "outcome": "failure"
+          }
+        ],
+        "execution": {
+          "run_id": "synthetic-previous-run",
+          "event": "analysis_pipeline",
+          "status": "partial",
+          "version": "fixture-v1",
+          "budget": {
+            "steps": {
+              "used": 5,
+              "limit": 50
+            },
+            "tool_calls": {
+              "used": 1,
+              "limit": 30
+            },
+            "agent_calls": {
+              "used": 0,
+              "limit": 10
+            },
+            "retries": {
+              "used": 0,
+              "limit": 2
+            },
+            "active_seconds": {
+              "used": 2.0,
+              "limit": 300.0
+            },
+            "final_model_calls": {
+              "used": 0,
+              "limit": 1
+            },
+            "final_active_seconds": {
+              "used": 0,
+              "limit": 30
+            }
+          },
+          "error": {
+            "code": "runtime_error",
+            "cause": "준비된 이전 설명 호출 오류"
+          }
+        }
+      },
+      "assessment": {
+        "expected": {
+          "schema_version": "execution-expectations-v1",
+          "situation": "fault",
+          "entry": "reentry",
+          "environment": "prepared synthetic data / configured model",
+          "data_size": "one request or one dong-month; one source row",
+          "role_path": [
+            "report_description",
+            "report_insight"
+          ],
+          "run_status": "returned"
+        },
+        "checks": [
+          "EX-1",
+          "EX-2",
+          "EX-3",
+          "EX-4",
+          "EX-5",
+          "EX-R1",
+          "EX-R2",
+          "EX-R3",
+          "EX-R4",
+          "EX-R5"
+        ],
+        "required": true
+      }
+    }
+  ]
+}
