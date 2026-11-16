@@ -1,6 +1,6 @@
 # 이음이 테이블 정의서
 
-- 판: 2.4.2 (2026-11-11, 인사이트 보고서 일부 저장 V20261111_01 반영) · 2.4.1 (2026-11-10, 인사이트 보고서 2단계 V20261110_02 반영 · analysis.pipeline_check(V20261109_01) · analysis.stream_progress(V20261110_01) 추가)
+- 판: 2.4.3 (2026-11-16, 운영 마이그레이션과 대조: region_insight_report 컬럼 순서를 DB 실제 순서로(generated_at이 3번째)) · 2.4.2 (2026-11-11, 인사이트 보고서 일부 저장 V20261111_01 반영) · 2.4.1 (2026-11-10, 인사이트 보고서 2단계 V20261110_02 반영 · analysis.pipeline_check(V20261109_01) · analysis.stream_progress(V20261110_01) 추가)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_테이블_정의서.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - DB의 실제 구조는 `db/migration`의 V 파일이 기준이다. V 파일이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -233,15 +233,15 @@
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | period_start | 기준월 | DATE | 필수 | PK | public.region_result |  | DATE NOT NULL | V5__dashboard.sql |
 | 2 | adm_cd10 | 행정동코드 | VARCHAR(10) | 필수 | PK | public.region_result |  | VARCHAR(10) NOT NULL | V5__dashboard.sql |
-| 3 | quick_insight | 퀵 인사이트 (읍면동 화면 위쪽 위험 설명 2~3줄). AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
-| 4 | graph_1 | 그래프 1 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01). 만들지 못하면 NULL | VARCHAR(100) | 선택 |  |  |  | VARCHAR(100) | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
-| 5 | desc_1 | 그래프 1 설명. 그래프 1이 있을 때만 쓰고, AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
-| 6 | graph_2 | 그래프 2 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01). 만들지 못하면 NULL | VARCHAR(100) | 선택 |  |  |  | VARCHAR(100) | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
-| 7 | desc_2 | 그래프 2 설명. 그래프 2가 있을 때만 쓰고, AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
-| 8 | graph_3 | 그래프 3 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01). 만들지 못하면 NULL | VARCHAR(100) | 선택 |  |  |  | VARCHAR(100) | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
-| 9 | desc_3 | 그래프 3 설명. 그래프 3이 있을 때만 쓰고, AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
-| 10 | result_updated_at | 기준 결과 수정 시각 (보고서를 만들 때 읽은 region_result.updated_at, 다르면 옛 보고서로 보고 조회·저장 제외) | TIMESTAMP | 필수 |  |  |  | TIMESTAMP NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
-| 11 | generated_at | AI 생성 일시 | TIMESTAMPTZ | 필수 |  |  |  | TIMESTAMPTZ NOT NULL | V5__dashboard.sql |
+| 3 | generated_at | AI 생성 일시 | TIMESTAMPTZ | 필수 |  |  |  | TIMESTAMPTZ NOT NULL | V5__dashboard.sql |
+| 4 | quick_insight | 퀵 인사이트 (읍면동 화면 위쪽 위험 설명 2~3줄). AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 5 | graph_1 | 그래프 1 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01). 만들지 못하면 NULL | VARCHAR(100) | 선택 |  |  |  | VARCHAR(100) | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 6 | desc_1 | 그래프 1 설명. 그래프 1이 있을 때만 쓰고, AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 7 | graph_2 | 그래프 2 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01). 만들지 못하면 NULL | VARCHAR(100) | 선택 |  |  |  | VARCHAR(100) | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 8 | desc_2 | 그래프 2 설명. 그래프 2가 있을 때만 쓰고, AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 9 | graph_3 | 그래프 3 (AI가 고른 Tableau 시트 이름, 예: EmbedDetailV01). 만들지 못하면 NULL | VARCHAR(100) | 선택 |  |  |  | VARCHAR(100) | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 10 | desc_3 | 그래프 3 설명. 그래프 3이 있을 때만 쓰고, AI 검토를 통과하지 못하면 NULL | TEXT | 선택 |  |  |  | TEXT | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql<br>V20261111_01__insight_report_partial.sql |
+| 11 | result_updated_at | 기준 결과 수정 시각 (보고서를 만들 때 읽은 region_result.updated_at, 다르면 옛 보고서로 보고 조회·저장 제외) | TIMESTAMP | 필수 |  |  |  | TIMESTAMP NOT NULL | V20261106_01__insight_report_slots.sql<br>V20261110_02__insight_report.sql |
 
 ### analysis.dim_grid100
 
