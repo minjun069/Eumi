@@ -7,9 +7,8 @@
 - **분석 지역**: 서울 강남구 · 강원 춘천시 47개 읍면동 (2025년 8 ~ 12월)
 - **SSAFY 15기 자율 프로젝트** (B201)
 
-<!-- 대표 GIF: 로그인 → 고립 위험 탐색 → 읍면동 상세 → AI 질문 (15초 안팎). 파일을 넣은 뒤 아래 주석을 풀어 주세요.
+<!-- 대표 GIF: 고립 위험 탐색 → 읍면동 상세 → AI 질문 → 격자 선택 → 상담 기록 → AI 답변 (약 20초) -->
 <p align="center"><img src="docs/images/readme/00-overview.gif" width="900" alt="이음이 시연 화면"></p>
--->
 
 ## 목차
 
@@ -46,9 +45,8 @@
 
 관할 시군구의 행정동별 위험을 지도와 그래프로 한눈에 봅니다.
 
-<!-- GIF: 지수 바꾸기 · 기간 바꾸기 · 지도에서 동 고르기
+<!-- GIF: 지수 바꾸기 · 지도에서 동 고르기 -->
 <p align="center"><img src="docs/images/readme/01-risk.gif" width="800" alt="고립 위험 탐색"></p>
--->
 
 - 행정동별 지도에서 종합 위험 · 배경 취약성 · 행동 이상 중 하나를 골라 봅니다.
 - 월별 종합 위험 단계 분포, 배경 취약성 분포, 전월 대비 행동 이상 변화를 함께 보여 줍니다.
@@ -58,9 +56,8 @@
 
 동을 고르면 100m 격자 단위로 내려가 위험이 몰린 곳을 확인하고, AI가 정리한 보고서를 함께 봅니다.
 
-<!-- GIF: 동 상세 진입 → 격자 지도 → 퀵 인사이트 → 보고서 그래프 크게 보기
+<!-- GIF: 동 상세 진입 → 격자 선택 → 퀵 인사이트 → 보고서 그래프 · 설명 -->
 <p align="center"><img src="docs/images/readme/02-dong-report.gif" width="800" alt="읍면동 상세와 인사이트 보고서"></p>
--->
 
 - 격자별 행동 이상 지도로 동 안에서도 평소와 다른 구역을 찾습니다.
 - 퀵 인사이트와 인사이트 보고서(그래프 최대 3개 · 그래프별 설명)는 AI가 분석 결과를 조회해 작성하고, 검토를 통과한 내용만 보여 줍니다.
@@ -70,9 +67,8 @@
 
 어느 화면에서든 자연어로 질문하면, AI 에이전트가 분석 결과를 직접 조회해 답합니다.
 
-<!-- GIF: 질문 입력 → 진행 단계 표시 → 답변 · 표 · Tableau 그래프
+<!-- GIF: 질문 입력 → 진행 단계 표시 → 답변 -->
 <p align="center"><img src="docs/images/readme/03-ai-panel.gif" width="800" alt="AI Agent 패널"></p>
--->
 
 - 보고 있는 화면 정보를 질문과 함께 보내, 지금 보는 동 · 기간에 맞춰 답합니다.
 - 요청 처리 Agent가 해석 Agent · 시각화 Agent에 일을 나누고, 각 Agent가 자료 조회 · 계산 · 그래프 검증 도구를 골라 실행합니다.
@@ -84,18 +80,16 @@
 
 위험 지역을 확인한 뒤 실제 업무로 이어 갑니다.
 
-<!-- GIF: 사례자 등록 → 상담 기록 추가 / 복지자원 검색
+<!-- GIF: 동 상세에서 사례자 탐색 → 상담 기록 / 복지자원 찾기 → 상세 -->
 <p align="center"><img src="docs/images/readme/04-case-resource.gif" width="800" alt="사례자 · 복지자원 관리"></p>
--->
 
 - 사례자를 등록하고 담당자를 지정해 상담 기록을 남깁니다. 사례자 정보는 담당자만 볼 수 있습니다.
 - 기관이 운영하는 복지자원을 등록하고 검색 · 정렬합니다. 조회는 모든 기관이, 수정 · 삭제는 담당자만 할 수 있습니다.
 
 ### 5. 기관 인증 회원 · 마이페이지
 
-<!-- 이미지: 가입 화면(기관 검색 · 이메일 인증) 또는 마이페이지
-<p align="center"><img src="docs/images/readme/05-member.png" width="800" alt="회원 가입과 마이페이지"></p>
--->
+<!-- 이미지: 마이페이지 AI 대화 기록 -->
+<p align="center"><img src="docs/images/readme/05-member.png" width="800" alt="마이페이지 AI 대화 기록"></p>
 
 - 소속 기관을 검색하고, 기관 공식 이메일 도메인으로 인증해 가입합니다.
 - 비밀번호 찾기(임시 비밀번호), 비밀번호 변경, 내 정보 · 내 복지자원 · AI 대화 기록을 관리합니다.
@@ -103,56 +97,7 @@
 
 ## 시스템 아키텍처
 
-```mermaid
-flowchart LR
-    user(["사용자 브라우저"])
-    tableau["Tableau Public<br/>지도 · 그래프"]
-    gms["SSAFY GMS<br/>LLM API"]
-    ext["공공데이터포털 · Kakao<br/>실거래가 · 좌표"]
-    gitlab["GitLab"]
-
-    subgraph server["AWS EC2"]
-        nginx["Nginx<br/>HTTPS · 경로 연결"]
-        jenkins["Jenkins<br/>자동 배포"]
-        subgraph app["서비스 (Docker Compose)"]
-            web["React<br/>웹 화면"]
-            be["Spring Boot<br/>API 서버"]
-            ai["FastAPI<br/>AI Agent 서버"]
-            mail["Mailpit<br/>메일 확인"]
-        end
-        db[("PostgreSQL 17")]
-        subgraph pipe["데이터 파이프라인"]
-            airflow["Airflow<br/>월 배치"]
-            spark["Spark<br/>정제 · 지표 · 분석"]
-            kafka["Kafka<br/>유동 스트림"]
-            minio[("MinIO<br/>원본 보관")]
-        end
-        grafana["Grafana<br/>파이프라인 모니터링"]
-    end
-
-    user --> nginx
-    user -.->|임베드| tableau
-    nginx --> web
-    nginx -->|/api| be
-    be -->|실행 요청| ai
-    ai -->|상태 알림| be
-    ai --> gms
-    be --> db
-    ai --> db
-    be --> mail
-    ext --> airflow
-    airflow --> spark
-    kafka --> spark
-    minio --> spark
-    spark --> db
-    grafana --> db
-    gitlab -->|master 병합| jenkins
-    jenkins -->|빌드 · 교체| app
-```
-
-<!-- 아키텍처를 그림 파일로 바꾸려면 위 Mermaid 대신:
 <p align="center"><img src="docs/images/readme/architecture.png" width="900" alt="시스템 아키텍처"></p>
--->
 
 - 한 서버에서 서비스 · DB · 데이터 파이프라인을 Docker Compose로 운영하고, Nginx가 HTTPS와 경로 연결을 맡습니다.
 - AI 서버는 백엔드의 요청을 받아 진행 단계와 답변을 DB에 직접 기록하고, 화면은 백엔드를 통해 새 기록을 조회합니다.
@@ -160,28 +105,7 @@ flowchart LR
 
 ## 데이터 분석 흐름
 
-```mermaid
-flowchart LR
-    subgraph src["원본"]
-        s1["주민등록 · 센서스<br/>SGIS 격자 · 공원 · 정류장"]
-        s2["SKT 유동인구<br/>50m 월평균"]
-        s3["아파트 실거래가 API"]
-    end
-    raw[("MinIO<br/>원본 보관")]
-    proc["정제<br/>배경 상세 · 유동 상세"]
-    ind["지표<br/>배경 6 · 행동 12 · 격자 10"]
-    ana["분석<br/>PCA · IsolationForest<br/>점수 · 등급 · 기여도"]
-    db[("PostgreSQL")]
-    use["화면 · AI 근거"]
-    stream["Kafka → Spark<br/>스트리밍"]
-
-    s1 --> raw
-    s2 --> raw
-    s3 --> raw
-    raw --> proc --> ind --> ana --> db --> use
-    s2 -.->|시간 단위로 재생| stream
-    stream -.-> proc
-```
+<p align="center"><img src="docs/images/readme/data-flow.png" width="900" alt="데이터 분석 흐름"></p>
 
 - **월 배치**: Airflow가 수집 → 정제 → 지표 → 분석 → 결과 검증을 차례로 실행합니다. 단계마다 검사해 실패하면 다음 단계로 넘어가지 않습니다.
 - **스트리밍**: SKT 월평균에 맞춰 만든 시간 단위 유동을 Kafka로 재생하고, Spark Structured Streaming이 1시간 워터마크 · 하루 윈도로 집계해 유동 상세에 더합니다.
@@ -264,6 +188,7 @@ flowchart LR
 | 데이터 파이프라인 | [data/](data/README.md) |
 | DB 스키마 · 마이그레이션 규칙 | [db/](db/README.md) |
 | 로컬 개발 환경 · 운영 배포 | [infra/](infra/README.md) |
+| 포팅 매뉴얼 · 외부 서비스 · DB 덤프 · 시연 시나리오 | [exec/](exec/README.md) |
 | 문서 전체 목록 | [docs/README.md](docs/README.md) |
 
 ## 개발 환경과 협업 규칙

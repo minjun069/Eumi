@@ -1,6 +1,6 @@
 # 이음이 테이블 정의서
 
-- 판: 2.4.3 (2026-11-16, 운영 마이그레이션과 대조: region_insight_report 컬럼 순서를 DB 실제 순서로(generated_at이 3번째)) · 2.4.2 (2026-11-11, 인사이트 보고서 일부 저장 V20261111_01 반영) · 2.4.1 (2026-11-10, 인사이트 보고서 2단계 V20261110_02 반영 · analysis.pipeline_check(V20261109_01) · analysis.stream_progress(V20261110_01) 추가)
+- 판: 2.4.4 (2026-11-17, region_result 단계 설명을 실제 값에 맞춤: 배경 · 행동 등급 1~3, 종합 = 배경 + 행동 − 1) · 2.4.3 (2026-11-16, 운영 마이그레이션과 대조: region_insight_report 컬럼 순서를 DB 실제 순서로(generated_at이 3번째)) · 2.4.2 (2026-11-11, 인사이트 보고서 일부 저장 V20261111_01 반영) · 2.4.1 (2026-11-10, 인사이트 보고서 2단계 V20261110_02 반영 · analysis.pipeline_check(V20261109_01) · analysis.stream_progress(V20261110_01) 추가)
 - 원본: 이 파일이 기준이다. 엑셀(`이음이_테이블_정의서.xlsx`)은 `python docs/spec/build_xlsx.py`로 이 파일에서 만든다. 엑셀만 따로 고치지 않는다.
 - DB의 실제 구조는 `db/migration`의 V 파일이 기준이다. V 파일이 바뀌면 같은 MR에서 이 문서도 고친다.
 - 형식: [docs/spec/README.md](README.md)의 'md 형식'
@@ -221,10 +221,10 @@
 | 1 | period_start | 기준월 (그 달 1일) | DATE | 필수 | PK |  |  | DATE NOT NULL | V5__dashboard.sql |
 | 2 | adm_cd10 | 행정동코드 | VARCHAR(10) | 필수 | PK | public.dim_region |  | VARCHAR(10) NOT NULL | V5__dashboard.sql |
 | 3 | bg_score | 배경 취약성 점수 | DECIMAL(7,2) | 필수 |  |  |  | DECIMAL(7,2) NOT NULL | V5__dashboard.sql |
-| 4 | bg_grade | 배경 도시 내 등급 (시군구 안 1~5, 5가 가장 위험) | SMALLINT | 필수 |  |  |  | SMALLINT NOT NULL | V5__dashboard.sql |
+| 4 | bg_grade | 배경 도시 내 등급 (1~3: 도시별 고정 P20 · P80으로 낮음 · 중간 · 높음, 3이 가장 위험. DB 제약은 1~5) | SMALLINT | 필수 |  |  |  | SMALLINT NOT NULL | V5__dashboard.sql |
 | 5 | bh_score | 행동 이상 점수 | DECIMAL(7,2) | 필수 |  |  |  | DECIMAL(7,2) NOT NULL | V5__dashboard.sql |
-| 6 | bh_grade | 행동 도시 내 등급 (시군구 안 1~5, 5가 가장 위험) | SMALLINT | 필수 |  |  |  | SMALLINT NOT NULL | V5__dashboard.sql |
-| 7 | risk_grade | 위험단계 등급 (종합 위험 단계 1~5, 산정 규칙은 데이터 분석 파트 문서) | SMALLINT | 필수 |  |  |  | SMALLINT NOT NULL | V5__dashboard.sql |
+| 6 | bh_grade | 행동 도시 내 등급 (1~3: 그 달 · 도시 안 bh_score의 P20 · P80으로 낮음 · 중간 · 높음, 3이 가장 위험. DB 제약은 1~5) | SMALLINT | 필수 |  |  |  | SMALLINT NOT NULL | V5__dashboard.sql |
+| 7 | risk_grade | 위험단계 등급 (종합 위험 단계 1~5 = bg_grade + bh_grade − 1, 5가 가장 위험) | SMALLINT | 필수 |  |  |  | SMALLINT NOT NULL | V5__dashboard.sql |
 | 8 | updated_at | 수정 시각 | TIMESTAMP | 필수 |  |  | now() | TIMESTAMP NOT NULL DEFAULT now() | V5__dashboard.sql |
 
 ### public.region_insight_report
